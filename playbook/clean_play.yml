@@ -1,0 +1,23 @@
+---
+- name: Nuc playbook
+  hosts: '{{ target }}'
+  gather_facts: no
+  become: yes
+  become_user: root 
+  tasks:
+    - name: Delete content & directory
+      ansible.builtin.file:
+        state: absent
+        path: "{{ item }}"
+      loop:
+        - /root/Aupe
+    - name: Check if the process is running
+      ansible.builtin.shell:
+        cmd: ps aux | grep -v grep | grep "basalt"
+      register: process_status
+      ignore_errors: yes  # Ignore errors to continue the playbook even if the process is not found
+
+    - name: Kill the process if it is running
+      ansible.builtin.shell:
+        cmd: "pkill -f 'main'"
+      when: process_status.rc == 0  # Execute only if the process is found

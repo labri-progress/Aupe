@@ -13,9 +13,6 @@
     - debug:
         msg: "File exists..."
       when: p.stat.exists
-    - name: Install a snap package
-      ansible.builtin.command:
-        cmd: pkill basalt
     - name: Execute the script
       command: sh /root/Aupe/expe.sh 0 1 3
       register: receivers
