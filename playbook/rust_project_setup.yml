@@ -33,6 +33,6 @@
       - rust
   - name: Clone the GitHub repository
     git:
-      repo: 'https://github.com/basalt-rps/basalt-sim.git'
-      dest: ~/basalt-sim
-      version: master
+      repo: 'https://github.com/labri-progress/Aupe.git'
+      dest: ~/paper
+      version: main
