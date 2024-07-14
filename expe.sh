@@ -2,7 +2,7 @@
 
 # Script to run all the experiment
 
-# ./expe.sh 0 1 1000 1 0
+# ./expe.sh 0 1 3
 echo "[Experiments : $@]"
 
 nohup echo "[Experiments : $@]"
@@ -22,8 +22,8 @@ force=10
 N=10000
 v=160
 sm=100
-f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
-
+#f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
+cd Aupe
 echo "DATE: $(date)" 
 echo "DATE: $(date)" > nohup.out
 expe=0
@@ -32,7 +32,8 @@ for strat in 1 2 3
 do   
     for k in 0 1 
     do   
-        for f in "${f_values[@]}" 
+        for f in 0.08 0.10 #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
+ 
         do    
             if [ $expe -gt $limit ]
             then
@@ -49,7 +50,7 @@ do
                 fi
                 #echo $expe $N $v $f $force $sm $round $strat $k $r
                 echo "$PWD"
-                cd Aupe
+                
                 nohup ./trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
 
                 if [ $? -eq 0 ]; then

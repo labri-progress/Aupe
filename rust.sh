@@ -16,6 +16,7 @@ done < "$machine"
 
 a=${#machines[@]}
 echo "array length $a"
+numberofexpe=100
 
 copy_file="${1:-0}"
 
@@ -31,6 +32,23 @@ if [ $copy_file -eq 1 ]; then
     for element in "${machines[@]}"; do
         ansible-playbook playbook/expe.yml \
         --extra-vars \
-        "target=$element ansible_user=root"&
+        "target=$element ansible_user=root begin=$count rep=$rep end=$count" &
     done
+fi
+rep=1
+if [ $copy_file -eq 1 ]; then # expe
+  count=0
+  while [ $count -le $numberofexpe ];
+  do 
+    index=$(($count % $a))
+    element=${machines[$index]}
+    let end=count+10
+    echo "-------["$element"] --> count"$count
+    echo "-------["$element"] --> count"$count >> log.txt
+    ansible-playbook playbook/expe.yml \
+        --extra-vars \
+        "target=$element ansible_user=root begin=$count rep=$rep end=$end" &
+    
+    let count=end
+  done
 fi
