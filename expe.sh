@@ -45,18 +45,18 @@ do
                 if [ $expe -lt $thrshold ]
                 then
                     echo "thrshold EXPE $expe!"
-                    let expe=expe+1
-                    continue
-                fi
-                #echo $expe $N $v $f $force $sm $round $strat $k $r
-                echo "$PWD"
-                
-                nohup ./trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
-
-                if [ $? -eq 0 ]; then
-                    echo "Expe succeeded"
+                    
                 else
-                    echo "Expe failed"
+                #echo $expe $N $v $f $force $sm $round $strat $k $r
+                    echo "$PWD"
+                    
+                    nohup ./trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
+
+                    if [ $? -eq 0 ]; then
+                        echo "Expe succeeded"
+                    else
+                        echo "Expe failed"
+                    fi
                 fi
                 echo "*****************NEXT*****************"
                 let expe=expe+1
