@@ -25,7 +25,10 @@
       force: 'yes'
     tags:
       - rust
-
+  - name: Execute the script
+    command: snap install rustup
+  - name: Execute the script
+    command: snap install tree
   - name: install rust/cargo
     when: cargo_exists is failed
     shell: /tmp/sh.rustup.rs -y
@@ -36,3 +39,4 @@
       repo: 'https://github.com/labri-progress/Aupe.git'
       dest: ~/Aupe
       version: main
+  

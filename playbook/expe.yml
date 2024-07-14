@@ -8,13 +8,13 @@
       register: current_directory
     - name: Ansible check file exists.
       stat:
-        path: /root/Aupe/expe/expe.sh
+        path: /root/Aupe/expe.sh
       register: p
     - debug:
         msg: "File exists..."
       when: p.stat.exists
     - name: Execute the script
-      command: sh /root/Aupe/expe.sh
+      command: sh /root/Aupe/expe.sh 0 1 3
       register: receivers
     - debug:
        var: receivers.stdout
