@@ -18,8 +18,5 @@
         msg: "File exists..."
       when: p.stat.exists
     - name: Execute the script
-      command: sh /root/Aupe/expe.sh {{ begin |int }} {{ rep |int }} {{ end |int }}
-      register: receivers
-    - debug:
-       var: receivers.stdout
-    
+      ansible.builtin.debug:
+        msg: "test {{ begin }} {{ rep }} {{ end }}"

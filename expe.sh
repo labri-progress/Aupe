@@ -34,20 +34,13 @@ do
     do   
         for f in 0.08 0.10 0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50
  
-        do    
-            if [ $expe -gt $limit ]
-            then
-                echo "limit EXPE $expe!"
-                exit 0
-            fi
+        do  
             for a in 1 #$( eval echo {1..$(($A))}) # run each experiment many times
             do    
-                if [ $expe -lt $thrshold ]
+                
+                if (( expe >= thrshold && expe < limit ))
                 then
-                    echo "thrshold EXPE $expe!"
-                    
-                else
-                #echo $expe $N $v $f $force $sm $round $strat $k $r
+                    echo "Expe: $expe"
                     echo "$PWD"
                     
                     nohup ./trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
