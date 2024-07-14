@@ -12,25 +12,25 @@
     - name: Copy scripts files
       copy:
         src: '../expe'
-        dest: '/root/basalt-sim'
+        dest: '/root/Aupe'
         mode: 0777
       loop:
         - expe.sh
         - trusted.sh
     - name: Ansible check file exists.
       stat:
-        path: /root/basalt-sim/expe/expe.sh
+        path: /root/Aupe/expe/expe.sh
       register: p
     - debug:
         msg: "File exists..."
       when: p.stat.exists
     - name: Move scripts location
-      command: mv /root/basalt-sim/expe/trusted.sh /root/basalt-sim/trusted.sh
+      command: mv /root/Aupe/expe/trusted.sh /root/Aupe/trusted.sh
     - name: Display current working directory
       debug:
         var: current_directory.stdout
     - name: Execute the script
-      command: sh /root/basalt-sim/expe/expe.sh
+      command: sh /root/Aupe/expe/expe.sh
       register: receivers
     - debug:
        var: receivers.stdout

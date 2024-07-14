@@ -45,11 +45,11 @@
 
     - name: Clone the GitHub repository
       git:
-        repo: 'https://github.com/basalt-rps/basalt-sim.git'
-        dest: ~/basalt-sim
+        repo: 'https://github.com/labri-progress/Aupe.git'
+        dest: ~/Aupe
         version: master
 
     - name: Compile the Rust project
       command: /root/.cargo/bin/cargo build --release
       args:
-        chdir: ~/basalt-sim
+        chdir: ~/Aupe
