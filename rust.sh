@@ -54,3 +54,11 @@ if [ $copy_file -eq 2 ]; then # collect
       "target=$element ansible_user=root dir=$dir" &
   done 
 fi
+
+if [ $copy_file -eq 3 ]; then # collect
+  for element in "${machines[@]}"; do
+    ansible-playbook playbook/clean_play.yml \
+      --extra-vars \
+      "target=$element ansible_user=root" &
+  done 
+fi
