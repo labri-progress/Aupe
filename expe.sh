@@ -49,6 +49,7 @@ do
                 fi
                 #echo $expe $N $v $f $force $sm $round $strat $k $r
                 echo "$PWD"
+                cd Aupe
                 nohup ./trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
 
                 if [ $? -eq 0 ]; then

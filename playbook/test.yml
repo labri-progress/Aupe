@@ -1,0 +1,43 @@
+---
+- name: Install Rust and Cargo
+  hosts: all
+  gather_facts: true
+  become: true
+  become_user: root
+  tasks:
+    - name: Ensure required packages are installed
+      apt:
+        name:
+          - curl
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure required packages are installed
+      yum:
+        name:
+          - curl
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Download Rust installation script
+      get_url:
+        url: https://sh.rustup.rs
+        dest: /tmp/rustup-init.sh
+        mode: '0755'
+
+    - name: Run Rust installation script
+      shell: /tmp/rustup-init.sh -y
+      args:
+        creates: /root/.cargo/bin/rustc
+
+    - name: Add Cargo bin directory to PATH for all users
+      lineinfile:
+        path: /etc/profile.d/rust.sh
+        create: yes
+        mode: '0755'
+        line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+
+    - name: Source the profile script
+      shell: source /etc/profile.d/rust.sh
+      args:
+        executable: /bin/bash
