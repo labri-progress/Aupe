@@ -1,0 +1,39 @@
+---
+- name: Install Cargo, clone a GitHub Rust project, and compile it
+  hosts: '{{ target }}'
+  become: yes
+  tasks:
+    - name: Get current working directory
+      command: pwd
+      register: current_directory
+    - name: Display current working directory
+      debug:
+        var: current_directory.stdout
+    - name: Copy scripts files
+      copy:
+        src: '../expe'
+        dest: '/root/basalt-sim'
+        mode: 0777
+      loop:
+        - expe.sh
+    - name: Ansible check file exists.
+      stat:
+        path: /root/basalt-sim/expe.sh
+      register: p
+    - debug:
+        msg: "File exists..."
+      when: p.stat.exists
+    - name: Move foo to bar
+      command: mv /root/basalt-sim/scripts/expe.sh /root/basalt-sim/expe.sh
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: /root/basalt-sim/scripts/expe.sh
+        dest: /root/basalt-sim/expe.sh
+        owner: root
+        group: root
+    - name: Ensure the script has execution permission
+      file:
+        path: /root/basalt-sim/expe.sh 
+        mode: '0755'
+    - name: Execute script 
+      script: /root/basalt-sim/expe.sh 

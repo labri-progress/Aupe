@@ -1,0 +1,55 @@
+---
+- name: Install Cargo, clone a GitHub Rust project, and compile it
+  hosts: '{{ target }}'
+  become: yes
+  become_user: root 
+
+  tasks:
+    - name: Ensure necessary dependencies are installed
+      apt:
+        name:
+          - build-essential
+          - git
+        state: present
+        update_cache: yes
+
+    - name: Install Snapd
+      apt:
+        name: snapd
+        state: present
+
+    - name: Ensure snapd is running
+      systemd:
+        name: snapd
+        state: started
+        enabled: yes
+
+    - name: Install Rust using Snap
+      snapd:
+        name: rustup
+        state: present
+        classic: yes
+
+    - name: Initialize Rust environment
+      shell: /snap/bin/rustup toolchain install stable
+      args:
+        creates: /root/.cargo/bin/cargo
+
+    - name: Ensure Rust is installed
+      command: rustc --version
+      register: rustc_version
+
+    - name: Debug Rustc version
+      debug:
+        msg: "{{ rustc_version.stdout }}"
+
+    - name: Clone the GitHub repository
+      git:
+        repo: 'https://github.com/basalt-rps/basalt-sim.git'
+        dest: ~/basalt-sim
+        version: master
+
+    - name: Compile the Rust project
+      command: /root/.cargo/bin/cargo build --release
+      args:
+        chdir: ~/basalt-sim
