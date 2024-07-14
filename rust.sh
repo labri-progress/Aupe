@@ -15,8 +15,10 @@ while IFS= read -r line; do
 done < "$machine"
 
 a=${#machines[@]}
-echo "array length $a"
+
 numberofexpe=100
+numberpermachine=$(echo "scale=0; $numberofexpe/10 / 1" | bc)
+echo "array length $a and $numberpermachine processes"
 
 copy_file="${1:-0}"
 
@@ -31,18 +33,17 @@ fi
 rep=1
 if [ $copy_file -eq 1 ]; then # expe
   count=0
-  while [ $count -le $numberofexpe ];
+  while [ $count -lt $numberofexpe ];
   do 
     index=$(($count % $a))
     element=${machines[$index]}
-    let end=count+10
     echo "-------["$element"] --> count"$count
     echo "-------["$element"] --> count"$count >> log.txt
     ansible-playbook playbook/expe.yml \
         --extra-vars \
-        "node=$element target=$element ansible_user=root begin=$count rep=$rep end=$end" &
+        "node=$element target=$element ansible_user=root begin=$count rep=$rep end=$count" &
     
-    let count=end
+    let count=count+1
   done
 fi
 
@@ -63,10 +64,11 @@ if [ $copy_file -eq 3 ]; then # collect
   done 
 fi
 
-if [ $copy_file -eq 5 ]; then #stop
+if [ $copy_file -eq 4 ]; then #stop
   # Display the elements in the array
   echo "Elements read from the file:"
   for element in "${machines[@]}"; do
       echo "$element"
   done
+  echo "array length $a and $numberpermachine processes"
 fi

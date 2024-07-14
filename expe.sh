@@ -37,18 +37,16 @@ do
         do    
             if [ $expe -gt $limit ]
             then
-                echo "EXPE $expe!"
-                break
+                echo "limit EXPE $expe!"
+                exit 0
             fi
             for a in 1 #$( eval echo {1..$(($A))}) # run each experiment many times
             do    
                 if [ $expe -lt $thrshold ]
                 then
-                    echo "EXPE $expe!"
+                    echo "thrshold EXPE $expe!"
                     let expe=expe+1
                     continue
-                else
-                    exit 0
                 fi
                 #echo $expe $N $v $f $force $sm $round $strat $k $r
                 echo "$PWD"
