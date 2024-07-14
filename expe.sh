@@ -47,6 +47,8 @@ do
                     echo "EXPE $expe!"
                     let expe=expe+1
                     continue
+                else
+                    exit 0
                 fi
                 #echo $expe $N $v $f $force $sm $round $strat $k $r
                 echo "$PWD"
