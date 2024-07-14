@@ -2,7 +2,7 @@
 
 # Script to run all the experiment
 
-# ./expe.sh 0 3 1000 1 0
+# ./expe.sh 0 1 1000 1 0
 echo "[Experiments : $@]"
 
 nohup echo "[Experiments : $@]"
@@ -15,14 +15,14 @@ nohup echo "[Experiments : $@]"
 
 thrshold="${1:-0}"
 A="${2:-1}"
-sm="${3:-100}"
-limit="${5:-10000}"
-round="${6:-1}"
-force="${7:-10}" #0.2 0.1
+limit="${3:-10000}"
 
+round=200
+force=10
 N=10000
 v=160
-#f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
+sm=100
+f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
 
 echo "DATE: $(date)" 
 echo "DATE: $(date)" > nohup.out
@@ -32,7 +32,7 @@ for strat in 1 2 3
 do   
     for k in 0 1 
     do   
-        for f in 0.08 0.10 #"${f_values[@]}" 
+        for f in "${f_values[@]}" 
         do    
             if [ $expe -gt $limit ]
             then
@@ -49,7 +49,7 @@ do
                 fi
                 #echo $expe $N $v $f $force $sm $round $strat $k $r
                 echo "$PWD"
-                nohup ../trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
+                nohup ./trusted.sh $expe $N $v $f $force $sm $round $strat $k $r &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe succeeded"
