@@ -1,65 +1,26 @@
-DATE: dim. 14 juil. 2024 11:22:45 CEST
+DATE: dim. 14 juil. 2024 14:22:56 CEST
 Experiment (0) with params 10000 160 0.08 10 100 200 1 0 1
+Experiment (1) with params 10000 160 0.10 10 100 200 1 0 1
 Experiment (2) with params 10000 160 0.08 10 100 200 1 1 1
 Experiment (3) with params 10000 160 0.10 10 100 200 1 1 1
-Experiment (5) with params 10000 160 0.10 10 100 200 2 0 1
 Experiment (4) with params 10000 160 0.08 10 100 200 2 0 1
-Experiment (1) with params 10000 160 0.10 10 100 200 1 0 1
-Experiment (6) with params 10000 160 0.08 10 100 200 2 1 1
-Experiment (10) with params 10000 160 0.08 10 100 200 3 1 1
-Experiment (8) with params 10000 160 0.08 10 100 200 3 0 1
-Experiment (9) with params 10000 160 0.10 10 100 200 3 0 1
-Experiment (11) with params 10000 160 0.10 10 100 200 3 1 1
 mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-Experiment (7) with params 10000 160 0.10 10 100 200 2 1 1
 mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
 mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
 : Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/10000»impossible de créer le répertoire «./analysis/rho1»mkdir: impossible de créer le répertoire «./analysis/rho0/10000»: Le fichier existe: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: impossible de créer le répertoire «./analysis/rho1»: Le fichier existe
+: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/10000»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/10000»mkdir: impossible de créer le répertoire «./analysis/rho1/10000»mkdir: : Le fichier existeimpossible de créer le répertoire «./analysis/rho0/10000/brahms»
+: Le fichier existe: Le fichier existe
 
-: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho1»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «./analysis/rho0/10000»: Le fichier existe
-: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/10000»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «./analysis/rho0/10000/brahms»: Le fichier existe
-: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/10000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho1/10000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/10000/aupe»mkdir: impossible de créer le répertoire «./analysis/rho1/10000»: Le fichier existe
-: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-./analysis/rho0/10000/brahms/expe1/text10
-mkdir: impossible de créer le répertoire «./analysis/rho0/10000/basalt»mkdir: : Le fichier existeimpossible de créer le répertoire «./analysis/rho1»
-: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho1»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/rho1/10000/brahms»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho1/10000»: Le fichier existe./analysis/rho0/10000/aupe/expe5/text10
-./analysis/rho0/10000/basalt/expe8/text8
-
-./analysis/rho1/10000/aupe/expe6/text8
-mkdir: impossible de créer le répertoire «./analysis/rho1»: Le fichier existe
-mkdir: ./analysis/rho1/10000/brahms/expe3/text10
-impossible de créer le répertoire «./analysis/rho1/10000»: Le fichier existe
-./analysis/rho1/10000/brahms/expe2/text8
-mkdir: ./analysis/rho0/10000/aupe/expe4/text8
-impossible de créer le répertoire «./analysis/rho1/10000»: Le fichier existe
-./analysis/rho1/10000/basalt/expe10/text8
-./analysis/rho0/10000/basalt/expe9/text10
+./analysis/rho0/10000/brahms/expe1/text10
 ./analysis/rho0/10000/brahms/expe0/text8
-mkdir: impossible de créer le répertoire «./analysis/rho1/10000/aupe»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho1/10000/basalt»: Le fichier existe
-./analysis/rho1/10000/basalt/expe11/text10
-./analysis/rho1/10000/aupe/expe7/text10
+./analysis/rho1/10000/brahms/expe2/text8
+./analysis/rho0/10000/aupe/expe4/text8
+./analysis/rho1/10000/brahms/expe3/text10
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
@@ -67,111 +28,17 @@ mkdir: impossible de créer le répertoire «./analysis/rho1/10000/basalt»: Le 
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.13s
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 -k 0 -r 1`
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-warning    Blocking    Blocking waiting for file lock on build directory
- waiting for file lock on build directory
-    Blocking: field `iteration` is never read
-  -->     Blockingsrc/main.rs:18:5 waiting for file lock on build directory
-
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18     Blocking waiting for file lock on package cache
-|     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.17s
+    Blocking    Blocking waiting for file lock on package cache
  waiting for file lock on package cache
-    Blocking waiting for file lock on build directory
-    Blocking waiting for file lock on build directory
-    Blocking waiting for file lock on package cache
-     Running `target/debug/basalt-sim -T 200 -n 10000 aupe -G samples -f 10 -t 1000 -v 160 -u 160 -k 0 -r 1 -m 100`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.18s
-    Blocking waiting for file lock on build directory
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-     Running `target/debug/basalt-sim -T 200 -n 10000 basalt -G -H -f 10 -t 800 -v 160 -i 50 -k 0 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.19s
-    Blocking waiting for file lock on build directory
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
     Blocking    Blocking waiting for file lock on build directory
  waiting for file lock on build directory
-    Blocking waiting for file lock on build directory
-     Running `target/debug/basalt-sim -T 200 -n 10000 basalt -G -H -f 10 -t 800 -v 160 -i 50 -k 1 -r 1`
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
 warning: field `iteration` is never read
   --> src/main.rs:18:5
    |
@@ -185,82 +52,7 @@ warning: field `iteration` is never read
    = note: `#[warn(dead_code)]` on by default
 
 warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.21s
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 800 -v 160 -u 160 -k 1 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.23s
-     Running `target/debug/basalt-sim -T 200 -n 10000 basalt -G -H -f 10 -t 1000 -v 160 -i 50 -k 0 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.26s
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 -k 1 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.28s
-     Running `target/debug/basalt-sim -T 200 -n 10000 aupe -G samples -f 10 -t 800 -v 160 -u 160 -k 1 -r 1 -m 100`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.29s
-     Running `target/debug/basalt-sim -T 200 -n 10000 aupe -G samples -f 10 -t 800 -v 160 -u 160 -k 0 -r 1 -m 100`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.30s
+    Finished dev [unoptimized + debuginfo] target(s) in 0.07s
      Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 800 -v 160 -u 160 -k 0 -r 1`
 warning: field `iteration` is never read
   --> src/main.rs:18:5
@@ -275,8 +67,9 @@ warning: field `iteration` is never read
    = note: `#[warn(dead_code)]` on by default
 
 warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.33s
-     Running `target/debug/basalt-sim -T 200 -n 10000 aupe -G samples -f 10 -t 1000 -v 160 -u 160 -k 1 -r 1 -m 100`
+    Finished dev [unoptimized + debuginfo] target(s) in 0.07s
+    Blocking waiting for file lock on package cache
+     Running `target/debug/basalt-sim -T 200 -n 10000 aupe -G samples -f 10 -t 800 -v 160 -u 160 -k 0 -r 1 -m 100`
 warning: field `iteration` is never read
   --> src/main.rs:18:5
    |
@@ -290,8 +83,39 @@ warning: field `iteration` is never read
    = note: `#[warn(dead_code)]` on by default
 
 warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.36s
-     Running `target/debug/basalt-sim -T 200 -n 10000 basalt -G -H -f 10 -t 1000 -v 160 -i 50 -k 1 -r 1`
+    Finished dev [unoptimized + debuginfo] target(s) in 0.08s
+     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 -k 0 -r 1`
+warning: field `iteration` is never read
+  --> src/main.rs:18:5
+   |
+15 | pub struct Opt {
+   |            --- field in this struct
+...
+18 |     iteration: usize,
+   |     ^^^^^^^^^
+   |
+   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.08s
+    Blocking waiting for file lock on build directory
+     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 800 -v 160 -u 160 -k 1 -r 1`
+warning: field `iteration` is never read
+  --> src/main.rs:18:5
+   |
+15 | pub struct Opt {
+   |            --- field in this struct
+...
+18 |     iteration: usize,
+   |     ^^^^^^^^^
+   |
+   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.12s
+     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 -k 1 -r 1`
 Complété
 Done------------------------
 Complété
@@ -301,18 +125,4 @@ Done------------------------
 Complété
 Done------------------------
 Complété
-Complété
-Done------------------------
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Complété
-Done------------------------
 Done------------------------

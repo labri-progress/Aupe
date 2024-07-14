@@ -3,11 +3,6 @@
   become: true
   become_user: root
 
-  pre_tasks:
-    - name: update repositories
-      apt: update_cache=yes
-      become_user: root
-      changed_when: False
   vars:
     user: "{{ ansible_user_id }}"
   tasks:
@@ -25,15 +20,14 @@
       force: 'yes'
     tags:
       - rust
-  - name: Execute the script
-    command: snap install rustup
-  - name: Execute the script
-    command: snap install tree
-  - name: install rust/cargo
-    when: cargo_exists is failed
-    shell: /tmp/sh.rustup.rs -y
-    tags:
-      - rust
+  - name: Install a snap package
+    ansible.builtin.command:
+      cmd: sudo apt update
+  - name: Install a snap package
+    ansible.builtin.command:
+      cmd: snap install rustup --classic
+  - name: Install build-essential
+    action: apt pkg=build-essential
   - name: Clone the GitHub repository
     git:
       repo: 'https://github.com/labri-progress/Aupe.git'
