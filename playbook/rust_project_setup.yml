@@ -34,5 +34,5 @@
   - name: Clone the GitHub repository
     git:
       repo: 'https://github.com/labri-progress/Aupe.git'
-      dest: ~/paper
+      dest: ~/Aupe
       version: main
