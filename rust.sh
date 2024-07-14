@@ -24,7 +24,7 @@ if [ $copy_file -eq 0 ]; then
     for element in "${machines[@]}"; do
         ansible-playbook playbook/rust_project_setup.yml \
         --extra-vars \
-        "target=$element ansible_user=root"&
+        "node=$element target=$element ansible_user=root"&
     done
 fi
 
@@ -40,7 +40,7 @@ if [ $copy_file -eq 1 ]; then # expe
     echo "-------["$element"] --> count"$count >> log.txt
     ansible-playbook playbook/expe.yml \
         --extra-vars \
-        "target=$element ansible_user=root begin=$count rep=$rep end=$end" &
+        "node=$element target=$element ansible_user=root begin=$count rep=$rep end=$end" &
     
     let count=end
   done
@@ -51,7 +51,7 @@ if [ $copy_file -eq 2 ]; then # collect
   for element in "${machines[@]}"; do
     ansible-playbook playbook/collect_play.yml \
       --extra-vars \
-      "target=$element ansible_user=root dir=$dir" &
+      "node=$element target=$element ansible_user=root dir=$dir" &
   done 
 fi
 
@@ -59,6 +59,14 @@ if [ $copy_file -eq 3 ]; then # collect
   for element in "${machines[@]}"; do
     ansible-playbook playbook/clean_play.yml \
       --extra-vars \
-      "target=$element ansible_user=root" &
+      "node=$element target=$element ansible_user=root" &
   done 
+fi
+
+if [ $copy_file -eq 5 ]; then #stop
+  # Display the elements in the array
+  echo "Elements read from the file:"
+  for element in "${machines[@]}"; do
+      echo "$element"
+  done
 fi
