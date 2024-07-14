@@ -28,13 +28,6 @@ if [ $copy_file -eq 0 ]; then
     done
 fi
 
-if [ $copy_file -eq 1 ]; then
-    for element in "${machines[@]}"; do
-        ansible-playbook playbook/expe.yml \
-        --extra-vars \
-        "target=$element ansible_user=root begin=$count rep=$rep end=$count" &
-    done
-fi
 rep=1
 if [ $copy_file -eq 1 ]; then # expe
   count=0
@@ -51,4 +44,13 @@ if [ $copy_file -eq 1 ]; then # expe
     
     let count=end
   done
+fi
+
+dir="/home/amukam/thss/simulation/Aupe"
+if [ $copy_file -eq 2 ]; then # collect
+  for element in "${machines[@]}"; do
+    ansible-playbook playbook/collect_play.yml \
+      --extra-vars \
+      "target=$element ansible_user=root dir=$dir" &
+  done 
 fi

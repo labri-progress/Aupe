@@ -26,6 +26,9 @@
   - name: Install a snap package
     ansible.builtin.command:
       cmd: snap install rustup --classic
+  - name: Install a snap package
+    ansible.builtin.command:
+      cmd: rustup default stable
   - name: Install build-essential
     action: apt pkg=build-essential
   - name: Clone the GitHub repository
