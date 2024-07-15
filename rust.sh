@@ -16,7 +16,7 @@ done < "$machine"
 
 a=${#machines[@]}
 
-numberofexpe=100
+numberofexpe=10
 numberpermachine=$(echo "scale=0; $numberofexpe/10 / 1" | bc)
 echo "array length $a and $numberpermachine processes"
 

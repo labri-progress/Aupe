@@ -73,14 +73,14 @@ compute <- function(args, path, topic) {
 
     ymax = 100
     strat1 = "brahms"
-    strat2 = "brahms"
+    strat2 ="aupe"
 
-    filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho1/", 
+    filepath = paste("/home/amukam/thss/simulation/aupe/analysis/", 
         N, sep="")
-    filepath2 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho0/", 
-        N, sep="")
-    brahmspath = paste(filepath1,"/", strat1,"/text",f*100, sep="")
-    aupepath = paste(filepath2,"/", strat2,"/text",f*100, sep="")
+    brahmspath = paste(filepath,"/", strat1,"/expe", expe, 
+        "text",f*100, sep="")
+    aupepath = paste(filepath,"/", strat2,"/expe", expe, 
+        "text",f*100, sep="")
     print(brahmspath)
     print(aupepath)
     
@@ -128,8 +128,7 @@ compute <- function(args, path, topic) {
     axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
     abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
     if (path == CVIEW|| path==SAMPLE){
-        labels = c(paste("Brahms rho=1", sep=""), 
-            paste("Brahms rho=0", sep=""))
+        labels = c(paste("Brahms ", sep=""), paste("Aupe sm=", sm, sep=""))
         colors = c("red", "blue")
         locator(1) 
         legend("topright", legend = labels, box.col = "grey",
@@ -147,18 +146,18 @@ compute <- function(args, path, topic) {
         comment="RAS"
         }
         system = paste("N=", N, " v=",  v, sep="")
-        study = paste("strat=", strat1, sep="")
+        study = paste("strat=", strat, sep="")
         mainDir = "../results/"
         dir.create(file.path(mainDir, system)) # check folder existence
         new = paste(mainDir, system, sep="")
         dir.create(file.path(new, study))
         
-        filename = paste(new, "/","dsn", name,  sep="")
+        filename = paste(folder, "/","dsn", name,  sep="")
         
         #print("write_results4")
-        write_results(filename, expe, f, "Brahmsrho1", resilience1, 0,
+        write_results(filename, expe, f, "Brahms", resilience1, 0,
             ttc0, roundNumber1, comment, name)
-        write_results(filename, expe, f, "Brahmsrho0", resilience2, sm,
+        write_results(filename, expe, f, "Aupe", resilience2, sm,
             ttc1, roundNumber2, comment, name)
     }
 }
