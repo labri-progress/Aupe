@@ -20,3 +20,9 @@
     - name: Execute the script
       ansible.builtin.debug:
         msg: "test {{ begin }} {{ rep }} {{ end }}"
+    - name: Execute the script
+      command: sh /root/Aupe/expe.sh {{ begin |int }} {{ rep |int }} {{ end |int }}
+      register: receivers
+    - debug:
+       var: receivers.stdout
+    

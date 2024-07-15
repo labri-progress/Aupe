@@ -1,128 +1,29 @@
-DATE: dim. 14 juil. 2024 14:22:56 CEST
-Experiment (0) with params 10000 160 0.08 10 100 200 1 0 1
-Experiment (1) with params 10000 160 0.10 10 100 200 1 0 1
-Experiment (2) with params 10000 160 0.08 10 100 200 1 1 1
-Experiment (3) with params 10000 160 0.10 10 100 200 1 1 1
-Experiment (4) with params 10000 160 0.08 10 100 200 2 0 1
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
+DATE: lun. 15 juil. 2024 16:35:53 CEST
+Experiment (3) with params 10 160 0.14 10 100 200 1 0 1
+Experiment (4) with params 10 160 0.16 10 100 200 1 0 1
 mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
 : Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: impossible de créer le répertoire «./analysis/rho1»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
 : Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/10000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/10000»mkdir: impossible de créer le répertoire «./analysis/rho1/10000»mkdir: : Le fichier existeimpossible de créer le répertoire «./analysis/rho0/10000/brahms»
-: Le fichier existe: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/10»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/10/brahms»: Le fichier existe
+./analysis/rho0/10/brahms/expe3/text14
+./analysis/rho0/10/brahms/expe4/text16
+error: failed to parse manifest at `/home/amukam/thss/simulation/Aupe/Cargo.toml`
 
-mkdir: impossible de créer le répertoire «./analysis/rho1/10000/brahms»: Le fichier existe
-./analysis/rho0/10000/brahms/expe1/text10
-./analysis/rho0/10000/brahms/expe0/text8
-./analysis/rho1/10000/brahms/expe2/text8
-./analysis/rho0/10000/aupe/expe4/text8
-./analysis/rho1/10000/brahms/expe3/text10
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking    Blocking waiting for file lock on package cache
- waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking    Blocking waiting for file lock on build directory
- waiting for file lock on build directory
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
+Caused by:
+  feature `edition2024` is required
 
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.07s
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 800 -v 160 -u 160 -k 0 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.07s
-    Blocking waiting for file lock on package cache
-     Running `target/debug/basalt-sim -T 200 -n 10000 aupe -G samples -f 10 -t 800 -v 160 -u 160 -k 0 -r 1 -m 100`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.08s
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 -k 0 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.08s
-    Blocking waiting for file lock on build directory
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 800 -v 160 -u 160 -k 1 -r 1`
-warning: field `iteration` is never read
-  --> src/main.rs:18:5
-   |
-15 | pub struct Opt {
-   |            --- field in this struct
-...
-18 |     iteration: usize,
-   |     ^^^^^^^^^
-   |
-   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
-   = note: `#[warn(dead_code)]` on by default
-
-warning: `basalt-sim` (bin "basalt-sim") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.12s
-     Running `target/debug/basalt-sim -T 200 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 -k 1 -r 1`
-Complété
+  The package requires the Cargo feature called `edition2024`, but that feature is not stabilized in this version of Cargo (1.75.0).
+  Consider adding `cargo-features = ["edition2024"]` to the top of Cargo.toml (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
+  See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#edition-2024 for more information about the status of this feature.
 Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
+error: failed to parse manifest at `/home/amukam/thss/simulation/Aupe/Cargo.toml`
+
+Caused by:
+  feature `edition2024` is required
+
+  The package requires the Cargo feature called `edition2024`, but that feature is not stabilized in this version of Cargo (1.75.0).
+  Consider adding `cargo-features = ["edition2024"]` to the top of Cargo.toml (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
+  See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#edition-2024 for more information about the status of this feature.
 Done------------------------
