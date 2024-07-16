@@ -118,3 +118,13 @@
 -------[gros-87.nancy.grid5000.fr] --> count7
 -------[gros-98.nancy.grid5000.fr] --> count8
 -------[gros-85.nancy.grid5000.fr] --> count9
+-------[gros-85.nancy.grid5000.fr] --> count0
+-------[gros-87.nancy.grid5000.fr] --> count1
+-------[gros-98.nancy.grid5000.fr] --> count2
+-------[gros-85.nancy.grid5000.fr] --> count3
+-------[gros-87.nancy.grid5000.fr] --> count4
+-------[gros-98.nancy.grid5000.fr] --> count5
+-------[gros-85.nancy.grid5000.fr] --> count6
+-------[gros-87.nancy.grid5000.fr] --> count7
+-------[gros-98.nancy.grid5000.fr] --> count8
+-------[gros-85.nancy.grid5000.fr] --> count9
