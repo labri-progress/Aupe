@@ -13,7 +13,7 @@ ARR     = "globalarray.txt"
 
 library(miscTools)
 
-source("compute.r")
+source("aupe.r")
 #source("test.r")
 n_values = c(10000) #10000
 
@@ -26,7 +26,7 @@ print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = "brahms"
+strat = "aupe"
 merge = "no"
 Method = "moy"
 gamma = 0.3
@@ -50,6 +50,7 @@ for (n in n_values){
 
     for (f in f_values){
         
+        print(paste("Expe", expe, sep=""))
         params = c(n, v, f, 0, sm, expe, strat, merge, gamma, 
             rMAX, folder, k, s)
 
