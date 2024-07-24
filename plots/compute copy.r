@@ -10,7 +10,7 @@ detect_first_convergence_index <- function(values, f, rounds) {
     threshold1 <- 75*f # f-25% threshold
     threshold2 <- 125*f # f+25% threshold
     n <- length(values)
-    print(paste("n =", n, "threshold1 =", threshold1, "threshold2 =", threshold2))
+    #print(paste("n =", n, "threshold1 =", threshold1, "threshold2 =", threshold2))
     i <-1
     flag <- FALSE
     while (i < n) {
@@ -73,9 +73,9 @@ compute <- function(args, path, topic) {
 
     ymax = 100
     strat1 = "brahms"
-    strat2 = "aupe"
+    strat2 = "brahms"
 
-    filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho0/", 
+    filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho1/", 
         N, sep="")
     filepath2 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho0/", 
         N, sep="")
@@ -107,7 +107,7 @@ compute <- function(args, path, topic) {
         aupe$comp=(aupe$avgByzN/v)*100
         title=paste("Byzantine proportion inside view over Time f=", 
             f*100,"%  
-            N=", N, " v=s=", v, " F=1O \n alpha=beta=gamma=1/3 rounds=", roundNumber1)
+            N=", N, " v=s=", v, " F=10 \n alpha=beta=gamma=1/3 rounds=", roundNumber1)
     }else if(path == SAMPLE){
         brahms$comp=(brahms$avgByzSamp/v)*100
         aupe$comp=(aupe$avgByzSamp/v)*100
@@ -128,8 +128,8 @@ compute <- function(args, path, topic) {
     axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
     abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
     if (path == CVIEW|| path==SAMPLE){
-        labels = c(paste("Brahms rho=0", sep=""), 
-            paste("Aupe rho=0", sep=""))
+        labels = c(paste("Brahms rho=1", sep=""), 
+            paste("Brahms rho=0", sep=""))
         colors = c("red", "blue")
         locator(1) 
         legend("topright", legend = labels, box.col = "grey",
@@ -140,8 +140,25 @@ compute <- function(args, path, topic) {
     if (path == CVIEW){
         ttc0 <- detect_first_convergence_index(brahms$comp, f, roundNumber1)
         ttc1 <- detect_first_convergence_index(aupe$comp, f, roundNumber2)
-        print(paste("ttc0",ttc0, "vs ttc1", ttc1))
     
+        # 2. Logs
         
+        if (comment==""){
+        comment="RAS"
+        }
+        system = paste("N=", N, " v=",  v, sep="")
+        study = paste("strat=", strat1, sep="")
+        mainDir = "../results/"
+        dir.create(file.path(mainDir, system)) # check folder existence
+        new = paste(mainDir, system, sep="")
+        dir.create(file.path(new, study))
+        
+        filename = paste(new, "/","dsn", name,  sep="")
+        
+        #print("write_results4")
+        write_results(filename, expe, f, "Brahmsrho1", resilience1, 0,
+            ttc0, roundNumber1, comment, name)
+        write_results(filename, expe, f, "Brahmsrho0", resilience2, sm,
+            ttc1, roundNumber2, comment, name)
     }
 }

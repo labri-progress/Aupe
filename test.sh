@@ -3,7 +3,14 @@
 exeorplot="${1:-0}"
 whichN="${2:-2}"
 strat="${3:-0}"
+
 gamma=0.3
+sm=100
+force=10
+k=0
+r=1
+rnd=200
+
 if [[ $whichN -eq 0 ]]
 then
     expe=0
@@ -11,13 +18,14 @@ then
     v=5 #20 # 160
     rnd=10
     f=0.3
+    sm=10
 fi
 if [[ $whichN -eq 1 ]]
 then
     expe=21
     N=1000 # 100
     v=100 # 160
-    rnd=10
+    rnd=200
     f=0.2
 fi
 if [[ $whichN -eq 2 ]]
@@ -25,15 +33,9 @@ then
     expe=30
     N=10000
     v=160
-    rnd=50
+    rnd=200
     f=0.2
 fi 
-
-sm=100
-force=10
-k=0
-r=1
-rnd=200
 
 if [ $strat -eq 1 ]; then
     stratLitt="brahms"
@@ -62,7 +64,7 @@ then
         -v $v -u $v -k $k -r $r > $folder"/text"$F
     elif [ $strat -eq 2 ]; then
         cargo run -- -T $rnd -n $N aupe -G samples -f $force -t $byz \
-        -v $v -u $v -k $k -r $r -m $sm > $folder"/text"$F 
+        -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
     else 
         cargo run -- -T $rnd -n $N basalt -G -H -f $force -t $byz \
         -v $v -i 50 -k $k -r $r > $folder"/text"$F

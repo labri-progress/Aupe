@@ -20,6 +20,7 @@ pub struct Opt {
     /// Number of simulation steps
     #[structopt(short = "T", long = "time", default_value = "100")]
     n_steps: usize,
+    
     /// Number of nodes
     #[structopt(short = "n", long = "nodes", default_value = "1000")]
     nodes: usize,
