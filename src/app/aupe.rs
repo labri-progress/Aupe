@@ -6,7 +6,6 @@ use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy,  get_min_key_value};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
-use std::collections::{HashMap};
 
 
 pub enum Msg {
@@ -18,6 +17,10 @@ pub enum Msg {
 
 #[derive(Clone, Default, StructOpt, Debug)]
 pub struct Init {
+    /// Number of nodes
+    #[structopt(short = "n", long = "nodes")]
+    pub nodes: usize,
+
     /// Number of Byzantine nodes
     #[structopt(short = "t", long = "num-byzantines")]
     pub n_byzantine: usize,
@@ -100,10 +103,10 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    omniscient_freq_array: HashMap<PeerRef, PeerRef>,
+    omniscient_freq_array: Vec<isize>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
-    minvalue: usize,
+    minvalue: isize,
 }
 
 pub struct Metrics {
@@ -270,17 +273,20 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            omniscient_freq_array: HashMap::new(),
+            omniscient_freq_array: Vec::new(),
             omniscient_memory: Vec::new(),
             minkey: 0,
-            minvalue: std::usize::MAX,
+            minvalue: std::isize::MAX,
         }
     }
     
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-
+        //println!("Params {:?}", self.params);
+    
+        // Init preallocated vectors
+        self.omniscient_freq_array = vec![-1; self.params.nodes];
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
@@ -410,9 +416,11 @@ impl App for Aupe {
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
                     self.v_pull.extend(lst);
+                    
                     for item in lst {
-                        *(self.omniscient_freq_array).entry(item.clone())
-                            .or_insert(0) += 1;
+                        let max_value = std::cmp::max( self.omniscient_freq_array[item.clone()] +1, 
+                            1);
+                        self.omniscient_freq_array[item.clone()] = max_value;
                     }
                     /* println!("omniscient_freq_array {:?} of node { } after Pull",
                         self.omniscient_freq_array, self.my_id); */
@@ -424,8 +432,9 @@ impl App for Aupe {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    *(self.omniscient_freq_array).entry(from.clone())
-                            .or_insert(0) += 1;
+                    let max_value = std::cmp::max( self.omniscient_freq_array[from.clone()] +1, 
+                            1);
+                    self.omniscient_freq_array[from.clone()] = max_value;
                     /* println!("omniscient_freq_array {:?} of node { } after Push ",
                         self.omniscient_freq_array, self.my_id); */
                
@@ -442,27 +451,29 @@ impl App for Aupe {
         rng.shuffle(&mut shuffled_input[..]);
 
         for element in &shuffled_input {
-            let occur = self.omniscient_freq_array.get(element).unwrap_or(&0);
+            let occur = self.omniscient_freq_array[*element];
             //println!("Element {} occurs {} times.", element, occur);
 
-            if self.minvalue > *occur { // new minval
-                self.minvalue = *occur;
+            if self.minvalue > occur { // new minval
+                self.minvalue = occur;
                 self.minkey = *element;
             }else if *element == self.minkey { // search min if it was him
-                if self.omniscient_freq_array.is_empty() {
-                    println!("The HashMap is empty.");
-                } else {
-                    let (min_key, min_value) = get_min_key_value(&self.omniscient_freq_array);
+                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
+                    if self.my_id == 9 && true{
+                        println!("Minimum value: {}, at index: {}", min_value, min_index);
+                    }
                     self.minvalue = min_value;
-                    self.minkey = *min_key; 
-                }     
+                    self.minkey = min_index; 
+                } else {
+                    println!("The vector is empty.");
+                }  
             }
             if self.omniscient_memory.len() < self.params.memory_size {
                 if !self.omniscient_memory.contains(element) {
                     self.omniscient_memory.push(*element);
                 }
             }else {
-                let prob = self.minvalue as f64/ *occur as f64;
+                let prob = self.minvalue as f64/ occur as f64;
                 let random_float: f64 = rand::thread_rng().gen(); 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());

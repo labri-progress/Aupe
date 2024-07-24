@@ -3,7 +3,6 @@ use fasthash::*;
 use rand::{thread_rng, Rng};
 
 use super::net::PeerRef;
-use std::collections::HashMap;
 
 pub fn either_or_if_both<T: Clone>(a: &Option<T>, b: &Option<T>, f: fn(&T, &T) -> T) -> Option<T> {
     match (a, b) {
@@ -64,6 +63,54 @@ pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
     }
 }
 
+/* fn contains_value(from: &[isize], value: isize) -> Option<usize> {
+    from.iter().position(|&x| x == value)
+} */
+
+pub fn get_min_key_value(from: &[isize]) -> Option<(usize, isize)> {
+    let mut min_value = None;
+    let mut min_index = None;
+
+    for (index, &value) in from.iter().enumerate() {
+        if value > 0 {
+            match min_value {
+                Some(v) if value < v => {
+                    min_value = Some(value);
+                    min_index = Some(index);
+                },
+                None => {
+                    min_value = Some(value);
+                    min_index = Some(index);
+                },
+                _ => {}
+            }
+        }
+    }
+
+    match (min_index, min_value) {
+        (Some(i), Some(v)) => Some((i, v)),
+        _ => None,
+    }
+}
+
+pub fn get_min_key_value2(from: &[isize]) -> Option<(usize, isize )> {
+    if from.is_empty() {
+        return None;
+    }
+
+    let mut min_value = from[0];
+    let mut min_index = 0;
+
+    for (index, &value) in from.iter().enumerate() {
+        if value < min_value {
+            min_value = value;
+            min_index = index;
+        }
+    }
+
+    Some((min_index, min_value))
+}
+/* 
 pub fn get_min_key_value<K, V>(map: &HashMap<K, V>) -> (&K, V)
 where
     K: Eq + std::hash::Hash,
@@ -72,4 +119,4 @@ where
     // Unwrap the results directly assuming the map is not empty
     let (min_key, min_value) = map.iter().min_by_key(|&(_, v)| v).unwrap();
     (min_key, *min_value)
-}
+} */
