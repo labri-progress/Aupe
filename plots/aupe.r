@@ -107,7 +107,7 @@ compute <- function(args, path, topic) {
         aupe$comp=(aupe$avgByzN/v)*100
         title=paste("Byzantine proportion inside view over Time f=", 
             f*100,"%  
-            N=", N, " v=s=", v, " F=10 \n alpha=beta=gamma=1/3 rounds=", roundNumber1)
+            N=", N, " v=s=", v, " F=1 \n alpha=beta=gamma=1/3 rounds=", roundNumber1)
     }else if(path == SAMPLE){
         brahms$comp=(brahms$avgByzSamp/v)*100
         aupe$comp=(aupe$avgByzSamp/v)*100
