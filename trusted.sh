@@ -35,7 +35,7 @@ if [ $strat -eq 1 ]; then
 elif [ $strat -eq 2 ]; then
     stratLitt="aupe"
 else
-    stratLitt="basalt"
+    stratLitt="basalt-simple"
 fi
 rho=$(echo "scale=0; $k / $r / 1" | bc)
 mkdir analysis
@@ -48,13 +48,13 @@ F=$(echo "scale=0; 100.0 * $f / 1" | bc)
 echo $folder"/text"$F
 byz=$(echo "scale=0; $N * $f / 1" | bc)
 if [ $strat -eq 1 ]; then
-   cargo run -- -T $roundMax -n $N brahms -G samples -f $force -t $byz \
+   cargo run -- -T $roundMax -n $N brahms -f $force -t $byz \
    -v $v -u $v -k $k -r $r > $folder"/text"$F
 elif [ $strat -eq 2 ]; then
-   cargo run -- -T $roundMax -n $N aupe -G samples -f $force -t $byz \
-   -v $v -u $v -k $k -r $r -m $sm > $folder"/text"$F 
+   cargo run -- -T $roundMax -n $N aupe -f $force -t $byz \
+   -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
 else 
-   cargo run -- -T $roundMax -n $N basalt -G -H -f $force -t $byz \
+   cargo run -- -T $roundMax -n $N basalt-simple -f $force -t $byz \
    -v $v -i 50 -k $k -r $r > $folder"/text"$F
 fi
 echo "Done------------------------"
