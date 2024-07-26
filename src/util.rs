@@ -93,22 +93,14 @@ pub fn get_min_key_value(from: &[isize]) -> Option<(usize, isize)> {
     }
 }
 
-pub fn get_min_key_value2(from: &[isize]) -> Option<(usize, isize )> {
-    if from.is_empty() {
-        return None;
-    }
-
-    let mut min_value = from[0];
-    let mut min_index = 0;
-
-    for (index, &value) in from.iter().enumerate() {
-        if value < min_value {
-            min_value = value;
-            min_index = index;
+pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
+    print!("SampleList [");
+    for (_, opt_peer_ref) in sample_view.iter_mut() {
+        if let Some(peer_ref) = opt_peer_ref {
+            print!("{:?} ", peer_ref);
         }
     }
-
-    Some((min_index, min_value))
+    println!("]");
 }
 /* 
 pub fn get_min_key_value<K, V>(map: &HashMap<K, V>) -> (&K, V)
