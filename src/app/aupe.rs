@@ -3,7 +3,7 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy,  get_min_key_value};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy,  get_min_key_value, print_samples};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
@@ -21,6 +21,10 @@ pub struct Init {
     #[structopt(short = "n", long = "nodes")]
     pub nodes: usize,
 
+    /// Number of SGX nodes
+   /*  #[structopt(short = "x", long = "trusted-nodes")]
+    pub n_trusted: usize,
+ */
     /// Number of Byzantine nodes
     #[structopt(short = "t", long = "num-byzantines")]
     pub n_byzantine: usize,
@@ -93,6 +97,10 @@ pub struct Aupe {
     is_byzantine: bool,
 
     view: Vec<PeerRef>,
+    push_view: Vec<PeerRef>,
+    pull_view: Vec<PeerRef>,
+    sample_part: Vec<PeerRef>,
+    
     sample_view: Vec<(u64, Option<PeerRef>)>,
 
     out_samples: Vec<PeerRef>,
@@ -116,6 +124,9 @@ pub struct Metrics {
     n_received: usize,
     
     n_byzantine_neighbors: usize,
+    n_pushed_byzantine_neighbors: usize,
+    n_pulled_byzantine_neighbors: usize,
+    n_sampled_byzantine_neighbors: usize,
     n_isolated: usize,
 
     n_byzantine_samples: usize,
@@ -136,6 +147,9 @@ impl NetMetrics for Metrics {
             n_byzantine_received: 0,
             n_received: 0,
             n_byzantine_neighbors: 0,
+            n_pushed_byzantine_neighbors: 0,
+            n_pulled_byzantine_neighbors: 0,
+            n_sampled_byzantine_neighbors: 0,
             n_isolated: 0,
             n_byzantine_samples: 0,
             min_byzantine_samples: None,
@@ -152,6 +166,10 @@ impl NetMetrics for Metrics {
         self.n_received += other.n_received;
 
         self.n_byzantine_neighbors += other.n_byzantine_neighbors;
+        self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
+        self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
+        self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
+
         self.n_isolated += other.n_isolated;
 
         self.n_byzantine_samples += other.n_byzantine_samples;
@@ -175,6 +193,9 @@ impl NetMetrics for Metrics {
             "avgByzRecv",
             "pByzRecv",
             "avgByzN",
+            "avgpushedByzN",
+            "avgpulledByzN",
+            "avgsampledByzN",
             "n_isolated",
             "avgByzSamp",
             "min",
@@ -205,6 +226,13 @@ impl NetMetrics for Metrics {
                    (self.n_byzantine_received as f32) / (self.n_received as f32)),
             format!("{:.2}",
                    (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+
             format!("{}", self.n_isolated),
             format!("{:.2}",
                 (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
@@ -264,6 +292,9 @@ impl App for Aupe {
             my_id: 0,
             is_byzantine: false,
             view: Vec::new(),
+            push_view: Vec::new(),
+            pull_view: Vec::new(),
+            sample_part: Vec::new(),
             sample_view: Vec::new(),
             out_samples: Vec::new(),
 
@@ -356,7 +387,7 @@ impl App for Aupe {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
                         // TODO: Unbiasing
-                        if self.my_id == 9 && true{
+                        if self.my_id == 9 && false{
                             println!("BEFORE vpush{:?} vpull{:?}",v_push, v_pull);
                         }
                         
@@ -367,28 +398,37 @@ impl App for Aupe {
                             println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
-                        let mut view = sample(&v_push[..], self.params.view_size / 3);
-                        view.extend(sample(&v_pull[..], self.params.view_size / 3));
+                        self.push_view = sample(&v_push[..], self.params.view_size / 3);
+                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
+                        
+                        let mut view = self.push_view.clone();
+                        view.extend(self.pull_view.clone());
 
                         let samples_peer = self.sample_view.iter()
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        view.extend(sample(&samples_peer[..], self.params.view_size - view.len()));
+                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len());
+                        
+                        view.extend(self.sample_part.clone());
+
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
 
                         self.update_samples(&v_push[..]);
                         self.update_samples(&v_pull[..]);
-                        //println!("View Node{} {:?} ", self.my_id, self.view);
                     }else {
                         self.debiais_stream_with_omni(self.v_pull.to_vec());
                         self.debiais_stream_with_omni(self.v_push.to_vec());
                     }
-                    //
-                    //println!("View Node{} {:?} ", self.my_id, self.view);
-                    //println!("sample list {:?} ",self.sample_view);
+                    
                     if self.my_id == 9 && true{
+                        println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
+                            self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
+                        print_samples(&mut self.sample_view);
+                    }
+
+                    if self.my_id == 9 && false{
                         println!("omniscient_freq_array {:?} of node { }",
                             self.omniscient_freq_array, self.my_id);
                         println!("sample memory {:?} of node { }",
@@ -418,8 +458,7 @@ impl App for Aupe {
                     self.v_pull.extend(lst);
                     
                     for item in lst {
-                        let max_value = std::cmp::max( self.omniscient_freq_array[item.clone()] +1, 
-                            1);
+                        let max_value = std::cmp::max(self.omniscient_freq_array[item.clone()]+1, 1);
                         self.omniscient_freq_array[item.clone()] = max_value;
                     }
                     /* println!("omniscient_freq_array {:?} of node { } after Pull",
@@ -432,8 +471,7 @@ impl App for Aupe {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    let max_value = std::cmp::max( self.omniscient_freq_array[from.clone()] +1, 
-                            1);
+                    let max_value = std::cmp::max(self.omniscient_freq_array[from.clone()]+1, 1);
                     self.omniscient_freq_array[from.clone()] = max_value;
                     /* println!("omniscient_freq_array {:?} of node { } after Push ",
                         self.omniscient_freq_array, self.my_id); */
@@ -459,7 +497,7 @@ impl App for Aupe {
                 self.minkey = *element;
             }else if *element == self.minkey { // search min if it was him
                 if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
-                    if self.my_id == 9 && true{
+                    if self.my_id == 9 && false{
                         println!("Minimum value: {}, at index: {}", min_value, min_index);
                     }
                     self.minvalue = min_value;
@@ -506,6 +544,10 @@ impl App for Aupe {
             metrics
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count();
+
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
@@ -536,6 +578,10 @@ impl App for Aupe {
                 n_received: self.n_received,
                 n_byzantine_received: self.n_byzantine_received,
                 n_byzantine_neighbors: nbn,
+                n_pushed_byzantine_neighbors: nbpush,
+                n_pulled_byzantine_neighbors: nbpull,
+                n_sampled_byzantine_neighbors: nbsamp,
+                
                 n_isolated: if nbn == self.view.len() { 1 } else { 0 },
                 n_byzantine_samples: nbs,
                 min_byzantine_samples: Some(nbs as i64),

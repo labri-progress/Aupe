@@ -16,7 +16,7 @@ done < "$machine"
 
 a=${#machines[@]}
 
-numberofexpe=10
+numberofexpe=132
 numberpermachine=$(echo "scale=0; $numberofexpe/10 / 1" | bc)
 echo "array length $a and $numberpermachine processes"
 
@@ -32,7 +32,7 @@ fi
 
 rep=1
 if [ $copy_file -eq 1 ]; then # expe
-  count=0
+  count=88
   while [ $count -lt $numberofexpe ];
   do 
     index=$(($count % $a))
@@ -56,7 +56,7 @@ if [ $copy_file -eq 2 ]; then # collect
   done 
 fi
 
-if [ $copy_file -eq 3 ]; then # collect
+if [ $copy_file -eq 3 ]; then # clean
   for element in "${machines[@]}"; do
     ansible-playbook playbook/clean_play.yml \
       --extra-vars \

@@ -27,7 +27,7 @@ print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = "aupe"
+strat = "basalt-simple"
 merge = "no"
 Method = "moy"
 gamma = 0.3
@@ -61,7 +61,7 @@ for (n in n_values){
         #compute(params, CIN, "Input streams faulty proportion (%)")
         #compute(params, COUT, "Output stream faulty proportion  (%)")
         compute(params, CVIEW, "System faulty proportion  (%)")
-        compute(params, SAMPLE, "Sample faulty proportion  (%)")
+        #compute(params, SAMPLE, "Sample faulty proportion  (%)")
 
         dev.off()
         expe=expe+1

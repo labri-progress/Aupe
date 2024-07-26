@@ -72,15 +72,15 @@ compute <- function(args, path, topic) {
     name = sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(path))
 
     ymax = 100
-    strat1 = "aupe"
-    strat2 = "aupe"
+    strat1 = "basalt-simple"
+    strat2 = "basalt-simple"
 
     filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho1/", 
         N, sep="")
     filepath2 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho0/", 
         N, sep="")
-    brahmspath = paste(filepath1,"/", strat1,"/text",f*100, sep="")
-    aupepath = paste(filepath2,"/", strat2,"/text",f*100, sep="")
+    brahmspath = paste(filepath1,"/", strat,"/text",f*100, sep="")
+    aupepath = paste(filepath2,"/", strat,"/text",f*100, sep="")
     print(brahmspath)
     print(aupepath)
     
@@ -128,8 +128,8 @@ compute <- function(args, path, topic) {
     axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
     abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
     if (path == CVIEW|| path==SAMPLE){
-        labels = c(paste("aupe rho=1", sep=""), 
-            paste("aupe rho=0", sep=""))
+        labels = c(paste(strat, " rho=1", sep=""), 
+            paste(strat, " rho=0", sep=""))
         colors = c("red", "blue")
         locator(1) 
         legend("topright", legend = labels, box.col = "grey",
@@ -156,9 +156,9 @@ compute <- function(args, path, topic) {
         filename = paste(new, "/","dsn", name,  sep="")
         
         #print("write_results4")
-        write_results(filename, expe, f, "auperho1", resilience1, 0,
+        write_results(filename, expe, f, paste(strat, "rho1", sep=""), resilience1, 0,
             ttc0, roundNumber1, comment, name)
-        write_results(filename, expe, f, "auperho0", resilience2, sm,
+        write_results(filename, expe, f, paste(strat, "rho0", sep=""), resilience2, sm,
             ttc1, roundNumber2, comment, name)
     }
 }
