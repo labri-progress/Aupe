@@ -10,4 +10,4 @@
     - name: Copy results on my machine
       ansible.builtin.fetch:
         src: /root/analysis.tar.gz
-        dest: "{{dir}}/online"
+        dest: "{{dir}}/online/g5k"

@@ -50,7 +50,7 @@ do
                         echo "Expe failed"
                     fi
                 fi
-                echo "*****************NEXT*****************"
+                #echo "*****************NEXT*****************"
                 let expe=expe+1
             done
         done

@@ -32,7 +32,7 @@ fi
 
 rep=1
 if [ $copy_file -eq 1 ]; then # expe
-  count=88
+  count=44
   while [ $count -lt $numberofexpe ];
   do 
     index=$(($count % $a))

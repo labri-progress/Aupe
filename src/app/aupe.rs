@@ -127,6 +127,8 @@ pub struct Metrics {
     n_pushed_byzantine_neighbors: usize,
     n_pulled_byzantine_neighbors: usize,
     n_sampled_byzantine_neighbors: usize,
+    n_push_bag_byzantine: usize,
+    n_pull_bag_byzantine: usize,
     n_isolated: usize,
 
     n_byzantine_samples: usize,
@@ -150,6 +152,8 @@ impl NetMetrics for Metrics {
             n_pushed_byzantine_neighbors: 0,
             n_pulled_byzantine_neighbors: 0,
             n_sampled_byzantine_neighbors: 0,
+            n_push_bag_byzantine: 0,
+            n_pull_bag_byzantine: 0,
             n_isolated: 0,
             n_byzantine_samples: 0,
             min_byzantine_samples: None,
@@ -169,6 +173,8 @@ impl NetMetrics for Metrics {
         self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
         self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
         self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
+        self.n_push_bag_byzantine += other.n_push_bag_byzantine;
+        self.n_pull_bag_byzantine += other.n_pull_bag_byzantine;
 
         self.n_isolated += other.n_isolated;
 
@@ -196,6 +202,8 @@ impl NetMetrics for Metrics {
             "avgpushedByzN",
             "avgpulledByzN",
             "avgsampledByzN",
+            "avgpushBag",
+            "avgpullBag",
             "n_isolated",
             "avgByzSamp",
             "min",
@@ -204,19 +212,19 @@ impl NetMetrics for Metrics {
             "n_fbi",
             "cluscoeff",
             "MPL",
-            "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
+           // "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
         ]
     }
     fn values(&self) -> Vec<String> {
         // Clustering coefficient
-        let cluscoeff = self.graph.clustering_coeff();
+        /* let cluscoeff = self.graph.clustering_coeff();
 
         // In-degree quartiles (for correct nodes)
         let ind = self.graph.indegree_dist(self.n_procs);
 
         // Average path length estimation
         let mpl = self.graph.mean_path_length(self.n_procs);
-
+ */
         vec![
             format!("{:.2}",
                    (self.n_received as f32) / (self.n_procs as f32)),
@@ -232,6 +240,10 @@ impl NetMetrics for Metrics {
                    (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{:.2}",
                    (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_push_bag_byzantine as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pull_bag_byzantine as f32) / (self.n_procs as f32)),
 
             format!("{}", self.n_isolated),
             format!("{:.2}",
@@ -241,7 +253,7 @@ impl NetMetrics for Metrics {
             format!("{}", self.n_fullbyz),
             format!("{}", self.n_fbi),
 
-            format!("{:.4}", cluscoeff),
+            /*format!("{:.4}", cluscoeff),
             format!("{:.4}", mpl),
             format!("{}", ind[0]),
             format!("{}", ind[ind.len()/10]),
@@ -249,7 +261,7 @@ impl NetMetrics for Metrics {
             format!("{}", ind[ind.len()/2]),
             format!("{}", ind[3*ind.len()/4]),
             format!("{}", ind[9*ind.len()/10]),
-            format!("{}", ind[ind.len()-1]),
+            format!("{}", ind[ind.len()-1]), */
         ]
     }
 }
@@ -547,6 +559,8 @@ impl App for Aupe {
             let nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count();
             let nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count();
             let nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
 
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
@@ -581,7 +595,8 @@ impl App for Aupe {
                 n_pushed_byzantine_neighbors: nbpush,
                 n_pulled_byzantine_neighbors: nbpull,
                 n_sampled_byzantine_neighbors: nbsamp,
-                
+                n_push_bag_byzantine: nbpushbag,
+                n_pull_bag_byzantine: nbpullbag,
                 n_isolated: if nbn == self.view.len() { 1 } else { 0 },
                 n_byzantine_samples: nbs,
                 min_byzantine_samples: Some(nbs as i64),
