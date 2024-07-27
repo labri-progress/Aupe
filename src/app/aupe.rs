@@ -209,9 +209,9 @@ impl NetMetrics for Metrics {
             "min",
             "max",
             "n_fullbyz",
-            "n_fbi",
+            /* "n_fbi",
             "cluscoeff",
-            "MPL",
+            "MPL", */
            // "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
         ]
     }
@@ -251,7 +251,7 @@ impl NetMetrics for Metrics {
             format!("{}", self.min_byzantine_samples.unwrap_or(-1)),
             format!("{}", self.max_byzantine_samples.unwrap_or(-1)),
             format!("{}", self.n_fullbyz),
-            format!("{}", self.n_fbi),
+            //format!("{}", self.n_fbi),
 
             /*format!("{:.4}", cluscoeff),
             format!("{:.4}", mpl),
@@ -396,15 +396,15 @@ impl App for Aupe {
                     }
                     //
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
-                        let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
+                        /* let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
+                        let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new()); */
                         // TODO: Unbiasing
-                        if self.my_id == 9 && false{
+                        /* if self.my_id == 9 && false{
                             println!("BEFORE vpush{:?} vpull{:?}",v_push, v_pull);
-                        }
+                        } */
                         
-                        v_pull = self.debiais_stream_with_omni(v_pull);
-                        v_push = self.debiais_stream_with_omni(v_push);
+                        let v_pull = self.debiais_stream_with_omni(self.v_pull.clone());
+                        let v_push = self.debiais_stream_with_omni(self.v_push.clone());
                         
                         if self.my_id == 9 && true{
                             println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
@@ -561,11 +561,20 @@ impl App for Aupe {
             let nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count();
             let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
             let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
-
+ 
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
+
+            if self.my_id == 9 && self.params.nodes== 10 && true{
+                println!("nbn={}/{} nbpush={}/{} nbpull={}/{} nbsamp={}/{} nbpushbag={}/{} nbpullbag={}/{} nbs={}/{}",
+                nbn, self.view.len(),
+                nbpush, self.push_view.len(), nbpull, self.pull_view.len(),
+                nbsamp, self.sample_part.len(),
+                nbpushbag, self.v_push.len(), nbpullbag, self.v_pull.len(),
+                nbs, self.sample_view.len());
+            }
 
             let graph = match self.params.graph_stats {
                 WhichGraphStats::NoGraph => ByzConnGraph::new(),
@@ -607,6 +616,11 @@ impl App for Aupe {
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;
+            self.v_pull=Vec::new();
+            self.v_push=Vec::new();
+            /* if self.my_id == 9 && true{
+                println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
+            } */
             ret
         }
     }
