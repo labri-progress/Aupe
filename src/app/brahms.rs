@@ -439,10 +439,6 @@ impl App for Brahms {
             ret
         }
     }
-
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-        inputstream
-    }
     
 }
 

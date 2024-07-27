@@ -1,0 +1,168 @@
+time       n_sent     n_recv     avgRecv    avgByzRecv pByzRecv   avgByzN    avgpushedByzN avgpulledByzN avgsampledByzN avgpushBag avgpullBag n_isolated avgByzSamp min        max        n_fullbyz 
+0          10         0          0.00       0.00       NaN        1.14       0.00       0.00       0.00       0.00       0.00       0          1.43       0          3          0         
+vpush[] vpull[]
+omniscient_freq_array [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1] of node 9
+sample memory [] of node 9
+The key with the minimum value is '0' with a value of 9223372036854775807.
+1          68         10         0.00       0.00       NaN        1.14       0.00       0.00       0.00       0.00       0.00       0          1.00       0          2          0         
+vpush[0, 1, 2] vpull[]
+omniscient_freq_array [1, 1, 1, -1, -1, -1, -1, -1, -1, -1] of node 9
+sample memory [0, 1, 2] of node 9
+The key with the minimum value is '0' with a value of 1.
+2          83         68         3.57       3.00       0.8400     1.14       0.00       0.00       0.00       3.00       0.00       0          0.57       0          2          0         
+message MergeRq from 3
+The vector is empty.
+other omniscient_freq_array [1, 1, 1, -1, -1, -1, -1, -1, -1, -1]
+New omniscient_freq_array [2, 2, 2, 0, -1, -1, -1, -1, -1, -1] of node 9
+message MergeRq from 6
+other omniscient_freq_array [0, 0, 0, 0, -1, -1, -1, -1, -1, -1]
+New omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, -1] of node 9
+message MergeRq from 9
+other omniscient_freq_array [1, 1, 1, -1, -1, -1, -1, -1, -1, -1]
+New omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 0] of node 9
+vpush[0, 1, 2, 3, 9] vpull[0, 1, 2]
+AFTER debiasing vpush[9, 9, 9, 0, 9] vpull[2, 2, 2]
+omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 0] of node 9
+sample memory [0, 1, 2, 9, 3] of node 9
+The key with the minimum value is '9' with a value of 0.
+3          87         83         8.00       4.43       0.5536     1.43       0.43       0.86       0.14       3.00       1.43       0          0.86       0          2          0         
+The vector is empty.
+message MergeRy from 9
+other omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 1]
+New omniscient_freq_array [2, 2, 2, 0, -1, -1, -1, -1, -1, 0] of node 9
+The vector is empty.
+message MergeRq from 9
+other omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 0]
+New omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 0] of node 9
+vpush[0, 1, 2] vpull[0, 1, 2]
+AFTER debiasing vpush[0, 9, 2] vpull[1, 1, 1]
+omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 0] of node 9
+sample memory [0, 1, 2, 9, 3] of node 9
+The key with the minimum value is '9' with a value of 0.
+4          86         87         8.43       4.29       0.5085     1.43       0.43       0.57       0.43       3.00       1.29       0          0.86       0          2          0         
+message MergeRq from 4
+other omniscient_freq_array [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [1, 1, 1, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRy from 5
+other omniscient_freq_array [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 6
+other omniscient_freq_array [1, 1, 1, 0, 0, 0, -1, -1, 0, -1]
+New omniscient_freq_array [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 7
+other omniscient_freq_array [2, 2, 2, 0, -1, 0, -1, 0, 0, 0]
+New omniscient_freq_array [1, 1, 1, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRy from 9
+other omniscient_freq_array [2, 2, 2, 0, -1, -1, -1, -1, -1, 0]
+New omniscient_freq_array [1, 1, 2, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRq from 9
+other omniscient_freq_array [1, 1, 1, 0, -1, -1, -1, -1, -1, 0]
+New omniscient_freq_array [1, 1, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+vpush[0, 1, 2, 9] vpull[9, 2, 7, 9, 5]
+AFTER debiasing vpush[3, 1, 0, 5] vpull[3, 3, 2, 5, 3]
+omniscient_freq_array [1, 1, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+sample memory [0, 1, 2, 9, 3, 7, 5] of node 9
+The key with the minimum value is '5' with a value of 0.
+5          87         86         8.43       4.57       0.5424     0.71       0.00       0.43       0.29       3.00       1.57       0          0.71       0          2          0         
+message MergeRy from 7
+other omniscient_freq_array [2, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [2, 1, 1, 1, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 8
+other omniscient_freq_array [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRy from 9
+other omniscient_freq_array [1, 1, 2, 0, 0, 0, 0, 0, 0, 2]
+New omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRq from 9
+other omniscient_freq_array [1, 1, 1, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+vpush[0, 1, 2] vpull[3, 0, 3, 3, 4]
+AFTER debiasing vpush[7, 3, 4] vpull[3, 9, 0, 1, 0]
+omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+sample memory [0, 1, 2, 9, 3, 7, 5, 4] of node 9
+The key with the minimum value is '5' with a value of 0.
+6          86         87         8.71       4.57       0.5246     1.14       0.14       0.57       0.43       3.00       1.57       0          0.86       0          2          0         
+message MergeRq from 3
+other omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [2, 1, 2, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRy from 3
+other omniscient_freq_array [3, 3, 3, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 6
+other omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRy from 9
+other omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [1, 1, 1, 0, 0, 1, 0, 0, 0, 1] of node 9
+message MergeRq from 9
+other omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+vpush[0, 1, 2, 3, 6] vpull[5, 3, 7, 5, 9]
+AFTER debiasing vpush[3, 4, 0, 5, 1] vpull[1, 1, 2, 5, 3]
+omniscient_freq_array [1, 0, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+sample memory [0, 1, 2, 9, 3, 7, 5, 4, 6] of node 9
+The key with the minimum value is '7' with a value of 0.
+7          85         86         8.43       3.71       0.4407     1.00       0.29       0.43       0.29       3.00       0.71       0          0.43       0          2          0         
+message MergeRq from 3
+other omniscient_freq_array [3, 3, 3, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRq from 3
+other omniscient_freq_array [3, 3, 3, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRy from 4
+other omniscient_freq_array [2, 1, 1, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [2, 1, 1, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRq from 5
+other omniscient_freq_array [2, 1, 2, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [2, 1, 1, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 5
+other omniscient_freq_array [2, 1, 2, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [2, 1, 1, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 6
+other omniscient_freq_array [2, 2, 2, 0, 0, 0, 0, 1, 0, 0]
+New omniscient_freq_array [2, 1, 1, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRy from 9
+other omniscient_freq_array [1, 1, 1, 0, 0, 1, 0, 0, 0, 1]
+New omniscient_freq_array [2, 1, 1, 0, 0, 1, 0, 0, 0, 1] of node 9
+vpush[0, 1, 2, 3, 5] vpull[4, 0, 5, 1, 9]
+AFTER debiasing vpush[2, 9, 0, 4, 3] vpull[1, 1, 4, 3, 9]
+omniscient_freq_array [2, 1, 1, 0, 0, 1, 0, 0, 0, 1] of node 9
+sample memory [0, 1, 2, 9, 3, 7, 5, 4, 6] of node 9
+The key with the minimum value is '7' with a value of 0.
+8          83         85         7.86       4.71       0.6000     0.86       0.43       0.00       0.43       3.00       1.71       0          1.14       0          3          0         
+message MergeRq from 3
+other omniscient_freq_array [3, 2, 2, 0, 1, 0, 0, 0, 0, 1]
+New omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRq from 4
+other omniscient_freq_array [2, 1, 2, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [2, 1, 2, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRy from 5
+other omniscient_freq_array [4, 3, 4, 0, 0, 0, 0, 0, 0, 1]
+New omniscient_freq_array [3, 2, 3, 0, 0, 0, 0, 0, 0, 1] of node 9
+message MergeRy from 7
+other omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 1, 0]
+New omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 2, 0] of node 9
+vpush[0, 1, 2, 3] vpull[4, 8, 8, 3, 8]
+AFTER debiasing vpush[3, 0, 4, 2] vpull[3, 2, 9, 3, 8]
+omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 2, 0] of node 9
+sample memory [0, 1, 2, 9, 3, 7, 5, 4, 6, 8] of node 9
+The key with the minimum value is '7' with a value of 0.
+9          88         83         8.29       4.43       0.5345     1.00       0.14       0.14       0.71       3.00       1.43       0          1.86       0          5          1         
+message MergeRy from 5
+other omniscient_freq_array [2, 1, 1, 0, 0, 1, 0, 0, 0, 1]
+New omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 1, 0] of node 9
+message MergeRy from 5
+other omniscient_freq_array [2, 1, 1, 0, 0, 1, 0, 0, 0, 1]
+New omniscient_freq_array [2, 1, 2, 1, 0, 1, 0, 0, 0, 0] of node 9
+message MergeRq from 7
+other omniscient_freq_array [4, 3, 3, 0, 0, 0, 0, 0, 0, 0]
+New omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 0, 0] of node 9
+message MergeRq from 9
+other omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 2, 0]
+New omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 1, 0] of node 9
+vpush[0, 1, 2, 7] vpull[2, 5, 3, 4, 3]
+AFTER debiasing vpush[8, 3, 2, 9] vpull[1, 9, 4, 3, 4]
+omniscient_freq_array [3, 2, 2, 0, 0, 0, 0, 0, 1, 0] of node 9
+sample memory [0, 1, 2, 9, 3, 7, 5, 4, 6, 8] of node 9
+The key with the minimum value is '8' with a value of 1.
+10         85         88         8.71       4.57       0.5246     1.29       0.14       0.14       1.00       3.00       1.57       0          1.71       0          4          0         

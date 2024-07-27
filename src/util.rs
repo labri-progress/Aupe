@@ -86,7 +86,6 @@ pub fn get_min_key_value(from: &[isize]) -> Option<(usize, isize)> {
             }
         }
     }
-
     match (min_index, min_value) {
         (Some(i), Some(v)) => Some((i, v)),
         _ => None,
@@ -102,13 +101,20 @@ pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
     }
     println!("]");
 }
+
 /* 
-pub fn get_min_key_value<K, V>(map: &HashMap<K, V>) -> (&K, V)
-where
-    K: Eq + std::hash::Hash,
-    V: Ord + Copy,
-{
-    // Unwrap the results directly assuming the map is not empty
-    let (min_key, min_value) = map.iter().min_by_key(|&(_, v)| v).unwrap();
-    (min_key, *min_value)
+fn merge_knowledge_both_ways(&mut self, local_freq: &mut [i64], remote_freq: &mut [i64]) {
+        for id in 0..self.params.nodes {
+            let average_freq = ((remote_freq[id] + local_freq[id]) as f64 / 2.0) as i64;
+            remote_freq[id] = average_freq;
+            local_freq[id] = average_freq;
+        }
+    }
+    
+fn merge_knowledge_both_ways(local_freq: &mut [i64], remote_freq: &mut [i64], system_size: usize) {
+    (0..system_size).into_par_iter().for_each(|id| {
+        let average_freq = ((remote_freq[id] + local_freq[id]) as f64 / 2.0) as i64;
+        remote_freq[id] = average_freq;
+        local_freq[id] = average_freq;
+    });
 } */
