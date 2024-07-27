@@ -586,17 +586,29 @@ impl App for Aupe {
                
                 },
                 Msg::MergeRequest(lst) => {
-                    if self.my_id == 9 && true{
-                        println!("message MergeRq from {}", from.to_string());
+                    if self.params.use_omn_merge{
+                        if self.my_id == 9 && true{
+                            println!("message MergeRq from {}", from.to_string());
+                        }
+                        net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
+                        self.merge_knowledge_both_ways(lst.to_vec());
+                    }else{
+                        if self.my_id == 9 && true{
+                            println!("NO MERGE");
+                        }
                     }
-                    net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
-                    self.merge_knowledge_both_ways(lst.to_vec());
                 },
                 Msg::MergeReply(lst) => {
-                    if self.my_id == 9 && true{
-                        println!("message MergeRy from {}", from.to_string());
+                    if self.params.use_omn_merge{
+                        if self.my_id == 9 && true{
+                            println!("message MergeRy from {}", from.to_string());
+                        }
+                        self.merge_knowledge_both_ways(lst.to_vec());
+                    }else{
+                        if self.my_id == 9 && true{
+                            println!("NO MERGE");
+                        }
                     }
-                    self.merge_knowledge_both_ways(lst.to_vec());
                 },
             }
         }
