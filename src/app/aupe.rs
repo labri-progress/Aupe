@@ -347,17 +347,32 @@ impl Aupe {
     }
 
     fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<isize>) {
+        if self.my_id == 9 && true{
+            println!("**********merge_knowledge_both_ways*********");
+            println!("Omniscient_freq_array {:?} of node { }",
+                self.omniscient_freq_array, self.my_id);
+            println!("other omniscient_freq_array {:?}", other_omniscient_freq_array);
+        }
+        
         //TODO: parallelize
+
         for id in 0..self.params.nodes {
-            let average_freq = ((self.omniscient_freq_array[id] + other_omniscient_freq_array[id]) as f64 / 2.0) as isize;
+            let mut average_freq;
+            if self.omniscient_freq_array[id] <=0 && other_omniscient_freq_array[id] <=0 {
+                average_freq = -1; // Both didn't see the node
+            } else{
+                average_freq = ((std::cmp::max(self.omniscient_freq_array[id], 0) + 
+                    std::cmp::max(other_omniscient_freq_array[id], 0)) as f64 / 2.0) as isize;
+                average_freq = std::cmp::max(average_freq, 1);
+            }
+            
             self.omniscient_freq_array[id] = average_freq;
-            //other.omniscient_freq_array[id] = average_freq;
         }
         if self.my_id == 9 && true{
-            println!("other omniscient_freq_array {:?}", other_omniscient_freq_array);
-            println!("New omniscient_freq_array {:?} of node { }",
+            println!("NEW Omniscient_freq_array {:?} of node { }",
                 self.omniscient_freq_array, self.my_id);
         }
+        
     }
 }
 
@@ -460,7 +475,7 @@ impl App for Aupe {
                             }
                         }
                     }
-                    if self.my_id == 9 && true{
+                    if self.my_id == 9 && false{
                         println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     }
                     //
@@ -471,7 +486,7 @@ impl App for Aupe {
                         let v_pull = self.debiais_stream_with_omni(self.v_pull.clone());
                         let v_push = self.debiais_stream_with_omni(self.v_push.clone());
                         
-                        if self.my_id == 9 && true{
+                        if self.my_id == 9 && false{
                             println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
@@ -527,8 +542,9 @@ impl App for Aupe {
                             net.send(*p, Msg::PullRequest);
                             net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone()))
                         });
-
-                    
+                    if self.my_id == 9 && true{
+                        println!("Sent push to {} and pull to { }", id_to_push[0], id_to_pull[0]);
+                    }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -536,7 +552,10 @@ impl App for Aupe {
                     net.send(from, Msg::PullReply(self.view.clone()));
                 },
                 Msg::PullReply(lst) => {
-                    //println!("message PlRy ");
+                    if self.my_id == 9 && true{
+                        println!("message PlRy from {} : {:?}", 
+                        from.to_string(), lst);
+                    }
                     self.n_received += lst.len();
                     self.n_byzantine_received += lst.iter()
                         .filter(|x| **x < self.params.n_byzantine)
@@ -551,7 +570,9 @@ impl App for Aupe {
                         self.omniscient_freq_array, self.my_id); */
                 },
                 Msg::PushRequest => {
-                    //println!("message PushR ");
+                    if self.my_id == 9 && true{
+                        println!("message PushR from {} ", from.to_string());
+                    }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
                         self.n_byzantine_received += 1;
@@ -568,7 +589,7 @@ impl App for Aupe {
                     if self.my_id == 9 && true{
                         println!("message MergeRq from {}", from.to_string());
                     }
-                    net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone()));
+                    net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
                     self.merge_knowledge_both_ways(lst.to_vec());
                 },
                 Msg::MergeReply(lst) => {
@@ -657,9 +678,7 @@ impl App for Aupe {
             self.n_byzantine_received = 0;
             self.v_pull=Vec::new();
             self.v_push=Vec::new();
-            /* if self.my_id == 9 && true{
-                println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
-            } */
+          
             ret
         }
     }
