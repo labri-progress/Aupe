@@ -352,9 +352,6 @@ impl App for Basalt {
             ret
         }
     }
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-        inputstream
-    }
 }
 
 impl RPS for Basalt {

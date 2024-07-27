@@ -73,9 +73,7 @@ impl App for Oracle {
     fn metrics(&mut self, _network: &mut dyn Network<Self::Msg>) -> Self::Metrics {
         Self::Metrics::empty()
     }
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-        inputstream
-    }
+   
 }
 
 impl RPS for Oracle {

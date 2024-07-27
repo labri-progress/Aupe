@@ -39,8 +39,6 @@ pub trait App {
     fn metrics(&mut self, network: &mut dyn Network<Self::Msg>) -> Self::Metrics
         where Self: Sized;
     
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize>
-        where Self: Sized;
 }
 
 struct Message<Msg> {

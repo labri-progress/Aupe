@@ -13,6 +13,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
+    MergeRequest(Vec<isize>),
+    MergeReply(Vec<isize>),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -60,6 +62,10 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
+
+    /// Use merge with omniscient strategy
+    #[structopt(short = "O", long = "use-omn-merge")]
+    pub use_omn_merge: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -290,6 +296,69 @@ impl Aupe {
             }
         }
     }
+
+
+    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+        let mut outputstream = Vec::new();
+        //println!("++");
+        let mut rng = thread_rng();
+        let mut shuffled_input = inputstream.to_vec();
+        rng.shuffle(&mut shuffled_input[..]);
+
+        for element in &shuffled_input {
+            let occur = self.omniscient_freq_array[*element];
+            //println!("Element {} occurs {} times.", element, occur);
+
+            if self.minvalue > occur { // new minval
+                self.minvalue = occur;
+                self.minkey = *element;
+            }else if *element == self.minkey { // search min if it was him
+                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
+                    if self.my_id == 9 && false{
+                        println!("Minimum value: {}, at index: {}", min_value, min_index);
+                    }
+                    self.minvalue = min_value;
+                    self.minkey = min_index; 
+                } else {
+                    println!("The vector is empty.");
+                }  
+            }
+            if self.omniscient_memory.len() < self.params.memory_size {
+                if !self.omniscient_memory.contains(element) {
+                    self.omniscient_memory.push(*element);
+                }
+            }else {
+                let prob = self.minvalue as f64/ occur as f64;
+                let random_float: f64 = rand::thread_rng().gen(); 
+                if random_float < prob && !self.omniscient_memory.contains(element) {
+                    let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
+                    if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
+                        *tobereplaced = *element;
+                    } else {
+                        println!("Index out of bounds");
+                    }
+                }
+            }
+            let i = rng.gen_range(0, self.omniscient_memory.len());
+            outputstream.push(self.omniscient_memory[i].clone());
+        }
+            
+        outputstream
+    }
+
+    fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<isize>) {
+        //TODO: parallelize
+        for id in 0..self.params.nodes {
+            let average_freq = ((self.omniscient_freq_array[id] + other_omniscient_freq_array[id]) as f64 / 2.0) as isize;
+            self.omniscient_freq_array[id] = average_freq;
+            //other.omniscient_freq_array[id] = average_freq;
+        }
+        if self.my_id == 9 && true{
+            println!("other omniscient_freq_array {:?}", other_omniscient_freq_array);
+            println!("New omniscient_freq_array {:?} of node { }",
+                self.omniscient_freq_array, self.my_id);
+        }
+    }
 }
 
 impl App for Aupe {
@@ -398,10 +467,6 @@ impl App for Aupe {
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         /* let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new()); */
-                        // TODO: Unbiasing
-                        /* if self.my_id == 9 && false{
-                            println!("BEFORE vpush{:?} vpull{:?}",v_push, v_pull);
-                        } */
                         
                         let v_pull = self.debiais_stream_with_omni(self.v_pull.clone());
                         let v_push = self.debiais_stream_with_omni(self.v_push.clone());
@@ -434,13 +499,13 @@ impl App for Aupe {
                         self.debiais_stream_with_omni(self.v_push.to_vec());
                     }
                     
-                    if self.my_id == 9 && true{
+                    if self.my_id == 9 && false{
                         println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
                             self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
                         print_samples(&mut self.sample_view);
                     }
 
-                    if self.my_id == 9 && false{
+                    if self.my_id == 9 && true{
                         println!("omniscient_freq_array {:?} of node { }",
                             self.omniscient_freq_array, self.my_id);
                         println!("sample memory {:?} of node { }",
@@ -449,12 +514,21 @@ impl App for Aupe {
                             self.minkey, self.minvalue);
                     }
                     
-                    sample(&self.view[..], 1).iter()
-                        .for_each(|p| net.send(*p, Msg::PushRequest));
+                    let id_to_push = sample(&self.view[..], 1);
+                    id_to_push.iter()
+                        .for_each(|p| {
+                            net.send(*p, Msg::PushRequest);
+                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone()))
+                        });
+                    
+                    let id_to_pull = sample(&self.view[..], 1);
+                    id_to_pull.iter()
+                        .for_each(|p| {
+                            net.send(*p, Msg::PullRequest);
+                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone()))
+                        });
 
-                    sample(&self.view[..], 1).iter()
-                        .for_each(|p| net.send(*p, Msg::PullRequest));
-
+                    
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -483,64 +557,29 @@ impl App for Aupe {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
+
                     let max_value = std::cmp::max(self.omniscient_freq_array[from.clone()]+1, 1);
                     self.omniscient_freq_array[from.clone()] = max_value;
                     /* println!("omniscient_freq_array {:?} of node { } after Push ",
                         self.omniscient_freq_array, self.my_id); */
                
                 },
+                Msg::MergeRequest(lst) => {
+                    if self.my_id == 9 && true{
+                        println!("message MergeRq from {}", from.to_string());
+                    }
+                    net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone()));
+                    self.merge_knowledge_both_ways(lst.to_vec());
+                },
+                Msg::MergeReply(lst) => {
+                    if self.my_id == 9 && true{
+                        println!("message MergeRy from {}", from.to_string());
+                    }
+                    self.merge_knowledge_both_ways(lst.to_vec());
+                },
             }
         }
     }
-
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-        let mut outputstream = Vec::new();
-        //println!("++");
-        let mut rng = thread_rng();
-        let mut shuffled_input = inputstream.to_vec();
-        rng.shuffle(&mut shuffled_input[..]);
-
-        for element in &shuffled_input {
-            let occur = self.omniscient_freq_array[*element];
-            //println!("Element {} occurs {} times.", element, occur);
-
-            if self.minvalue > occur { // new minval
-                self.minvalue = occur;
-                self.minkey = *element;
-            }else if *element == self.minkey { // search min if it was him
-                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
-                    if self.my_id == 9 && false{
-                        println!("Minimum value: {}, at index: {}", min_value, min_index);
-                    }
-                    self.minvalue = min_value;
-                    self.minkey = min_index; 
-                } else {
-                    println!("The vector is empty.");
-                }  
-            }
-            if self.omniscient_memory.len() < self.params.memory_size {
-                if !self.omniscient_memory.contains(element) {
-                    self.omniscient_memory.push(*element);
-                }
-            }else {
-                let prob = self.minvalue as f64/ occur as f64;
-                let random_float: f64 = rand::thread_rng().gen(); 
-                if random_float < prob && !self.omniscient_memory.contains(element) {
-                    let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
-                    if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
-                        *tobereplaced = *element;
-                    } else {
-                        println!("Index out of bounds");
-                    }
-                }
-            }
-            let i = rng.gen_range(0, self.omniscient_memory.len());
-            outputstream.push(self.omniscient_memory[i].clone());
-        }
-            
-        outputstream
-    }
-
 
     fn metrics(&mut self, _net: Net) -> Self::Metrics {
         if self.is_byzantine {
@@ -567,7 +606,7 @@ impl App for Aupe {
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
-            if self.my_id == 9 && self.params.nodes== 10 && true{
+            if self.my_id == 9 && self.params.nodes== 10 && false{
                 println!("nbn={}/{} nbpush={}/{} nbpull={}/{} nbsamp={}/{} nbpushbag={}/{} nbpullbag={}/{} nbs={}/{}",
                 nbn, self.view.len(),
                 nbpush, self.push_view.len(), nbpull, self.pull_view.len(),
