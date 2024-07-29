@@ -38,11 +38,11 @@ then
 fi 
 
 if [ $strat -eq 1 ]; then
-    stratLitt="brahms"
+    stratLitt="aupe-merge"
 elif [ $strat -eq 2 ]; then
     stratLitt="aupe"
 else
-    stratLitt="basalt"
+    stratLitt="basalt-simple"
 fi
 
 rho=$(echo "scale=0; $k / $r / 1" | bc)
@@ -60,8 +60,8 @@ then
     byz=$(echo "scale=0; $N * $f / 1" | bc)
     
     if [ $strat -eq 1 ]; then
-        cargo run -- -T $rnd -n $N brahms -G samples -f $force -t $byz \
-        -v $v -u $v -k $k -r $r > $folder"/text"$F
+        cargo run -- -T $rnd -n $N aupe -O -G -f $force -t $byz \
+        -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F
     elif [ $strat -eq 2 ]; then
         cargo run -- -T $rnd -n $N aupe -G samples -f $force -t $byz \
         -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 

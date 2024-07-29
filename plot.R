@@ -4,9 +4,11 @@ args = commandArgs(trailingOnly=TRUE)
 library(ggplot2)
 
 # Read the data from the file
+# Rscript plot.R 1000 20
 N=as.numeric(args[1])
 f=as.numeric(args[2])
-data <- read.table(paste("text",f, sep=""), header = TRUE)
+filename="merge" # paste("text",f, sep="")
+data <- read.table(filename, header = TRUE)
 
 if (N==1000 ){
     VIEW_SIZE= 100

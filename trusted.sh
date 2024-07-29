@@ -31,7 +31,7 @@ r="${9:-1}" #number_of_hash_functions
 #gamma="${10:-0.2}"
 
 if [ $strat -eq 1 ]; then
-    stratLitt="brahms"
+    stratLitt="aupe-merge"
 elif [ $strat -eq 2 ]; then
     stratLitt="aupe"
 else
@@ -48,8 +48,10 @@ F=$(echo "scale=0; 100.0 * $f / 1" | bc)
 echo $folder"/text"$F
 byz=$(echo "scale=0; $N * $f / 1" | bc)
 if [ $strat -eq 1 ]; then
-   cargo run -- -T $roundMax -n $N brahms -G -f $force -t $byz \
-   -v $v -u $v -k $k -r $r > $folder"/text"$F
+   #cargo run -- -T $roundMax -n $N brahms -G -f $force -t $byz \
+   #-v $v -u $v -k $k -r $r > $folder"/text"$F
+   cargo run -- -T $roundMax -n $N aupe -O -G -f $force -t $byz \
+   -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
 elif [ $strat -eq 2 ]; then
    cargo run -- -T $roundMax -n $N aupe -G -f $force -t $byz \
    -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
