@@ -205,11 +205,11 @@ impl NetMetrics for Metrics {
             "avgByzRecv",
             "pByzRecv",
             "avgByzN",
-            "avgpushedByzN",
-            "avgpulledByzN",
-            "avgsampledByzN",
-            "avgpushBag",
-            "avgpullBag",
+            "pushByzN",
+            "pullByzN",
+            "sampByzN",
+            "pushBagByz",
+            "pullBagByz",
             "n_isolated",
             "avgByzSamp",
             "min",
@@ -481,7 +481,7 @@ impl App for Aupe {
                             }
                         }
                     }
-                    if self.my_id == 9 && false{
+                    if self.my_id == 9 && true{
                         println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     }
                     //
@@ -516,11 +516,6 @@ impl App for Aupe {
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
 
-                        self.update_samples(&v_push[..]);
-                        self.update_samples(&v_pull[..]);
-                    }else {
-                        self.debiais_stream_with_omni(self.v_pull.to_vec());
-                        self.debiais_stream_with_omni(self.v_push.to_vec());
                     }
                     
                     if self.my_id == 9 && false{
@@ -538,22 +533,18 @@ impl App for Aupe {
                             self.minkey, self.minvalue);
                     }
                     
-                    let id_to_push = sample(&self.view[..], 1);
-                    id_to_push.iter()
+                    sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
-                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone()))
+                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
                         });
-                    
-                    let id_to_pull = sample(&self.view[..], 1);
-                    id_to_pull.iter()
+
+                    sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone()))
                         });
-                    if self.my_id == 9 && true{
-                        println!("Sent push to {} and pull to { }", id_to_push[0], id_to_pull[0]);
-                    }
+
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -561,7 +552,7 @@ impl App for Aupe {
                     net.send(from, Msg::PullReply(self.view.clone()));
                 },
                 Msg::PullReply(lst) => {
-                    if self.my_id == 9 && true{
+                    if self.my_id == 9 && false{
                         println!("message PlRy from {} : {:?}", 
                         from.to_string(), lst);
                     }
@@ -579,7 +570,7 @@ impl App for Aupe {
                         self.omniscient_freq_array, self.my_id); */
                 },
                 Msg::PushRequest => {
-                    if self.my_id == 9 && true{
+                    if self.my_id == 9 && false{
                         println!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
