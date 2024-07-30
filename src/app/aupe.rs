@@ -495,7 +495,7 @@ impl App for Aupe {
                         v_push = self.debiais_stream_with_omni(v_push);
                         v_pull = self.debiais_stream_with_omni(v_pull);
                         
-                        if self.my_id == 9 && false{
+                        if self.my_id == 9 && true{
                             println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
@@ -518,7 +518,7 @@ impl App for Aupe {
 
                     }
                     
-                    if self.my_id == 9 && false{
+                    if self.my_id == 9 && true{
                         println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
                             self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
                         print_samples(&mut self.sample_view);
@@ -628,23 +628,39 @@ impl App for Aupe {
             metrics
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
- 
+            let mut nbpush = 0;
+            let mut nbpull = 0;
+            let mut nbsamp = 0;
+
+            if self.push_view.len() !=0{
+                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count()/self.push_view.len();
+            }
+            if self.pull_view.len() !=0{
+                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count()/self.pull_view.len();
+            }
+            if self.sample_part.len() !=0{
+                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count()/self.sample_part.len();
+            }
+            let mut nbpushbag =0;
+            if self.v_push.len() !=0{
+                nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count()/self.v_push.len();
+            }
+            let mut nbpullbag = 0;
+            if self.v_pull.len() !=0{
+                nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count()/self.v_pull.len();
+            }
+            
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
-            if self.my_id == 9 && self.params.nodes== 10 && false{
+            if self.my_id == 9 && self.params.nodes== 10 && true{
                 println!("nbn={}/{} nbpush={}/{} nbpull={}/{} nbsamp={}/{} nbpushbag={}/{} nbpullbag={}/{} nbs={}/{}",
                 nbn, self.view.len(),
-                nbpush, self.push_view.len(), nbpull, self.pull_view.len(),
-                nbsamp, self.sample_part.len(),
-                nbpushbag, self.v_push.len(), nbpullbag, self.v_pull.len(),
+                nbpush*self.push_view.len(), self.push_view.len(), nbpull*self.pull_view.len(), self.pull_view.len(),
+                nbsamp*self.sample_part.len(), self.sample_part.len(),
+                nbpushbag*self.v_push.len(), self.v_push.len(), nbpullbag*self.v_pull.len(), self.v_pull.len(),
                 nbs, self.sample_view.len());
             }
 
