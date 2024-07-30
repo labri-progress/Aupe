@@ -117,6 +117,9 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
+    n_push_bag_byzantine: f64,
+    n_pull_bag_byzantine: f64,
+
     omniscient_freq_array: Vec<isize>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
@@ -133,8 +136,8 @@ pub struct Metrics {
     n_pushed_byzantine_neighbors: usize,
     n_pulled_byzantine_neighbors: usize,
     n_sampled_byzantine_neighbors: usize,
-    n_push_bag_byzantine: usize,
-    n_pull_bag_byzantine: usize,
+    n_push_bag_byzantine: f64,
+    n_pull_bag_byzantine: f64,
     n_isolated: usize,
 
     n_byzantine_samples: usize,
@@ -158,8 +161,8 @@ impl NetMetrics for Metrics {
             n_pushed_byzantine_neighbors: 0,
             n_pulled_byzantine_neighbors: 0,
             n_sampled_byzantine_neighbors: 0,
-            n_push_bag_byzantine: 0,
-            n_pull_bag_byzantine: 0,
+            n_push_bag_byzantine: 0.0,
+            n_pull_bag_byzantine: 0.0,
             n_isolated: 0,
             n_byzantine_samples: 0,
             min_byzantine_samples: None,
@@ -400,6 +403,9 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
+            n_push_bag_byzantine: 0.0,
+            n_pull_bag_byzantine: 0.0,
+
             omniscient_freq_array: Vec::new(),
             omniscient_memory: Vec::new(),
             minkey: 0,
@@ -481,13 +487,23 @@ impl App for Aupe {
                             }
                         }
                     }
-                    if self.my_id == 9 && true{
-                        println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
+                    if self.my_id == self.params.nodes-1 && false{
+                        //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
+                        println!("vpush({}) vpull({})",self.v_push.len(), self.v_pull.len());
                     }
                     //
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        let mut v_push = self.v_push.clone();
-                        let mut v_pull = self.v_pull.clone();
+                        
+                        let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
+                        self.n_push_bag_byzantine = (nbpushbag as f64)/(self.v_push.len() as f64);
+                        let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
+                        self.n_pull_bag_byzantine = (nbpullbag as f64)/(self.v_pull.len() as f64);
+                        if self.my_id == self.params.nodes-1 && true{
+                            //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
+                            println!("vpush({}/{}) vpull({}/{})", nbpushbag, self.v_push.len(), nbpullbag, self.v_pull.len());
+                        }
+                        let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
+                        let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
                         
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
@@ -628,39 +644,22 @@ impl App for Aupe {
             metrics
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let mut nbpush = 0;
-            let mut nbpull = 0;
-            let mut nbsamp = 0;
 
-            if self.push_view.len() !=0{
-                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count()/self.push_view.len();
-            }
-            if self.pull_view.len() !=0{
-                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count()/self.pull_view.len();
-            }
-            if self.sample_part.len() !=0{
-                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count()/self.sample_part.len();
-            }
-            let mut nbpushbag =0;
-            if self.v_push.len() !=0{
-                nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count()/self.v_push.len();
-            }
-            let mut nbpullbag = 0;
-            if self.v_pull.len() !=0{
-                nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count()/self.v_pull.len();
-            }
+            let nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count();
             
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
-            if self.my_id == 9 && self.params.nodes== 10 && true{
-                println!("nbn={}/{} nbpush={}/{} nbpull={}/{} nbsamp={}/{} nbpushbag={}/{} nbpullbag={}/{} nbs={}/{}",
+            if self.my_id == self.params.nodes-1 && true{
+                println!("nbn={}/{} nbpush={}/{} nbpull={}/{} nbsamp={}/{} nbpushbag={} nbpullbag={} nbs={}/{}",
                 nbn, self.view.len(),
-                nbpush*self.push_view.len(), self.push_view.len(), nbpull*self.pull_view.len(), self.pull_view.len(),
-                nbsamp*self.sample_part.len(), self.sample_part.len(),
-                nbpushbag*self.v_push.len(), self.v_push.len(), nbpullbag*self.v_pull.len(), self.v_pull.len(),
+                nbpush, self.push_view.len(), nbpull, self.pull_view.len(),
+                nbsamp, self.sample_part.len(),
+                self.n_push_bag_byzantine, self.n_pull_bag_byzantine,
                 nbs, self.sample_view.len());
             }
 
@@ -692,8 +691,8 @@ impl App for Aupe {
                 n_pushed_byzantine_neighbors: nbpush,
                 n_pulled_byzantine_neighbors: nbpull,
                 n_sampled_byzantine_neighbors: nbsamp,
-                n_push_bag_byzantine: nbpushbag,
-                n_pull_bag_byzantine: nbpullbag,
+                n_push_bag_byzantine: self.n_push_bag_byzantine,
+                n_pull_bag_byzantine: self.n_pull_bag_byzantine,
                 n_isolated: if nbn == self.view.len() { 1 } else { 0 },
                 n_byzantine_samples: nbs,
                 min_byzantine_samples: Some(nbs as i64),
@@ -704,8 +703,8 @@ impl App for Aupe {
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;
-            self.v_pull=Vec::new();
-            self.v_push=Vec::new();
+            /* self.v_pull=Vec::new();
+            self.v_push=Vec::new(); */
           
             ret
         }
