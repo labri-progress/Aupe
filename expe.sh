@@ -29,7 +29,7 @@ echo "DATE: $(date)" > nohup.out
 expe=0
 r=1
 
-for strat in 1 2 3
+for strat in 1 2 3 4
 do   
     for k in 0 1 
     do   
