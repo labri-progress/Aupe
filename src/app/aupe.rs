@@ -133,9 +133,9 @@ pub struct Metrics {
     n_received: usize,
     
     n_byzantine_neighbors: usize,
-    n_pushed_byzantine_neighbors: usize,
-    n_pulled_byzantine_neighbors: usize,
-    n_sampled_byzantine_neighbors: usize,
+    n_pushed_byzantine_neighbors: f64,
+    n_pulled_byzantine_neighbors: f64,
+    n_sampled_byzantine_neighbors: f64,
     n_push_bag_byzantine: f64,
     n_pull_bag_byzantine: f64,
     n_isolated: usize,
@@ -158,9 +158,9 @@ impl NetMetrics for Metrics {
             n_byzantine_received: 0,
             n_received: 0,
             n_byzantine_neighbors: 0,
-            n_pushed_byzantine_neighbors: 0,
-            n_pulled_byzantine_neighbors: 0,
-            n_sampled_byzantine_neighbors: 0,
+            n_pushed_byzantine_neighbors: 0.0,
+            n_pulled_byzantine_neighbors: 0.0,
+            n_sampled_byzantine_neighbors: 0.0,
             n_push_bag_byzantine: 0.0,
             n_pull_bag_byzantine: 0.0,
             n_isolated: 0,
@@ -498,7 +498,7 @@ impl App for Aupe {
                         self.n_push_bag_byzantine = (nbpushbag as f64)/(self.v_push.len() as f64);
                         let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
                         self.n_pull_bag_byzantine = (nbpullbag as f64)/(self.v_pull.len() as f64);
-                        if self.my_id == self.params.nodes-1 && true{
+                        if self.my_id == self.params.nodes-1 && false{
                             //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                             println!("vpush({}/{}) vpull({}/{})", nbpushbag, self.v_push.len(), nbpullbag, self.v_pull.len());
                         }
@@ -644,21 +644,31 @@ impl App for Aupe {
             metrics
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
-
-            let nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let mut nbpush = 0.0;
+            let mut nbpull = 0.0;
+            let mut nbsamp = 0.0;
+            if self.push_view.len() !=0 {
+                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbpush = nbpush / (self.push_view.len() as f64);
+            }
+            if self.pull_view.len() !=0 {
+                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbpull = nbpull / (self.pull_view.len() as f64);
+            }
+            if self.sample_part.len() !=0 {
+                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbsamp = nbsamp / (self.sample_part.len() as f64);
+            }
             
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
-            if self.my_id == self.params.nodes-1 && true{
-                println!("nbn={}/{} nbpush={}/{} nbpull={}/{} nbsamp={}/{} nbpushbag={} nbpullbag={} nbs={}/{}",
+            if self.my_id == self.params.nodes-1 && false{
+                println!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbpushbag={} nbpullbag={} nbs={}/{}",
                 nbn, self.view.len(),
-                nbpush, self.push_view.len(), nbpull, self.pull_view.len(),
-                nbsamp, self.sample_part.len(),
+                nbpush, nbpull, nbsamp, 
                 self.n_push_bag_byzantine, self.n_pull_bag_byzantine,
                 nbs, self.sample_view.len());
             }
