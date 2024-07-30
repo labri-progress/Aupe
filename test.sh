@@ -37,7 +37,9 @@ then
     f=0.2
 fi 
 
-if [ $strat -eq 1 ]; then
+if [ $strat -eq 4 ]; then
+    stratLitt="brahms"
+elif [ $strat -eq 1 ]; then
     stratLitt="aupe-merge"
 elif [ $strat -eq 2 ]; then
     stratLitt="aupe"
@@ -59,14 +61,17 @@ then
     echo $folder"/text"$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
     
-    if [ $strat -eq 1 ]; then
-        cargo run -- -T $rnd -n $N aupe -O -G -f $force -t $byz \
-        -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F
+    if [ $strat -eq 4 ]; then
+        cargo run -- -T $roundMax -n $N brahms -G -f $force -t $byz \
+        -v $v -u $v -k $k -r $r > $folder"/text"$F
+    elif [ $strat -eq 1 ]; then
+        cargo run -- -T $roundMax -n $N aupe -O -G -f $force -t $byz \
+        -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
     elif [ $strat -eq 2 ]; then
-        cargo run -- -T $rnd -n $N aupe -G samples -f $force -t $byz \
+        cargo run -- -T $roundMax -n $N aupe -G -f $force -t $byz \
         -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
     else 
-        cargo run -- -T $rnd -n $N basalt -G -H -f $force -t $byz \
+        cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
         -v $v -i 50 -k $k -r $r > $folder"/text"$F
     fi
 

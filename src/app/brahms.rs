@@ -84,6 +84,10 @@ pub struct Brahms {
     is_byzantine: bool,
 
     view: Vec<PeerRef>,
+    push_view: Vec<PeerRef>,
+    pull_view: Vec<PeerRef>,
+    sample_part: Vec<PeerRef>,
+
     sample_view: Vec<(u64, Option<PeerRef>)>,
 
     out_samples: Vec<PeerRef>,
@@ -93,6 +97,9 @@ pub struct Brahms {
 
     n_received: usize,
     n_byzantine_received: usize,
+
+    n_push_bag_byzantine: f64,
+    n_pull_bag_byzantine: f64,
 }
 
 pub struct Metrics {
@@ -102,6 +109,11 @@ pub struct Metrics {
     n_received: usize,
     
     n_byzantine_neighbors: usize,
+    n_pushed_byzantine_neighbors: f64,
+    n_pulled_byzantine_neighbors: f64,
+    n_sampled_byzantine_neighbors: f64,
+    n_push_bag_byzantine: f64,
+    n_pull_bag_byzantine: f64,
     n_isolated: usize,
 
     n_byzantine_samples: usize,
@@ -122,6 +134,11 @@ impl NetMetrics for Metrics {
             n_byzantine_received: 0,
             n_received: 0,
             n_byzantine_neighbors: 0,
+            n_pushed_byzantine_neighbors: 0.0,
+            n_pulled_byzantine_neighbors: 0.0,
+            n_sampled_byzantine_neighbors: 0.0,
+            n_push_bag_byzantine: 0.0,
+            n_pull_bag_byzantine: 0.0,
             n_isolated: 0,
             n_byzantine_samples: 0,
             min_byzantine_samples: None,
@@ -138,6 +155,12 @@ impl NetMetrics for Metrics {
         self.n_received += other.n_received;
 
         self.n_byzantine_neighbors += other.n_byzantine_neighbors;
+        self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
+        self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
+        self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
+        self.n_push_bag_byzantine += other.n_push_bag_byzantine;
+        self.n_pull_bag_byzantine += other.n_pull_bag_byzantine;
+
         self.n_isolated += other.n_isolated;
 
         self.n_byzantine_samples += other.n_byzantine_samples;
@@ -161,6 +184,11 @@ impl NetMetrics for Metrics {
             "avgByzRecv",
             "pByzRecv",
             "avgByzN",
+            "pushByzN",
+            "pullByzN",
+            "sampByzN",
+            "pushBagByz",
+            "pullBagByz",
             "n_isolated",
             "avgByzSamp",
             "min",
@@ -191,6 +219,17 @@ impl NetMetrics for Metrics {
                    (self.n_byzantine_received as f32) / (self.n_received as f32)),
             format!("{:.2}",
                    (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_push_bag_byzantine as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pull_bag_byzantine as f32) / (self.n_procs as f32)),
+
             format!("{}", self.n_isolated),
             format!("{:.2}",
                 (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
@@ -250,6 +289,9 @@ impl App for Brahms {
             my_id: 0,
             is_byzantine: false,
             view: Vec::new(),
+            push_view: Vec::new(),
+            pull_view: Vec::new(),
+            sample_part: Vec::new(),
             sample_view: Vec::new(),
             out_samples: Vec::new(),
 
@@ -258,6 +300,9 @@ impl App for Brahms {
 
             n_received: 0,
             n_byzantine_received: 0,
+
+            n_push_bag_byzantine: 0.0,
+            n_pull_bag_byzantine: 0.0,
         }
     }
     
@@ -328,17 +373,29 @@ impl App for Brahms {
                     }
                     //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
+                        
+                        let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
+                        self.n_push_bag_byzantine = (nbpushbag as f64)/(self.v_push.len() as f64);
+                        let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
+                        self.n_pull_bag_byzantine = (nbpullbag as f64)/(self.v_pull.len() as f64);
+                        
                         let v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
-                        let mut view = sample(&v_push[..], self.params.view_size / 3);
-                        view.extend(sample(&v_pull[..], self.params.view_size / 3));
+                        self.push_view = sample(&v_push[..], self.params.view_size / 3);
+                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
+                        
+                        let mut view = self.push_view.clone();
+                        view.extend(self.pull_view.clone());
 
                         let samples_peer = self.sample_view.iter()
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        view.extend(sample(&samples_peer[..], self.params.view_size - view.len()));
+                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len());
+                        
+                        view.extend(self.sample_part.clone());
+
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
 
@@ -396,6 +453,21 @@ impl App for Brahms {
             metrics
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let mut nbpush = 0.0;
+            let mut nbpull = 0.0;
+            let mut nbsamp = 0.0;
+            if self.push_view.len() !=0 {
+                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbpush = nbpush / (self.push_view.len() as f64);
+            }
+            if self.pull_view.len() !=0 {
+                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbpull = nbpull / (self.pull_view.len() as f64);
+            }
+            if self.sample_part.len() !=0 {
+                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbsamp = nbsamp / (self.sample_part.len() as f64);
+            }
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
@@ -426,6 +498,11 @@ impl App for Brahms {
                 n_received: self.n_received,
                 n_byzantine_received: self.n_byzantine_received,
                 n_byzantine_neighbors: nbn,
+                n_pushed_byzantine_neighbors: nbpush,
+                n_pulled_byzantine_neighbors: nbpull,
+                n_sampled_byzantine_neighbors: nbsamp,
+                n_push_bag_byzantine: self.n_push_bag_byzantine,
+                n_pull_bag_byzantine: self.n_pull_bag_byzantine,
                 n_isolated: if nbn == self.view.len() { 1 } else { 0 },
                 n_byzantine_samples: nbs,
                 min_byzantine_samples: Some(nbs as i64),

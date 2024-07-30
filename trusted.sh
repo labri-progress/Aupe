@@ -29,8 +29,9 @@ r="${9:-1}" #number_of_hash_functions
 #t="${5:-0.01}"
 #mergestrat="${9:-0}"
 #gamma="${10:-0.2}"
-
-if [ $strat -eq 1 ]; then
+if [ $strat -eq 4 ]; then
+    stratLitt="brahms"
+elif [ $strat -eq 1 ]; then
     stratLitt="aupe-merge"
 elif [ $strat -eq 2 ]; then
     stratLitt="aupe"
@@ -47,9 +48,11 @@ mkdir $folder
 F=$(echo "scale=0; 100.0 * $f / 1" | bc)
 echo $folder"/text"$F
 byz=$(echo "scale=0; $N * $f / 1" | bc)
-if [ $strat -eq 1 ]; then
-   #cargo run -- -T $roundMax -n $N brahms -G -f $force -t $byz \
-   #-v $v -u $v -k $k -r $r > $folder"/text"$F
+
+if [ $strat -eq 4 ]; then
+   cargo run -- -T $roundMax -n $N brahms -G -f $force -t $byz \
+   -v $v -u $v -k $k -r $r > $folder"/text"$F
+elif [ $strat -eq 1 ]; then
    cargo run -- -T $roundMax -n $N aupe -O -G -f $force -t $byz \
    -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
 elif [ $strat -eq 2 ]; then
