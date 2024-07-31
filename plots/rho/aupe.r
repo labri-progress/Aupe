@@ -5,9 +5,49 @@ COV     = "coverage.txt"
 INDEG   = "indegree.txt"
 OUTDEG  = "outdegree.txt"
 
-source("compute.r")
+library(zoom)
+detect_first_convergence_index <- function(values, f, rounds) {
+    threshold1 <- 75*f # f-25% threshold
+    threshold2 <- 125*f # f+25% threshold
+    n <- length(values)
+    #print(paste("n =", n, "threshold1 =", threshold1, "threshold2 =", threshold2))
+    i <-1
+    flag <- FALSE
+    while (i < n) {
+        if (values[i] >= threshold1 && values[i] <= threshold2) {
+            #print(paste("index =", i))
+            if (!flag) {
+                index = i
+            }
+            flag <- TRUE
+        }else{
+            flag <- FALSE
+        }
+        i <- i+1
+    }
+    if (flag){
+        return(index)
+    }else {
+        return(rounds)  # Return Round max if no convergence is found
+    }
+    
+}
+write_results <- function(filename, expe, f, strat,
+    resilience, sm, ttC, roundNumber, comment, name) {
+    file.info(filename)$size
+    if (!file.exists(filename)) {
+       head <- "Expe     faulty     Strat     resilience     ttC     sm     round     comment"
+        if(name == COV){
+            head <- "Expe faulty SMemory Strat coverage round comment"
+        }
+        write(head, append=TRUE, file = filename)
+    }
+    separator = "        "
+    sol = paste(expe, f*100, strat, resilience, ttC, sm, roundNumber, comment, sep = separator)
+    write(sol, append=TRUE, file = filename)
+}
 
-rho <- function(args, path, topic) {  
+compute <- function(args, path, topic) {  
     # 0. Data      
     #print(path)
     N = as.numeric(args[1])
@@ -32,7 +72,9 @@ rho <- function(args, path, topic) {
     name = sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(path))
 
     ymax = 100
-    
+    strat1 = "basalt-simple"
+    strat2 = "basalt-simple"
+
     filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho1/", 
         N, sep="")
     filepath2 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho0/", 
@@ -41,9 +83,7 @@ rho <- function(args, path, topic) {
     aupepath = paste(filepath2,"/", strat,"/text",f*100, sep="")
     print(brahmspath)
     print(aupepath)
-    if (strat=="basalt-simple"){
-        strat="basalt"
-    }
+    
     brahms <- read.table(brahmspath, header = TRUE)
     roundNumber1 <- nrow(brahms)
     aupe <- read.table(aupepath, header = TRUE)
@@ -107,7 +147,7 @@ rho <- function(args, path, topic) {
         comment="RAS"
         }
         system = paste("N=", N, " v=",  v, sep="")
-        study = paste("strat=", strat, sep="")
+        study = paste("strat=", strat1, sep="")
         mainDir = "../results/"
         dir.create(file.path(mainDir, system)) # check folder existence
         new = paste(mainDir, system, sep="")
