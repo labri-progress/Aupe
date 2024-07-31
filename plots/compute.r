@@ -4,8 +4,9 @@ CVIEW   = "compoVIEW.txt"
 COV     = "coverage.txt"
 INDEG   = "indegree.txt"
 OUTDEG  = "outdegree.txt"
+PVIEW     = "partView"
+BAGS    = "bags"
 
-library(zoom)
 detect_first_convergence_index <- function(values, f, rounds) {
     threshold1 <- 75*f # f-25% threshold
     threshold2 <- 125*f # f+25% threshold
