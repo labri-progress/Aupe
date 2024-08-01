@@ -6,21 +6,22 @@ library(dplyr)
 library(tidyr)
 
 # 0. Loading
-filename="../results/N=10000 v=160/dsncompoVIEW" # paste("text",f, sep="")
+#filename="../results/N=10000 v=160/dsncompoVIEW" # paste("text",f, sep="")
+filename="../results/N=1000 v=100/dsncompoVIEW"
 data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 
 # 1. Cleaning
-data <- data %>%
-  separate(Strat, into = c("Strat", "rho"), sep = "(?<=\\D)(?=rho)")
 data$faulty= data$faulty/100
 data$resilience= data$resilience/100
 data$Strat <- gsub("aupe-merge", "AupeMerge", data$Strat)
+data$Strat <- gsub("aupe-global", "AupeGlobal", data$Strat)
 data$Strat <- gsub("basalt", "Basalt", data$Strat)
 data$Strat <- gsub("brahms", "Brahms", data$Strat)
 data$Strat <- gsub("aupe", "Aupe", data$Strat)
 data
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", "Optimal"= "black")
+"Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", "Optimal"= "black", 
+"AupeGlobal" = "red")
 
 line_size <- 1
 point_size <- 1.5
@@ -31,7 +32,7 @@ create_plot <- function(df, rho_value) {
     geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
     scale_color_manual(values = custom_colors) +
     labs(title = paste("Resilience of strategies depending on 
-    initial proportion of Faulty N=10000 v=160 F=10 sm=100 rho=",
+    initial proportion of Faulty N=1000 v=100 F=10 sm=100 rho=",
     rho_value, sep=" "), color=NULL,
       x = "Proportion of Byzantine nodes", 
       y = "Proportion of Byzantine samples") +
