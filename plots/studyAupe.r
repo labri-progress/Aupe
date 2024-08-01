@@ -6,106 +6,20 @@ INDEG   = "indegree.txt"
 OUTDEG  = "outdegree.txt"
 
 source("compute.r")
-bags <- function(args, path, topic) {  
-    # 0. Data      
-    #print(path)
-    N = as.numeric(args[1])
-    v = as.numeric(args[2])
-    f = as.numeric(args[3])
-    t = as.numeric(args[4])
-    sm = as.numeric(args[5])
-    expe = as.numeric(args[6])
-    strat = args[7]
-    merge = args[8]
-    gamma = as.double(args[9])
-    roundMAX = 200 #as.numeric(args[10])
-    folder = args[11]
-    k=as.numeric(args[12])
-    s=as.numeric(args[13])
-    if ( strat=="KFREE"){
-       strat=paste("KFREE(", k,",",s,")", sep="")
-    }
-
-    # 1. Plots
-    
-    name = sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(path))
-
-    ymax = 100
-
-    rho="rho1"
-    filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/",rho, "/", 
-        N, sep="")
-    filepath2 = paste("/home/amukam/thss/simulation/Aupe/analysis/", rho, "/",
-        N, sep="")
-
-    strat1="aupe"
-    strat2="brahms"
-    brahmspath = paste(filepath1,"/", strat1,"/text",f*100, sep="")
-    aupepath = paste(filepath2,"/", strat2,"/text",f*100, sep="")
-    print(brahmspath)
-    print(aupepath)
-    
-    brahms <- read.table(brahmspath, header = TRUE)
-    roundNumber1 <- nrow(brahms)
-    aupe <- read.table(aupepath, header = TRUE)
-    roundNumber2 <- nrow(aupe)
-    print(paste("roundNumber1",roundNumber1, "vs roundNumber2", roundNumber2))
-    comment="" # for logging
-    missing = roundMAX +1 - roundNumber1 # round of initialisation
-    if (missing != 0) {
-        print(c(nrow(brahms), ncol(brahms)))
-        print(paste("roundMAX", roundMAX, "roundNumber", roundNumber1, 
-            "--> missing", missing, "rounds"))
-        sentence = paste("missing", missing, "rounds", sep="") 
-        if (comment==""){
-            comment = sentence
-        } else{
-            comment = paste(comment, "and", sentence, sep ="")
+source("test.R")
+write_results <- function(filename, expe, f, strat, rho,
+    resilience, part, sm, ttC, roundNumber, comment, name) {
+    file.info(filename)$size
+    if (!file.exists(filename)) {
+       head <- "Expe     faulty     Strat     rho     resilience     part     ttC     sm     round     comment"
+        if(name == COV){
+            head <- "Expe faulty SMemory Strat coverage round comment"
         }
+        write(head, append=TRUE, file = filename)
     }
-    
-    brahms$comp1=(brahms$pushBagByz)*100
-    aupe$comp1=(aupe$pushBagByz)*100
-    brahms$comp2=(brahms$pullBagByz)*100
-    aupe$comp2=(aupe$pullBagByz)*100
-    title="Aupe Brahms Bags studying"
-    title=paste(title, #"\n Byzantine proportion inside push and pull bags over Time \n", 
-        "f=", f*100,"% N=", N, " v=s=", v, " F=1 \n rounds=", roundNumber1)
-    
-    resilience1=c(tail(brahms, 1)$comp1, tail(brahms, 1)$comp2)
-    resilience2=c(tail(aupe, 1)$comp1, tail(aupe, 1)$comp2)
-    print(paste("resilience1",resilience1, "vs resilience2", resilience2))
-    
-    #PLOTS
-    plot(brahms$comp1, main=paste(title, "Pushbag"), col="red", xlab="Rounds", ylab="Resilience",
-        type = "l", lty=1, ylim=c(0,100))
-    lines(aupe$comp1, col="blue", type = "l", lty=2)
-
-    grid(nx = NA, ny = NULL, col = "lightgray", lty = "dotted")
-    axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
-    abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
-    labels = c(paste("Aupe rho=1", sep=""),
-            paste("Brahms rho=1", sep=""))
-    colors = c("red", "blue")
-    
-    locator(1) 
-    legend("topright", legend = labels, box.col = "grey",
-    col = colors, lty=c(1,2), xpd = TRUE)
-
-    plot(brahms$comp2, main=paste(title, "Pullbag"), col="red", xlab="Rounds", ylab="Resilience",
-        type = "l", lty=1, ylim=c(0,100))
-    lines(aupe$comp2, col="blue", type = "l", lty=2)
-
-    grid(nx = NA, ny = NULL, col = "lightgray", lty = "dotted")
-    axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
-    abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
-    labels = c(paste("Aupe rho=1", sep=""), 
-            paste("Brahms rho=1", sep=""))
-    colors = c("red", "blue")
-    
-    locator(1) 
-    legend("topright", legend = labels, box.col = "grey",
-    col = colors, lty=c(1,2), xpd = TRUE)
+    separator = "        "
+    sol = paste(expe, f*100, strat, rho, resilience, part, ttC, sm, roundNumber, comment, sep = separator)
+    write(sol, append=TRUE, file = filename)
 }
 
 view <- function(args, path, topic) {  
@@ -123,35 +37,35 @@ view <- function(args, path, topic) {
     roundMAX = 200 #as.numeric(args[10])
     folder = args[11]
     k=as.numeric(args[12])
-    s=as.numeric(args[13])
-    if ( strat=="KFREE"){
-       strat=paste("KFREE(", k,",",s,")", sep="")
-    }
+    r=as.numeric(args[13])
 
     # 1. Plots
     
-    name = sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(path))
-
     ymax = 100
 
-    rho="rho1"
-    filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/",rho, "/", 
-        N, sep="")
-    filepath2 = paste("/home/amukam/thss/simulation/Aupe/analysis/", rho, "/",
+    rho=paste("rho",k/r, sep="")
+    print(rho)
+    filepath = paste("/home/amukam/thss/simulation/Aupe/analysis/",rho, "/", 
         N, sep="")
 
-    strat1="aupe"
-    strat2="brahms"
-    brahmspath = paste(filepath1,"/", strat1,"/text",f*100, sep="")
-    aupepath = paste(filepath2,"/", strat2,"/text",f*100, sep="")
+    strat1="brahms"
+    strat2="aupe"
+    strat3="aupe-merge"
+    brahmspath = paste(filepath,"/", strat1,"/text",f*100, sep="")
+    aupepath = paste(filepath,"/", strat2,"/text",f*100, sep="")
+    mergepath = paste(filepath,"/", strat3,"/text",f*100, sep="")
     print(brahmspath)
     print(aupepath)
-    
+    print(mergepath)
+
     brahms <- read.table(brahmspath, header = TRUE)
     roundNumber1 <- nrow(brahms)
     aupe <- read.table(aupepath, header = TRUE)
     roundNumber2 <- nrow(aupe)
-    print(paste("roundNumber1",roundNumber1, "vs roundNumber2", roundNumber2))
+    merge <- read.table(mergepath, header = TRUE)
+    roundNumber3 <- nrow(merge)
+    print(paste("roundNumber1",roundNumber1, "vs roundNumber2", roundNumber2,
+    "and roundNumber3", roundNumber3))
     comment="" # for logging
     missing = roundMAX +1 - roundNumber1 # round of initialisation
     if (missing != 0) {
@@ -168,61 +82,51 @@ view <- function(args, path, topic) {
     
     brahms$comp1=(brahms$pushByzN)*100
     aupe$comp1=(aupe$pushByzN)*100
+    merge$comp1=(merge$pushByzN)*100
     brahms$comp2=(brahms$pullByzN)*100
     aupe$comp2=(aupe$pullByzN)*100
+    merge$comp2=(merge$pushByzN)*100
     brahms$comp3=(brahms$sampByzN)*100
     aupe$comp3=(aupe$sampByzN)*100
+    merge$comp3=(merge$sampByzN)*100
     title="Aupe Brahms view part studying"
     title=paste(title, #"\n Byzantine proportion inside parts of the view over Time \n", 
         "f=", f*100,"% N=", N, " v=s=", v, " F=10 \n rounds=", roundNumber1)
     
     resilience1=c(tail(brahms, 1)$comp1, tail(brahms, 1)$comp2, tail(brahms, 1)$comp3)
     resilience2=c(tail(aupe, 1)$comp1, tail(aupe, 1)$comp2, tail(aupe, 1)$comp3)
-    print(paste("resilience1",resilience1, "vs resilience2", resilience2))
+    resilience3=c(tail(merge, 1)$comp1, tail(merge, 1)$comp2, tail(merge, 1)$comp3)
+    
+    print(paste("resilience1",resilience1, "vs resilience2", resilience2, 
+    "and resilience3", resilience3))
     
     #PLOTS
-    plot(brahms$comp1, main=paste(title, "PushPart"), col="red", xlab="Rounds", ylab="Resilience",
-        type = "l", lty=1, ylim=c(0,100))
-    lines(aupe$comp1, col="blue", type = "l", lty=2)
+    print(aesplot(brahms,aupe,merge, f*100))
 
-    grid(nx = NA, ny = NULL, col = "lightgray", lty = "dotted")
-    axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
-    abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
-    labels = c(paste("Aupe rho=1", sep=""),
-            paste("Brahms rho=1", sep=""))
-    colors = c("red", "blue")
+    if (path == PVIEW){
+        ttc0 <- detect_first_convergence_index(brahms$comp, f, roundNumber1)
+        ttc1 <- detect_first_convergence_index(aupe$comp, f, roundNumber2)
     
-    locator(1) 
-    legend("topright", legend = labels, box.col = "grey",
-    col = colors, lty=c(1,2), xpd = TRUE)
-
-    plot(brahms$comp2, main=paste(title, "PullPart"), col="red", xlab="Rounds", ylab="Resilience",
-        type = "l", lty=1, ylim=c(0,100))
-    lines(aupe$comp2, col="blue", type = "l", lty=2)
-
-    grid(nx = NA, ny = NULL, col = "lightgray", lty = "dotted")
-    axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
-    abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
-    labels = c(paste("Aupe rho=1", sep=""), 
-            paste("Brahms rho=1", sep=""))
-    colors = c("red", "blue")
-    
-    locator(1) 
-    legend("topright", legend = labels, box.col = "grey",
-    col = colors, lty=c(1,2), xpd = TRUE)
-
-    plot(brahms$comp3, main=paste(title, "SamPart"), col="red", xlab="Rounds", ylab="Resilience",
-        type = "l", lty=1, ylim=c(0,100))
-    lines(aupe$comp3, col="blue", type = "l", lty=2)
-
-    grid(nx = NA, ny = NULL, col = "lightgray", lty = "dotted")
-    axis(2, at = seq(0, 100, by = 10), labels = seq(0, 100, by = 10)) 
-    abline(h = f*100,, col = "yellow", lty = 2, lwd = 2)
-    labels = c(paste("Aupe rho=1", sep=""), 
-            paste("Brahms rho=1", sep=""))
-    colors = c("red", "blue")
-    
-    locator(1) 
-    legend("topright", legend = labels, box.col = "grey",
-    col = colors, lty=c(1,2), xpd = TRUE)
+        # 2. Logs
+        
+        if (comment==""){
+        comment="RAS"
+        }
+        system = paste("N=", N, " v=",  v, sep="")
+        study = paste("strat=", strat, sep="")
+        mainDir = "../results/"
+        dir.create(file.path(mainDir, system)) # check folder existence
+        new = paste(mainDir, system, sep="")
+        dir.create(file.path(new, study))
+        
+        filename = paste(new, "/","dsn", path,  sep="")
+        
+        part <- c("pushPart", "pullPart", "sampPart")
+        write_results(filename, expe, f, strat1, rho, resilience1, part, sm,
+            ttc0, roundNumber1, comment, path)
+        write_results(filename, expe, f, strat2, rho, resilience2, part, sm,
+            ttc1, roundNumber2, comment, path)
+        write_results(filename, expe, f, strat3, rho, resilience3, part, sm,
+            ttc1, roundNumber3, comment, path)
+    }
 }
