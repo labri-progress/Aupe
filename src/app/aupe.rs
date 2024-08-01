@@ -513,7 +513,7 @@ impl App for Aupe {
                         print_samples(&mut self.sample_view);
                     }
 
-                    if self.my_id == self.params.nodes-1 && true{
+                    if self.my_id == self.params.nodes-1 && false{
                         let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().read().unwrap();
                         println!("omniscient_freq_array {:?} of node { }",
                             *vec, self.my_id);
