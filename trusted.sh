@@ -58,7 +58,7 @@ elif [ $strat -eq 1 ]; then
 elif [ $strat -eq 2 ]; then
    cargo run -- -T $roundMax -n $N aupe -G -f $force -t $byz \
    -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
-else 
+elif [ $strat -eq 3 ]; then 
    cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
    -v $v -i 50 -k $k -r $r > $folder"/text"$F
 fi
