@@ -6,7 +6,7 @@ INDEG   = "indegree.txt"
 OUTDEG  = "outdegree.txt"
 
 source("compute.r")
-source("test.R")
+source("view.r")
 write_results <- function(filename, expe, f, strat, rho,
     resilience, part, sm, ttC, roundNumber, comment, name) {
     file.info(filename)$size
@@ -101,7 +101,11 @@ view <- function(args, path, topic) {
     "and resilience3", resilience3))
     
     #PLOTS
-    print(aesplot(brahms,aupe,merge, f*100))
+    print(partview_plot(brahms,aupe,merge, f*100))
+    print("SECOND PLOT")
+    print(dim(brahms))
+    print(colnames(brahms))
+    print(view_plot(brahms,aupe,merge, f*100, v))
 
     if (path == PVIEW){
         ttc0 <- detect_first_convergence_index(brahms$comp, f, roundNumber1)
