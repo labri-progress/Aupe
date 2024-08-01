@@ -58,6 +58,7 @@ fn main() {
     let opt = Opt::from_args();
     match opt.app {
         WhichApp::Brahms(pp) => {
+            //println!("Brahms");
             if let Some(rs) = opt.random_samples {
                 sim_rps_rng::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp, rs);
             } else {
@@ -65,6 +66,7 @@ fn main() {
             }   
         }
         WhichApp::Aupe(pp) => {
+            //println!("Aupe");
             if let Some(rs) = opt.random_samples {
                 sim_rps_rng::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, rs);
             } else {
@@ -73,6 +75,7 @@ fn main() {
         }
         WhichApp::BasaltSimple(mut pp) => {
             pp.use_hit_counter = false;
+            //println!("BasaltSimple");
             if let Some(rs) = opt.random_samples {
                 sim_rps_rng::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp, rs);
             } else {
@@ -93,8 +96,6 @@ fn main() {
 fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init) {
     GLOBAL_OMNISCIENT_FREQ_ARRAY.set(RwLock::new(vec![-1; nproc])).unwrap();
 
-    /* let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().read().unwrap();
-        println!("Global vector: {:?}", *vec); */
     let mut net = Simulator::<A>::new(nproc, init);
     net.print_header();
     net.print_metrics();

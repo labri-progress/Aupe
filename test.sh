@@ -25,7 +25,7 @@ then
     expe=21
     N=1000 # 100
     v=100 # 160
-    rnd=200
+    rnd=20
     f=0.2
 fi
 if [[ $whichN -eq 2 ]]
@@ -37,14 +37,16 @@ then
     f=0.2
 fi 
 
-if [ $strat -eq 4 ]; then
-    stratLitt="brahms"
-elif [ $strat -eq 1 ]; then
+if [ $strat -eq 0 ]; then
     stratLitt="aupe-merge"
+elif [ $strat -eq 1 ]; then
+    stratLitt="aupe-global"
 elif [ $strat -eq 2 ]; then
     stratLitt="aupe"
-else
+elif [ $strat -eq 3 ]; then
     stratLitt="basalt-simple"
+elif [ $strat -eq 4 ]; then
+    stratLitt="brahms"
 fi
 
 rho=$(echo "scale=0; $k / $r / 1" | bc)
@@ -61,18 +63,21 @@ then
     echo $folder"/text"$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
     
-    if [ $strat -eq 4 ]; then
-        cargo run -- -T $roundMax -n $N brahms -G -f $force -t $byz \
-        -v $v -u $v -k $k -r $r > $folder"/text"$F
+    if [ $strat -eq 0 ]; then
+    cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz \
+    -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
     elif [ $strat -eq 1 ]; then
-        cargo run -- -T $roundMax -n $N aupe -O -G -f $force -t $byz \
-        -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
+    cargo run -- -T $roundMax -n $N aupe -L -G samples -f $force -t $byz \
+    -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
     elif [ $strat -eq 2 ]; then
-        cargo run -- -T $roundMax -n $N aupe -G -f $force -t $byz \
-        -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
-    elif [ $strat -eq 3 ]; then  
-        cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
-        -v $v -i 50 -k $k -r $r > $folder"/text"$F
+    cargo run -- -T $roundMax -n $N aupe -G samples -f $force -t $byz \
+    -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
+    elif [ $strat -eq 3 ]; then 
+    cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
+    -v $v -i 50 -k $k -r $r > $folder"/text"$F
+    elif [ $strat -eq 4 ]; then 
+    cargo run -- -T $roundMax -n $N brahms -G samples -f $force -t $byz \
+    -v $v -u $v -k $k -r $r > $folder"/text"$F
     fi
 
 else

@@ -33,18 +33,18 @@ detect_first_convergence_index <- function(values, f, rounds) {
     }
     
 }
-write_results <- function(filename, expe, f, strat,
+write_results <- function(filename, expe, f, strat, rho,
     resilience, sm, ttC, roundNumber, comment, name) {
     file.info(filename)$size
     if (!file.exists(filename)) {
-       head <- "Expe     faulty     Strat     resilience     ttC     sm     round     comment"
+       head <- "Expe     faulty     Strat     rho     resilience     ttC     sm     round     comment"
         if(name == COV){
             head <- "Expe faulty SMemory Strat coverage round comment"
         }
         write(head, append=TRUE, file = filename)
     }
     separator = "        "
-    sol = paste(expe, f*100, strat, resilience, ttC, sm, roundNumber, comment, sep = separator)
+    sol = paste(expe, f*100, strat, rho, resilience, ttC, sm, roundNumber, comment, sep = separator)
     write(sol, append=TRUE, file = filename)
 }
 

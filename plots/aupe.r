@@ -30,7 +30,7 @@ rho <- function(args, path, topic) {
     # 1. Plots
     
     name = sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(path))
-
+    print(name)
     ymax = 100
     
     filepath1 = paste("/home/amukam/thss/simulation/Aupe/analysis/rho1/", 
@@ -112,13 +112,13 @@ rho <- function(args, path, topic) {
         dir.create(file.path(mainDir, system)) # check folder existence
         new = paste(mainDir, system, sep="")
         dir.create(file.path(new, study))
-        
+        print(paste("name", name))
         filename = paste(new, "/","dsn", name,  sep="")
         
         #print("write_results4")
-        write_results(filename, expe, f, paste(strat, "rho1", sep=""), resilience1, 0,
+        write_results(filename, expe, f, strat, "rho1", resilience1, sm,
             ttc0, roundNumber1, comment, name)
-        write_results(filename, expe, f, paste(strat, "rho0", sep=""), resilience2, sm,
+        write_results(filename, expe, f, strat, "rho0", resilience2, sm,
             ttc1, roundNumber2, comment, name)
     }
 }
