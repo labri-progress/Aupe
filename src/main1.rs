@@ -5,10 +5,7 @@ mod rps;
 
 mod app;
 
-use once_cell::sync::OnceCell;
-use std::sync::RwLock;
-
-static GLOBAL_OMNISCIENT_FREQ_ARRAY: OnceCell<RwLock<Vec<isize>>> = OnceCell::new();
+//use std::sync::{Arc, RwLock};
 
 use structopt::StructOpt;
 use net::{Simulator, App};
@@ -19,6 +16,7 @@ pub struct Opt {
     /// Iteration number for a repeated experiment (ignored)
     /* #[structopt(short = "i", long = "iteration", default_value = "0")]
     iteration: usize, */
+
     /// Number of simulation steps
     #[structopt(short = "T", long = "time", default_value = "100")]
     n_steps: usize,
@@ -91,11 +89,8 @@ fn main() {
 }
 
 fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init) {
-    GLOBAL_OMNISCIENT_FREQ_ARRAY.set(RwLock::new(vec![-1; nproc])).unwrap();
-
-    /* let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().read().unwrap();
-        println!("Global vector: {:?}", *vec); */
     let mut net = Simulator::<A>::new(nproc, init);
+
     net.print_header();
     net.print_metrics();
     /* println!("--------------------------------");

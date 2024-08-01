@@ -6,15 +6,15 @@ use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy,  get_min_key_value, print_samples};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
-use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
-//static mut GLOBAL_OMNISCIENT_FREQ_ARRAY: i32 = 0;
 
 pub enum Msg {
     SelfNotif,
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
+    MergeRequest(Vec<isize>),
+    MergeReply(Vec<isize>),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -120,7 +120,7 @@ pub struct Aupe {
     n_push_bag_byzantine: f64,
     n_pull_bag_byzantine: f64,
 
-    //omniscient_freq_array: Vec<isize>,
+    omniscient_freq_array: Vec<isize>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
     minvalue: isize,
@@ -307,16 +307,16 @@ impl Aupe {
         let mut rng = thread_rng();
         let mut shuffled_input = inputstream.to_vec();
         rng.shuffle(&mut shuffled_input[..]);
-        let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
+
         for element in &shuffled_input {
-            let occur = vec[*element];
+            let occur = self.omniscient_freq_array[*element];
             //println!("Element {} occurs {} times.", element, occur);
 
             if self.minvalue > occur { // new minval
                 self.minvalue = occur;
                 self.minkey = *element;
             }else if *element == self.minkey { // search min if it was him
-                if let Some((min_index, min_value)) = get_min_key_value(&vec) {
+                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
                     if self.my_id == 9 && false{
                         println!("Minimum value: {}, at index: {}", min_value, min_index);
                     }
@@ -349,6 +349,34 @@ impl Aupe {
         outputstream
     }
 
+    fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<isize>) {
+        if self.my_id == 9 && true{
+            println!("**********merge_knowledge_both_ways*********");
+            println!("Omniscient_freq_array {:?} of node { }",
+                self.omniscient_freq_array, self.my_id);
+            println!("other omniscient_freq_array {:?}", other_omniscient_freq_array);
+        }
+        
+        //TODO: parallelize
+
+        for id in 0..self.params.nodes {
+            let mut average_freq;
+            if self.omniscient_freq_array[id] <=0 && other_omniscient_freq_array[id] <=0 {
+                average_freq = -1; // Both didn't see the node
+            } else{
+                average_freq = ((std::cmp::max(self.omniscient_freq_array[id], 0) + 
+                    std::cmp::max(other_omniscient_freq_array[id], 0)) as f64 / 2.0) as isize;
+                average_freq = std::cmp::max(average_freq, 1);
+            }
+            
+            self.omniscient_freq_array[id] = average_freq;
+        }
+        if self.my_id == 9 && true{
+            println!("NEW Omniscient_freq_array {:?} of node { }",
+                self.omniscient_freq_array, self.my_id);
+        }
+        
+    }
 }
 
 impl App for Aupe {
@@ -378,7 +406,7 @@ impl App for Aupe {
             n_push_bag_byzantine: 0.0,
             n_pull_bag_byzantine: 0.0,
 
-            //omniscient_freq_array: Vec::new(),
+            omniscient_freq_array: Vec::new(),
             omniscient_memory: Vec::new(),
             minkey: 0,
             minvalue: std::isize::MAX,
@@ -391,7 +419,7 @@ impl App for Aupe {
         //println!("Params {:?}", self.params);
     
         // Init preallocated vectors
-        //self.omniscient_freq_array = vec![-1; self.params.nodes];
+        self.omniscient_freq_array = vec![-1; self.params.nodes];
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
@@ -403,10 +431,9 @@ impl App for Aupe {
             self.view = view;
             // Update tracking component
             for item in self.view.clone() {
-                let mut vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
-                let max_value = std::cmp::max(vec[item.clone()] +1, 
+                let max_value = std::cmp::max(self.omniscient_freq_array[item.clone()] +1, 
                     1);
-                vec[item.clone()] = max_value;
+                self.omniscient_freq_array[item.clone()] = max_value;
             }
         }
         net.send(id, Msg::SelfNotif);
@@ -513,10 +540,9 @@ impl App for Aupe {
                         print_samples(&mut self.sample_view);
                     }
 
-                    if self.my_id == self.params.nodes-1 && true{
-                        let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().read().unwrap();
+                    if self.my_id == 9 && true{
                         println!("omniscient_freq_array {:?} of node { }",
-                            *vec, self.my_id);
+                            self.omniscient_freq_array, self.my_id);
                         println!("sample memory {:?} of node { }",
                             self.omniscient_memory, self.my_id);
                         println!("The key with the minimum value is '{}' with a value of {}.", 
@@ -525,12 +551,14 @@ impl App for Aupe {
                     
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
-                            net.send(*p, Msg::PushRequest)
+                            net.send(*p, Msg::PushRequest);
+                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
                         });
 
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
-                            net.send(*p, Msg::PullRequest)
+                            net.send(*p, Msg::PullRequest);
+                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone()))
                         });
 
                     net.send(self.my_id, Msg::SelfNotif);
@@ -550,11 +578,9 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    let mut vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
                     for item in lst {
-                        let max_value = std::cmp::max(vec[item.clone()] +1, 
-                            1);
-                        vec[item.clone()] = max_value;
+                        let max_value = std::cmp::max(self.omniscient_freq_array[item.clone()]+1, 1);
+                        self.omniscient_freq_array[item.clone()] = max_value;
                     }
                     /* println!("omniscient_freq_array {:?} of node { } after Pull",
                         self.omniscient_freq_array, self.my_id); */
@@ -569,11 +595,36 @@ impl App for Aupe {
                     }
                     self.v_push.push(from);
 
-                    let mut vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
-                    let max_value = std::cmp::max(vec[from.clone()] +1, 
-                        1);
-                    vec[from.clone()] = max_value;
+                    let max_value = std::cmp::max(self.omniscient_freq_array[from.clone()]+1, 1);
+                    self.omniscient_freq_array[from.clone()] = max_value;
+                    /* println!("omniscient_freq_array {:?} of node { } after Push ",
+                        self.omniscient_freq_array, self.my_id); */
                
+                },
+                Msg::MergeRequest(lst) => {
+                    if self.params.use_omn_merge{
+                        if self.my_id == 9 && true{
+                            println!("message MergeRq from {}", from.to_string());
+                        }
+                        net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
+                        self.merge_knowledge_both_ways(lst.to_vec());
+                    }else{
+                        if self.my_id == 9 && true{
+                            println!("NO MERGE");
+                        }
+                    }
+                },
+                Msg::MergeReply(lst) => {
+                    if self.params.use_omn_merge{
+                        if self.my_id == 9 && true{
+                            println!("message MergeRy from {}", from.to_string());
+                        }
+                        self.merge_knowledge_both_ways(lst.to_vec());
+                    }else{
+                        if self.my_id == 9 && true{
+                            println!("NO MERGE");
+                        }
+                    }
                 },
             }
         }
