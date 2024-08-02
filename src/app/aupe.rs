@@ -8,7 +8,7 @@ use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
-//static mut GLOBAL_OMNISCIENT_FREQ_ARRAY: i32 = 0;
+const DEBUG: bool = false;
 
 pub enum Msg {
     SelfNotif,
@@ -326,8 +326,8 @@ impl Aupe {
             }else if *element == self.minkey { // search min if it was him
                 if self.params.use_omn_global {
                     if let Some((min_index, min_value)) = get_min_key_value(&vec) {
-                        if self.my_id == 9 && false{
-                            println!("Minimum value: {}, at index: {}", min_value, min_index);
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
                         }
                         self.minvalue = min_value;
                         self.minkey = min_index; 
@@ -336,8 +336,8 @@ impl Aupe {
                     }  
                 }else{
                     if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
-                        if self.my_id == 9 && false{
-                            println!("Minimum value: {}, at index: {}", min_value, min_index);
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
                         }
                         self.minvalue = min_value;
                         self.minkey = min_index; 
@@ -369,14 +369,16 @@ impl Aupe {
         outputstream
     }
     fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<isize>) {
-        if self.my_id == 9 && false{
+        if self.my_id == 9 && DEBUG{
             println!("**********merge_knowledge_both_ways*********");
             println!("Omniscient_freq_array {:?} of node { }",
                 self.omniscient_freq_array, self.my_id);
             println!("other omniscient_freq_array {:?}", other_omniscient_freq_array);
         }
         
-        println!("Merge");
+        if DEBUG {
+            eprintln!("Merge");
+        }
 
         for id in 0..self.params.nodes {
             let mut average_freq;
@@ -390,8 +392,8 @@ impl Aupe {
             
             self.omniscient_freq_array[id] = average_freq;
         }
-        if self.my_id == 9 && false{
-            println!("NEW Omniscient_freq_array {:?} of node { }",
+        if self.my_id == 9 && DEBUG{
+            eprintln!("NEW Omniscient_freq_array {:?} of node { }",
                 self.omniscient_freq_array, self.my_id);
         }
         
@@ -436,7 +438,6 @@ impl App for Aupe {
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-        //println!("Params {:?}", self.params);
     
         // Init preallocated vectors
         if !self.params.use_omn_global{
@@ -519,9 +520,9 @@ impl App for Aupe {
                             }
                         }
                     }
-                    if self.my_id == self.params.nodes-1 && false{
+                    if self.my_id == self.params.nodes-1 && DEBUG{
                         //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
-                        println!("vpush({}) vpull({})",self.v_push.len(), self.v_pull.len());
+                        eprintln!("vpush({}) vpull({})",self.v_push.len(), self.v_pull.len());
                     }
                     //
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
@@ -530,7 +531,7 @@ impl App for Aupe {
                         self.n_push_bag_byzantine = (nbpushbag as f64)/(self.v_push.len() as f64);
                         let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
                         self.n_pull_bag_byzantine = (nbpullbag as f64)/(self.v_pull.len() as f64);
-                        if self.my_id == self.params.nodes-1 && false{
+                        if self.my_id == self.params.nodes-1 && DEBUG{
                             //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                             println!("vpush({}/{}) vpull({}/{})", nbpushbag, self.v_push.len(), nbpullbag, self.v_pull.len());
                         }
@@ -543,8 +544,8 @@ impl App for Aupe {
                         v_push = self.debiais_stream_with_omni(v_push);
                         v_pull = self.debiais_stream_with_omni(v_pull);
                         
-                        if self.my_id == 9 && false{
-                            println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
@@ -566,13 +567,13 @@ impl App for Aupe {
 
                     }
                     
-                    if self.my_id == 9 && false{
-                        println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
+                    if self.my_id == 9 && DEBUG{
+                        eprintln!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
                             self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
                         print_samples(&mut self.sample_view);
                     }
 
-                    if self.my_id == self.params.nodes-1 && false{
+                    if self.my_id == self.params.nodes-1 && DEBUG{
                         if self.params.use_omn_global{
                             let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().read().unwrap();
                             println!("omniscient_freq_array {:?} of node { }",
@@ -618,8 +619,8 @@ impl App for Aupe {
                     net.send(from, Msg::PullReply(self.view.clone()));
                 },
                 Msg::PullReply(lst) => {
-                    if self.my_id == 9 && false{
-                        println!("message PlRy from {} : {:?}", 
+                    if self.my_id == 9 && DEBUG{
+                        eprintln!("message PlRy from {} : {:?}", 
                         from.to_string(), lst);
                     }
                     self.n_received += lst.len();
@@ -643,8 +644,8 @@ impl App for Aupe {
                     }
                 },
                 Msg::PushRequest => {
-                    if self.my_id == 9 && false{
-                        println!("message PushR from {} ", from.to_string());
+                    if self.my_id == 9 && DEBUG{
+                        eprintln!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
@@ -667,26 +668,26 @@ impl App for Aupe {
                 },
                 Msg::MergeRequest(lst) => {
                     if self.params.use_omn_merge{
-                        if self.my_id == 9 && false{
-                            println!("message MergeRq from {}", from.to_string());
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("message MergeRq from {}", from.to_string());
                         }
                         net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
                         self.merge_knowledge_both_ways(lst.to_vec());
                     }else{
-                        if self.my_id == 9 && false{
-                            println!("NO MERGE");
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("NO MERGE");
                         }
                     }
                 },
                 Msg::MergeReply(lst) => {
                     if self.params.use_omn_merge{
-                        if self.my_id == 9 && false{
-                            println!("message MergeRy from {}", from.to_string());
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("message MergeRy from {}", from.to_string());
                         }
                         self.merge_knowledge_both_ways(lst.to_vec());
                     }else{
-                        if self.my_id == 9 && false{
-                            println!("NO MERGE");
+                        if self.my_id == 9 && DEBUG{
+                            eprintln!("NO MERGE");
                         }
                     }
                 },
@@ -729,8 +730,8 @@ impl App for Aupe {
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
-            if self.my_id == self.params.nodes-1 && false{
-                println!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbpushbag={} nbpullbag={} nbs={}/{}",
+            if self.my_id == self.params.nodes-1 && DEBUG{
+                eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbpushbag={} nbpullbag={} nbs={}/{}",
                 nbn, self.view.len(),
                 nbpush, nbpull, nbsamp, 
                 self.n_push_bag_byzantine, self.n_pull_bag_byzantine,
