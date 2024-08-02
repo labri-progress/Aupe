@@ -1,13 +1,20 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
-#Rscript strategy.r
+#Rscript strategy.r 10000
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 
 # 0. Loading
-#filename="../results/N=10000 v=160/dsncompoVIEW" # paste("text",f, sep="")
-filename="../results/N=1000 v=100/dsncompoVIEW"
+N=as.numeric(args[1])
+if (N==10000){
+  v=160
+}else{
+  v=100
+}
+
+filename=paste("../results/N=", N, 
+" v=", v, "/dsncompoVIEW", sep="")
 data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 
 # 1. Cleaning
@@ -18,7 +25,11 @@ data$Strat <- gsub("aupe-global", "AupeGlobal", data$Strat)
 data$Strat <- gsub("basalt", "Basalt", data$Strat)
 data$Strat <- gsub("brahms", "Brahms", data$Strat)
 data$Strat <- gsub("aupe", "Aupe", data$Strat)
+
+#Filter
+data = data[data$comment %in% c("RAS"), ]
 data
+
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", "Optimal"= "black", 
 "AupeGlobal" = "red")
@@ -26,18 +37,25 @@ custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 line_size <- 1
 point_size <- 1.5
 create_plot <- function(df, rho_value) {
+  x_breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)
+  if (length(intersect(x_breaks, unique(df$faulty))) < 3){
+    x_breaks = append(0.0,unique(df$faulty))
+  }
+  print(x_breaks)
   ggplot(df, aes(x = faulty, y = resilience, color = Strat)) +
     geom_point(size=point_size) +
     geom_line(linewidth=line_size) +
     geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
+    geom_abline(intercept = 0, slope = 0.75, color = "yellow", linetype = "dashed") +  # Add y = 0.75x line
+    geom_abline(intercept = 0, slope = 1.25, color = "yellow", linetype = "dashed") +   # Add y = 1.25x line
     scale_color_manual(values = custom_colors) +
-    labs(title = paste("Resilience of strategies depending on 
-    initial proportion of Faulty N=1000 v=100 F=10 sm=100 rho=",
-    rho_value, sep=" "), color=NULL,
+    labs(title = paste("Resilience of strategies depending on f
+     N=", N," v=", v," F=10 sm=100 rho=",
+    rho_value, sep=""), color=NULL,
       x = "Proportion of Byzantine nodes", 
       y = "Proportion of Byzantine samples") +
     #theme_minimal()+
-    scale_x_continuous(breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)) +
+    scale_x_continuous(breaks = x_breaks) +
     scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
     theme(
       panel.grid.major = element_blank(),  # Remove major gridlines

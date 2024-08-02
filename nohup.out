@@ -1,52 +1,49 @@
-DATE: jeu. 01 août 2024 21:21:02 CEST
-Experiment (44) with params 1000 100 0.08 10 100 200 2 0 1
-Experiment (46) with params 1000 100 0.12 10 100 200 2 0 1
-Experiment (47) with params 1000 100 0.14 10 100 200 2 0 1
-Experiment (45) with params 1000 100 0.10 10 100 200 2 0 1
-Experiment (48) with params 1000 100 0.16 10 100 200 2 0 1
-Experiment (49) with params 1000 100 0.18 10 100 200 2 0 1
-Experiment (51) with params 1000 100 0.22 10 100 200 2 0 1
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-Experiment (50) with params 1000 100 0.20 10 100 200 2 0 1
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «analysis»: Le fichier existe: Le fichier existe
+DATE: ven. 02 août 2024 14:17:25 CEST
+Experiment (0) with params 1000 160 0.08 10 100 200 0 0 1
+Experiment (1) with params 1000 160 0.10 10 100 200 0 0 1
+Experiment (2) with params 1000 160 0.12 10 100 200 0 0 1
+Experiment (3) with params 1000 160 0.14 10 100 200 0 0 1
+Experiment (4) with params 1000 160 0.16 10 100 200 0 0 1
+Experiment (7) with params 1000 160 0.22 10 100 200 0 0 1
+Experiment (5) with params 1000 160 0.18 10 100 200 0 0 1
+Experiment (6) with params 1000 160 0.20 10 100 200 0 0 1
+mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «analysis»mkdir: mkdir: impossible de créer le répertoire «analysis»impossible de créer le répertoire «analysis»: Le fichier existe
+: Le fichier existe: Le fichier existe
 
 : Le fichier existe
 mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-: Le fichier existemkdir: 
-impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
+mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0»impossible de créer le répertoire «./analysis/rho0»mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe: Le fichier existe
-
-: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000»mkdir: impossible de créer le répertoire «./analysis/rho0/1000»impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-: Le fichier existe
-: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000»impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe: Le fichier existe
-
-mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-mkdir: : Le fichier existeimpossible de créer le répertoire «./analysis/rho0/1000/aupe»mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-: Le fichier existe
-
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000»impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe: Le fichier existe
-
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000»mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
 : Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-./analysis/rho0/1000/aupe/expe46/text12
-./analysis/rho0/1000/aupe/expe49/text18
-./analysis/rho0/1000/aupe/expe45/text10
-mkdir: ./analysis/rho0/1000/aupe/expe48/text16
-impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe./analysis/rho0/1000/aupe/expe44/text8
+mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000»mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
+: Le fichier existe
+impossible de créer le répertoire «analysis»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000»impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
+: Le fichier existe: Le fichier existe
 
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-./analysis/rho0/1000/aupe/expe51/text22
-./analysis/rho0/1000/aupe/expe47/text14
-./analysis/rho0/1000/aupe/expe50/text20
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existemkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»
+: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»: Le fichier existe
+: Le fichier existe
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»./analysis/rho0/1000/aupe-merge/expe0/text8
+: Le fichier existemkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
+
+./analysis/rho0/1000/aupe-merge/expe2/text12
+./analysis/rho0/1000/aupe-merge/expe3/text14
+./analysis/rho0/1000/aupe-merge/expe1/text10
+mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe-merge»: Le fichier existe
+./analysis/rho0/1000/aupe-merge/expe5/text18
+./analysis/rho0/1000/aupe-merge/expe7/text22
+./analysis/rho0/1000/aupe-merge/expe6/text20
+./analysis/rho0/1000/aupe-merge/expe4/text16
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
@@ -70,158 +67,27 @@ mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fic
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
+    Finished dev [unoptimized + debuginfo] target(s) in 0.10s
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 140 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
     Blocking waiting for file lock on package cache
     Finished dev [unoptimized + debuginfo] target(s) in 0.11s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 80 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
     Blocking waiting for file lock on package cache
+    Blocking     Running waiting for file lock on package cache
+ `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 180 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
     Blocking waiting for file lock on build directory
-    Finished dev [unoptimized + debuginfo] target(s) in 0.12s
-    Blocking waiting for file lock on package cache
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 200 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Blocking    Blocking    Blocking waiting for file lock on build directory
- waiting for file lock on build directory
+    Blocking    Blocking waiting for file lock on build directory
+    Blocking waiting for file lock on build directory
  waiting for file lock on build directory
     Blocking waiting for file lock on build directory
     Finished dev [unoptimized + debuginfo] target(s) in 0.13s
-    Blocking waiting for file lock on build directory
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 100 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 100 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
     Finished dev [unoptimized + debuginfo] target(s) in 0.14s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 180 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.17s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 220 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.20s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 160 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.22s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 140 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.24s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 120 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-Complété
-Complété
-Done------------------------
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Experiment (52) with params 1000 100 0.24 10 100 200 2 0 1
-Experiment (53) with params 1000 100 0.26 10 100 200 2 0 1
-Experiment (54) with params 1000 100 0.28 10 100 200 2 0 1
-Experiment (56) with params 1000 100 0.32 10 100 200 2 0 1
-Experiment (57) with params 1000 100 0.34 10 100 200 2 0 1
-Experiment (55) with params 1000 100 0.30 10 100 200 2 0 1
-Experiment (59) with params 1000 100 0.38 10 100 200 2 0 1
-mkdir: mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «analysis»impossible de créer le répertoire «analysis»: Le fichier existe
-: Le fichier existe
-: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-Experiment (58) with params 1000 100 0.36 10 100 200 2 0 1
-mkdir: impossible de créer le répertoire «analysis»mkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe
-: Le fichier existe
-: Le fichier existemkdir: impossible de créer le répertoire «./analysis/rho0»mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0»impossible de créer le répertoire «analysis»: Le fichier existe
-: Le fichier existe: Le fichier existe
-
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000»impossible de créer le répertoire «./analysis/rho0/1000»mkdir: impossible de créer le répertoire «./analysis/rho0»: Le fichier existe: Le fichier existe
-: Le fichier existe
-
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0»impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-: Le fichier existemkdir: impossible de créer le répertoire «./analysis/rho0»
-: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»mkdir: : Le fichier existeimpossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existemkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»impossible de créer le répertoire «./analysis/rho0/1000/aupe»
-: Le fichier existe: Le fichier existe
-
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe./analysis/rho0/1000/aupe/expe53/text26
-
-mkdir: impossible de créer le répertoire «./analysis/rho0»./analysis/rho0/1000/aupe/expe54/text28
-./analysis/rho0/1000/aupe/expe52/text24
-: Le fichier existe
-./analysis/rho0/1000/aupe/expe59/text38
-./analysis/rho0/1000/aupe/expe57/text34
-./analysis/rho0/1000/aupe/expe56/text32
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/rho0/1000/aupe»: Le fichier existe
-./analysis/rho0/1000/aupe/expe55/text30
-./analysis/rho0/1000/aupe/expe58/text36
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Finished dev [unoptimized + debuginfo] target(s) in 0.14s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 240 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Blocking waiting for file lock on package cache
-    Finished dev [unoptimized + debuginfo] target(s) in 0.17s
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 340 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 220 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
+    Finished dev [unoptimized + debuginfo] target(s) in 0.16s
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 200 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
     Finished dev [unoptimized + debuginfo] target(s) in 0.19s
-    Blocking waiting for file lock on package cache
-    Blocking    Blocking waiting for file lock on build directory
- waiting for file lock on build directory
-    Blocking waiting for file lock on build directory
-    Blocking waiting for file lock on build directory
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 380 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.20s
-    Finished dev [unoptimized + debuginfo] target(s) in 0.22s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 300 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 260 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 120 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
+    Finished dev [unoptimized + debuginfo] target(s) in 0.21s
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 160 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
     Finished dev [unoptimized + debuginfo] target(s) in 0.24s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 280 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.26s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 320 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-    Finished dev [unoptimized + debuginfo] target(s) in 0.28s
-     Running `target/debug/aupe -T 200 -n 1000 aupe -G samples -f 10 -t 360 -v 100 -u 100 -k 0 -r 1 -m 100 -n 1000`
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Done------------------------
-Complété
-Complété
-Done------------------------
-Done------------------------
-Complété
-Done------------------------
-Complété
-Complété
-Done------------------------
-Done------------------------
+     Running `target/debug/aupe -T 200 -n 1000 aupe -O -G samples -f 10 -t 80 -v 160 -u 160 -k 0 -r 1 -m 100 -n 1000`
