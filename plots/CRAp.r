@@ -15,13 +15,14 @@ library(miscTools)
 
 source("aupe.r")
 #source("studyAupe.r")
-n_values = c(1000) #10000
+n_values = c(10000) #10000
 
 
 all_f_values= c(0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 
     0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
     0.42, 0.44, 0.46, 0.48, 0.50 ) #c(0.06, 0.10, 0.14, 0.18, 0.20, 0.24, 0.30, 0.36, 0.40, 0.50)
 
+strats = c("aupe-merge", "aupe-global", "aupe", "basalt-simple", "brahms")
 f_values=all_f_values
 
 print(args)
@@ -29,7 +30,7 @@ print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = "brahms"
+strat = strats[2]
 merge = "no"
 Method = "moy"
 gamma = 0.3
