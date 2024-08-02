@@ -29,7 +29,7 @@ print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = "aupe-global" #"brahms" #"basalt-simple"
+strat = "brahms"
 merge = "no"
 Method = "moy"
 gamma = 0.3
