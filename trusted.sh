@@ -62,7 +62,7 @@ elif [ $strat -eq 2 ]; then
    -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
 elif [ $strat -eq 3 ]; then 
    cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
-   -v $v -i 50 -k $k -r $r > $folder"/text"$F
+   -v $v -i $v -k $k -r $r > $folder"/text"$F
 elif [ $strat -eq 4 ]; then 
    cargo run -- -T $roundMax -n $N brahms -G samples -f $force -t $byz \
    -v $v -u $v -k $k -r $r > $folder"/text"$F
