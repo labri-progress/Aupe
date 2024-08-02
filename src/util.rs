@@ -67,12 +67,12 @@ pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
     from.iter().position(|&x| x == value)
 } */
 
-pub fn get_min_key_value(from: &[isize]) -> Option<(usize, isize)> {
+pub fn get_min_key_value(from: &[f64]) -> Option<(usize, f64)> {
     let mut min_value = None;
     let mut min_index = None;
 
     for (index, &value) in from.iter().enumerate() {
-        if value > 0 {
+        if value > 0.0 {
             match min_value {
                 Some(v) if value < v => {
                     min_value = Some(value);
