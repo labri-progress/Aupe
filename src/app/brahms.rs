@@ -97,9 +97,6 @@ pub struct Brahms {
 
     n_received: usize,
     n_byzantine_received: usize,
-
-    n_push_bag_byzantine: f64,
-    n_pull_bag_byzantine: f64,
 }
 
 pub struct Metrics {
@@ -112,8 +109,6 @@ pub struct Metrics {
     n_pushed_byzantine_neighbors: f64,
     n_pulled_byzantine_neighbors: f64,
     n_sampled_byzantine_neighbors: f64,
-    n_push_bag_byzantine: f64,
-    n_pull_bag_byzantine: f64,
     n_isolated: usize,
 
     n_byzantine_samples: usize,
@@ -137,8 +132,6 @@ impl NetMetrics for Metrics {
             n_pushed_byzantine_neighbors: 0.0,
             n_pulled_byzantine_neighbors: 0.0,
             n_sampled_byzantine_neighbors: 0.0,
-            n_push_bag_byzantine: 0.0,
-            n_pull_bag_byzantine: 0.0,
             n_isolated: 0,
             n_byzantine_samples: 0,
             min_byzantine_samples: None,
@@ -158,8 +151,6 @@ impl NetMetrics for Metrics {
         self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
         self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
         self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
-        self.n_push_bag_byzantine += other.n_push_bag_byzantine;
-        self.n_pull_bag_byzantine += other.n_pull_bag_byzantine;
 
         self.n_isolated += other.n_isolated;
 
@@ -225,10 +216,6 @@ impl NetMetrics for Metrics {
                    (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{:.2}",
                    (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}",
-                   (self.n_push_bag_byzantine as f32) / (self.n_procs as f32)),
-            format!("{:.2}",
-                   (self.n_pull_bag_byzantine as f32) / (self.n_procs as f32)),
 
             format!("{}", self.n_isolated),
             format!("{:.2}",
@@ -300,9 +287,6 @@ impl App for Brahms {
 
             n_received: 0,
             n_byzantine_received: 0,
-
-            n_push_bag_byzantine: 0.0,
-            n_pull_bag_byzantine: 0.0,
         }
     }
     
@@ -373,11 +357,6 @@ impl App for Brahms {
                     }
                     //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        
-                        let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
-                        self.n_push_bag_byzantine = (nbpushbag as f64)/(self.v_push.len() as f64);
-                        let nbpullbag = self.v_pull.iter().filter(|x| **x < self.params.n_byzantine).count();
-                        self.n_pull_bag_byzantine = (nbpullbag as f64)/(self.v_pull.len() as f64);
                         
                         let v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
@@ -501,8 +480,6 @@ impl App for Brahms {
                 n_pushed_byzantine_neighbors: nbpush,
                 n_pulled_byzantine_neighbors: nbpull,
                 n_sampled_byzantine_neighbors: nbsamp,
-                n_push_bag_byzantine: self.n_push_bag_byzantine,
-                n_pull_bag_byzantine: self.n_pull_bag_byzantine,
                 n_isolated: if nbn == self.view.len() { 1 } else { 0 },
                 n_byzantine_samples: nbs,
                 min_byzantine_samples: Some(nbs as i64),
