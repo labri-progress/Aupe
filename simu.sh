@@ -21,7 +21,7 @@ batch_max=8
 
 round=200
 force=10
-N=10000 #10000
+N=1000 #10000
 
 if [ $N -eq 1000 ]; then
     v=100
@@ -29,10 +29,9 @@ else
     v=160
 fi
 
-v=160
 sm=100
 #f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
-
+echo $N $v $sm
 echo "DATE: $(date)" 
 echo "DATE: $(date)" > nohup.out
 expe=0
