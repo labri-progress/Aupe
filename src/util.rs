@@ -102,6 +102,13 @@ pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
     println!("]");
 }
 
+pub fn print_vector_with_two_digits(v: Vec<f64>, total:f64) {
+    print!("[");
+    for num in v {
+        print!("{:.2} ", num);
+    }
+    print!("]({ })", total);
+}
 /* 
 fn merge_knowledge_both_ways(&mut self, local_freq: &mut [i64], remote_freq: &mut [i64]) {
         for id in 0..self.params.nodes {
