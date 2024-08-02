@@ -109,19 +109,3 @@ pub fn print_vector_with_two_digits(v: Vec<f64>, total:f64) {
     }
     print!("]({ })", total);
 }
-/* 
-fn merge_knowledge_both_ways(&mut self, local_freq: &mut [i64], remote_freq: &mut [i64]) {
-        for id in 0..self.params.nodes {
-            let average_freq = ((remote_freq[id] + local_freq[id]) as f64 / 2.0) as i64;
-            remote_freq[id] = average_freq;
-            local_freq[id] = average_freq;
-        }
-    }
-    
-fn merge_knowledge_both_ways(local_freq: &mut [i64], remote_freq: &mut [i64], system_size: usize) {
-    (0..system_size).into_par_iter().for_each(|id| {
-        let average_freq = ((remote_freq[id] + local_freq[id]) as f64 / 2.0) as i64;
-        remote_freq[id] = average_freq;
-        local_freq[id] = average_freq;
-    });
-} */
