@@ -3,12 +3,13 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy,  get_min_key_value, print_samples};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy, get_min_key_value, print_samples};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
-//static mut GLOBAL_OMNISCIENT_FREQ_ARRAY: i32 = 0;
+
+const DEBUG: bool = false;
 
 pub enum Msg {
     SelfNotif,
@@ -23,10 +24,6 @@ pub struct Init {
     #[structopt(short = "n", long = "nodes")]
     pub nodes: usize,
 
-    /// Number of SGX nodes
-   /*  #[structopt(short = "x", long = "trusted-nodes")]
-    pub n_trusted: usize,
- */
     /// Number of Byzantine nodes
     #[structopt(short = "t", long = "num-byzantines")]
     pub n_byzantine: usize,
@@ -123,7 +120,6 @@ pub struct Aupe {
     n_push_bag_byzantine: f64,
     n_pull_bag_byzantine: f64,
 
-    //omniscient_freq_array: Vec<isize>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
     minvalue: isize,
@@ -320,8 +316,8 @@ impl Aupe {
                 self.minkey = *element;
             }else if *element == self.minkey { // search min if it was him
                 if let Some((min_index, min_value)) = get_min_key_value(&vec) {
-                    if self.my_id == 9 && false{
-                        println!("Minimum value: {}, at index: {}", min_value, min_index);
+                    if self.my_id == self.params.nodes -1 && DEBUG{
+                        eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
                     }
                     self.minvalue = min_value;
                     self.minkey = min_index; 
@@ -391,10 +387,7 @@ impl App for Aupe {
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-        //println!("Params {:?}", self.params);
-    
-        // Init preallocated vectors
-        //self.omniscient_freq_array = vec![-1; self.params.nodes];
+        
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
@@ -417,13 +410,10 @@ impl App for Aupe {
 
     
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
-        //println!("**********************Node {}**********************", self.my_id);
         if self.is_byzantine {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
-                    //println!("message b SN ");
-                    //println!("indexes {:?} ", net.sample_peers(self.params.byzantine_flood_factor));
                     net.send(self.my_id, Msg::SelfNotif);
                     if net.time() >= self.params.attack_start_time {
                         net.sample_peers(self.params.byzantine_flood_factor)
@@ -432,8 +422,6 @@ impl App for Aupe {
                     }
                 },
                 Msg::PullRequest => {
-                    //println!("message b PlRq ");
-                    //println!("byzview {:?} ", sample_nocopy(&mut byzantines[..], self.params.view_size));
                     net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size)));
                 },
                 _ => (),
@@ -441,7 +429,6 @@ impl App for Aupe {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    //println!("message SN ");
                     if let Some(rf) = self.params.replacement_frequency {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
@@ -464,10 +451,8 @@ impl App for Aupe {
                         }
                     }
                     if self.my_id == self.params.nodes-1 && false{
-                        //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                         println!("vpush({}) vpull({})",self.v_push.len(), self.v_pull.len());
                     }
-                    //
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         
                         let nbpushbag = self.v_push.iter().filter(|x| **x < self.params.n_byzantine).count();
