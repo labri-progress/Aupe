@@ -26,7 +26,7 @@ roundMax="${6:-200}"
 strat="${7:-1}"
 k="${8:-0}" #number_of_partitions
 r="${9:-1}" #number_of_hash_functions
-t="${10:-0.1}"
+#t="${5:-0.01}"
 #mergestrat="${9:-0}"
 #gamma="${10:-0.2}"
 if [ $strat -eq 0 ]; then
@@ -52,22 +52,19 @@ echo $folder"/text"$F
 byz=$(echo "scale=0; $N * $f / 1" | bc)
 
 if [ $strat -eq 0 ]; then
-    T=$(echo "scale=0; 100.0 * $t / 1" | bc)
-    echo $folder"/text"$F"-"$T
-    trust=$(echo "scale=0; $N * $t / 1" | bc)
-    cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-        -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F"-"$T
+   cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz \
+   -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
 elif [ $strat -eq 1 ]; then
-    cargo run -- -T $roundMax -n $N aupe -L -G samples -f $force -t $byz \
-        -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
+   cargo run -- -T $roundMax -n $N aupe -L -G samples -f $force -t $byz \
+   -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
 elif [ $strat -eq 2 ]; then
-    cargo run -- -T $roundMax -n $N aupe -G samples -f $force -t $byz \
-        -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
+   cargo run -- -T $roundMax -n $N aupe -G samples -f $force -t $byz \
+   -v $v -u $v -k $k -r $r -m $sm -n $N > $folder"/text"$F 
 elif [ $strat -eq 3 ]; then 
-    cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
-        -v $v -i $v -k $k -r $r > $folder"/text"$F
+   cargo run -- -T $roundMax -n $N basalt-simple -G -f $force -t $byz \
+   -v $v -i $v -k $k -r $r > $folder"/text"$F
 elif [ $strat -eq 4 ]; then 
-    cargo run -- -T $roundMax -n $N brahms -G samples -f $force -t $byz \
-        -v $v -u $v -k $k -r $r > $folder"/text"$F
+   cargo run -- -T $roundMax -n $N brahms -G samples -f $force -t $byz \
+   -v $v -u $v -k $k -r $r > $folder"/text"$F
 fi
 echo "Done------------------------"
