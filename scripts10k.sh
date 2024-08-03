@@ -1,7 +1,7 @@
 #!/bin/sh
 
-simu=N="${1:-0}"
-echo "received instruction for " $simu
+strat=N="${1:-0}"
+echo "received instruction for " $strat
 
 N=10000
 v=160
