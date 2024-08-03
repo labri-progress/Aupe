@@ -3,20 +3,19 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy,  get_min_key_value, print_samples, print_vector_with_two_digits};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy, get_min_key_value, print_samples};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
-//use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
+use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
-const DEBUG: bool = false;
+
+const DEBUG: bool = true;
 
 pub enum Msg {
     SelfNotif,
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(Vec<f64>),
-    MergeReply(Vec<f64>),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -25,10 +24,6 @@ pub struct Init {
     #[structopt(short = "n", long = "nodes")]
     pub nodes: usize,
 
-    /// Number of SGX nodes
-    #[structopt(short = "x", long = "trusted-nodes")]
-    pub n_trusted: usize,
- 
     /// Number of Byzantine nodes
     #[structopt(short = "t", long = "num-byzantines")]
     pub n_byzantine: usize,
@@ -68,10 +63,10 @@ pub struct Init {
     /// Use merge with omniscient strategy
     #[structopt(short = "O", long = "use-omn-merge")]
     pub use_omn_merge: bool,
-    /*/// Use merge with omniscient strategy
-     #[structopt(short = "L", long = "use-omn-global")]
-    pub use_omn_global: bool, */
-} 
+    /// Use merge with omniscient strategy
+    #[structopt(short = "L", long = "use-omn-global")]
+    pub use_omn_global: bool,
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum WhichGraphStats {
@@ -106,7 +101,6 @@ pub struct Aupe {
 
     my_id: PeerRef,
     is_byzantine: bool,
-    is_trusted: bool,
 
     view: Vec<PeerRef>,
     push_view: Vec<PeerRef>,
@@ -123,10 +117,9 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    omniscient_freq_array: Vec<f64>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
-    minvalue: f64,
+    minvalue: isize,
 }
 
 pub struct Metrics {
@@ -139,6 +132,7 @@ pub struct Metrics {
     n_pushed_byzantine_neighbors: f64,
     n_pulled_byzantine_neighbors: f64,
     n_sampled_byzantine_neighbors: f64,
+   
     n_isolated: usize,
 
     n_byzantine_samples: usize,
@@ -162,6 +156,7 @@ impl NetMetrics for Metrics {
             n_pushed_byzantine_neighbors: 0.0,
             n_pulled_byzantine_neighbors: 0.0,
             n_sampled_byzantine_neighbors: 0.0,
+            
             n_isolated: 0,
             n_byzantine_samples: 0,
             min_byzantine_samples: None,
@@ -208,6 +203,8 @@ impl NetMetrics for Metrics {
             "pushByzN",
             "pullByzN",
             "sampByzN",
+            "pushBagByz",
+            "pullBagByz",
             "n_isolated",
             "avgByzSamp",
             "min",
@@ -291,20 +288,23 @@ impl Aupe {
         }
     }
 
+
     fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
         //println!("++");
         let mut rng = thread_rng();
         let mut shuffled_input = inputstream.to_vec();
         rng.shuffle(&mut shuffled_input[..]);
-        
+        let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
         for element in &shuffled_input {
-            let occur :f64= self.omniscient_freq_array[*element];
+            let occur = vec[*element];
+            //println!("Element {} occurs {} times.", element, occur);
+
             if self.minvalue > occur { // new minval
                 self.minvalue = occur;
                 self.minkey = *element;
             }else if *element == self.minkey { // search min if it was him
-                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
+                if let Some((min_index, min_value)) = get_min_key_value(&vec) {
                     if self.my_id == self.params.nodes -1 && DEBUG{
                         eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
                     }
@@ -337,53 +337,6 @@ impl Aupe {
         outputstream
     }
 
-    
-    fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<f64>) {
-        /* if DEBUG {
-            let strategy = "simple_means";
-            println!("**********merge_knowledge_both_ways { }*********", strategy);
-        } */
-        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-            println!("{:?} MERGE {:?} =",
-            print_vector_with_two_digits(self.omniscient_freq_array.clone()),
-            print_vector_with_two_digits(other_omniscient_freq_array.clone()));
-        }
-        for id in 0..self.params.nodes {
-            let average_freq:f64;
-            if self.omniscient_freq_array[id] <=0.0 && other_omniscient_freq_array[id] <=0.0 {
-                average_freq = -1.0; // Both didn't see the node id
-            } else{
-                average_freq = (self.omniscient_freq_array[id].max(0.0) + 
-                    other_omniscient_freq_array[id].max(0.0)) / 2.0;
-            }
-            self.omniscient_freq_array[id] = average_freq;
-        }
-        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-            println!("{:?} ",
-            print_vector_with_two_digits(self.omniscient_freq_array.clone()));
-        }
-        
-    }
-
-    fn update_omn_freq(&mut self, item: PeerRef) {
-        let value = self.omniscient_freq_array[item.clone()] + 1.0;
-        self.omniscient_freq_array[item.clone()] = value.max(1.0);
-    }
-
-    fn is_trusted(&self, id:PeerRef) -> bool {
-        return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
-    }
-    fn show_role(&self) {
-        let role;
-        if self.is_byzantine{
-            role = "byzantine";
-        } else if self.is_trusted {
-            role = "trusted";
-        } else {
-            role = "correct";
-        }
-        println!("Node {} is {}", self.my_id, role);
-    }
 }
 
 impl App for Aupe {
@@ -397,8 +350,6 @@ impl App for Aupe {
 
             my_id: 0,
             is_byzantine: false,
-            is_trusted: false,
-
             view: Vec::new(),
             push_view: Vec::new(),
             pull_view: Vec::new(),
@@ -412,28 +363,17 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            omniscient_freq_array: Vec::new(),
             omniscient_memory: Vec::new(),
             minkey: 0,
-            minvalue: std::isize::MAX as f64,
+            minvalue: std::isize::MAX,
         }
     }
     
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-    
-        // Init preallocated vectors
-        self.omniscient_freq_array = vec![-1.0; self.params.nodes];
-
-        self.is_byzantine = id < init.n_byzantine; // 0 to F-1
-        if self.params.use_omn_merge {
-            self.is_trusted = self.is_trusted(id);//id >= init.n_byzantine && id < init.n_byzantine + init.n_trusted; // F to T-1
-            // the rest is correct node
-            if DEBUG {
-                self.show_role();
-            }
-        }
+        
+        self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
@@ -442,9 +382,12 @@ impl App for Aupe {
                 .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
-           
+            // Update tracking component
             for item in self.view.clone() {
-                self.update_omn_freq(item.clone());
+                let mut vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
+                let max_value = std::cmp::max(vec[item.clone()] +1, 
+                    1);
+                vec[item.clone()] = max_value;
             }
         }
         net.send(id, Msg::SelfNotif);
@@ -468,150 +411,6 @@ impl App for Aupe {
                 },
                 _ => (),
             }
-        } else if self.is_trusted{
-            match msg {
-                Msg::SelfNotif => {
-                    if let Some(rf) = self.params.replacement_frequency {
-                        if (self.my_id as u64 + net.time()) % rf == 0 {
-                            let mut rng = thread_rng();
-                            let view = self.view.clone();
-                            let sample_view = self.sample_view.iter()
-                                .filter(|(_, x)| x.is_some())
-                                .map(|(_, x)| x.unwrap())
-                                .collect::<Vec<_>>();
-                            for k in 0..self.params.replacement_count {
-                                let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.sample_view.len();
-                                if let Some(sample) = self.sample_view[i_replace].1 {
-                                    if self.out_samples.len() < 200 {
-                                        self.out_samples.push(sample);
-                                    }
-                                }
-                                self.sample_view[i_replace].0 = rng.gen_range(0, std::u64::MAX);
-                                self.update_sample(i_replace, &view[..]);
-                                self.update_sample(i_replace, &sample_view[..]);
-                            }
-                        }
-                    }
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
-                    }
-                    //
-                    if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        
-                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                            //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
-                            println!("vpush({}) vpull({})", self.v_push.len(), self.v_pull.len());
-                        }
-                        let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
-                        let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
-                        
-                        self.update_samples(&v_push);
-                        self.update_samples(&v_pull);
-
-                        v_push = self.debiais_stream_with_omni(v_push);
-                        v_pull = self.debiais_stream_with_omni(v_pull);
-                        
-                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                            eprintln!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
-                        }
-
-                        self.push_view = sample(&v_push[..], self.params.view_size / 3);
-                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
-                        
-                        let mut view = self.push_view.clone();
-                        view.extend(self.pull_view.clone());
-
-                        let samples_peer = self.sample_view.iter()
-                            .filter(|(_, x)| x.is_some())
-                            .map(|(_, x)| x.unwrap())
-                            .collect::<Vec<_>>();
-                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len());
-                        
-                        view.extend(self.sample_part.clone());
-
-                        view.extend(sample(&self.view[..], self.params.view_size - view.len()));
-                        self.view = view;
-
-                    }
-                    
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
-                            self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
-                        print_samples(&mut self.sample_view);
-                    }
-
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("omniscient_freq_array {:?} of node { }",
-                        self.omniscient_freq_array, self.my_id);
-                        
-                        println!("sample memory {:?} of node { }",
-                            self.omniscient_memory, self.my_id);
-                        println!("The key with the minimum value is '{}' with a value of {}.", 
-                            self.minkey, self.minvalue);
-                    }
-                    sample(&self.view[..], 1).iter()
-                        .for_each(|p| {
-                            net.send(*p, Msg::PushRequest);
-                            if self.is_trusted(*p) {
-                                net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
-                            }
-                        });
-
-                    sample(&self.view[..], 1).iter()
-                        .for_each(|p| {
-                            net.send(*p, Msg::PullRequest);
-                            if self.is_trusted(*p) {
-                                net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
-                            }
-                        });
-                    net.send(self.my_id, Msg::SelfNotif);
-                },
-                Msg::PullRequest => {
-                    //println!("message PlRq ");
-                    net.send(from, Msg::PullReply(self.view.clone()));
-                },
-                Msg::PullReply(lst) => {
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        eprintln!("message PlRy from {} : {:?}", 
-                        from.to_string(), lst);
-                    }
-                    self.n_received += lst.len();
-                    self.n_byzantine_received += lst.iter()
-                        .filter(|x| **x < self.params.n_byzantine)
-                        .count();
-                    self.v_pull.extend(lst);
-                    
-                    for item in lst {
-                        self.update_omn_freq(item.clone());
-                    }
-                },
-                Msg::PushRequest => {
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        eprintln!("message PushR from {} ", from.to_string());
-                    }
-                    self.n_received += 1;
-                    if from < self.params.n_byzantine {
-                        self.n_byzantine_received += 1;
-                    }
-                    self.v_push.push(from);
-                    
-                    self.update_omn_freq(from.clone());
-               
-                },
-                Msg::MergeRequest(lst) => {
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("message MergeRq from {} ", from.to_string());
-                    }
-                    net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
-                    self.merge_knowledge_both_ways(lst.to_vec());
-                },
-                Msg::MergeReply(lst) => {
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("message MergeRy from {} ", from.to_string());
-                    }
-                    self.merge_knowledge_both_ways(lst.to_vec());
-                },
-            }
         } else {
             match msg {
                 Msg::SelfNotif => {
@@ -639,7 +438,6 @@ impl App for Aupe {
                     if self.my_id == self.params.nodes-1 && DEBUG{
                         println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
                     }
-                    //
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         
                         if self.my_id == self.params.nodes-1 && DEBUG{
@@ -654,8 +452,8 @@ impl App for Aupe {
                         v_push = self.debiais_stream_with_omni(v_push);
                         v_pull = self.debiais_stream_with_omni(v_pull);
                         
-                        if self.my_id == self.params.nodes-1 && DEBUG{
-                            eprintln!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
+                        if self.my_id == self.params.nodes-1&& true{
+                            println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
@@ -674,17 +472,19 @@ impl App for Aupe {
 
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
+
                     }
                     
-                    if self.my_id == self.params.nodes-1 && DEBUG{
+                    if self.my_id == self.params.nodes-1&& true{
                         println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
                             self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
                         print_samples(&mut self.sample_view);
                     }
 
                     if self.my_id == self.params.nodes-1 && DEBUG{
+                        let vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().read().unwrap();
                         println!("omniscient_freq_array {:?} of node { }",
-                        self.omniscient_freq_array, self.my_id);
+                            *vec, self.my_id);
                         println!("sample memory {:?} of node { }",
                             self.omniscient_memory, self.my_id);
                         println!("The key with the minimum value is '{}' with a value of {}.", 
@@ -708,8 +508,8 @@ impl App for Aupe {
                     net.send(from, Msg::PullReply(self.view.clone()));
                 },
                 Msg::PullReply(lst) => {
-                    if self.my_id == self.params.nodes-1 && DEBUG{
-                        eprintln!("message PlRy from {} : {:?}", 
+                    if self.my_id == self.params.nodes-1&& DEBUG{
+                        println!("message PlRy from {} : {:?}", 
                         from.to_string(), lst);
                     }
                     self.n_received += lst.len();
@@ -718,27 +518,30 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
+                    let mut vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
                     for item in lst {
-                        self.update_omn_freq(item.clone());
+                        let max_value = std::cmp::max(vec[item.clone()] +1, 
+                            1);
+                        vec[item.clone()] = max_value;
                     }
+                    /* println!("omniscient_freq_array {:?} of node { } after Pull",
+                        self.omniscient_freq_array, self.my_id); */
                 },
                 Msg::PushRequest => {
-                    if self.my_id == self.params.nodes-1 && DEBUG{
-                        eprintln!("message PushR from {} ", from.to_string());
+                    if self.my_id == self.params.nodes-1&& DEBUG{
+                        println!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    self.update_omn_freq(from.clone());
+
+                    let mut vec = GLOBAL_OMNISCIENT_FREQ_ARRAY.get().unwrap().write().unwrap();
+                    let max_value = std::cmp::max(vec[from.clone()] +1, 
+                        1);
+                    vec[from.clone()] = max_value;
                
-                },
-                Msg::MergeRequest(lst) => {
-                    println!("NO MERGERq {:?}", lst.to_vec());    
-                },
-                Msg::MergeReply(lst) => {
-                    eprintln!("NO MERGERply {:?}", lst.to_vec()); 
                 },
             }
         }
@@ -780,7 +583,7 @@ impl App for Aupe {
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
             if self.my_id == self.params.nodes-1 && DEBUG{
-                eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbs={}/{}",
+                println!("nbn={}/{} nbpush={} nbpull={} nbsamp={}  nbs={}/{}",
                 nbn, self.view.len(),
                 nbpush, nbpull, nbsamp, 
                 nbs, self.sample_view.len());
