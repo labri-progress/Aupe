@@ -30,6 +30,7 @@ if [ $strat -eq 0 ]; then
         -v 160 -u 160 -k 1 -r 1 -m $sm -n $N > $stratLitt"/rho1text22"
 elif [ $strat -eq 1 ]; then
     # f=22% rho=1
+    echo "TotalMergew400rounds" > "log.txt"
     cargo run -- -T 400 -n $N aupe -O -G samples -f $force -t 2200 \
         -v 160 -u 160 -k 1 -r 1 -m $sm -n $N > $stratLitt"/rho1text22"
 fi
