@@ -9,7 +9,7 @@ use crate::graph::ByzConnGraph;
 use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 pub enum Msg {
     SelfNotif,
@@ -203,8 +203,6 @@ impl NetMetrics for Metrics {
             "pushByzN",
             "pullByzN",
             "sampByzN",
-            "pushBagByz",
-            "pullBagByz",
             "n_isolated",
             "avgByzSamp",
             "min",
@@ -452,7 +450,7 @@ impl App for Aupe {
                         v_push = self.debiais_stream_with_omni(v_push);
                         v_pull = self.debiais_stream_with_omni(v_pull);
                         
-                        if self.my_id == self.params.nodes-1&& true{
+                        if self.my_id == self.params.nodes-1&& DEBUG{
                             println!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
@@ -475,7 +473,7 @@ impl App for Aupe {
 
                     }
                     
-                    if self.my_id == self.params.nodes-1&& true{
+                    if self.my_id == self.params.nodes-1&& DEBUG{
                         println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
                             self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
                         print_samples(&mut self.sample_view);
