@@ -10,7 +10,7 @@ sm=100
 roundMax=200
 
 mkdir $strat
-if [[ "$strat" == "global" ]];
+if [[ "$strat" == "global" ]]; then
     # f=22% rho=1
     cargo run -- -T 400 -n 10000 aupe -L -G samples -f $force -t 2200 \
         -v 160 -u 160 -k 1 -r 1 > $strat"/rho0text22"
