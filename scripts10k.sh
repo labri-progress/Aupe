@@ -1,7 +1,7 @@
 #!/bin/sh
 
-strat=N="${1:-0}"
-echo "received instruction for " $strat
+strat="${1:-0}"
+
 
 N=10000
 v=160
@@ -9,13 +9,27 @@ force=10
 sm=100
 roundMax=200
 
-mkdir $strat
-if [[ "$strat" == "global" ]]; then
+if [ $strat -eq 0 ]; then
+    stratLitt="global"
+elif [ $strat -eq 1 ]; then
+    stratLitt="merge"
+elif [ $strat -eq 2 ]; then
+    stratLitt="aupe"
+elif [ $strat -eq 3 ]; then
+    stratLitt="basalt-simple"
+elif [ $strat -eq 4 ]; then
+    stratLitt="brahms"
+fi
+echo "received instruction for " $stratLitt
+
+mkdir $stratLitt
+if [ $strat -eq 0 ]; then
     # f=22% rho=1
-    cargo run -- -T 400 -n 10000 aupe -L -G samples -f $force -t 2200 \
-        -v 160 -u 160 -k 1 -r 1 > $strat"/rho0text22"
-elif [[ "$strat" == "merge" ]]; then
+    echo "Globalw400rounds" > "log.txt"
+    cargo run -- -T 400 -n $N aupe -L -G samples -f $force -t 2200 \
+        -v 160 -u 160 -k 1 -r 1 -m $sm -n $N > $stratLitt"/rho1text22"
+elif [ $strat -eq 1 ]; then
     # f=22% rho=1
-    cargo run -- -T 400 -n 10000 aupe -O -G samples -f $force -t 2200 \
-        -v 160 -u 160 -k 1 -r 1 > $strat"/rho0text22"
+    cargo run -- -T 400 -n $N aupe -O -G samples -f $force -t 2200 \
+        -v 160 -u 160 -k 1 -r 1 -m $sm -n $N > $stratLitt"/rho1text22"
 fi
