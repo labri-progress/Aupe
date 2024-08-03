@@ -56,6 +56,15 @@ if [ $copy_file -eq 2 ]; then # collect
   done 
 fi
 
+if [ $copy_file -eq 22 ]; then # collect
+  fold="${2:-"global"}"
+  for element in "${machines[@]}"; do
+    ansible-playbook playbook/recup.yml \
+      --extra-vars \
+      "node=$element target=$element ansible_user=root dir=$dir origin=$fold" &
+  done 
+fi
+
 if [ $copy_file -eq 3 ]; then # clean
   for element in "${machines[@]}"; do
     ansible-playbook playbook/clean_play.yml \
