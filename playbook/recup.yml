@@ -1,0 +1,13 @@
+- name: WAIT FOR THE EXPERIMENT
+  hosts: '{{ target }}'
+  gather_facts: no
+  vars:
+    var_delay: 3600
+  tasks:
+    - name: Archive remote folder
+      ansible.builtin.shell:
+        cmd: "tar -cvzf /root/analysis.tar.gz /root/Aupe/{{origin}}"  # Replace 'folder' with the name of your folder
+    - name: Copy results on my machine
+      ansible.builtin.fetch:
+        src: /root/analysis.tar.gz
+        dest: "{{dir}}/online/g5k"
