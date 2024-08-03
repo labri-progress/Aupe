@@ -16,7 +16,7 @@ elif [ $strat -eq 2 ]; then
 elif [ $strat -eq 3 ]; then
     stratLitt="mergewithPond"
 elif [ $strat -eq 4 ]; then
-    stratLitt="brahms"
+    stratLitt="aupewithT"
 fi
 echo "received instruction for " $stratLitt
 
@@ -36,6 +36,7 @@ elif [ $strat -eq 1 ]; then
 elif [ $strat -eq 2 ]; then
     f="${2:-0}" # 0.22 0.24 0.26 0.28  
     k="${3:-0}"
+    # ./scripts10k.sh 2 0.22 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
@@ -50,22 +51,28 @@ elif [ $strat -eq 3 ]; then
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
-
+    # ./scripts10k.sh 3 0.22 1
 
     echo "TotalMergewithPonderation" > $stratLitt"/log.txt"
     nohup ./aupewithponderation -T $rnd -n $N aupe -O -G samples -f $force -t $byz \
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F &
 
 elif [ $strat -eq 4 ]; then
-    f="${2:-0}" # 0.22 0.24 0.26 0.28  
-    k="${3:-0}"
+    f=0.22 # 0.22 0.24 0.26 0.28  
+    k=1
+    t="${2:-0}"
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
+    # ./scripts10k.sh 4 0.22 
+
+    T=$(echo "scale=0; 100.0 * $t / 1" | bc)
+    echo $folder"/text"$F"-"$T
+    trust=$(echo "scale=0; $N * $t / 1" | bc)
 
     echo "TotalMergewithPonderation" > $stratLitt"/log.txt"
-    nohup cargo run -- -T $rnd -n $N aupe -O -G samples -f $force -t $byz \
-        -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F &
+    nohup ./aupewitT -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+        -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F"-"$T &
 
 
 fi
