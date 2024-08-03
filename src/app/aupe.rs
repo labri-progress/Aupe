@@ -8,7 +8,7 @@ use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 //use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 pub enum Msg {
     SelfNotif,
@@ -731,8 +731,6 @@ impl App for Aupe {
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;
-            /* self.v_pull=Vec::new();
-            self.v_push=Vec::new(); */
           
             ret
         }
