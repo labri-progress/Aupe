@@ -7,6 +7,17 @@ OUTDEG  = "outdegree.txt"
 
 source("compute.r")
 
+write_results <- function(filename, expe, f, strat, rho,
+    resilience, sm, ttC, roundNumber, comment) {
+    file.info(filename)$size
+    if (!file.exists(filename)) {
+       head <- "Expe     faulty     Strat     rho     resilience     ttC     sm     round     comment"
+        write(head, append=TRUE, file = filename)
+    }
+    separator = "        "
+    sol = paste(expe, f*100, strat, rho, resilience, ttC, sm, roundNumber, comment, sep = separator)
+    write(sol, append=TRUE, file = filename)
+}
 rho <- function(args, path, topic) {  
     # 0. Data      
     #print(path)
@@ -115,10 +126,10 @@ rho <- function(args, path, topic) {
         print(paste("name", name))
         filename = paste(new, "/","dsn", name,  sep="")
         
-        #print("write_results4")
+        print(filename)
         write_results(filename, expe, f, strat, "rho1", resilience1, sm,
-            ttc0, roundNumber1, comment, name)
+            ttc0, roundNumber1, comment)
         write_results(filename, expe, f, strat, "rho0", resilience2, sm,
-            ttc1, roundNumber2, comment, name)
+            ttc1, roundNumber2, comment)
     }
 }

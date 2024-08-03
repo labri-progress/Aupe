@@ -31,8 +31,8 @@ data = data[data$comment %in% c("RAS"), ]
 data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", "Optimal"= "black", 
-"AupeGlobal" = "red")
+"Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", #"Optimal"= "black", 
+"AupeGlobal" = "red", "Aupewithpond" = "black", "Aupewopond" = "chocolate")
 
 line_size <- 1
 point_size <- 1.5
@@ -54,7 +54,7 @@ create_plot <- function(df, rho_value) {
     rho_value, sep=""), color=NULL,
       x = "Proportion of Byzantine nodes", 
       y = "Proportion of Byzantine samples") +
-    #theme_minimal()+
+    coord_cartesian(ylim = c(0, 1))+
     scale_x_continuous(breaks = x_breaks) +
     scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
     theme(
