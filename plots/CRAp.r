@@ -14,6 +14,7 @@ ARR     = "globalarray.txt"
 library(miscTools)
 
 source("aupe.r")
+#source("trusted.r")
 #source("studyAupe.r")
 n_values = c(10000) #10000
 
@@ -23,14 +24,14 @@ all_f_values= c(0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
     0.42, 0.44, 0.46, 0.48, 0.50 ) #c(0.06, 0.10, 0.14, 0.18, 0.20, 0.24, 0.30, 0.36, 0.40, 0.50)
 
 strats = c("aupe-merge", "aupe-global", "aupe", "basalt-simple", "brahms")
-f_values=c(0.10,0.20, 0.30, 0.40, 0.50) #all_f_values
+f_values=c(0.22, 0.24, 0.26, 0.28) #c(0.22) #c(0.10,0.20, 0.30, 0.40, 0.50) #all_f_values
 
 print(args)
 print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = strats[1]
+strat = "aupewithpond" #strats[1]
 merge = "no"
 Method = "moy"
 gamma = 0.3
@@ -61,12 +62,16 @@ for (n in n_values){
         par(mfrow = c(1, 1))  # 3 rows and 2 columns
         #par(mfrow = c(3, 2))        
         
-        rho(params, CVIEW, "System faulty proportion  (%)")
+        #rho(params, CVIEW, "System faulty proportion  (%)")
         #rho(params, SAMPLE, "Sample faulty proportion  (%)")
-        #if(strat == "aupe"){
+        rho(params, CVIEW, "System faulty proportion  (%)")
+        if(strat == "aupe"){
             #bags(params, BAGS, "Stream Bags faulty proportion (%)")
             #view(params, PVIEW, "Parts of the view faulty proportion  (%)")
-        #}
+        }
+        if(strat == "aupe-merge"){
+            trust(params, CVIEW, "Study of Aupe-mergeT ")
+        }
        
         dev.off()
         expe=expe+1
