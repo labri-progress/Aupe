@@ -58,13 +58,13 @@ elif [ $strat -eq 3 ]; then
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F &
 
 elif [ $strat -eq 4 ]; then
-    f=0.22 # 0.22 0.24 0.26 0.28  
+    f="${2:-0}" # 0.22 0.24 0.26 0.28  
     k=1
-    t="${2:-0}"
+    t="${3:-0}"
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
-    # ./scripts10k.sh 4 0.22 
+    # ./scripts10k.sh 4 0.22 0.01
 
     T=$(echo "scale=0; 100.0 * $t / 1" | bc)
     echo $folder"/text"$F"-"$T
@@ -73,6 +73,5 @@ elif [ $strat -eq 4 ]; then
     echo "TotalMergewithPonderation" > $stratLitt"/log.txt"
     nohup ./aupewitT -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F"-"$T &
-
 
 fi
