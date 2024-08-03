@@ -1,0 +1,7 @@
+    Finished dev [unoptimized + debuginfo] target(s) in 0.04s
+     Running `target/debug/aupe -T 200 -n 10000 aupe -O -G samples -f 10 -t 2200 -v 160 -u 160 -k 1 -r 1 -m 100 -n 10000`
+time       n_sent     n_recv     avgRecv    avgByzRecv pByzRecv   avgByzN    pushByzN   pullByzN   sampByzN   n_isolated avgByzSamp min        max        n_fullbyz  n_fbi      cluscoeff  MPL        id_min     id_d1      id_q1      id_med     id_q3      id_d9      id_max    
+0          10000      0          0.00       0.00       NaN        35.10      0.00       0.00       0.00       0          35.16      11         66         0          0          0.0582     2.4376     51         68         73         79         85         90         115       
+1          63200      10000      0.00       0.00       NaN        35.10      0.00       0.00       0.00       0          35.16      12         66         0          0          0.0582     2.4362     51         68         73         79         85         90         115       
+2          83217      63200      2.99       2.20       0.7367     35.10      0.00       0.00       0.00       0          35.15      12         66         0          0          0.0582     2.4255     51         68         73         79         85         90         115       
+3          83175      83217      162.98     64.81      0.3976     56.13      0.47       0.33       0.22       0          49.33      12         120        0          0          0.1321     2.4369     40         67         73         80         87         93         120       
