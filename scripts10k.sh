@@ -6,7 +6,7 @@ v=160
 force=10
 sm=100
 rnd=200
-
+r=1
 if [ $strat -eq 0 ]; then
     stratLitt="global"
 elif [ $strat -eq 1 ]; then
