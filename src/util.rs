@@ -67,12 +67,12 @@ pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
     from.iter().position(|&x| x == value)
 } */
 
-pub fn get_min_key_value(from: &[isize]) -> Option<(usize, isize)> {
+pub fn get_min_key_value(from: &[f64]) -> Option<(usize, f64)> {
     let mut min_value = None;
     let mut min_index = None;
 
     for (index, &value) in from.iter().enumerate() {
-        if value > 0 {
+        if value > 0.0 {
             match min_value {
                 Some(v) if value < v => {
                     min_value = Some(value);
@@ -102,10 +102,10 @@ pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
     println!("]");
 }
 
-pub fn print_vector_with_two_digits(v: Vec<isize>, total:isize) {
+pub fn print_vector_with_two_digits(v: Vec<f64>) {
     print!("[");
     for num in v {
         print!("{:.2} ", num);
     }
-    print!("]({ })", total);
+    print!("]");
 }
