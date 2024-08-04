@@ -1,7 +1,0 @@
-   Compiling aupe v0.1.0 (/home/amukam/thss/simulation/Aupe)
-    Finished dev [unoptimized + debuginfo] target(s) in 1.14s
-     Running `target/debug/aupe -T 200 -n 10000 aupe -O -G samples -f 10 -t 2200 -x 100 -v 160 -u 160 -k 1 -r 1 -m 100 -n 10000`
-time       n_sent     n_recv     avgRecv    avgByzRecv pByzRecv   avgByzN    pushByzN   pullByzN   sampByzN   n_isolated avgByzSamp min        max        n_fullbyz  n_fbi      cluscoeff  MPL        id_min     id_d1      id_q1      id_med     id_q3      id_d9      id_max    
-0          10000      0          0.00       0.00       NaN        35.28      0.00       0.00       0.00       0          35.27      11         62         0          0          0.0587     2.4269     49         68         73         79         85         91         119       
-1          47601      10000      0.00       0.00       NaN        35.28      0.00       0.00       0.00       0          35.27      11         62         0          0          0.0587     2.4319     49         68         73         79         85         91         119       
-2          55403      47601      2.98       2.20       0.7387     35.28      0.00       0.00       0.00       0          35.28      11         62         0          0          0.0587     2.4310     50         68         73         79         85         91         119       
