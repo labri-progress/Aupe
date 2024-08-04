@@ -107,6 +107,7 @@ elif [ $strat -eq 5 ]; then
 elif [ $strat -eq 6 ]; then
     f=0.22 
     k="${2:-0}"
+    rnd=600
     # ./scripts10k.sh 6 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
