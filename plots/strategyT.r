@@ -14,6 +14,18 @@ if (N==10000){
 }
 
 filename=paste("../results/N=", N, 
+" v=", v, "/dsncompoVIEW.txt", sep="")
+data1 <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
+
+# 1. Cleaning
+data1$faulty= data1$faulty/100
+data1$resilience= data1$resilience/100
+# Concatenate columns trusty and Strat
+data1$Strat <- paste("Aupe(t=",data1$trusty,"%)", sep = "")
+
+unique(data1$Strat)
+
+filename=paste("../results/N=", N, 
 " v=", v, "/dsncompoVIEW", sep="")
 data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 
@@ -26,7 +38,7 @@ data$Strat <- gsub("basalt", "Basalt", data$Strat)
 data$Strat <- gsub("brahms", "Brahms", data$Strat)
 data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
 
-#Filter
+data <- bind_rows(data, data1)
 data = data[data$comment %in% c("RAS"), ]
 data
 
@@ -34,6 +46,10 @@ custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="yellow", "Aupe(t=5%)"="pink", "Aupe(t=10%)"="chocolate1", 
     "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", "AupeGlobal" = "red")
 
+levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "AupeGlobal")
+data$Strat <- factor(data$Strat, levels = levels)
+data = data[data$Strat %in% levels, ]
 line_size <- 1
 point_size <- 1.5
 create_plot <- function(df, rho_value) {
@@ -78,7 +94,7 @@ create_plot <- function(df, rho_value) {
 }
 
 # 2. Plots
-pdf("resilience_plots.pdf")
+pdf("resilience_plotswithT.pdf")
 for (rho_value in unique(data$rho)) {
   plot_data <- data %>% filter(rho == rho_value)
   p <- create_plot(plot_data, rho_value)
