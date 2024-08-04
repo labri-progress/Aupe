@@ -340,7 +340,7 @@ impl Aupe {
     
     fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<f64>) {
         /* if DEBUG {
-            let strategy = "simple_means";
+            let strategy = "addition";
             println!("**********merge_knowledge_both_ways { }*********", strategy);
         } */
         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
@@ -353,8 +353,8 @@ impl Aupe {
             if self.omniscient_freq_array[id] <=0.0 && other_omniscient_freq_array[id] <=0.0 {
                 average_freq = -1.0; // Both didn't see the node id
             } else{
-                average_freq = (self.omniscient_freq_array[id].max(0.0) + 
-                    other_omniscient_freq_array[id].max(0.0)) / 2.0;
+                average_freq = self.omniscient_freq_array[id].max(0.0) + 
+                    other_omniscient_freq_array[id].max(0.0);
             }
             self.omniscient_freq_array[id] = average_freq;
         }
