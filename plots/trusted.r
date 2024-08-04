@@ -40,13 +40,14 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
     df6 <- df6 %>% mutate(trusted = "t=100%")
     df7 <- df7 %>% mutate(trusted = "AupeGlobal")
     
-    df <- bind_rows(df0, df1, df2, df3, df4, df5, df6, df7)
+    df <- bind_rows(df0, df1, df2, df3, df4, df5, df6)#, df7)
     #print(df)
     print(colnames(df))
 
     df$trusted <- factor(df$trusted, levels = c("t=0%","t=1%", "t=5%", "t=10%",
     "t=20%", "t=30%", "t=100%", "AupeGlobal"))
-
+    pos1=c(0.3, 0.2)
+    pos0=c(0.7, 0.7)
     ggplot(df, aes(x = Time, y = comp, color = trusted)) + #, linetype = trusted)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = df %>% filter(Time %% 10 == 0), size = point_size) + # Points at intervals
@@ -54,6 +55,7 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
             x = "Time steps",
             y = "Prop. of Byz. Samples") +
         theme_minimal() +
+        coord_cartesian(ylim = c(0, 1))+
         scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + #c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
         scale_color_manual(values = custom_colors) +
         theme(
@@ -63,7 +65,7 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.4, 0.2),
+            legend.position = pos1,
             legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
@@ -77,7 +79,8 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
             #legend.key.height= unit(0.4, 'cm'),
                 legend.key.width= unit(1, 'cm'),
             axis.ticks = element_line(color = "black", linewidth=1), 
-        )
+        )+
+        guides(color=guide_legend(ncol=2))
 
 }
 write_resultsT <- function(filename, expe, f, t, strat, rho,

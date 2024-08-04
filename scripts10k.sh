@@ -28,10 +28,10 @@ echo "received instruction for " $stratLitt
 
 mkdir $stratLitt
 if [ $strat -eq 0 ]; then
-    f=0.22 #"${2:-0}" # 0.22 0.24 0.26 0.28  
-    k="${2:-0}"
+    f="${2:-0}" #"${2:-0}" # 0.22 0.24 0.26 0.28  
+    k="${3:-0}"
     rnd=600
-    # ./scripts10k.sh 0 1
+    # ./scripts10k.sh 0 0.26 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
@@ -41,10 +41,10 @@ if [ $strat -eq 0 ]; then
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F &
 
 elif [ $strat -eq 1 ]; then
-    f=0.22
-    k="${2:-0}"
+    f="${2:-0}" #"${2:-0}" # 0.22 0.24 0.26 0.28  
+    k="${3:-0}"
     rnd=600
-    # ./scripts10k.sh 1 1
+    # ./scripts10k.sh 1 0.26 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
@@ -112,10 +112,10 @@ elif [ $strat -eq 5 ]; then
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F"-"$T &
 
 elif [ $strat -eq 6 ]; then
-    f=0.22 
-    k="${2:-0}"
+    f="${2:-0}" #"${2:-0}" # 0.22 0.24 0.26 0.28  
+    k="${3:-0}"
     rnd=600
-    # ./scripts10k.sh 6 1
+    # ./scripts10k.sh 6 0.26 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
@@ -125,14 +125,14 @@ elif [ $strat -eq 6 ]; then
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F &
 
 elif [ $strat -eq 7 ]; then
-    f=0.22  
-    t="${2:-0}"
-    k="${3:-0}"
+    f="${2:-0}"
+    t="${3:-0}"
+    k="${4:-0}"
     rnd=600
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
-    # ./scripts10k.sh 7 0.01 1
+    # ./scripts10k.sh 7 0.26 0.01 1
 
     T=$(echo "scale=0; 100.0 * $t / 1" | bc)
     echo $folder"/text"$F"-"$T
