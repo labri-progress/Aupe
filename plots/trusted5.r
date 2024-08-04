@@ -13,11 +13,11 @@ library(tidyr)
 library(gridExtra)
 
 custom_colors <- c("t=0%" = "#C77CFF", "t=1%"="yellow", "t=5%"="pink", "t=10%"="chocolate1", 
-    "t=20%"="darkgreen", "t=30%"="black", "t=100%" = "#00BFC4", "AupeGlobal" = "red")
+    "t=20%"="darkgreen", "t=30%"="black", "t=100%" = "#00BFC4")
 line_size <- 1
 point_size <- 1.5
 
-partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
+partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
     print("viewplot")
     print(dim(df1))
     print(colnames(df1))
@@ -28,8 +28,6 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
     df3 <- data.frame(Time = seq_along(df3$avgByzN), comp = df3$comp/100)
     df4 <- data.frame(Time = seq_along(df4$avgByzN), comp = df4$comp/100)
     df5 <- data.frame(Time = seq_along(df5$avgByzN), comp = df5$comp/100)
-    df6 <- data.frame(Time = seq_along(df6$avgByzN), comp = df6$comp/100)
-    df7 <- data.frame(Time = seq_along(df7$avgByzN), comp = df7$comp/100)
 
     df0 <- df0 %>% mutate(trusted = "t=0%")
     df1 <- df1 %>% mutate(trusted = "t=1%")
@@ -37,15 +35,13 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
     df3 <- df3 %>% mutate(trusted = "t=10%")
     df4 <- df4 %>% mutate(trusted = "t=20%")
     df5 <- df5 %>% mutate(trusted = "t=30%")
-    df6 <- df6 %>% mutate(trusted = "t=100%")
-    df7 <- df7 %>% mutate(trusted = "AupeGlobal")
     
-    df <- bind_rows(df0, df1, df2, df3, df4, df5, df6, df7)
+    df <- bind_rows(df0, df1, df2, df3, df4, df5)
     #print(df)
     print(colnames(df))
 
     df$trusted <- factor(df$trusted, levels = c("t=0%","t=1%", "t=5%", "t=10%",
-    "t=20%", "t=30%", "t=100%", "AupeGlobal"))
+    "t=20%", "t=30%", "t=100%"))
 
     ggplot(df, aes(x = Time, y = comp, color = trusted)) + #, linetype = trusted)) +
         geom_line(size = line_size) + # Lines
@@ -126,20 +122,15 @@ trust <- function(args, path, topic) {
     t3=10
     t4=20
     t5=30
-    t6=100
     path0 = paste(filepath,"/aupe/text",f*100, sep="")
     path1 = paste(filepath,"/", strat,"/text",f*100,"-", t1, sep="")
     path2 = paste(filepath,"/", strat,"/text",f*100,"-", t2, sep="")
     path3 = paste(filepath,"/", strat,"/text",f*100,"-", t3, sep="")
     path4 = paste(filepath,"/", strat,"/text",f*100,"-", t4, sep="")
     path5 = paste(filepath,"/", strat,"/text",f*100,"-", t5, sep="")
-    path6 = paste(filepath,"/", strat,"/text",f*100, sep="")
-    path7 = paste(filepath,"/aupe-global/text",f*100, sep="")
     print(path0)
     print(path2)
     print(path5)
-    print(path6)
-    print(path7)
 
     merge0 <- read.table(path0, header = TRUE)
     roundNumber0 <- nrow(merge0)
@@ -153,10 +144,6 @@ trust <- function(args, path, topic) {
     roundNumber4 <- nrow(merge4)
     merge5 <- read.table(path5, header = TRUE)
     roundNumber5 <- nrow(merge5)
-    merge6 <- read.table(path6, header = TRUE)
-    roundNumber6 <- nrow(merge6)
-    merge7 <- read.table(path6, header = TRUE)
-    roundNumber7 <- nrow(merge7)
 
     print(paste("roundNumber0",roundNumber0, "vs roundNumber2", roundNumber2,
     "and roundNumber5", roundNumber5))
@@ -180,8 +167,6 @@ trust <- function(args, path, topic) {
     merge3$comp=(merge3$avgByzN/v)*100
     merge4$comp=(merge4$avgByzN/v)*100
     merge5$comp=(merge5$avgByzN/v)*100
-    merge6$comp=(merge6$avgByzN/v)*100
-    merge7$comp=(merge7$avgByzN/v)*100
 
     title="Aupe Merge studying"
     title=paste(title, #"\n Byzantine proportion inside parts of the view over Time \n", 
@@ -193,14 +178,12 @@ trust <- function(args, path, topic) {
     resilience3=c(tail(merge3, 1)$comp)
     resilience4=c(tail(merge4, 1)$comp)
     resilience5=c(tail(merge5, 1)$comp)
-    resilience6=c(tail(merge6, 1)$comp)
-    resilience7=c(tail(merge7, 1)$comp)
 
     print(paste("resilience0",resilience2, "vs resilience2", resilience2, 
     "and resilience5", resilience5))
     
     #PLOTS
-    print(partview_plot(merge0, merge1, merge2, merge3, merge4, merge5, merge6, merge7, f*100, k))
+    print(partview_plot(merge0, merge1, merge2, merge3, merge4, merge5, f*100, k))
    
     ttc0 <- detect_first_convergence_index(merge0$comp, f, roundNumber0)
     ttc1 <- detect_first_convergence_index(merge1$comp, f, roundNumber1)
@@ -208,8 +191,7 @@ trust <- function(args, path, topic) {
     ttc3 <- detect_first_convergence_index(merge3$comp, f, roundNumber3)
     ttc4 <- detect_first_convergence_index(merge4$comp, f, roundNumber4)
     ttc5 <- detect_first_convergence_index(merge5$comp, f, roundNumber5)
-    ttc6 <- detect_first_convergence_index(merge6$comp, f, roundNumber6)
-    ttc7 <- detect_first_convergence_index(merge7$comp, f, roundNumber7)
+
     # 2. Logs
     
     if (comment==""){
@@ -237,8 +219,4 @@ trust <- function(args, path, topic) {
         ttc4, roundNumber4, comment, path)
     write_resultsT(filename, expe, f, t5, strat, rho, resilience5, sm,
         ttc5, roundNumber5, comment, path)
-    write_resultsT(filename, expe, f, t6, strat, rho, resilience6, sm,
-        ttc6, roundNumber6, comment, path)
-    write_resultsT(filename, expe, f, "global", strat, rho, resilience7, sm,
-        ttc7, roundNumber7, comment, path)
 }

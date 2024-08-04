@@ -20,19 +20,19 @@ data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 # 1. Cleaning
 data$faulty= data$faulty/100
 data$resilience= data$resilience/100
-data$Strat <- gsub("aupe-merge", "Aupe(t=100%)", data$Strat)
+data$Strat <- gsub("aupe-merge", "AupeMerge", data$Strat)
 data$Strat <- gsub("aupe-global", "AupeGlobal", data$Strat)
 data$Strat <- gsub("basalt", "Basalt", data$Strat)
 data$Strat <- gsub("brahms", "Brahms", data$Strat)
-data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
+data$Strat <- gsub("aupe", "Aupe", data$Strat)
 
 #Filter
 data = data[data$comment %in% c("RAS"), ]
 data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4") #"Optimal"= "black", 
-#"AupeGlobal" = "red", "Aupewithpond" = "black", "Aupewopond" = "chocolate")
+"Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", #"Optimal"= "black", 
+"AupeGlobal" = "red", "Aupewithpond" = "black", "Aupewopond" = "chocolate")
 
 line_size <- 1
 point_size <- 1.5
@@ -46,6 +46,8 @@ create_plot <- function(df, rho_value) {
     geom_point(size=point_size) +
     geom_line(linewidth=line_size) +
     geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
+    geom_abline(intercept = 0, slope = 0.75, color = "yellow", linetype = "dashed") +  # Add y = 0.75x line
+    geom_abline(intercept = 0, slope = 1.25, color = "yellow", linetype = "dashed") +   # Add y = 1.25x line
     scale_color_manual(values = custom_colors) +
     labs(title = paste("Resilience of strategies depending on f
      N=", N," v=", v," F=10 sm=100 rho=",
@@ -61,7 +63,7 @@ create_plot <- function(df, rho_value) {
       panel.background = element_rect("white"),
       panel.border = element_rect(colour = "black", size=1,
        fill = NA),  # Optional: add border
-      legend.position = c(0.8, 0.2),
+      legend.position = c(0.85, 0.2),
       legend.box.background = element_rect(color = "gray"),
       legend.spacing.y = unit(0.005, "cm"),
       text = element_text(size = 12, color="black"),

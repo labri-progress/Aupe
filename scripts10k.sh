@@ -58,7 +58,7 @@ elif [ $strat -eq 2 ]; then
     k="${3:-0}"
     # ./scripts10k.sh 2 0.22 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
-    echo "F="$F
+    echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
 
     echo "TotalMergewoPonderation" > $stratLitt"/log.txt"
