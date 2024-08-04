@@ -1,2 +1,0 @@
-time       n_sent     n_recv     avgRecv    avgByzRecv pByzRecv   avgByzN    pushByzN   pullByzN   sampByzN   n_isolated avgByzSamp min        max        n_fullbyz  n_fbi      cluscoeff  MPL        id_min     id_d1      id_q1      id_med     id_q3      id_d9      id_max    
-0          10000      0          0.00       0.00       NaN        35.20      0.00       0.00       0.00       0          35.07      12         67         0          0          0.0583     2.4314     46         68         73         79         85         91         113       
