@@ -61,12 +61,12 @@ elif [ $strat -eq 3 ]; then
 
 elif [ $strat -eq 4 ]; then
     f="${2:-0}" # 0.22 0.24 0.26 0.28  
-    k=1
     t="${3:-0}"
+    k="${4:-0}"
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
-    # ./scripts10k.sh 4 0.22 0.01
+    # ./scripts10k.sh 4 0.22 0.01 1
 
     T=$(echo "scale=0; 100.0 * $t / 1" | bc)
     echo $folder"/text"$F"-"$T
@@ -78,12 +78,12 @@ elif [ $strat -eq 4 ]; then
 
 elif [ $strat -eq 5 ]; then
     f="${2:-0}" # 0.22 0.24 0.26 0.28  
-    k=1
     t="${3:-0}"
+    k="${4:-0}"
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F
     byz=$(echo "scale=0; $N * $f / 1" | bc)
-    # ./scripts10k.sh 5 0.22 0.01 et 0.3
+    # ./scripts10k.sh 5 0.22 0.01 1
 
     T=$(echo "scale=0; 100.0 * $t / 1" | bc)
     echo $folder"/text"$F"-"$T

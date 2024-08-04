@@ -76,8 +76,8 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f) {
         )
 
 }
-write_results <- function(filename, expe, f, strat, rho,
-    resilience, t, sm, ttC, roundNumber, comment, name) {
+write_resultsT <- function(filename, expe, f, t, strat, rho,
+    resilience, sm, ttC, roundNumber, comment, name) {
     file.info(filename)$size
     if (!file.exists(filename)) {
        head <- "Expe     faulty     trusty     Strat     rho     resilience     ttC     sm     round     comment"
@@ -87,7 +87,7 @@ write_results <- function(filename, expe, f, strat, rho,
         write(head, append=TRUE, file = filename)
     }
     separator = "        "
-    sol = paste(expe, f*100, t*100, strat, rho, resilience, ttC, sm, roundNumber, comment, sep = separator)
+    sol = paste(expe, f*100, t, strat, rho, resilience, ttC, sm, roundNumber, comment, sep = separator)
     write(sol, append=TRUE, file = filename)
 }
 
@@ -206,17 +206,17 @@ trust <- function(args, path, topic) {
     
     filename = paste(new, "/","dsn", path,  sep="")
     
-    part <- c("pushPart", "pullPart", "sampPart")
-    write_results(filename, expe, f, t0, strat, rho, resilience0, sm,
+    #filename, expe, f, t, strat, rho, resilience, sm, ttC, roundNumber, comment, name
+    write_resultsT(filename, expe, f, t0, strat, rho, resilience0, sm,
         ttc0, roundNumber0, comment, path)
-    write_results(filename, expe, f, t1, strat, rho, resilience1, sm,
-        ttc, roundNumber1, comment, path)
-    write_results(filename, expe, f, t2, strat, rho, resilience2, sm,
+    write_resultsT(filename, expe, f, t1, strat, rho, resilience1, sm,
+        ttc1, roundNumber1, comment, path)
+    write_resultsT(filename, expe, f, t2, strat, rho, resilience2, sm,
         ttc2, roundNumber2, comment, path)
-    write_results(filename, expe, f, t3, strat, rho, resilience3, sm,
+    write_resultsT(filename, expe, f, t3, strat, rho, resilience3, sm,
         ttc3, roundNumber3, comment, path)
-    write_results(filename, expe, f, t4, strat, rho, resilience4, sm,
+    write_resultsT(filename, expe, f, t4, strat, rho, resilience4, sm,
         ttc4, roundNumber4, comment, path)
-    write_results(filename, expe, f, t5, strat, rho, resilience5, sm,
+    write_resultsT(filename, expe, f, t5, strat, rho, resilience5, sm,
         ttc5, roundNumber5, comment, path)
 }
