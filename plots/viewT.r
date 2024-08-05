@@ -5,8 +5,10 @@ library(tidyr)
 library(gridExtra)
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="yellow", "Aupe(t=5%)"="pink", "Aupe(t=10%)"="brown", 
-    "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", "AupeGlobal" = "red")
+"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
+"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
+"AupeGlobal" = "#FF0033")
 line_size <- 1
 point_size <- 0.5
 
@@ -14,11 +16,13 @@ partview <- function(data, component) {
     ggplot(data %>% filter(Component == component), aes(x = Time, y = Value, color = Source, linetype=Source)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = data %>% filter(Component == component & Time %% 10 == 0), size = 2) + # Points at intervals
-        labs(title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
+        labs(#title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
             x = "Time steps",
             y = "Prop. of Byz. Samp.") +
         theme_minimal() +
-        scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+        #scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+        coord_cartesian(ylim = c(0, 1))+
+        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + 
         scale_color_manual(values = custom_colors) +
         theme(legend.position = "none",
         panel.grid.major = element_blank(),  # Remove major gridlines
@@ -27,7 +31,6 @@ partview <- function(data, component) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 14, face = "bold"),  
@@ -36,6 +39,7 @@ partview <- function(data, component) {
             axis.text.y = element_text(size = 14), 
             plot.title = element_text(size = 14, face = "bold"),  
             axis.ticks = element_line(color = "black", linewidth=1), 
+            legend.background = element_rect(fill = "transparent"),
         )
 }
 
@@ -43,20 +47,19 @@ partview3 <- function(data, component) {
     ggplot(data %>% filter(Component == component), aes(x = Time, y = Value, color = Source, linetype=Source)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = data %>% filter(Component == component & Time %% 10 == 0), size = 2) + # Points at intervals
-        labs(title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
+        labs(#title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
             x = "Time steps",
             y = "Prop. of Byz. Samp.") +
         theme_minimal() +
         scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
         scale_color_manual(values = custom_colors) +
-        theme(legend.position = "top", #c(0.6, 0.2), #"bottom",
+        theme(legend.position = c(0.7, 0.15),
             legend.title = element_blank(),
             panel.grid.major = element_blank(),  # Remove major gridlines
             panel.grid.minor = element_blank(),  # Remove minor gridlines
             panel.background = element_rect("white"),
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 13, face = "bold"),  

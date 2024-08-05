@@ -14,8 +14,19 @@ library(gridExtra)
 
 custom_colors <- c("t=0%" = "#C77CFF", "t=1%"="yellow", "t=5%"="pink", "t=10%"="chocolate1", 
     "t=20%"="darkgreen", "t=30%"="black", "t=100%" = "#00BFC4", "AupeGlobal" = "red")
+custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
+"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
+"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
+"AupeGlobal" = "#FF0033")
+
 line_size <- 1
 point_size <- 1.5
+ratio <- 16 / 9
+width <- 8   # largeur en pouces
+height <- width / ratio   # hauteur calculée en fonction du ratio
+
+#  width = width, height = height)
 
 partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
     print("viewplot")
@@ -31,27 +42,29 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
     df6 <- data.frame(Time = seq_along(df6$avgByzN), comp = df6$comp/100)
     df7 <- data.frame(Time = seq_along(df7$avgByzN), comp = df7$comp/100)
 
-    df0 <- df0 %>% mutate(trusted = "t=0%")
-    df1 <- df1 %>% mutate(trusted = "t=1%")
-    df2 <- df2 %>% mutate(trusted = "t=5%")
-    df3 <- df3 %>% mutate(trusted = "t=10%")
-    df4 <- df4 %>% mutate(trusted = "t=20%")
-    df5 <- df5 %>% mutate(trusted = "t=30%")
-    df6 <- df6 %>% mutate(trusted = "t=100%")
-    df7 <- df7 %>% mutate(trusted = "AupeGlobal")
+    df0 <- df0 %>% mutate(Source = "Aupe(t=0%)")
+    df1 <- df1 %>% mutate(Source = "Aupe(t=1%)")
+    df2 <- df2 %>% mutate(Source = "Aupe(t=5%)")
+    df3 <- df3 %>% mutate(Source = "Aupe(t=10%)")
+    df4 <- df4 %>% mutate(Source = "Aupe(t=20%)")
+    df5 <- df5 %>% mutate(Source = "Aupe(t=30%)")
+    df6 <- df6 %>% mutate(Source = "Aupe(t=100%)")
+    df7 <- df7 %>% mutate(Source = "AupeGlobal")
     
     df <- bind_rows(df0, df1, df2, df3, df4, df5, df6)#, df7)
     #print(df)
     print(colnames(df))
+    
+    levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "Brahms")
+    df$Source <- factor(df$Source, levels = levels)
 
-    df$trusted <- factor(df$trusted, levels = c("t=0%","t=1%", "t=5%", "t=10%",
-    "t=20%", "t=30%", "t=100%", "AupeGlobal"))
     pos1=c(0.3, 0.2)
     pos0=c(0.7, 0.7)
-    ggplot(df, aes(x = Time, y = comp, color = trusted)) + #, linetype = trusted)) +
+    ggplot(df, aes(x = Time, y = comp, color = Source)) + #, linetype = trusted)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = df %>% filter(Time %% 10 == 0), size = point_size) + # Points at intervals
-        labs(title = paste("AupeMerge system resilience depending on t f=", f, "% rho=", rho, sep=""),
+        labs(#title = paste("AupeMerge system resilience depending on t f=", f, "% rho=", rho, sep=""),
             x = "Time steps",
             y = "Prop. of Byz. Samples") +
         theme_minimal() +
@@ -66,7 +79,6 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
             fill = NA),  
             legend.title = element_blank(),
             legend.position = pos1,
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 14, face = "bold"),  
@@ -79,6 +91,7 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
             #legend.key.height= unit(0.4, 'cm'),
                 legend.key.width= unit(1, 'cm'),
             axis.ticks = element_line(color = "black", linewidth=1), 
+            legend.background = element_rect(fill = "transparent"),
         )+
         guides(color=guide_legend(ncol=2))
 

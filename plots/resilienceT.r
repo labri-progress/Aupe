@@ -19,13 +19,15 @@ partview <- function(data, component, rho_value) {
         geom_point(size=point_size) +
         geom_line(linewidth=line_size) +
         geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
-        labs(title = paste("Resilience in ", component, sep=""), #" depending on 
+        labs(#title = paste("Resilience in ", component, sep=""), #" depending on 
         #initial proportion of Faulty N=10000 v=160 F=10 sm=100 rho=",
         #rho_value, sep=" ")
           x = "Prop. of Byz. nodes", 
           y = "Prop. of Byz Samp.") +
         scale_x_continuous(breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)) +
-        scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+        #scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+        coord_cartesian(ylim = c(0, 1))+
+        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + 
         scale_color_manual(values = custom_colors) +
         #scale_linetype_manual(values = c("df1" = "solid", "df2" = "dashed", "df3" = "dotted")) +
         theme(
@@ -56,7 +58,7 @@ partview3 <- function(data, component, rho_value) {
         geom_point(size=point_size) +
         geom_line(linewidth=line_size) +
         geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
-        labs(title = paste("Resilience in ", component, sep=""),
+        labs(#title = paste("Resilience in ", component, sep=""),
           x = "Prop. of Byz. nodes", 
           y = "Prop. of Byz Samp.") +
         scale_x_continuous(breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)) +
@@ -70,8 +72,7 @@ partview3 <- function(data, component, rho_value) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = "top",
-            legend.box.background = element_rect(color = "gray"),
+            legend.position = c(0.7, 0.15),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  
@@ -83,8 +84,8 @@ partview3 <- function(data, component, rho_value) {
                 legend.key.width= unit(0.5, 'cm'),
             legend.background = element_rect(fill = "transparent"),
             axis.ticks = element_line(color = "black", linewidth=1), 
-        )
-
+        )+
+        guides(color=guide_legend(nrow=2))
 }
 
 # 0. Loading
@@ -103,13 +104,18 @@ levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=10%)",
 data$Strat <- factor(data$Strat, levels = levels)
 data = data[data$Strat %in% levels, ]
 print(unique(data$Strat))
-rho=0
+rho=1
+print(paste("rho", rho, sep=""))
 print(colnames(data))
 plot_comp1 <- partview(data, "pushPart", rho)
 plot_comp2 <- partview(data, "pullPart", rho)
 plot_comp3 <- partview3(data, "sampPart", rho)
 
-pdf("partview_resilience_plotsT.pdf")
+ratio <- 1 #6 / 9
+width <- 8   # largeur en pouces
+height <- width / ratio
+
+pdf("partview_resilience_plotsT.pdf", width = width, height = height)
 grid.arrange(plot_comp1, plot_comp2, plot_comp3, ncol = 1)
 
 dev.off()
