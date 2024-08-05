@@ -51,6 +51,7 @@ F=$(echo "scale=0; 100.0 * $f / 1" | bc)
 echo $folder"/text"$F
 byz=$(echo "scale=0; $N * $f / 1" | bc)
 
+
 if [ $strat -eq 0 ]; then
     T=$(echo "scale=0; 100.0 * $t / 1" | bc)
     echo $folder"/text"$F"-"$T
