@@ -98,15 +98,15 @@ view <- function(args, path, topic) {
         }
     }
     
-    merge1$comp1=(brahms$pushByzN)*100
-    merge2$comp1=(aupe$pushByzN)*100
-    merge3$comp1=(merge$pushByzN)*100
-    merge1$comp2=(brahms$pullByzN)*100
-    merge2$comp2=(aupe$pullByzN)*100
-    merge3$comp2=(merge$pushByzN)*100
-    merge1$comp3=(brahms$sampByzN)*100
-    merge2$comp3=(aupe$sampByzN)*100
-    merge3$comp3=(merge$sampByzN)*100
+    merge1$comp1=(merge1$pushByzN)*100
+    merge2$comp1=(merge2$pushByzN)*100
+    merge3$comp1=(merge3$pushByzN)*100
+    merge1$comp2=(merge1$pullByzN)*100
+    merge2$comp2=(merge2$pullByzN)*100
+    merge3$comp2=(merge3$pushByzN)*100
+    merge1$comp3=(merge1$sampByzN)*100
+    merge2$comp3=(merge2$sampByzN)*100
+    merge3$comp3=(merge3$sampByzN)*100
 
     brahms$comp1=(brahms$pushByzN)*100
     aupe$comp1=(aupe$pushByzN)*100

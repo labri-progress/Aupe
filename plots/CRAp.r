@@ -34,18 +34,24 @@ print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = "basalt-simple" #strats[1]
+strat = "aupe-merge"
 merge = "no"
 Method = "moy"
 gamma = 0.3
 rMAX = 200
-k=0
+k=as.integer(args[1])
+print(paste("rho",k))
 r=1
 expe=0
 sm=100
 local1 = "machines"
 local2 = "serveur9/data"
 local = "data"  
+
+ratio <- 16 / 9
+width <- 8   # largeur en pouces
+height <- width / ratio
+
 for (n in n_values){
     if (n==1000 ){
         v= 100
@@ -61,17 +67,13 @@ for (n in n_values){
         params = c(n, v, f, 0, sm, expe, strat, merge, gamma, 
             rMAX, folder, k, r)
 
-        pdf(paste(folder, "/expe", expe, ".pdf", sep=""))
+        pdf(paste(folder, "/expe", expe, ".pdf", sep=""), width = width, height = height)
         par(mfrow = c(1, 1))  # 3 rows and 2 columns
-        #par(mfrow = c(3, 2))        
-        
         #rho(params, CVIEW, "System faulty proportion  (%)")
-        #rho(params, SAMPLE, "Sample faulty proportion  (%)")
-        rho(params, CVIEW, "System faulty proportion  (%)")
         if(strat == "aupe-merge"){
             source("studyAupeT.r")
             #bags(params, BAGS, "Stream Bags faulty proportion (%)")
-            #view(params, PVIEW, "Parts of the view faulty proportion  (%)")
+            view(params, PVIEW, "Parts of the view faulty proportion  (%)")
         }
         if(strat == "aupe-merge"){
             source("trusted.r")

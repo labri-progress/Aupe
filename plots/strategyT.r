@@ -6,7 +6,7 @@ library(dplyr)
 library(tidyr)
 
 # 0. Loading
-N=as.numeric(args[1])
+N=10000
 if (N==10000){
   v=160
 }else{
@@ -40,7 +40,7 @@ data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
 
 data <- bind_rows(data, data1)
 data = data[data$comment %in% c("RAS"), ]
-data
+#data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="yellow", "Aupe(t=5%)"="pink", "Aupe(t=10%)"="chocolate1", 
@@ -48,10 +48,16 @@ custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 
 levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
     "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "AupeGlobal")
+
 data$Strat <- factor(data$Strat, levels = levels)
-data = data[data$Strat %in% levels, ]
+#data <- data[!(data$Strat %in% c("Aupe(t=1%)", "Aupe(t=5%)")), ]
+kept <- c("Aupe(t=0%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "AupeGlobal")
+
+data <- data[(data$Strat %in% kept), ]
 line_size <- 1
 point_size <- 1.5
+
 create_plot <- function(df, rho_value) {
   x_breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)
   if (length(intersect(x_breaks, unique(df$faulty))) < 3){
@@ -63,22 +69,24 @@ create_plot <- function(df, rho_value) {
     geom_line(linewidth=line_size) +
     geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
     scale_color_manual(values = custom_colors) +
-    labs(title = paste("Resilience of strategies depending on f
-     N=", N," v=", v," F=10 sm=100 rho=",
-    rho_value, sep=""), color=NULL,
+    labs(#title = paste("Resilience of strategies depending on f
+     #N=", N," v=", v," F=10 sm=100 rho=",
+    #rho_value, sep=""), color=NULL,
       x = "Proportion of Byzantine nodes", 
       y = "Proportion of Byzantine samples") +
     coord_cartesian(xlim = c(0.07, 0.5), ylim = c(0, 1))+
     scale_x_continuous(breaks = x_breaks) +
-    scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) + #scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) +
+    #scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) 
+    coord_cartesian(ylim = c(0, 1))+
+    scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + 
     theme(
       panel.grid.major = element_blank(),  # Remove major gridlines
       panel.grid.minor = element_blank(),  # Remove minor gridlines
       panel.background = element_rect("white"),
       panel.border = element_rect(colour = "black", size=1,
-       fill = NA),  # Optional: add border
-      legend.position = c(0.8, 0.2),
-      legend.box.background = element_rect(color = "gray"),
+       fill = NA),  
+      legend.title = element_blank(),
+      legend.position = c(0.7, 0.15),
       legend.spacing.y = unit(0.005, "cm"),
       text = element_text(size = 12, color="black"),
       axis.title.x = element_text(size = 14, face = "bold"),  # Increase x-axis title size
@@ -87,16 +95,21 @@ create_plot <- function(df, rho_value) {
       axis.text.y = element_text(size = 14),  # Increase y-axis text size
       plot.title = element_text(size = 14, face = "bold"),  # Increase plot title size
       legend.text = element_text(size = 16),  # Increase legend text size
-      legend.title = element_text(size = 14),  # Increase legend title size
-       axis.ticks = element_line(color = "black", size=1), 
-    )
-    #guides(color = guide_legend(override.aes = list(linetype = c(0, 0, 0, 1), color = custom_colors))) # Add custom legend for y = x line
+      axis.ticks = element_line(color = "black", size=1), 
+       legend.background = element_rect(fill = "transparent"),
+    )+
+   guides(color=guide_legend(ncol=2))
 }
 
 # 2. Plots
-pdf("resilience_plotswithT.pdf")
+ratio <- 16 / 9
+width <- 8   # largeur en pouces
+height <- width / ratio
+
+pdf("resilience_plotswithT.pdf", width = width, height = height)
 for (rho_value in unique(data$rho)) {
   plot_data <- data %>% filter(rho == rho_value)
+  print(rho_value)
   p <- create_plot(plot_data, rho_value)
   print(p)
 }

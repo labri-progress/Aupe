@@ -103,7 +103,6 @@ create_plot <- function(df, rho_value) {
       panel.border = element_rect(colour = "black", linewidth=1,
        fill = NA),  # Optional: add border
       legend.position = c(0.75, 0.2),
-      legend.box.background = element_rect(color = "gray"),
       legend.spacing.y = unit(0.005, "cm"),
       text = element_text(size = 12, color="black"),
       axis.title.x = element_text(size = 14, face = "bold"),  # Increase x-axis title size
