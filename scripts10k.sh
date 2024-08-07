@@ -30,7 +30,7 @@ mkdir $stratLitt
 if [ $strat -eq 0 ]; then
     f="${2:-0}" #"${2:-0}" # 0.22 0.24 0.26 0.28  
     k="${3:-0}"
-    rnd=600
+    rnd="${4:-600}"
     # ./scripts10k.sh 0 0.26 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
@@ -43,7 +43,7 @@ if [ $strat -eq 0 ]; then
 elif [ $strat -eq 1 ]; then
     f="${2:-0}" #"${2:-0}" # 0.22 0.24 0.26 0.28  
     k="${3:-0}"
-    rnd=600
+    rnd="${4:-600}"
     # ./scripts10k.sh 1 0.26 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
@@ -114,7 +114,7 @@ elif [ $strat -eq 5 ]; then
 elif [ $strat -eq 6 ]; then
     f="${2:-0}" #"${2:-0}" # 0.22 0.24 0.26 0.28  
     k="${3:-0}"
-    rnd=600
+    rnd="${4:-600}"
     # ./scripts10k.sh 6 0.26 1
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
@@ -128,7 +128,7 @@ elif [ $strat -eq 7 ]; then
     f="${2:-0}"
     t="${3:-0}"
     k="${4:-0}"
-    rnd=600
+    rnd="${5:-600}"
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
