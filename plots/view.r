@@ -5,7 +5,10 @@ library(tidyr)
 library(gridExtra)
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-    "Aupe" = "#C77CFF", "AupeMerge" = "#00BFC4", "Optimal"= "black")
+"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
+"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
+"AupeGlobal" = "#FF0033")
 line_size <- 1
 point_size <- 1.5
 
@@ -17,33 +20,30 @@ partview <- function(data, component) {
             x = "Time steps",
             y = "Prop. of Byz. Samples") +
         theme_minimal() +
-        scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+        coord_cartesian(ylim = c(0, 1))+
+        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
         scale_color_manual(values = custom_colors) +
-        #scale_linetype_manual(values = c("df1" = "solid", "df2" = "dashed", "df3" = "dotted")) +
         theme(
-            panel.grid.major = element_blank(),  # Remove major gridlines
+        panel.grid.major = element_blank(),  # Remove major gridlines
             panel.grid.minor = element_blank(),  # Remove minor gridlines
             panel.background = element_rect("white"),
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.6, 0.2),
+            legend.position = "none",
             legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 14, face = "bold"),  
-            axis.title.y = element_text(size = 14, face = "bold"),  
-            axis.text.x = element_text(size = 14),  
-            axis.text.y = element_text(size = 14), 
-            plot.title = element_text(size = 14, face = "bold"),  
-            legend.text = element_text(size = 16),  
-            #legend.title = element_text(size = 14),  # Increase legend title size
-            #legend.key.height= unit(0.4, 'cm'),
-                legend.key.width= unit(1, 'cm'),
+            axis.title.x = element_text(size = 12, face = "bold"),  
+            axis.title.y = element_text(size = 12, face = "bold"),  
+            axis.text.x = element_text(size = 12),  
+            axis.text.y = element_text(size = 12), 
+            plot.title = element_text(size = 12, face = "bold"), 
+            legend.background = element_rect(fill = "transparent"),
             axis.ticks = element_line(color = "black", linewidth=1), 
-        )+
-        guides(shape = guide_legend(override.aes = list(size = 3)))+
-        guides(color=guide_legend(ncol=3))
+        )#+
+        #guides(shape = guide_legend(override.aes = list(size = 3)))+
+        #guides(color=guide_legend(ncol=3))
 
 }
 
@@ -84,8 +84,8 @@ view_plot <- function(df1, df2, df3, f, v) {
     df3 <- data.frame(Time = seq_along(df3$avgByzN), resilience = df3$avgByzN/v)
     # Add an identifier column to each data frame
     df1 <- df1 %>% mutate(Source = "Brahms")
-    df2 <- df2 %>% mutate(Source = "Aupe")
-    df3 <- df3 %>% mutate(Source = "AupeMerge")
+    df2 <- df2 %>% mutate(Source = "Aupe(t=0%)")
+    df3 <- df3 %>% mutate(Source = "Aupe(t=100%)")
     print(dim(df1))
     # Combine the long format data frames
     df <- bind_rows(df1, df2, df3)
@@ -95,14 +95,13 @@ view_plot <- function(df1, df2, df3, f, v) {
     ggplot(df, aes(x = Time, y = resilience, color = Source, linetype = Source)) +
         geom_line(size = 1) + # Lines
         geom_point(data = df %>% filter(Time %% 10 == 0), size = 2) + # Points at intervals
-        labs(title = "Brahms, Aupe and AupeMerge system resilience",
+        labs(#title = "Brahms, Aupe and AupeMerge system resilience",
             x = "Time steps",
             y = "Prop. of Byz. Samples") +
         theme_minimal() +
-        scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
-        scale_color_manual(values = custom_colors) +
-        #scale_linetype_manual(values = c("df1" = "solid", "df2" = "dashed", "df3" = "dotted")) +
-        theme(
+        coord_cartesian(ylim = c(0, 1))+
+        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
+        scale_color_manual(values = custom_colors) +theme(
             panel.grid.major = element_blank(),  # Remove major gridlines
             panel.grid.minor = element_blank(),  # Remove minor gridlines
             panel.background = element_rect("white"),

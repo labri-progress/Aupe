@@ -72,28 +72,26 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
         scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + #c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
         scale_color_manual(values = custom_colors) +
         theme(
-            panel.grid.major = element_blank(),  # Remove major gridlines
-            panel.grid.minor = element_blank(),  # Remove minor gridlines
+            panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(), # Remove major gridlines
             panel.background = element_rect("white"),
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = pos1,
-            legend.spacing.y = unit(0.005, "cm"),
+            legend.position = c(0.35, 0.15),
+            legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 14, face = "bold"),  
-            axis.title.y = element_text(size = 14, face = "bold"),  
-            axis.text.x = element_text(size = 14),  
-            axis.text.y = element_text(size = 14), 
-            plot.title = element_text(size = 14, face = "bold"),  
-            legend.text = element_text(size = 16),  
-            #legend.title = element_text(size = 14),  # Increase legend title size
-            #legend.key.height= unit(0.4, 'cm'),
-                legend.key.width= unit(1, 'cm'),
-            axis.ticks = element_line(color = "black", linewidth=1), 
+            axis.title.x = element_text(size = 12, face = "bold"),  
+            axis.title.y = element_text(size = 12, face = "bold"),  
+            axis.text.x = element_text(size = 12),  
+            axis.text.y = element_text(size = 12), 
+            plot.title = element_text(size = 12, face = "bold"),  
+            legend.text = element_text(size = 10), 
+             legend.key = element_blank(),
             legend.background = element_rect(fill = "transparent"),
+            axis.ticks = element_line(color = "black", linewidth=1),
         )+
-        guides(color=guide_legend(ncol=2))
+        guides(color=guide_legend(nrow=2))
 
 }
 write_resultsT <- function(filename, expe, f, t, strat, rho,

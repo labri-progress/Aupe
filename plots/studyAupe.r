@@ -101,7 +101,7 @@ view <- function(args, path, topic) {
     "and resilience3", resilience3))
     
     #PLOTS
-    print(partview_plot(brahms,aupe,merge, f*100))
+    #print(partview_plot(brahms,aupe,merge, f*100))
     print("SECOND PLOT")
     print(dim(brahms))
     print(colnames(brahms))

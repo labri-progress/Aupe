@@ -19,27 +19,28 @@ partview <- function(data, component) {
         labs(#title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
             x = "Time steps",
             y = "Prop. of Byz. Samp.") +
-        theme_minimal() +
-        #scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
         coord_cartesian(ylim = c(0, 1))+
-        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + 
+        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
         scale_color_manual(values = custom_colors) +
-        theme(legend.position = "none",
-        panel.grid.major = element_blank(),  # Remove major gridlines
+        #scale_linetype_manual(values = c("df1" = "solid", "df2" = "dashed", "df3" = "dotted")) +
+        theme(
+            panel.grid.major = element_blank(),  # Remove major gridlines
             panel.grid.minor = element_blank(),  # Remove minor gridlines
             panel.background = element_rect("white"),
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
+            legend.position = "none",
+            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 14, face = "bold"),  
-            axis.title.y = element_text(size = 14, face = "bold"),  
-            axis.text.x = element_text(size = 14),  
-            axis.text.y = element_text(size = 14), 
-            plot.title = element_text(size = 14, face = "bold"),  
-            axis.ticks = element_line(color = "black", linewidth=1), 
+            axis.title.x = element_text(size = 12, face = "bold"),  
+            axis.title.y = element_text(size = 12, face = "bold"),  
+            axis.text.x = element_text(size = 12),  
+            axis.text.y = element_text(size = 12), 
+            plot.title = element_text(size = 12, face = "bold"), 
             legend.background = element_rect(fill = "transparent"),
+            axis.ticks = element_line(color = "black", linewidth=1), 
         )
 }
 
@@ -50,27 +51,30 @@ partview3 <- function(data, component) {
         labs(#title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
             x = "Time steps",
             y = "Prop. of Byz. Samp.") +
-        theme_minimal() +
-        scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+        coord_cartesian(ylim = c(0, 1))+
+        scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
         scale_color_manual(values = custom_colors) +
-        theme(legend.position = c(0.7, 0.15),
-            legend.title = element_blank(),
+        theme(
             panel.grid.major = element_blank(),  # Remove major gridlines
             panel.grid.minor = element_blank(),  # Remove minor gridlines
             panel.background = element_rect("white"),
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
+            legend.title = element_blank(),
+            legend.position = c(0.775, 0.15),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 13, face = "bold"),  
-            axis.title.y = element_text(size = 13, face = "bold"),  
-            axis.text.x = element_text(size = 13),  
-            axis.text.y = element_text(size = 13), 
-            plot.title = element_text(size = 13, face = "bold"),  
-            legend.text = element_text(size = 10),  
-            legend.key.width= unit(0.75, 'cm'),
+            axis.title.x = element_text(size = 12, face = "bold"),  
+            axis.title.y = element_text(size = 12, face = "bold"),  
+            axis.text.x = element_text(size = 12),  
+            axis.text.y = element_text(size = 12), 
+            plot.title = element_text(size = 12, face = "bold"),  
+            legend.text = element_text(size = 10), 
+                legend.key.width= unit(0.5, 'cm'),
+            legend.background = element_rect(fill = "transparent"),
             axis.ticks = element_line(color = "black", linewidth=1), 
-        )
+        )+
+        guides(color=guide_legend(nrow=2))
 }
 
 partview_plot <- function(df1, df2, df3, df11, df22, df33, f) {  
