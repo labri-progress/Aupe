@@ -35,7 +35,6 @@ partview <- function(data, component, rho_value) {
             fill = NA),  
             legend.title = element_blank(),
             legend.position = c(0.8, 0.35),
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 14, face = "bold"),  
@@ -43,7 +42,7 @@ partview <- function(data, component, rho_value) {
             axis.text.x = element_text(size = 14),  
             axis.text.y = element_text(size = 14), 
             plot.title = element_text(size = 14, face = "bold"),  
-            legend.text = element_text(size = 14),  
+            legend.text = element_text(size = 10),  
             #legend.title = element_text(size = 14),  # Increase legend title size
             #legend.key.height= unit(0.4, 'cm'),
                 legend.key.width= unit(1, 'cm'),

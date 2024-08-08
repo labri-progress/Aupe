@@ -38,7 +38,6 @@ partview <- function(data, component, rho_value) {
             fill = NA),  
             legend.title = element_blank(),
             legend.position = "none",
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  

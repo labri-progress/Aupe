@@ -76,7 +76,6 @@ create_plot <- function(df, rho_value) {
       y = "Proportion of Byzantine samples") +
     coord_cartesian(xlim = c(0.07, 0.5), ylim = c(0, 1))+
     scale_x_continuous(breaks = x_breaks) +
-    #scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) 
     coord_cartesian(ylim = c(0, 1))+
     scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + 
     theme(
@@ -93,12 +92,11 @@ create_plot <- function(df, rho_value) {
       axis.title.y = element_text(size = 14, face = "bold"),  # Increase y-axis title size
       axis.text.x = element_text(size = 14),  # Increase x-axis text size
       axis.text.y = element_text(size = 14),  # Increase y-axis text size
-      plot.title = element_text(size = 14, face = "bold"),  # Increase plot title size
-      legend.text = element_text(size = 16),  # Increase legend text size
-      axis.ticks = element_line(color = "black", size=1), 
+      legend.text = element_text(size = 10),  # Increase legend text size
+      axis.ticks = element_line(color = "black", linewidth=1), 
        legend.background = element_rect(fill = "transparent"),
     )+
-   guides(color=guide_legend(ncol=2))
+   guides(color=guide_legend(nrow=2))
 }
 
 # 2. Plots

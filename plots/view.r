@@ -24,14 +24,13 @@ partview <- function(data, component) {
         scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
         scale_color_manual(values = custom_colors) +
         theme(
-        panel.grid.major = element_blank(),  # Remove major gridlines
+            panel.grid.major = element_blank(),  # Remove major gridlines
             panel.grid.minor = element_blank(),  # Remove minor gridlines
             panel.background = element_rect("white"),
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
             legend.position = "none",
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  
@@ -109,7 +108,6 @@ view_plot <- function(df1, df2, df3, f, v) {
             fill = NA),  
             legend.title = element_blank(),
             legend.position = c(0.6, 0.2),
-            legend.box.background = element_rect(color = "gray"),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 14, face = "bold"),  

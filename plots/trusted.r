@@ -43,15 +43,15 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
     df7 <- data.frame(Time = seq_along(df7$avgByzN), comp = df7$comp/100)
 
     df0 <- df0 %>% mutate(Source = "Aupe(t=0%)")
-    df1 <- df1 %>% mutate(Source = "Aupe(t=1%)")
-    df2 <- df2 %>% mutate(Source = "Aupe(t=5%)")
+    #df1 <- df1 %>% mutate(Source = "Aupe(t=1%)")
+    #df2 <- df2 %>% mutate(Source = "Aupe(t=5%)")
     df3 <- df3 %>% mutate(Source = "Aupe(t=10%)")
     df4 <- df4 %>% mutate(Source = "Aupe(t=20%)")
     df5 <- df5 %>% mutate(Source = "Aupe(t=30%)")
     df6 <- df6 %>% mutate(Source = "Aupe(t=100%)")
     df7 <- df7 %>% mutate(Source = "AupeGlobal")
     
-    df <- bind_rows(df0, df1, df2, df3, df4, df5, df6)#, df7)
+    df <- bind_rows(df0, df3, df4, df5, df6)#, df7)
     #print(df)
     print(colnames(df))
     
@@ -78,17 +78,17 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, df6, df7, f, rho) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.35, 0.15),
+            legend.position = c(0.35, 0.1),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  
             axis.title.y = element_text(size = 12, face = "bold"),  
             axis.text.x = element_text(size = 12),  
             axis.text.y = element_text(size = 12), 
-            plot.title = element_text(size = 12, face = "bold"),  
             legend.text = element_text(size = 10), 
              legend.key = element_blank(),
-            legend.background = element_rect(fill = "transparent"),
+             legend.background = element_blank(), 
+            #legend.background = element_rect(fill = "transparent")
             axis.ticks = element_line(color = "black", linewidth=1),
         )+
         guides(color=guide_legend(nrow=2))
