@@ -26,7 +26,7 @@ if [ $strat -eq 0 ]; then
 
     echo "Basalt Rounds" > $stratLitt"/log.txt"
     nohup ./basalt-sim -T $rnd -n $N basalt-simple -G -f $force -t $byz \
-        -v 160 -u 160 -k $k -r 1 > $stratLitt"/rho"$k"text"$F &
+        -v 160 -i 160 -k $k -r 1 > $stratLitt"/rho"$k"text"$F &
 
 elif [ $strat -eq 1 ]; then
     f="${2:-0}" # 0.20 0.22 0.24 0.26 0.28 0.30
