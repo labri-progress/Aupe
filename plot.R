@@ -7,8 +7,8 @@ library(ggplot2)
 # Rscript plot.R 1000 20
 N=as.numeric(args[1])
 f=as.numeric(args[2])
-other="aupe-global"
-filename="rho1text22" # paste("text",f, sep="")
+other="aupe-merge"
+filename="text22-20" # paste("text",f, sep="")
 data <- read.table(filename, header = TRUE)
 
 if (N==1000 ){

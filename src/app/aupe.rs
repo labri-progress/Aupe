@@ -428,7 +428,7 @@ impl App for Aupe {
 
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
         if self.params.use_omn_merge {
-            self.is_trusted = self.is_trusted(id);//id >= init.n_byzantine && id < init.n_byzantine + init.n_trusted; // F to T-1
+            self.is_trusted = self.is_trusted(id);
             // the rest is correct node
             if DEBUG {
                 self.show_role();
