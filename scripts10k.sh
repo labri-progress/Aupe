@@ -38,6 +38,11 @@ elif [ $strat -eq 1 ]; then
     echo "F="$F" rho="$k " rnd="$rnd
     byz=$(echo "scale=0; $N * $f / 1" | bc)
 
+
+    T=$(echo "scale=0; 100.0 * $t / 1" | bc)
+    echo $folder"/text"$F"-"$T
+    trust=$(echo "scale=0; $N * $t / 1" | bc)
+    
     echo "aupe-merge Rounds" > $stratLitt"/log.txt"
     nohup ./aupewitT -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
         -v 160 -u 160 -k $k -r 1 -m $sm -n $N > $stratLitt"/rho"$k"text"$F"-"$T &
