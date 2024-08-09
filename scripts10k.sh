@@ -15,6 +15,8 @@ elif [ $strat -eq 2 ]; then
     stratLitt="sample"
 elif [ $strat -eq 3 ]; then
     stratLitt="rho"
+elif [ $strat -eq 4 ]; then
+    stratLitt="globalT"
 fi
 echo "received instruction for " $stratLitt
 
@@ -77,7 +79,7 @@ elif [ $strat -eq 3 ]; then
     k="${3:-1}" # 10 20 50 100
     f="${4:-0.24}"
     rnd="${5:-1000}"
-    
+
     # ./scripts10k.sh 3 0.01 10
     F=$(echo "scale=0; 100.0 * $f / 1" | bc)
     echo "F="$F" rho="$k " rnd="$rnd
@@ -91,5 +93,24 @@ elif [ $strat -eq 3 ]; then
     echo "Rho" > $stratLitt"/log.txt"
     nohup ./aupewitT -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
         -v 160 -u 160 -k $k -r $k -m $sm -n $N > $stratLitt"/rho"$k"text"$F"-"$T &
+
+elif [ $strat -eq 4 ]; then
+    t="${2:-0.01}"
+    f="${3:-0.24}"
+    k="${4:-1}"
+    rnd="${5:-1000}"
+    
+    # ./scripts10k.sh 4 0.01 0.22
+    F=$(echo "scale=0; 100.0 * $f / 1" | bc)
+    byz=$(echo "scale=0; $N * $f / 1" | bc)
+
+
+    T=$(echo "scale=0; 100.0 * $t / 1" | bc)
+    echo "rho"$k"Gtext"$F"-"$T
+    trust=$(echo "scale=0; $N * $t / 1" | bc)
+    
+    echo "Rho" > $stratLitt"/log.txt"
+    nohup ./aupeGT -T $rnd -n $N aupe -L -G samples -f $force -t $byz -x $trust \
+        -v 160 -u 160 -k $k -r $k -m $sm -n $N > $stratLitt"/rho"$k"Gtext"$F"-"$T &
 
 fi
