@@ -28,7 +28,8 @@ f_values=c(0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
     0.42, 0.44, 0.46, 0.48, 0.50 )
      #c(0.22) #c(0.10,0.20, 0.30, 0.40, 0.50)  #c(0.22, 0.24, 0.26, 0.28) #c(0.22) #c(0.10,0.20, 0.30, 0.40, 0.50) #all_f_values
 
-f_values=c(0.22) #, 0.26, 0.34) #all_f_values
+f_values= seq(0.2, 0.3, by=0.02) #c(0.22) #, 0.26, 0.34) #all_f_values
+
 print(args)
 print(f_values)
 thrshold = 0 #as.numeric(args[1])
@@ -72,14 +73,21 @@ for (n in n_values){
         #par(mfrow = c(1, 1))  # 3 rows and 2 columns
         
         #rho(params, CVIEW, "System faulty proportion  (%)")
-        if(strat == "aupe-merge"){
+        if(strat == "aupe-merge" && FALSE){
             source("studyAupe.r")#source("studyAupeT.r")
             #bags(params, BAGS, "Stream Bags faulty proportion (%)")
             view(params, PVIEW, "Parts of the view faulty proportion  (%)")
         }
-        if(strat == "aupe-merge"){
+        if(strat == "aupe-merge" && FALSE){
             source("trusted.r")
             #trust(params, CVIEW, "Study of Aupe-mergeT ")
+        }
+        if(strat == "aupe-merge" && TRUE){
+            source("comparaison.r")
+            rMAX = 1000
+            params = c(n, v, f, 0, sm, expe, strat, merge, gamma, 
+            rMAX, folder, k, r)
+            comp(params, CVIEW, "Study of Aupe-mergeT ")
         }
        
         dev.off()
