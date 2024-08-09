@@ -317,7 +317,7 @@ impl Aupe {
             }else if *element == self.minkey { // search min if it was him
                 if self.params.use_omn_global {
                     if self.is_trusted {
-                        println!("+++");
+                        //println!("+++");
                         if let Some((min_index, min_value)) = get_min_key_value(&vec) {
                             if self.my_id == self.params.nodes -1 && DEBUG{
                                 eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
@@ -328,7 +328,7 @@ impl Aupe {
                             println!("The vector is empty.");
                         } 
                     }else {
-                        println!("---");
+                        //println!("---");
                         if let Some((min_index, min_value)) = get_min_key_valuef64(&self.omniscient_freq_array) {
                             if self.my_id == self.params.nodes -1 && DEBUG{
                                 eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
