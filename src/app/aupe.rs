@@ -9,7 +9,7 @@ use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 pub enum Msg {
     SelfNotif,
