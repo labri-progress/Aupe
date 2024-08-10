@@ -109,7 +109,7 @@ elif [ $strat -eq 4 ]; then
     echo "rho"$k"Gtext"$F"-"$T
     trust=$(echo "scale=0; $N * $t / 1" | bc)
     
-    echo "Rho" > $stratLitt"/log.txt"
+    echo "globalT" > $stratLitt"/log.txt"
     nohup ./aupeGT -T $rnd -n $N aupe -L -G samples -f $force -t $byz -x $trust \
         -v 160 -u 160 -k $k -r $k -m $sm -n $N > $stratLitt"/rho"$k"Gtext"$F"-"$T &
 
