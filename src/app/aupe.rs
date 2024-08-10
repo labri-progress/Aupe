@@ -3,10 +3,10 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy, get_min_key_value, print_samples, print_vector_with_two_digits};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy, 
+    get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
-//use crate::GLOBAL_OMNISCIENT_FREQ_ARRAY;
 
 const DEBUG: bool = false;
 
@@ -15,8 +15,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(Vec<f64>),
-    MergeReply(Vec<f64>),
+    MergeRequest(String),
+    MergeReply(String),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -127,8 +127,6 @@ pub struct Aupe {
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
     minvalue: f64,
-
-    contacted: Vec<isize>,
 }
 
 pub struct Metrics {
@@ -418,8 +416,6 @@ impl App for Aupe {
             omniscient_memory: Vec::new(),
             minkey: 0,
             minvalue: std::isize::MAX as f64,
-
-            contacted: Vec::new(),
         }
     }
     
@@ -451,10 +447,7 @@ impl App for Aupe {
                 self.update_omn_freq(item.clone());
             }
         }
-        // Init contacted list of trusted vectors
-        if self.is_trusted {
-            self.contacted = vec![-1; self.params.n_trusted];
-        }
+
         net.send(id, Msg::SelfNotif);
     }
 
@@ -560,7 +553,8 @@ impl App for Aupe {
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             if self.is_trusted(*p) {
-                                net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
+                                net.send(*p, Msg::MergeRequest(
+                                    vec_to_string(&self.omniscient_freq_array.clone()))) 
                             }
                         });
 
@@ -568,28 +562,21 @@ impl App for Aupe {
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             if self.is_trusted(*p) {
-                                net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
+                                net.send(*p, Msg::MergeRequest(
+                                    vec_to_string(&self.omniscient_freq_array.clone()))) 
                             }
                         });
                     
-                    let trustednodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
-                        .filter(|x| *x!=self.my_id && self.contacted[*x-self.params.n_byzantine]==-1) // contact only not contacted nodes
+                    // intentionally send Merge replies
+                    (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
+                        .filter(|x| *x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
-                        .collect::<Vec<_>>();
-
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                    let sum:isize= self.contacted.iter().sum();
-                        println!("contacted=({:?}) nb={}", self.contacted, (sum+self.params.n_trusted as isize)/2);
-                        println!("trustednodes({:?})", trustednodes);
-                    }
-                    self.contacted = vec![-1; self.params.n_trusted]; // free
-
-                    trustednodes.iter()
+                        .collect::<Vec<_>>().iter()
                         .for_each(|p| {
-                            //net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
-                            //net.send(*p, Msg::MergeReply(self.omniscient_freq_array.clone())) 
+                            /* net.send(*p, Msg::MergeReply(
+                                vec_to_string(&self.omniscient_freq_array.clone())))  */
                         });
-
+                    
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -625,20 +612,25 @@ impl App for Aupe {
                
                 },
                 Msg::MergeRequest(lst) => {
-                    //contacted
-                    self.contacted[from-self.params.n_byzantine] = 1; // for not sending mergeR also
 
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("message MergeRq from {} ", from.to_string());
+                        println!("message MergeRq from {} :{:?} ", from.to_string(), lst);
                     }
-                    net.send(from, Msg::MergeReply(self.omniscient_freq_array.clone())); //send its array before merging
-                    self.merge_knowledge_both_ways(lst.to_vec());
+                    net.send(from, Msg::MergeReply(
+                        vec_to_string(&self.omniscient_freq_array.clone()))); //send its array before merging
+                    match string_to_vec(lst) {
+                        Ok(vec) => self.merge_knowledge_both_ways(vec),
+                        Err(e) => println!("Error parsing string: {}", e),
+                    }
                 },
                 Msg::MergeReply(lst) => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("message MergeRy from {} ", from.to_string());
+                        println!("message MergeRy from {} :{:?} ", from.to_string(), lst);
                     }
-                    self.merge_knowledge_both_ways(lst.to_vec());
+                    match string_to_vec(lst) {
+                        Ok(vec) => self.merge_knowledge_both_ways(vec),
+                        Err(e) => println!("Error parsing string: {}", e),
+                    }
                 },
             }
         } else {
@@ -763,11 +755,11 @@ impl App for Aupe {
                     self.update_omn_freq(from.clone());
                
                 },
-                Msg::MergeRequest(lst) => {
-                    println!("NO MERGERq {:?}", lst.to_vec());    
+                Msg::MergeRequest(_lst) => {
+                    println!("NO MERGERq ");    
                 },
-                Msg::MergeReply(lst) => {
-                    eprintln!("NO MERGERply {:?}", lst.to_vec()); 
+                Msg::MergeReply(_lst) => {
+                    eprintln!("NO MERGERply"); 
                 },
             }
         }

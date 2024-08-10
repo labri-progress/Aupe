@@ -1,6 +1,7 @@
 use std::hash::{Hash, Hasher};
 use fasthash::*;
 use rand::{thread_rng, Rng};
+use std::fmt::Write; // Import the Write trait
 
 use super::net::PeerRef;
 
@@ -109,3 +110,45 @@ pub fn print_vector_with_two_digits(v: Vec<f64>) {
     }
     print!("]");
 }
+
+pub fn vec_to_string(vec: &[f64]) -> String {
+    let precision = 2;
+    let mut result = String::with_capacity(vec.len() * (precision + 3)); // Allocate some capacity to reduce reallocations
+    for (i, num) in vec.iter().enumerate() {
+        if i > 0 {
+            result.push(','); // Append a comma between elements
+        }
+        // Use a buffer to format the number directly
+        let _ = write!(&mut result, "{:.1$}", num, precision);
+    }
+    result
+}
+
+pub fn string_to_vec(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError> {
+    s.split(',')
+        .map(str::trim) // Trim whitespace
+        .map(str::parse::<f64>) // Parse directly
+        .collect()
+}
+
+pub fn vec_to_string_slow(vec: &Vec<f64>) -> String {
+    let precision = 2;
+    vec.iter()
+    .map(|num| format!("{:.1$}", num, precision))
+        .collect::<Vec<String>>()
+        .join(",")
+}
+
+pub fn string_to_vec_slow(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError> {
+    s.split(',')
+        .map(|num_str| num_str.trim().parse::<f64>())
+        .collect()
+}
+
+
+/* fn string_to_vec(s: &str) -> Result<Vec<f64>, std::num::ParseIntError> {
+    s.split(',')
+        .map(|num_str| num_str.trim().parse::<i32>())
+        .collect()
+}
+ */
