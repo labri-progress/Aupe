@@ -128,7 +128,7 @@ pub struct Aupe {
     minkey: PeerRef,
     minvalue: f64,
 
-    trustednodes: Vec<PeerRef>,
+    contacted: Vec<isize>,
 }
 
 pub struct Metrics {
@@ -419,7 +419,7 @@ impl App for Aupe {
             minkey: 0,
             minvalue: std::isize::MAX as f64,
 
-            trustednodes: Vec::new(),
+            contacted: Vec::new(),
         }
     }
     
@@ -451,15 +451,9 @@ impl App for Aupe {
                 self.update_omn_freq(item.clone());
             }
         }
+        // Init contacted list of trusted vectors
         if self.is_trusted {
-            self.trustednodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
-                                .filter(|x| *x!=self.my_id)
-                                .map(|x| x)
-                                .collect::<Vec<_>>();
-
-            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                println!("trustednodes({:?})", self.trustednodes);
-            }
+            self.contacted = vec![-1; self.params.n_trusted];
         }
         net.send(id, Msg::SelfNotif);
     }
@@ -577,10 +571,23 @@ impl App for Aupe {
                                 net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
                             }
                         });
+                    
+                    let trustednodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
+                        .filter(|x| *x!=self.my_id && self.contacted[*x-self.params.n_byzantine]==-1) // contact only not contacted nodes
+                        .map(|x| x)
+                        .collect::<Vec<_>>();
 
-                    self.trustednodes.iter()
+                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                    let sum:isize= self.contacted.iter().sum();
+                        println!("contacted=({:?}) nb={}", self.contacted, (sum+self.params.n_trusted as isize)/2);
+                        println!("trustednodes({:?})", trustednodes);
+                    }
+                    self.contacted = vec![-1; self.params.n_trusted]; // free
+
+                    trustednodes.iter()
                         .for_each(|p| {
-                            net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
+                            //net.send(*p, Msg::MergeRequest(self.omniscient_freq_array.clone())) 
+                            //net.send(*p, Msg::MergeReply(self.omniscient_freq_array.clone())) 
                         });
 
                     net.send(self.my_id, Msg::SelfNotif);
@@ -618,6 +625,9 @@ impl App for Aupe {
                
                 },
                 Msg::MergeRequest(lst) => {
+                    //contacted
+                    self.contacted[from-self.params.n_byzantine] = 1; // for not sending mergeR also
+
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("message MergeRq from {} ", from.to_string());
                     }
