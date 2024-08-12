@@ -68,9 +68,10 @@ pub struct Init {
     /// Use merge with omniscient strategy
     #[structopt(short = "O", long = "use-omn-merge")]
     pub use_omn_merge: bool,
-    /*/// Use merge with omniscient strategy
-     #[structopt(short = "L", long = "use-omn-global")]
-    pub use_omn_global: bool, */
+    
+    /// How many sup merges should be used
+    #[structopt(short = "p", long = "nb_merges")]
+    pub nb_merge: usize,
 } 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -129,6 +130,8 @@ pub struct Aupe {
     minvalue: f64,
 
     omniscient_freq_array_string: String,
+    to_conctact: Vec<PeerRef>,
+    oldest: PeerRef,
 }
 
 pub struct Metrics {
@@ -376,6 +379,21 @@ impl Aupe {
         self.omniscient_freq_array[item.clone()] = value
     }
 
+    fn update_contact(&mut self, item: PeerRef) {
+        if self.is_trusted(item){
+            if !self.to_conctact.contains(&item) {
+                if self.to_conctact.len() < self.params.nb_merge {
+                    self.to_conctact.push(item.clone());
+                }else{ //full
+                    if let Some(to_be_replaced) = self.to_conctact.get_mut(self.oldest) {
+                        *to_be_replaced = item;
+                        self.oldest +=1;
+                        self.oldest = self.oldest % self.params.nb_merge ;
+                    }
+                }
+            } 
+        }
+    }
     fn is_trusted(&self, id:PeerRef) -> bool {
         return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
     }
@@ -424,6 +442,8 @@ impl App for Aupe {
             minvalue: std::isize::MAX as f64,
 
             omniscient_freq_array_string: String::new(),
+            to_conctact: Vec::new(),
+            oldest: 0,
         }
     }
     
@@ -455,7 +475,20 @@ impl App for Aupe {
                 self.update_omn_freq(item.clone());
             }
         }
-
+        if self.is_trusted {
+            let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
+            sample(&trusted_nodes, self.params.nb_merge)
+                        .iter()
+                        .for_each(|p| self.to_conctact.push(*p));
+                           
+            /* for item in self.view.clone() {
+                self.update_contact(item.clone());
+            } */
+            if DEBUG{
+                println!("to_contacted({:?}) M={} oldest=Node{}",
+                    self.to_conctact, self.params.nb_merge, self.oldest);
+            }
+        }
         net.send(id, Msg::SelfNotif);
     }
 
@@ -478,7 +511,6 @@ impl App for Aupe {
                 _ => (),
             }
         } else if self.is_trusted{
-            let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
                     if let Some(rf) = self.params.replacement_frequency {
@@ -563,7 +595,8 @@ impl App for Aupe {
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             if self.is_trusted(*p) {
-                                net.send(*p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                                //net.send(*p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                                self.update_contact(*p);
                             }
                         });
 
@@ -571,18 +604,24 @@ impl App for Aupe {
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             if self.is_trusted(*p) {
-                                net.send(*p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                                //net.send(*p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                                self.update_contact(*p);
                             }
                         });
                     
+                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                        println!("to_contacted({:?}) M={} oldest=Node{}",
+                        self.to_conctact, self.params.nb_merge, self.oldest);
+                    }
                     // intentionally send Merge replies
                     //(self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
-                    sample(&trusted_nodes, 10).iter()
+                    //sample(&trusted_nodes, self.params.nb_merge)
+                    self.to_conctact.iter()
                         .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
                         .for_each(|p| {
-                            net.send(**p, Msg::MergeReply(self.omniscient_freq_array_string.to_string())) 
+                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
                         });
                     
                     net.send(self.my_id, Msg::SelfNotif);
