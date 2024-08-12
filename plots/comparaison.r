@@ -12,12 +12,14 @@ library(dplyr)
 library(tidyr)
 library(gridExtra)
 
-
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
 "Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
-"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
-"AupeGlobal" = "#FF0033")
+"Aupe(t=20%)"="#006600", "Aupe(t=30%)"="#000000", 
+"AupeGlobal(t=100%)" = "#FF0033", "AupeGlobal(t=1%)"="#33FF99", 
+"AupeGlobal(t=5%)"="#FF3399", "AupeGlobal(t=10%)"="#3399FF", 
+"AupeGlobal(t=20%)"="#CC6666", "AupeGlobal(t=30%)"="#999000")
+
 
 line_size <- 1
 point_size <- 1.5
@@ -27,7 +29,7 @@ height <- width / ratio   # hauteur calculée en fonction du ratio
 
 #  width = width, height = height)
 
-partview_plot <- function( df1, df2, df3, df4, df5, df6, f, rho) {
+partview_plot <- function( df1, df2, df3, df4, df5, df6, df7, df8, df9, f, rho) {
     print("viewplot")
     print(dim(df1))
     print(colnames(df1))
@@ -39,6 +41,9 @@ partview_plot <- function( df1, df2, df3, df4, df5, df6, f, rho) {
     df4 <- data.frame(Time = seq_along(df4$avgByzN), comp = df4$comp/100)
     df5 <- data.frame(Time = seq_along(df5$avgByzN), comp = df5$comp/100)
     df6 <- data.frame(Time = seq_along(df6$avgByzN), comp = df6$comp/100)
+    df7 <- data.frame(Time = seq_along(df7$avgByzN), comp = df7$comp/100)
+    df8 <- data.frame(Time = seq_along(df8$avgByzN), comp = df8$comp/100)
+    df9 <- data.frame(Time = seq_along(df9$avgByzN), comp = df9$comp/100)
     
 
     df1 <- df1 %>% mutate(Strat = "Aupe(t=1%)")
@@ -47,13 +52,17 @@ partview_plot <- function( df1, df2, df3, df4, df5, df6, f, rho) {
     df4 <- df4 %>% mutate(Strat = "Aupe(t=20%)")
     df5 <- df5 %>% mutate(Strat = "Aupe(t=30%)")
     df6 <- df6 %>% mutate(Strat = "Basalt")
-    
-    df <- bind_rows(df1, df2, df3, df4, df5, df6)#, df7)
+    df7 <- df7 %>% mutate(Strat = "AupeGlobal(t=10%)")
+    df8 <- df8 %>% mutate(Strat = "AupeGlobal(t=20%)")
+    df9 <- df9 %>% mutate(Strat = "AupeGlobal(t=30%)")
+
+    df <- bind_rows(df1, df2, df3, df4, df5, df6, df7, df8, df9)
     #print(df)
     print(colnames(df))
     
-    levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "Basalt")
+    levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)", "AupeGlobal(t=10%)",
+    "Aupe(t=20%)", "AupeGlobal(t=20%)", "Aupe(t=30%)", "AupeGlobal(t=30%)",
+    "Aupe(t=100%)", "Basalt")
     df$Strat <- factor(df$Strat, levels = levels)
 
     pos1=c(0.3, 0.2)
@@ -76,7 +85,7 @@ partview_plot <- function( df1, df2, df3, df4, df5, df6, f, rho) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.35, 0.1),
+            legend.position = c(0.45, 0.1),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  
@@ -144,12 +153,17 @@ comp <- function(args, path, topic) {
     path4 = paste(filepath,"/", strat,"/text",f*100,"-", t4, sep="")
     path5 = paste(filepath,"/", strat,"/text",f*100,"-", t5, sep="")
     path6 = paste(filepath,"/basalt/text",f*100, sep="")
+    strat2="aupe-global"
+    path33 = paste(filepath,"/", strat2,"/text",f*100,"-10", sep="")
+    path44 = paste(filepath,"/", strat2,"/text",f*100,"-20", sep="")
+    path55 = paste(filepath,"/", strat2,"/text",f*100,"-30", sep="")
 
     print(path1)
     print(path2)
     print(path5)
     print(path6)
-    
+    print(path55)
+
     merge1 <- read.table(path1, header = TRUE)
     roundNumber1 <- nrow(merge1)
     merge2 <- read.table(path2, header = TRUE)
@@ -162,7 +176,13 @@ comp <- function(args, path, topic) {
     roundNumber5 <- nrow(merge5)
     merge6 <- read.table(path6, header = TRUE)
     roundNumber6 <- nrow(merge6)
-    
+
+    merge33 <- read.table(path33, header = TRUE)
+    roundNumber33 <- nrow(merge33)
+    merge44 <- read.table(path44, header = TRUE)
+    roundNumber44 <- nrow(merge44)
+    merge55 <- read.table(path55, header = TRUE)
+    roundNumber55 <- nrow(merge55)
 
     print(paste("roundNumber1",roundNumber1, "vs roundNumber2", roundNumber2,
     "and roundNumber5", roundNumber5))
@@ -187,6 +207,11 @@ comp <- function(args, path, topic) {
     merge5$comp=(merge5$avgByzN/v)*100
     merge6$comp=(merge6$avgByzN/v)*100
 
+
+    merge33$comp=(merge33$avgByzN/v)*100
+    merge44$comp=(merge44$avgByzN/v)*100
+    merge55$comp=(merge55$avgByzN/v)*100
+
     title="Aupe Merge studying"
     title=paste(title, #"\n Byzantine proportion inside parts of the view over Time \n", 
         "f=", f*100,"% N=", N, " v=s=", v, " F=10 \n rounds=", roundNumber1)
@@ -198,11 +223,14 @@ comp <- function(args, path, topic) {
     resilience5=c(tail(merge5, 1)$comp)
     resilience6=c(tail(merge6, 1)$comp)
 
+    resilience33=c(tail(merge33, 1)$comp)
+    resilience44=c(tail(merge44, 1)$comp)
+    resilience55=c(tail(merge55, 1)$comp)
     print(paste("resilience1",resilience1, "vs resilience2", resilience2, 
     "and resilience5", resilience5))
     
     #PLOTS
-    print(partview_plot(merge1, merge2, merge3, merge4, merge5, merge6, f, k))
+    print(partview_plot(merge1, merge2, merge3, merge4, merge5, merge6, merge33, merge44, merge55, f, k))
    
     ttc1 <- detect_first_convergence_index(merge1$comp, f, roundNumber1)
     ttc2 <- detect_first_convergence_index(merge2$comp, f, roundNumber2)
@@ -211,6 +239,9 @@ comp <- function(args, path, topic) {
     ttc5 <- detect_first_convergence_index(merge5$comp, f, roundNumber5)
     ttc6 <- detect_first_convergence_index(merge6$comp, f, roundNumber6)
     
+    ttc33 <- detect_first_convergence_index(merge33$comp, f, roundNumber33)
+    ttc44 <- detect_first_convergence_index(merge44$comp, f, roundNumber44)
+    ttc55 <- detect_first_convergence_index(merge55$comp, f, roundNumber55)
     # 2. Logs
     
     if (comment==""){
@@ -225,7 +256,6 @@ comp <- function(args, path, topic) {
     
     filename = paste(new, "/","dsn", path,  sep="")
     
-    #filename, expe, f, t, strat, rho, resilience, sm, ttC, roundNumber, comment, name
     write_resultsT(filename, expe, f, paste("Aupe(t=",t1,"%)", sep = ""), rho, resilience1, sm,
         ttc1, roundNumber1, comment, path)
     write_resultsT(filename, expe, f, paste("Aupe(t=",t2,"%)", sep = ""), rho, resilience2, sm,
@@ -238,4 +268,11 @@ comp <- function(args, path, topic) {
         ttc5, roundNumber5, comment, path)
     write_resultsT(filename, expe, f, "Basalt", rho, resilience6, sm,
         ttc6, roundNumber6, comment, path)
+    
+    write_resultsT(filename, expe, f, paste("AupeGlobal(t=10%)", sep = ""), rho, resilience33, sm,
+        ttc33, roundNumber33, comment, path)
+    write_resultsT(filename, expe, f, paste("AupeGlobal(t=20%)", sep = ""), rho, resilience44, sm,
+        ttc44, roundNumber44, comment, path)
+    write_resultsT(filename, expe, f, paste("AupeGlobal(t=30%)", sep = ""), rho, resilience55, sm,
+        ttc55, roundNumber55, comment, path)
 }
