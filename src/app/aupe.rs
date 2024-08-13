@@ -8,7 +8,7 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy,
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 pub enum Msg {
     SelfNotif,
@@ -394,7 +394,7 @@ impl Aupe {
             } 
         }
     }
-    
+
     fn is_trusted(&self, id:PeerRef) -> bool {
         return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
     }
