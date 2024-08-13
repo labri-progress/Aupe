@@ -56,9 +56,10 @@ if [ $strat -eq 0 ]; then
     T=$(echo "scale=0; 100.0 * $t / 1" | bc)
     echo $folder"/text"$F"-"$T
     trust=$(echo "scale=0; $N * $t / 1" | bc)
+    sup=30 # sup Merges
     #cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-    ./aupewoponderation -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-        -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F"-"$T
+    ./aupeM -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+        -v $v -u $v -k $k -r $r  -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
 elif [ $strat -eq 1 ]; then
     cargo run -- -T $roundMax -n $N aupe -L -G samples -f $force -t $byz \
         -v $v -u $v -k $k -r $r  -m $sm -n $N > $folder"/text"$F
