@@ -22,14 +22,18 @@ T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
 
-nohup ./aupeTN -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-    -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T &
+strat="${1:-0}"
 
-nohup ./aupey -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-        -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T"RPLY" &
-
-nohup ./aupeRand -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-        -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T"Rand" &
-
-nohup ./aupeyYRND -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
-        -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T"YRND" &
+if [ $strat -eq 0 ]; then
+    nohup ./aupeTN -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+        -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T &
+elif [ $strat -eq 1 ]; then
+    nohup ./aupey -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+            -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T"RPLY" &
+elif [ $strat -eq 2 ]; then
+    nohup ./aupeRand -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+            -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T"Rand" &
+elif [ $strat -eq 3 ]; then
+    nohup ./aupeyYRND -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+            -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T"YRND" &
+fi
