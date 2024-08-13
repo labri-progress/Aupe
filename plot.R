@@ -8,7 +8,7 @@ library(ggplot2)
 N=as.numeric(args[1])
 f=as.numeric(args[2])
 other="aupe-merge"
-filename="text22-20" # paste("text",f, sep="")
+filename="rho1text26-30RPLY" # paste("text",f, sep="")
 data <- read.table(filename, header = TRUE)
 
 if (N==1000 ){
