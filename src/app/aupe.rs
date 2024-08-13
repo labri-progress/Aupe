@@ -8,14 +8,14 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy,
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 pub enum Msg {
     SelfNotif,
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    //MergeRequest(String),
+    MergeRequest(String),
     MergeReply(String),
 }
 
@@ -394,6 +394,7 @@ impl Aupe {
             } 
         }
     }
+    
     fn is_trusted(&self, id:PeerRef) -> bool {
         return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
     }
@@ -609,19 +610,23 @@ impl App for Aupe {
                             }
                         });
                     
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                    /* if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("to_contacted({:?}) M={} oldest=Node{}",
                         self.to_conctact, self.params.nb_merge, self.oldest);
-                    }
+                    } */
                     // intentionally send Merge replies
                     //(self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
                     //sample(&trusted_nodes, self.params.nb_merge)
+                    //self.to_conctact.iter()
+                    /* let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine)
+                                                        .collect::<Vec<_>>(); */
+                    //sample(&trusted_nodes, self.params.nb_merge).iter()
                     self.to_conctact.iter()
                         .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
                         .for_each(|p| {
-                            net.send(**p, Msg::MergeReply(self.omniscient_freq_array_string.to_string())) 
+                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
                         });
                     
                     net.send(self.my_id, Msg::SelfNotif);
@@ -658,7 +663,7 @@ impl App for Aupe {
                     self.update_omn_freq(from.clone());
                
                 },
-                /* Msg::MergeRequest(lst) => {
+                Msg::MergeRequest(lst) => {
 
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("message MergeRq from {} :{:?} ", from.to_string(), lst);
@@ -669,7 +674,7 @@ impl App for Aupe {
                         Ok(vec) => self.merge_knowledge_both_ways(vec),
                         Err(e) => println!("Error parsing string: {}", e),
                     }
-                }, */
+                },
                 Msg::MergeReply(lst) => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("message MergeRy from {} :{:?} ", from.to_string(), lst);
@@ -802,9 +807,9 @@ impl App for Aupe {
                     self.update_omn_freq(from.clone());
                
                 },
-                /* Msg::MergeRequest(_lst) => {
+                Msg::MergeRequest(_lst) => {
                     println!("NO MERGERq ");    
-                }, */
+                },
                 Msg::MergeReply(_lst) => {
                     eprintln!("NO MERGERply"); 
                 },

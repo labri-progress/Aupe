@@ -39,12 +39,16 @@ data$Strat <- gsub("brahms", "Brahms", data$Strat)
 data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
 
 data <- bind_rows(data, data1)
-data = data[data$comment %in% c("RAS"), ]
+#data = data[data$comment %in% c("RAS"), ]
 #data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="yellow", "Aupe(t=5%)"="pink", "Aupe(t=10%)"="chocolate1", 
-    "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", "AupeGlobal" = "red")
+"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
+"Aupe(t=20%)"="#006600", "Aupe(t=30%)"="#000000", 
+"AupeGlobal(t=100%)" = "#FF0033", "AupeGlobal(t=1%)"="#33FF99", 
+"AupeGlobal(t=5%)"="#FF3399", "AupeGlobal(t=10%)"="#3399FF", 
+"AupeGlobal(t=20%)"="#CC6666", "AupeGlobal(t=30%)"="#999000")
 
 levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
     "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "AupeGlobal")

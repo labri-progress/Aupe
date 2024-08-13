@@ -39,7 +39,7 @@ if (k==0) {
 }
 
 f_values= seq(0.2, 0.3, by=0.02)
-
+f_values = c(0.26)
 print(args)
 print(f_values)
 thrshold = 0 #as.numeric(args[1])
