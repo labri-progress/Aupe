@@ -31,12 +31,15 @@ f_values=c(0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
 f_values= seq(0.2, 0.3, by=0.02) #c(0.22) #, 0.26, 0.34) #all_f_values
 
 k=as.integer(args[1])
+print(paste("rho",k))
 if (k==0) {
-    f_values =  c(f_values, c(0.34, 0.40, 0.50))
+    f_values =  c(0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.34, 0.40, 0.50)
 }else {
-    f_values =  c(c(0.08, 0.1, 0.12, 0,14), f_values, c(0.34, 0.40, 0.50))
+    f_values =  c(0.08, 0.1, 0.12, 0,14, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.34, 0.40, 0.50)
 }
-f_values= c()
+
+f_values= seq(0.2, 0.3, by=0.02)
+
 print(args)
 print(f_values)
 thrshold = 0 #as.numeric(args[1])
@@ -46,9 +49,9 @@ strat = "aupe-merge"
 merge = "no"
 Method = "moy"
 gamma = 0.3
-rMAX = 200
+rMAX = 500
 
-print(paste("rho",k))
+#print(paste("rho",k))
 r=1
 expe=0
 sm=100
