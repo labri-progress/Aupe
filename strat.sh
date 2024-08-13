@@ -23,7 +23,8 @@ echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
 
 strat="${1:-0}"
-
+stratLitt="test"
+mkdir $stratLitt
 if [ $strat -eq 0 ]; then
     nohup ./aupeTN -T $rnd -n $N aupe -O -G samples -f $force -t $byz -x $trust \
         -v 160 -u 160 -k $k -r $r -m $sm -n $N -p $sup > $stratLitt"/rho"$k"text"$F"-"$T &
