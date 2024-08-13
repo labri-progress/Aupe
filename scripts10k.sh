@@ -45,6 +45,6 @@ elif [ $strat -eq 1 ]; then
     byz=$(echo "scale=0; $N * $f / 1" | bc)
 
     echo "Basalt Rounds" > $stratLitt"/log.txt"
-    nohup ./basalt-sim -T $rnd -n $N basalt-simple -G -f $force -t $byz 500\
+    nohup ./basalt-sim -T $rnd -n $N basalt-simple -G -f $force -t $byz \
         -v 160 -i 160 -k $k -r 1 > $stratLitt"/rho"$k"text"$F &
 fi
