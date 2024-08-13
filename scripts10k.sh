@@ -12,7 +12,7 @@ if [ $strat -eq 0 ]; then
 elif [ $strat -eq 1 ]; then
     stratLitt="basalt"
 elif [ $strat -eq 2 ]; then
-    stratLitt="aupey"
+    stratLitt="aupeMy"
 fi
 echo "received instruction for " $stratLitt
 
