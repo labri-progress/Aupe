@@ -178,8 +178,6 @@ impl NetMetrics for Metrics {
             "pushByzN",
             "pullByzN",
             "sampByzN",
-            "pushBagByz",
-            "pullBagByz",
             "n_isolated",
             "avgByzSamp",
             "min",

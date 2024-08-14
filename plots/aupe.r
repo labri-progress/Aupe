@@ -30,7 +30,7 @@ rho <- function(args, path, topic) {
     strat = args[7]
     merge = args[8]
     gamma = as.double(args[9])
-    roundMAX = 200 #as.numeric(args[10])
+    roundMAX = as.numeric(args[10])
     folder = args[11]
     k=as.numeric(args[12])
     s=as.numeric(args[13])
@@ -50,6 +50,12 @@ rho <- function(args, path, topic) {
         N, sep="")
     brahmspath = paste(filepath1,"/", strat,"/text",f*100, sep="")
     aupepath = paste(filepath2,"/", strat,"/text",f*100, sep="")
+    if (strat=="aupe-merge" && merge=="yes"){
+        t=10
+        strat=paste("Aupe(t=", t,"%)", sep="")
+        brahmspath = paste(filepath1,"/", "aupe-merge","/text",f*100,"-",t, sep="")
+        aupepath = paste(filepath2,"/", "aupe-merge","/text",f*100, "-", t,sep="")
+    }
     print(brahmspath)
     print(aupepath)
     if (strat=="basalt-simple"){
