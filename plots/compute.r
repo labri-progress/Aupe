@@ -60,7 +60,7 @@ compute <- function(args, path, topic) {
     strat = args[7]
     merge = args[8]
     gamma = as.double(args[9])
-    roundMAX = 200 #as.numeric(args[10])
+    roundMAX = as.numeric(args[10])
     folder = args[11]
     k=as.numeric(args[12])
     s=as.numeric(args[13])

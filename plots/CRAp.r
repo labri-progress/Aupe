@@ -22,7 +22,8 @@ all_f_values= c(0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
     0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
     0.42, 0.44, 0.46, 0.48, 0.50 ) #c(0.06, 0.10, 0.14, 0.18, 0.20, 0.24, 0.30, 0.36, 0.40, 0.50)
 
-strats = c("aupe-merge", "aupe-global", "aupe", "basalt-simple", "brahms")
+strats = c("aupe-merge", "aupe-global", "aupe", 
+"basalt-simple", "brahms")
 f_values=c(0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 
     0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
     0.42, 0.44, 0.46, 0.48, 0.50 )
@@ -39,14 +40,14 @@ if (k==0) {
 }
 
 f_values= seq(0.2, 0.3, by=0.02)
-f_values = c(0.26)
+f_values = all_f_values
 print(args)
 print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = "aupe-merge"
-merge = "no"
+strat = strats[5]
+merge = "yes"
 Method = "moy"
 gamma = 0.3
 rMAX = 500
@@ -76,13 +77,14 @@ for (n in n_values){
     for (f in f_values){
         
         print(paste("Expe", expe, sep=""))
+        rMAX = 500
         params = c(n, v, f, 0, sm, expe, strat, merge, gamma, 
             rMAX, folder, k, r)
 
         pdf(paste(folder, "/expe", expe, ".pdf", sep=""), width = width, height = height)
         #par(mfrow = c(1, 1))  # 3 rows and 2 columns
         
-        #rho(params, CVIEW, "System faulty proportion  (%)")
+        rho(params, CVIEW, "System faulty proportion  (%)")
         if(strat == "aupe-merge" && FALSE){
             source("studyAupe.r")#source("studyAupeT.r")
             #bags(params, BAGS, "Stream Bags faulty proportion (%)")
@@ -94,10 +96,9 @@ for (n in n_values){
         }
         if(strat == "aupe-merge" && TRUE){
             source("comparaison.r")
-            rMAX = 1000
             params = c(n, v, f, 0, sm, expe, strat, merge, gamma, 
             rMAX, folder, k, r)
-            comp(params, CVIEW, "Study of Aupe-mergeT ")
+            #comp(params, CVIEW, "Study of Aupe-mergeT ")
         }
        
         dev.off()
