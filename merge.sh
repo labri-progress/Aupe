@@ -24,10 +24,10 @@ force="${4:-10}"
 sm="${5:-100}"
 roundMax="${6:-200}"
 strat="${7:-1}"
-k="${8:-0}" #number_of_partitions
-r="${9:-1}" #number_of_hash_functions
-
-stratLitt="aupe-merge"
+k="${8:-0}" 
+r="${9:-1}" 
+sup="${10:-30}"
+stratLitt="aupe-merge-sup"$sup
 
 if [ $strat -eq 0 ]; then
     t=0.01
@@ -54,10 +54,10 @@ byz=$(echo "scale=0; $N * $f / 1" | bc)
 T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
-sup=30 # sup Merges
+ # sup Merges
     #cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
 
-./aupeM -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+./aupefinal -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
     -v $v -u $v -k $k -r $r  -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
 
 
