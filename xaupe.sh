@@ -21,7 +21,7 @@ batch_max=8
 
 round=500
 force=10
-N=1000 #10000
+N=10000 #10000
 
 if [ $N -eq 1000 ]; then
     v=100
