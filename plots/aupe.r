@@ -51,7 +51,7 @@ rho <- function(args, path, topic) {
     brahmspath = paste(filepath1,"/", strat,"/text",f*100, sep="")
     aupepath = paste(filepath2,"/", strat,"/text",f*100, sep="")
     if (strat=="aupe-merge-sup10" && merge=="yes"){
-        t=20
+        t=30
         brahmspath = paste(filepath1,"/", strat,"/text",f*100,"-",t, sep="")
         aupepath = paste(filepath2,"/", strat,"/text",f*100, "-", t,sep="")
         strat=paste("Aupe(t=", t,"%)", sep="")

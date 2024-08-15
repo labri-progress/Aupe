@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-args = commandArgs(trailingOnly=TRUE)
 #Rscript strategy.r 10000
 library(ggplot2)
 library(dplyr)
@@ -28,16 +26,16 @@ data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
 
 #Filter
 data = data[data$comment %in% c("RAS"), ]
-data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="yellow", "Aupe(t=5%)"="pink", "Aupe(t=10%)"="chocolate1", 
     "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", "AupeGlobal" = "red")
 
-levels=c("Brahms", "Basalt", "Aupe(t=0%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "AupeGlobal")
+levels=c("Aupe(t=0%)", "Aupe(t=30%)", "Aupe(t=100%)", 
+    "Basalt","Brahms")
 
 data$Strat <- factor(data$Strat, levels = levels)
+data
 
 line_size <- 1
 point_size <- 1.5
