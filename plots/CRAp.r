@@ -46,7 +46,7 @@ print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat = strats[5]
+strat = "aupe-merge-sup10" #strats[5]
 merge = "yes"
 Method = "moy"
 gamma = 0.3

@@ -17,7 +17,7 @@ thrshold="${1:-0}"
 limit="${2:-10000}"
 sup="${3:-30}"
 
-batch_max=8
+batch_max=2
 
 round=500
 force=10
