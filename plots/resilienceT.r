@@ -1,15 +1,16 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
-#Rscript partview.r
+k=as.integer(args[1])
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(gridExtra)
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="yellow", "Aupe(t=5%)"="pink", "Aupe(t=10%)"="brown", 
-    "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", "AupeGlobal" = "red")
-
+"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
+"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
+"AupeGlobal" = "#FF0033")
 line_size <- 1
 point_size <- 1.5 
 
@@ -63,7 +64,7 @@ partview3 <- function(data, component, rho_value) {
             theme_minimal() +
             scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
             scale_color_manual(values = custom_colors) +
-            theme(legend.position = c(0.7, 0.15),
+            theme(legend.position = c(0.75, 0.15),
                 legend.title = element_blank(),
                 panel.grid.major = element_blank(),  # Remove major gridlines
                 panel.grid.minor = element_blank(),  # Remove minor gridlines
@@ -72,15 +73,17 @@ partview3 <- function(data, component, rho_value) {
                 fill = NA),  
                 legend.spacing.y = unit(0.001, "cm"),
                 text = element_text(size = 12, color="black"),
-                axis.title.x = element_text(size = 13, face = "bold"),  
-                axis.title.y = element_text(size = 13, face = "bold"),  
-                axis.text.x = element_text(size = 13),  
-                axis.text.y = element_text(size = 13), 
-                plot.title = element_text(size = 13, face = "bold"),  
+                axis.title.x = element_text(size = 12, face = "bold"),  
+                axis.title.y = element_text(size = 12, face = "bold"),  
+                axis.text.x = element_text(size = 12),  
+                axis.text.y = element_text(size = 12), 
+                plot.title = element_text(size = 12, face = "bold"),  
                 legend.text = element_text(size = 10),  
                 legend.key.width= unit(0.75, 'cm'),
                 axis.ticks = element_line(color = "black", linewidth=1), 
-            )
+            )+
+            guides(shape = guide_legend(override.aes = list(size = 3)))+
+        guides(color=guide_legend(nrow=2))
 }
 
 # 0. Loading
@@ -99,14 +102,14 @@ levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=10%)",
 data$Strat <- factor(data$Strat, levels = levels)
 data = data[data$Strat %in% levels, ]
 print(unique(data$Strat))
-rho=1
+rho=k
 print(paste("rho", rho, sep=""))
 print(colnames(data))
 plot_comp1 <- partview(data, "pushPart", rho)
 plot_comp2 <- partview(data, "pullPart", rho)
 plot_comp3 <- partview3(data, "sampPart", rho)
 
-ratio <- 1 #6 / 9
+ratio <- 16 / 9
 width <- 8   # largeur en pouces
 height <- width / ratio
 

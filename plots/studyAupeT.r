@@ -60,13 +60,14 @@ view <- function(args, path, topic) {
 
     strat1="brahms"
     strat2="aupe"
-    strat3="aupe-merge"
+    #strat3="basalt-simple"
+    t4=20
     brahmspath = paste(filepath,"/", strat1,"/text",f*100, sep="")
     aupepath = paste(filepath,"/", strat2,"/text",f*100, sep="")
-    mergepath = paste(filepath,"/", strat3,"/text",f*100, sep="")
+    mergepath = paste(filepath,"/", strat,"/text",f*100,"-", t4, sep="") #paste(filepath,"/", strat3,"/text",f*100, sep="")
     print(brahmspath)
     print(aupepath)
-    print(mergepath)
+    #print(mergepath)
     
     brahms <- read.table(brahmspath, header = TRUE)
     roundNumber11 <- nrow(brahms)
@@ -97,13 +98,14 @@ view <- function(args, path, topic) {
             comment = paste(comment, "and", sentence, sep ="")
         }
     }
-    
     merge1$comp1=(merge1$pushByzN)*100
     merge2$comp1=(merge2$pushByzN)*100
     merge3$comp1=(merge3$pushByzN)*100
+
     merge1$comp2=(merge1$pullByzN)*100
     merge2$comp2=(merge2$pullByzN)*100
-    merge3$comp2=(merge3$pushByzN)*100
+    merge3$comp2=(merge3$pullByzN)*100
+
     merge1$comp3=(merge1$sampByzN)*100
     merge2$comp3=(merge2$sampByzN)*100
     merge3$comp3=(merge3$sampByzN)*100
@@ -111,9 +113,11 @@ view <- function(args, path, topic) {
     brahms$comp1=(brahms$pushByzN)*100
     aupe$comp1=(aupe$pushByzN)*100
     merge$comp1=(merge$pushByzN)*100
+
     brahms$comp2=(brahms$pullByzN)*100
     aupe$comp2=(aupe$pullByzN)*100
-    merge$comp2=(merge$pushByzN)*100
+    merge$comp2=(merge$pullByzN)*100
+
     brahms$comp3=(brahms$sampByzN)*100
     aupe$comp3=(aupe$sampByzN)*100
     merge$comp3=(merge$sampByzN)*100
@@ -169,7 +173,7 @@ view <- function(args, path, topic) {
             ttc11, roundNumber11, comment, path)
         write_results(filename, expe, f, strat2, rho, resilience22, part, sm,
             ttc22, roundNumber22, comment, path)
-        write_results(filename, expe, f, strat3, rho, resilience33, part, sm,
-            ttc33, roundNumber33, comment, path)
+        write_results(filename, expe, f, paste("Aupe(t=",t4,"%)",sep=""), rho, resilience33, part, sm,
+           ttc33, roundNumber33, comment, path)
     }
 }
