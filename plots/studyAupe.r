@@ -50,10 +50,10 @@ view <- function(args, path, topic) {
 
     strat1="brahms"
     strat2="aupe"
-    strat3="aupe-merge"
+    strat3="aupe-merge-sup10"
     brahmspath = paste(filepath,"/", strat1,"/text",f*100, sep="")
     aupepath = paste(filepath,"/", strat2,"/text",f*100, sep="")
-    mergepath = paste(filepath,"/", strat3,"/text",f*100, sep="")
+    mergepath = paste(filepath,"/", strat3,"/text",f*100,"-30", sep="")
     print(brahmspath)
     print(aupepath)
     print(mergepath)
@@ -130,7 +130,7 @@ view <- function(args, path, topic) {
             ttc0, roundNumber1, comment, path)
         write_results(filename, expe, f, strat2, rho, resilience2, part, sm,
             ttc1, roundNumber2, comment, path)
-        write_results(filename, expe, f, strat3, rho, resilience3, part, sm,
+        write_results(filename, expe, f, "Aupe(t=30%)", rho, resilience3, part, sm,
             ttc1, roundNumber3, comment, path)
     }
 }

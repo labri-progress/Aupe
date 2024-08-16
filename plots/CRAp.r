@@ -41,12 +41,17 @@ if (k==0) {
 
 f_values= seq(0.2, 0.3, by=0.02)
 f_values = all_f_values
+
+
+#f_values= c(0.22) #c(0.22, 0.26, 0.34)
 print(args)
 print(f_values)
 thrshold = 0 #as.numeric(args[1])
 #rep = as.integer(args[2])
 rep=1
-strat =  strats[5] #"aupe-merge-sup10"
+strat1 =  "aupe-merge-sup10"
+strat2 =  "aupe-merge-sup30"
+strat=strats[5]
 merge = "yes"
 Method = "moy"
 gamma = 0.3
@@ -60,7 +65,7 @@ local1 = "machines"
 local2 = "serveur9/data"
 local = "data"  
 
-ratio <- 16 / 9
+ratio <- 25 / 9
 ratiopartview <- 1
 width <- 8   # largeur en pouces
 height <- width / ratio
@@ -85,12 +90,12 @@ for (n in n_values){
         #par(mfrow = c(1, 1))  # 3 rows and 2 columns
         
         rho(params, CVIEW, "System faulty proportion  (%)")
-        if(strat == "aupe-merge" && FALSE){
-            source("studyAupe.r")#source("studyAupeT.r")
+        if(strat == strat1) {#"aupe-merge" && FALSE){
+            source("studyAupeT.r")#source("studyAupeT.r")
             #bags(params, BAGS, "Stream Bags faulty proportion (%)")
-            view(params, PVIEW, "Parts of the view faulty proportion  (%)")
+            #view(params, PVIEW, "Parts of the view faulty proportion  (%)")
         }
-        if(strat == "aupe-merge" && FALSE){
+        if(strat == strat1) { #"aupe-merge" && FALSE){
             source("trusted.r")
             #trust(params, CVIEW, "Study of Aupe-mergeT ")
         }

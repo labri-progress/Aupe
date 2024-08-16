@@ -61,7 +61,7 @@ partview3 <- function(data, component) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.775, 0.15),
+            legend.position = c(0.775, 0.55),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  
@@ -83,15 +83,15 @@ partview_plot <- function(df1, df2, df3, df11, df22, df33, f) {
     df2 <- data.frame(Time = seq_along(df2$comp1), pushPart = df2$comp1/100, pullPart = df2$comp2/100, sampPart = df2$comp3/100)
     df3 <- data.frame(Time = seq_along(df3$comp1), pushPart = df3$comp1/100, pullPart = df3$comp2/100, sampPart = df3$comp3/100)
 
-    #df11 <- data.frame(Time = seq_along(df11$comp1), pushPart = df11$comp1/100, pullPart = df11$comp2/100, sampPart = df11$comp3/100)
+    df11 <- data.frame(Time = seq_along(df11$comp1), pushPart = df11$comp1/100, pullPart = df11$comp2/100, sampPart = df11$comp3/100)
     df22 <- data.frame(Time = seq_along(df22$comp1), pushPart = df22$comp1/100, pullPart = df22$comp2/100, sampPart = df22$comp3/100)
     df33 <- data.frame(Time = seq_along(df33$comp1), pushPart = df33$comp1/100, pullPart = df33$comp2/100, sampPart = df33$comp3/100)
 
     # Add an identifier column to each data frame
     df1 <- df1 %>% mutate(Source = "Brahms")
     df2 <- df2 %>% mutate(Source = "Aupe(t=0%)")
-    df3 <- df3 %>% mutate(Source = "Aupe(t=100%)")
-    #df11 <- df11 %>% mutate(Source = "Aupe(t=5%)")
+    df3 <- df3 %>% mutate(Source = "Aupe(t=20%)")
+    df11 <- df11 %>% mutate(Source = "Aupe(t=5%)")
     df22 <- df22 %>% mutate(Source = "Aupe(t=10%)")
     df33 <- df33 %>% mutate(Source = "Aupe(t=30%)")
     # Reshape each data frame to long format
@@ -99,12 +99,13 @@ partview_plot <- function(df1, df2, df3, df11, df22, df33, f) {
     df2_long <- df2 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     df3_long <- df3 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
 
-    #df11_long <- df11 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
+    df11_long <- df11 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     df22_long <- df22 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     df33_long <- df33 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     # Combine the long format data frames
     
-    combined_df <- bind_rows(df1_long, df2_long, df3_long, df22_long, df33_long)
+    combined_df <- bind_rows(df1_long, df2_long, df3_long, df11_long,
+    df22_long, df33_long)
     print(unique(combined_df$Source))
 
     levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",

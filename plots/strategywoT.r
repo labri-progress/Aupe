@@ -27,7 +27,7 @@ data$Strat <- gsub("brahms", "Brahms", data$Strat)
 data$Strat <- gsub("aupe", "Aupe", data$Strat)
 
 #Filter
-data = data[data$comment %in% c("RAS"), ]
+#data = data[data$comment %in% c("RAS"), ]
 data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
