@@ -105,7 +105,7 @@ view <- function(args, path, topic) {
     print("SECOND PLOT")
     print(dim(brahms))
     print(colnames(brahms))
-    print(view_plot(brahms,aupe,merge, f*100, v))
+    print(view_plot(brahms,aupe, f*100, v))
 
     if (path == PVIEW){
         ttc0 <- detect_first_convergence_index(brahms$comp, f, roundNumber1)

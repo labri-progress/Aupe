@@ -5,10 +5,10 @@ library(tidyr)
 library(gridExtra)
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe-simple" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
 "Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
 "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
-"AupeGlobal" = "#FF0033")
+"Aupe-oracle" = "#FF0033")
 line_size <- 1
 point_size <- 1.5
 
@@ -38,7 +38,9 @@ partview <- function(data, component) {
             axis.text.x = element_text(size = 12),  
             axis.text.y = element_text(size = 12), 
             plot.title = element_text(size = 12, face = "bold"), 
-            legend.background = element_rect(fill = "transparent"),
+            
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
             axis.ticks = element_line(color = "black", linewidth=1), 
         )#+
         #guides(shape = guide_legend(override.aes = list(size = 3)))+
@@ -74,20 +76,20 @@ partview_plot <- function(df1, df2, df3, f) {
     grid.arrange(plot_comp1, plot_comp2, plot_comp3, ncol = 1)
 }
 
-view_plot <- function(df1, df2, df3, f, v) {
+view_plot <- function(df1, df2, f, v) {
     print("viewplot")
     print(dim(df1))
     print(colnames(df1))
     df1 <- data.frame(Time = seq_along(df1$avgByzN), resilience = df1$avgByzN/v)
     df2 <- data.frame(Time = seq_along(df2$avgByzN), resilience = df2$avgByzN/v)
-    df3 <- data.frame(Time = seq_along(df3$avgByzN), resilience = df3$avgByzN/v)
+    #df3 <- data.frame(Time = seq_along(df3$avgByzN), resilience = df3$avgByzN/v)
     # Add an identifier column to each data frame
     df1 <- df1 %>% mutate(Source = "Brahms")
-    df2 <- df2 %>% mutate(Source = "Aupe(t=0%)")
-    df3 <- df3 %>% mutate(Source = "Aupe(t=30%)")
+    df2 <- df2 %>% mutate(Source = "Aupe-simple")
+    #df3 <- df3 %>% mutate(Source = "Aupe(t=30%)")
     print(dim(df1))
     # Combine the long format data frames
-    df <- bind_rows(df1, df2, df3)
+    df <- bind_rows(df1, df2) #, df3)
     #print(df)
     print(colnames(df))
 

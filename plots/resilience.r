@@ -44,7 +44,9 @@ partview <- function(data, component, rho_value) {
             axis.text.x = element_text(size = 12),  
             axis.text.y = element_text(size = 12),  
             plot.title = element_text(size = 12, face = "bold"),  
-            legend.background = element_rect(fill = "transparent"),
+            
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
             axis.ticks = element_line(color = "black", linewidth=1), 
         )
 }
@@ -83,7 +85,9 @@ partview3 <- function(data, component, rho_value) {
             #legend.title = element_text(size = 14),  # Increase legend title size
             #legend.key.height= unit(0.4, 'cm'),
                 legend.key.width= unit(1, 'cm'),
-            legend.background = element_rect(fill = "transparent"),
+            
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
             axis.ticks = element_line(color = "black", linewidth=1), 
         )+
         guides(shape = guide_legend(override.aes = list(size = 3)))+

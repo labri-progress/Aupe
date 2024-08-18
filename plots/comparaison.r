@@ -95,7 +95,6 @@ partview_plot <- function( df1, df2, df3, df4, df5, df6, df7, df8, df9, f, rho) 
             legend.text = element_text(size = 10), 
              legend.key = element_blank(),
              legend.background = element_blank(), 
-            #legend.background = element_rect(fill = "transparent")
             axis.ticks = element_line(color = "black", linewidth=1),
         )+
         guides(color=guide_legend(nrow=2))

@@ -31,22 +31,25 @@ data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
 #data
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe-simple" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
 "Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
 "Aupe(t=20%)"="#006600", "Aupe(t=30%)"="#000000", 
-"AupeGlobal(t=100%)" = "#FF0033", "AupeGlobal(t=1%)"="#33FF99", 
+"Aupe-oracle" = "#FF0033", "AupeGlobal(t=1%)"="#33FF99", 
 "AupeGlobal(t=5%)"="#FF3399", "AupeGlobal(t=10%)"="#3399FF", 
 "AupeGlobal(t=20%)"="#CC6666", "AupeGlobal(t=30%)"="#999000")
 
-levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "Basalt", "Brahms")
+levels=c("Aupe-simple", "Aupe(t=5%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe-oracle", "Basalt", "Brahms")
 
 data$Strat <- factor(data$Strat, levels = levels)
+
+print(unique(data$Strat))
 #data <- data[!(data$Strat %in% c("Aupe(t=1%)", "Aupe(t=5%)")), ]
-kept <- c("Aupe(t=0%)", "Aupe(t=5%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Basalt", "Brahms")
+kept <- c("Aupe-simple", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe-oracle",  "Basalt", "Brahms")
 
 data <- data[(data$Strat %in% kept), ]
+data
 line_size <- 1
 point_size <- 1.5
 
@@ -77,6 +80,8 @@ create_plot <- function(df, rho_value) {
       panel.border = element_rect(colour = "black", size=1,
        fill = NA),  
       legend.title = element_blank(),
+      legend.key = element_blank(),              # Remove the background from legend keys
+      legend.background = element_blank(), 
       legend.position = c(0.67, 0.15),
       legend.spacing.y = unit(0.005, "cm"),
       text = element_text(size = 12, color="black"),
@@ -86,7 +91,7 @@ create_plot <- function(df, rho_value) {
       axis.text.y = element_text(size = 14),  # Increase y-axis text size
       legend.text = element_text(size = 12),  # Increase legend text size
       axis.ticks = element_line(color = "black", linewidth=1), 
-       legend.background = element_rect(fill = "transparent"),
+      # legend.background = element_rect(fill = "transparent"),
     )+
    guides(color=guide_legend(nrow=3))
 }
