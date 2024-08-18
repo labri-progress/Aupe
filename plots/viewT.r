@@ -13,7 +13,7 @@ line_size <- 1
 point_size <- 0.5
 
 partview <- function(data, component) { 
-    ggplot(data %>% filter(Component == component), aes(x = Time, y = Value, color = Source, linetype=Source)) +
+    ggplot(data %>% filter(Component == component), aes(x = Time, y = Value, color = Source)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = data %>% filter(Component == component & Time %% 10 == 0), size = 2) + # Points at intervals
         labs(#title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
@@ -45,7 +45,7 @@ partview <- function(data, component) {
 }
 
 partview3 <- function(data, component) { 
-    ggplot(data %>% filter(Component == component), aes(x = Time, y = Value, color = Source, linetype=Source)) +
+    ggplot(data %>% filter(Component == component), aes(x = Time, y = Value, color = Source)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = data %>% filter(Component == component & Time %% 10 == 0), size = 2) + # Points at intervals
         labs(#title = component,#paste("Brahms, Aupe and AupeMerge on",component, sep=" "),
@@ -61,7 +61,7 @@ partview3 <- function(data, component) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.775, 0.55),
+            legend.position = c(0.575, 0.15),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
             axis.title.x = element_text(size = 12, face = "bold"),  
@@ -69,12 +69,12 @@ partview3 <- function(data, component) {
             axis.text.x = element_text(size = 12),  
             axis.text.y = element_text(size = 12), 
             plot.title = element_text(size = 12, face = "bold"),  
-            legend.text = element_text(size = 10), 
+            legend.text = element_text(size = 12), 
                 legend.key.width= unit(0.5, 'cm'),
             legend.background = element_rect(fill = "transparent"),
             axis.ticks = element_line(color = "black", linewidth=1), 
         )+
-        guides(color=guide_legend(nrow=2))
+        guides(color=guide_legend(nrow=1))
 }
 
 partview_plot <- function(df1, df2, df3, df11, df22, df33, f) {  
@@ -90,21 +90,21 @@ partview_plot <- function(df1, df2, df3, df11, df22, df33, f) {
     # Add an identifier column to each data frame
     df1 <- df1 %>% mutate(Source = "Brahms")
     df2 <- df2 %>% mutate(Source = "Aupe(t=0%)")
-    df3 <- df3 %>% mutate(Source = "Aupe(t=20%)")
-    df11 <- df11 %>% mutate(Source = "Aupe(t=5%)")
+    #df3 <- df3 %>% mutate(Source = "Aupe(t=20%)")
+    #df11 <- df11 %>% mutate(Source = "Aupe(t=5%)")
     df22 <- df22 %>% mutate(Source = "Aupe(t=10%)")
     df33 <- df33 %>% mutate(Source = "Aupe(t=30%)")
     # Reshape each data frame to long format
     df1_long <- df1 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     df2_long <- df2 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
-    df3_long <- df3 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
+    #df3_long <- df3 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
 
-    df11_long <- df11 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
+    #df11_long <- df11 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     df22_long <- df22 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     df33_long <- df33 %>% pivot_longer(cols = ends_with("Part"), names_to = "Component", values_to = "Value")
     # Combine the long format data frames
     
-    combined_df <- bind_rows(df1_long, df2_long, df3_long, df11_long,
+    combined_df <- bind_rows(df1_long, df2_long, #df3_long, df11_long,
     df22_long, df33_long)
     print(unique(combined_df$Source))
 

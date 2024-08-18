@@ -50,8 +50,8 @@ rho <- function(args, path, topic) {
         N, sep="")
     brahmspath = paste(filepath1,"/", strat,"/text",f*100, sep="")
     aupepath = paste(filepath2,"/", strat,"/text",f*100, sep="")
-    if (strat=="aupe-merge-sup30" && merge=="yes"){
-        t=5
+    if (strat=="aupe-merge-sup10" && merge=="yes"){
+        t=20
         brahmspath = paste(filepath1,"/", strat,"/text",f*100,"-",t, sep="")
         aupepath = paste(filepath2,"/", strat,"/text",f*100, "-", t,sep="")
         strat=paste("Aupe(t=", t,"%)", sep="")
@@ -60,6 +60,15 @@ rho <- function(args, path, topic) {
     print(aupepath)
     if (strat=="basalt-simple"){
         strat="basalt"
+    }
+    if (strat=="aupe-merge"){
+        strat="Aupe(t=100%)"
+    }
+    if (strat=="aupe-global"){
+        strat="Aupe-oracle"
+    }
+    if (strat=="aupe"){
+        strat="Aupe-simple"
     }
     brahms <- read.table(brahmspath, header = TRUE)
     roundNumber1 <- nrow(brahms)
@@ -133,9 +142,13 @@ rho <- function(args, path, topic) {
         filename = paste(new, "/","dsn", name,  sep="")
         
         print(filename)
-        write_results(filename, expe, f, strat, "rho1", resilience1, sm,
-            ttc0, roundNumber1, comment)
-        write_results(filename, expe, f, strat, "rho0", resilience2, sm,
-            ttc1, roundNumber2, comment)
+        if (strat=="basalt"){
+            write_results(filename, expe, f, strat, "rho1", resilience1, sm,
+                ttc0, roundNumber1, comment)
+        }else {
+            write_results(filename, expe, f, strat, "rho0", resilience2, sm,
+                ttc1, roundNumber2, comment)
+        }
+        
     }
 }
