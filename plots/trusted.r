@@ -15,14 +15,23 @@ library(gridExtra)
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe-simple" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
 "Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
-"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
+"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 'Optimal'='black',
 "Aupe-oracle" = "#FF0033")
+
+
+custom_linetypes <- c('Basalt' = 'solid', 'Brahms' = 'solid',
+'Aupe-simple' = 'solid', 'Aupe(t=30%)' = 'solid', 
+'Aupe(t=5%)' = 'solid', 'Aupe(t=10%)' = 'solid',
+    'Aupe(t=20%)' = 'solid', 'Aupe-oracle' = 'solid',
+'Optimal'='dashed')
+
+custom_shapes <- c('Basalt' = 16, 'Brahms' = 16, 
+'Aupe(t=30%)' = 16, 'Aupe(t=5%)' = 16, 'Aupe(t=10%)' = 16,
+    'Aupe(t=20%)' = 16, 'Aupe-oracle' = 16,
+'Aupe-simple' = 16,'Optimal'=NA)
 
 line_size <- 1
 point_size <- 1.5
-ratio <- 16 / 9
-width <- 8   # largeur en pouces
-height <- width / ratio   # hauteur calculée en fonction du ratio
 
 #  width = width, height = height)
 
@@ -36,6 +45,10 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
     df2 <- data.frame(Time = seq_along(df2$avgByzN), comp = df2$comp/100)
     df3 <- data.frame(Time = seq_along(df3$avgByzN), comp = df3$comp/100)
     df4 <- data.frame(Time = seq_along(df4$avgByzN), comp = df4$comp/100)
+
+    rep = rep(f/100, length(df5$avgByzN))
+    df6 <- data.frame(Time = seq_along(df5$avgByzN), comp = rep)
+
     df5 <- data.frame(Time = seq_along(df5$avgByzN), comp = df5$comp/100)
 
     df0 <- df0 %>% mutate(Source = "Aupe-simple")
@@ -44,28 +57,29 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
     df3 <- df3 %>% mutate(Source = "Aupe(t=10%)")
     df4 <- df4 %>% mutate(Source = "Aupe(t=20%)")
     df5 <- df5 %>% mutate(Source = "Aupe(t=30%)")
+    df6 <- df6 %>% mutate(Source = "Optimal")
     
-    df <- bind_rows(df0, df1, df3, df4, df5)#, df7)
+    df <- bind_rows(df0, df1, df3, df4, df5, df6)
     #print(df)
     print(colnames(df))
     
     levels=c("Aupe-simple", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe-oracle", "Brahms")
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe-oracle", "Brahms", "Optimal")
     df$Source <- factor(df$Source, levels = levels)
 
-    pos1=c(0.3, 0.2)
-    pos0=c(0.7, 0.7)
-    ggplot(df, aes(x = Time, y = comp, color = Source)) + #, linetype = trusted)) +
+    text_size =14
+    ggplot(df, aes(x = Time, y = comp, color = Source, linetype = Source, shape=Source)) +
         geom_line(size = line_size) + # Lines
         geom_point(data = df %>% filter(Time %% 10 == 0), size = point_size) + # Points at intervals
-        geom_hline(yintercept = f/100, linetype = "dashed", color = "black") +
         labs(#title = paste("AupeMerge system resilience depending on t f=", f, "% rho=", rho, sep=""),
             x = "Time steps",
-            y = "Prop. of Byz. Samples") +
+            y = "Prop. of Byz. Samp.") +
         theme_minimal() +
         coord_cartesian(ylim = c(0, 1))+
         scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + #c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
         scale_color_manual(values = custom_colors) +
+    scale_linetype_manual(values = custom_linetypes) +
+    scale_shape_manual(values = custom_shapes) +
         theme(
             panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(), # Remove major gridlines
@@ -73,17 +87,17 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
             panel.border = element_rect(colour = "black", linewidth=1,
             fill = NA),  
             legend.title = element_blank(),
-            legend.position = c(0.35, 0.1),
+            legend.position = c(0.5, 0.15),
             legend.spacing.y = unit(0.001, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 12, face = "bold"),  
-            axis.title.y = element_text(size = 12, face = "bold"),  
-            axis.text.x = element_text(size = 12),  
-            axis.text.y = element_text(size = 12), 
-            legend.text = element_text(size = 12), 
+            axis.title.x = element_text(size = text_size, face = "bold"),  
+            axis.title.y = element_text(size = text_size, face = "bold"),  
+            axis.text.x = element_text(size = text_size),  
+            axis.text.y = element_text(size = text_size), 
+            legend.text = element_text(size = 16), 
+            legend.key.width= unit(1, 'cm'),
              legend.key = element_blank(),
              legend.background = element_blank(), 
-            #legend.background = element_rect(fill = "transparent")
             axis.ticks = element_line(color = "black", linewidth=1),
         )+
         guides(color=guide_legend(nrow=2))

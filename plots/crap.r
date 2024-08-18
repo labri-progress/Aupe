@@ -67,7 +67,7 @@ local = "data"
 partview=FALSE
 if (as.integer(args[1])==1){
     partview=TRUE
-    ratio <- 1
+    ratio <- 0.75
 }else{
 
     ratio <- 16 / 9
@@ -94,7 +94,7 @@ for (n in n_values){
         #par(mfrow = c(1, 1))  # 3 rows and 2 columns
         
         #rho(params, CVIEW, "System faulty proportion  (%)")
-        if(strat == strats[2] && partview==TRUE) {#"aupe-merge" && FALSE){
+        if(strat == strats[2] ) {#"aupe-merge" && FALSE){
             source("studyAupeT.r")#source("studyAupeT.r")
             #bags(params, BAGS, "Stream Bags faulty proportion (%)")
             #view(params, PVIEW, "Parts of the view faulty proportion  (%)")
