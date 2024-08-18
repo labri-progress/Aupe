@@ -48,7 +48,7 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
         geom_point(data = df %>% filter(Time %% 10 == 0), size = point_size) + # Points at intervals
         labs(title = paste("AupeMerge system resilience depending on t f=", f, "% rho=", rho, sep=""),
             x = "Time steps",
-            y = "Prop. of Byz. Samples") +
+            y = "Prop. of Byz. Samp.") +
         theme_minimal() +
         scale_y_continuous(breaks = seq(0.0, 1.0, by=0.1)) + #c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
         scale_color_manual(values = custom_colors) +

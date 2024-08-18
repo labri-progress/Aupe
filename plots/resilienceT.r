@@ -11,14 +11,13 @@ custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
 "Aupe-oracle" = "#FF0033")
 line_size <- 1
 point_size <- 1.5 
-text_size=12
+text_size=14
 space=0.005
 partview <- function(data, component, rho_value) { 
     ggplot(data %>% filter(part == component), aes(x = faulty, 
     y = resilience, color = Strat)) +
         geom_point(size=point_size) +
         geom_line(linewidth=line_size) +
-        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +  # Add y = x line
         labs(#title = paste("Resilience in ", component, sep=""), #" depending on 
         #initial proportion of Faulty N=10000 v=160 F=10 sm=100 rho=",
         #rho_value, sep=" ")
@@ -57,7 +56,6 @@ partview3 <- function(data, component, rho_value) {
     y = resilience, color = Strat)) +
         geom_point(size=point_size) +
         geom_line(linewidth=line_size) +
-        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +  # Add y = x line
         labs(#title = paste("Resilience in ", component, sep=""),
           x = "Prop. of Byz. nodes", 
           y = "Prop. of Byz Samp.") +
@@ -65,7 +63,7 @@ partview3 <- function(data, component, rho_value) {
             coord_cartesian(ylim = c(0, 1))+
             scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
             scale_color_manual(values = custom_colors) +
-            theme(legend.position = c(0.7, 0.2),
+            theme(legend.position = c(0.6, 0.1),
                 legend.title = element_blank(),
                 panel.grid.major = element_blank(),  # Remove major gridlines
                 panel.grid.minor = element_blank(),  # Remove minor gridlines
@@ -79,8 +77,8 @@ partview3 <- function(data, component, rho_value) {
                 axis.text.x = element_text(size = text_size),  
                 axis.text.y = element_text(size = text_size), 
                 plot.title = element_text(size = text_size, face = "bold"),  
-                legend.text = element_text(size = 12),  
-                legend.key.width= unit(0.75, 'cm'),
+                legend.text = element_text(size = 16),  
+                legend.key.width= unit(1, 'cm'),
                 axis.ticks = element_line(color = "black", linewidth=1), 
             )+
             guides(shape = guide_legend(override.aes = list(size = 3)))+
@@ -110,7 +108,7 @@ plot_comp1 <- partview(data, "pushPart", rho)
 plot_comp2 <- partview(data, "pullPart", rho)
 plot_comp3 <- partview3(data, "sampPart", rho)
 
-ratio <- 1
+ratio <- 0.75
 width <- 8   # largeur en pouces
 height <- width / ratio
 
