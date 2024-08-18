@@ -84,17 +84,17 @@ view_plot <- function(df1, df2, df3, f, v) {
     # Add an identifier column to each data frame
     df1 <- df1 %>% mutate(Source = "Brahms")
     df2 <- df2 %>% mutate(Source = "Aupe(t=0%)")
-    df3 <- df3 %>% mutate(Source = "Aupe(t=100%)")
+    df3 <- df3 %>% mutate(Source = "Aupe(t=30%)")
     print(dim(df1))
     # Combine the long format data frames
     df <- bind_rows(df1, df2, df3)
     #print(df)
     print(colnames(df))
 
-    ggplot(df, aes(x = Time, y = resilience, color = Source, linetype = Source)) +
+    ggplot(df, aes(x = Time, y = resilience, color = Source)) +
         geom_line(size = 1) + # Lines
         geom_point(data = df %>% filter(Time %% 10 == 0), size = 2) + # Points at intervals
-        #geom_hline(yintercept = f/100, linetype = "dashed", color = "black") +
+        geom_hline(yintercept = f/100, linetype = "dashed", color = "black") +
         labs(#title = "Brahms, Aupe and AupeMerge system resilience",
             x = "Time steps",
             y = "Prop. of Byz. Samples") +
@@ -111,15 +111,15 @@ view_plot <- function(df1, df2, df3, f, v) {
             legend.position = c(0.6, 0.1),
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 14, face = "bold"),  
-            axis.title.y = element_text(size = 14, face = "bold"),  
-            axis.text.x = element_text(size = 14),  
-            axis.text.y = element_text(size = 14), 
-            plot.title = element_text(size = 14, face = "bold"),  
-            legend.text = element_text(size = 10),  
+            axis.title.x = element_text(size = 12, face = "bold"),  # Increase x-axis title size
+            axis.title.y = element_text(size = 12, face = "bold"),  # Increase y-axis title size
+            axis.text.x = element_text(size = 12),  # Increase x-axis text size
+            axis.text.y = element_text(size = 12),  # Increase y-axis text size
+            plot.title = element_text(size = 12, face = "bold"),  # Increase plot title size
+            legend.text = element_text(size = 12),  # Increase legend text size
             #legend.title = element_text(size = 14),  # Increase legend title size
             #legend.key.height= unit(0.4, 'cm'),
-                legend.key.width= unit(1, 'cm'),
+                legend.key.width= unit(0.5, 'cm'),
             axis.ticks = element_line(color = "black", linewidth=1), 
         )+
         guides(shape = guide_legend(override.aes = list(size = 3)))+

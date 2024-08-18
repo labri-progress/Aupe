@@ -82,7 +82,7 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
             axis.title.y = element_text(size = 12, face = "bold"),  
             axis.text.x = element_text(size = 12),  
             axis.text.y = element_text(size = 12), 
-            legend.text = element_text(size = 10), 
+            legend.text = element_text(size = 12), 
              legend.key = element_blank(),
              legend.background = element_blank(), 
             #legend.background = element_rect(fill = "transparent")
@@ -224,7 +224,7 @@ trust <- function(args, path, topic) {
         filename = paste(new, "/","dsn", name,  sep="")
     
     #filename, expe, f, t, strat, rho, resilience, sm, ttC, roundNumber, comment, name
-    write_results(filename, expe, f, strat=paste("Aupe(t=", t0,"%)", sep=""), rho, resilience0, sm,
+    write_results(filename, expe, f, strat=paste("Aupe-simple", sep=""), rho, resilience0, sm,
         ttc0, roundNumber0, comment, path)
     write_results(filename, expe, f, strat=paste("Aupe(t=", t1,"%)", sep=""), rho, resilience1, sm,
         ttc1, roundNumber1, comment, path)

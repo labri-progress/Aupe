@@ -16,10 +16,10 @@ point_size <- 1.5
 
 partview <- function(data, component, rho_value) { 
     ggplot(data %>% filter(part == component), aes(x = faulty, 
-    y = resilience, color = Strat, linetype = Strat)) +
+    y = resilience, color = Strat)) +
         geom_point(size=point_size) +
         geom_line(linewidth=line_size) +
-        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +  # Add y = x line
         labs(#title = paste("Resilience in ", component, sep=""), #" depending on 
         #initial proportion of Faulty N=10000 v=160 F=10 sm=100 rho=",
         #rho_value, sep=" ")
@@ -54,17 +54,18 @@ partview <- function(data, component, rho_value) {
 
 partview3 <- function(data, component, rho_value) { 
     ggplot(data %>% filter(part == component), aes(x = faulty, 
-    y = resilience, color = Strat, linetype = Strat)) +
+    y = resilience, color = Strat)) +
         geom_point(size=point_size) +
         geom_line(linewidth=line_size) +
-        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +  # Add y = x line
         labs(#title = paste("Resilience in ", component, sep=""),
           x = "Prop. of Byz. nodes", 
           y = "Prop. of Byz Samp.") +
             theme_minimal() +
-            scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+            coord_cartesian(ylim = c(0, 1))+
+            scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
             scale_color_manual(values = custom_colors) +
-            theme(legend.position = c(0.75, 0.15),
+            theme(legend.position = c(0.8, 0.42),
                 legend.title = element_blank(),
                 panel.grid.major = element_blank(),  # Remove major gridlines
                 panel.grid.minor = element_blank(),  # Remove minor gridlines
@@ -78,12 +79,12 @@ partview3 <- function(data, component, rho_value) {
                 axis.text.x = element_text(size = 12),  
                 axis.text.y = element_text(size = 12), 
                 plot.title = element_text(size = 12, face = "bold"),  
-                legend.text = element_text(size = 10),  
+                legend.text = element_text(size = 12),  
                 legend.key.width= unit(0.75, 'cm'),
                 axis.ticks = element_line(color = "black", linewidth=1), 
             )+
             guides(shape = guide_legend(override.aes = list(size = 3)))+
-        guides(color=guide_legend(nrow=2))
+        guides(color=guide_legend(nrow=3))
 }
 
 # 0. Loading
@@ -109,7 +110,7 @@ plot_comp1 <- partview(data, "pushPart", rho)
 plot_comp2 <- partview(data, "pullPart", rho)
 plot_comp3 <- partview3(data, "sampPart", rho)
 
-ratio <- 16 / 9
+ratio <- 13 / 9
 width <- 8   # largeur en pouces
 height <- width / ratio
 
