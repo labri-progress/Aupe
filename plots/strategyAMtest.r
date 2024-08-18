@@ -88,7 +88,9 @@ create_plot <- function(df) {
       axis.text.y = element_text(size = 14),  # Increase y-axis text size
       legend.text = element_text(size = 10),  # Increase legend text size
       axis.ticks = element_line(color = "black", linewidth=1), 
-       legend.background = element_rect(fill = "transparent"),
+      
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
     )+
    guides(color=guide_legend(nrow=2))
 }

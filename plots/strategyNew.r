@@ -80,6 +80,8 @@ create_plot <- function(df, rho_value) {
       plot.title = element_text(size = 14, face = "bold"),  # Increase plot title size
       legend.text = element_text(size = 16),  # Increase legend text size
       legend.title = element_blank(), 
+      legend.key = element_blank(),              # Remove the background from legend keys
+      legend.background = element_blank(), 
       axis.ticks = element_line(color = "black", size=1), 
     )+
    guides(color=guide_legend(ncol=2))

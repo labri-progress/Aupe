@@ -12,13 +12,11 @@ library(dplyr)
 library(tidyr)
 library(gridExtra)
 
-custom_colors <- c("t=0%" = "#C77CFF", "t=1%"="yellow", "t=5%"="pink", "t=10%"="chocolate1", 
-    "t=20%"="darkgreen", "t=30%"="black", "t=100%" = "#00BFC4", "AupeGlobal" = "red")
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe-simple" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
 "Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
 "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
-"AupeGlobal" = "#FF0033")
+"Aupe-oracle" = "#FF0033")
 
 line_size <- 1
 point_size <- 1.5
@@ -40,19 +38,19 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
     df4 <- data.frame(Time = seq_along(df4$avgByzN), comp = df4$comp/100)
     df5 <- data.frame(Time = seq_along(df5$avgByzN), comp = df5$comp/100)
 
-    df0 <- df0 %>% mutate(Source = "Aupe(t=0%)")
-    #df1 <- df1 %>% mutate(Source = "Aupe(t=1%)")
+    df0 <- df0 %>% mutate(Source = "Aupe-simple")
+    df1 <- df1 %>% mutate(Source = "Aupe-oracle")
     #df2 <- df2 %>% mutate(Source = "Aupe(t=5%)")
     df3 <- df3 %>% mutate(Source = "Aupe(t=10%)")
     df4 <- df4 %>% mutate(Source = "Aupe(t=20%)")
     df5 <- df5 %>% mutate(Source = "Aupe(t=30%)")
     
-    df <- bind_rows(df0, df3, df4, df5)#, df7)
+    df <- bind_rows(df0, df1, df3, df4, df5)#, df7)
     #print(df)
     print(colnames(df))
     
-    levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "Brahms")
+    levels=c("Aupe-simple", "Aupe(t=1%)", "Aupe(t=5%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe-oracle", "Brahms")
     df$Source <- factor(df$Source, levels = levels)
 
     pos1=c(0.3, 0.2)
@@ -141,7 +139,7 @@ trust <- function(args, path, topic) {
     t5=30
     t6=100
     path0 = paste(filepath,"/aupe/text",f*100, sep="")
-    path1 = paste(filepath,"/", strat,"/text",f*100,"-", t1, sep="")
+    path1 = paste(filepath,"/", "aupe-global","/text",f*100, sep="")
     path2 = paste(filepath,"/", strat,"/text",f*100,"-", t2, sep="")
     path3 = paste(filepath,"/", strat,"/text",f*100,"-", t3, sep="")
     path4 = paste(filepath,"/", strat,"/text",f*100,"-", t4, sep="")
@@ -226,7 +224,7 @@ trust <- function(args, path, topic) {
     #filename, expe, f, t, strat, rho, resilience, sm, ttC, roundNumber, comment, name
     write_results(filename, expe, f, strat=paste("Aupe-simple", sep=""), rho, resilience0, sm,
         ttc0, roundNumber0, comment, path)
-    write_results(filename, expe, f, strat=paste("Aupe(t=", t1,"%)", sep=""), rho, resilience1, sm,
+    write_results(filename, expe, f, strat=paste("Aupe-oracle", sep=""), rho, resilience1, sm,
         ttc1, roundNumber1, comment, path)
     write_results(filename, expe, f, strat=paste("Aupe(t=", t2,"%)", sep=""), rho, resilience2, sm,
         ttc2, roundNumber2, comment, path)

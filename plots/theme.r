@@ -41,7 +41,9 @@ custom_theme <- function() {
             plot.title = element_text(size = 12, face = "bold"),  
             legend.text = element_text(size = 10), 
              legend.key = element_blank(),
-            legend.background = element_rect(fill = "transparent"),
+            
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
             axis.ticks = element_line(color = "black", linewidth=1),
         )+
         guides(color=guide_legend(nrow=2))
@@ -65,7 +67,9 @@ custom_theme2 <- function() {
             plot.title = element_text(size = 12, face = "bold"),  
             legend.text = element_text(size = 10), 
              legend.key = element_blank(),
-            legend.background = element_rect(fill = "transparent"),
+            
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
             axis.ticks = element_line(color = "black", linewidth=1),
         )+
         guides(color=guide_legend(nrow=2))

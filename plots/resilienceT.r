@@ -1,19 +1,18 @@
-#!/usr/bin/env Rscript
-args = commandArgs(trailingOnly=TRUE)
-k=as.integer(args[1])
+
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(gridExtra)
 
 custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
+"Aupe-simple" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
 "Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
 "Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
-"AupeGlobal" = "#FF0033")
+"Aupe-oracle" = "#FF0033")
 line_size <- 1
 point_size <- 1.5 
-
+text_size=12
+space=0.005
 partview <- function(data, component, rho_value) { 
     ggplot(data %>% filter(part == component), aes(x = faulty, 
     y = resilience, color = Strat)) +
@@ -41,12 +40,13 @@ partview <- function(data, component, rho_value) {
             legend.position = "none",
             legend.spacing.y = unit(0.005, "cm"),
             text = element_text(size = 12, color="black"),
-            axis.title.x = element_text(size = 12, face = "bold"),  
-            axis.title.y = element_text(size = 12, face = "bold"),  
-            axis.text.x = element_text(size = 12),  
-            axis.text.y = element_text(size = 12), 
-            plot.title = element_text(size = 12, face = "bold"), 
-            legend.background = element_rect(fill = "transparent"),
+            axis.title.x = element_text(size = text_size, face = "bold"),  
+            axis.title.y = element_text(size = text_size, face = "bold"),  
+            axis.text.x = element_text(size = text_size),  
+            axis.text.y = element_text(size = text_size), 
+            
+             legend.key = element_blank(),
+             legend.background = element_blank(), 
             axis.ticks = element_line(color = "black", linewidth=1), 
         )
 
@@ -65,26 +65,26 @@ partview3 <- function(data, component, rho_value) {
             coord_cartesian(ylim = c(0, 1))+
             scale_y_continuous(breaks = seq(0.0, 1.0, by=0.2)) + 
             scale_color_manual(values = custom_colors) +
-            theme(legend.position = c(0.8, 0.42),
+            theme(legend.position = c(0.7, 0.2),
                 legend.title = element_blank(),
                 panel.grid.major = element_blank(),  # Remove major gridlines
                 panel.grid.minor = element_blank(),  # Remove minor gridlines
                 panel.background = element_rect("white"),
                 panel.border = element_rect(colour = "black", linewidth=1,
                 fill = NA),  
-                legend.spacing.y = unit(0.001, "cm"),
+                legend.spacing.y = unit(space, "cm"),
                 text = element_text(size = 12, color="black"),
-                axis.title.x = element_text(size = 12, face = "bold"),  
-                axis.title.y = element_text(size = 12, face = "bold"),  
-                axis.text.x = element_text(size = 12),  
-                axis.text.y = element_text(size = 12), 
-                plot.title = element_text(size = 12, face = "bold"),  
+                axis.title.x = element_text(size = text_size, face = "bold"),  
+                axis.title.y = element_text(size = text_size, face = "bold"),  
+                axis.text.x = element_text(size = text_size),  
+                axis.text.y = element_text(size = text_size), 
+                plot.title = element_text(size = text_size, face = "bold"),  
                 legend.text = element_text(size = 12),  
                 legend.key.width= unit(0.75, 'cm'),
                 axis.ticks = element_line(color = "black", linewidth=1), 
             )+
             guides(shape = guide_legend(override.aes = list(size = 3)))+
-        guides(color=guide_legend(nrow=3))
+        guides(color=guide_legend(nrow=2))
 }
 
 # 0. Loading
@@ -96,21 +96,21 @@ data$faulty= data$faulty/100
 data$resilience= data$resilience/100
 data$Strat <- gsub("aupe-merge", "Aupe(t=100%)", data$Strat)
 data$Strat <- gsub("brahms", "Brahms", data$Strat)
-data$Strat <- gsub("aupe", "Aupe(t=0%)", data$Strat)
+data$Strat <- gsub("aupe", "Aupe-simple", data$Strat)
 
-levels=c("Aupe(t=0%)", "Aupe(t=1%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "Brahms")
+levels=c("Aupe-simple", "Aupe(t=1%)", "Aupe(t=10%)",
+    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe-oracle", "Brahms")
 data$Strat <- factor(data$Strat, levels = levels)
 data = data[data$Strat %in% levels, ]
 print(unique(data$Strat))
-rho=k
+rho=0
 print(paste("rho", rho, sep=""))
 print(colnames(data))
 plot_comp1 <- partview(data, "pushPart", rho)
 plot_comp2 <- partview(data, "pullPart", rho)
 plot_comp3 <- partview3(data, "sampPart", rho)
 
-ratio <- 13 / 9
+ratio <- 1
 width <- 8   # largeur en pouces
 height <- width / ratio
 

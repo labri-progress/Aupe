@@ -47,8 +47,8 @@ view <- function(args, path, topic) {
     print(rho)
     filepath = paste("/home/amukam/thss/simulation/Aupe/analysis/",rho, "/", 
         N, sep="")
-    t1=5
-    t2=10
+    t1=10
+    t2=20
     t3=30
     path1 = paste(filepath,"/", strat,"/text",f*100,"-", t1, sep="")
     path2 = paste(filepath,"/", strat,"/text",f*100,"-", t2, sep="")
@@ -60,11 +60,10 @@ view <- function(args, path, topic) {
 
     strat1="brahms"
     strat2="aupe"
-    #strat3="basalt-simple"
-    t4=20
+    strat3="aupe-global"
     brahmspath = paste(filepath,"/", strat1,"/text",f*100, sep="")
     aupepath = paste(filepath,"/", strat2,"/text",f*100, sep="")
-    mergepath = paste(filepath,"/", strat,"/text",f*100,"-", t4, sep="") #paste(filepath,"/", strat3,"/text",f*100, sep="")
+    mergepath = paste(filepath,"/", strat3,"/text",f*100, sep="") #paste(filepath,"/", strat3,"/text",f*100, sep="")
     print(brahmspath)
     print(aupepath)
     #print(mergepath)
@@ -169,11 +168,11 @@ view <- function(args, path, topic) {
         write_results(filename, expe, f, paste("Aupe(t=",t3,"%)", sep = ""), rho, resilience3, part, sm,
             ttc3, roundNumber3, comment, path)
         
-        write_results(filename, expe, f, strat1, rho, resilience11, part, sm,
+        write_results(filename, expe, f, "Brahms", rho, resilience11, part, sm,
             ttc11, roundNumber11, comment, path)
-        write_results(filename, expe, f, strat2, rho, resilience22, part, sm,
+        write_results(filename, expe, f, "Aupe-simple", rho, resilience22, part, sm,
             ttc22, roundNumber22, comment, path)
-        write_results(filename, expe, f, paste("Aupe(t=",t4,"%)",sep=""), rho, resilience33, part, sm,
+        write_results(filename, expe, f, "Aupe-oracle", rho, resilience33, part, sm,
            ttc33, roundNumber33, comment, path)
     }
 }
