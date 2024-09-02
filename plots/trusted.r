@@ -35,7 +35,7 @@ point_size <- 1.5
 
 #  width = width, height = height)
 
-partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
+partview_plot <- function(df0, df1, df2, df3, df4, df5, dfb, f, rho) {
     print("viewplot")
     print(dim(df1))
     print(colnames(df1))
@@ -51,6 +51,8 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
 
     df5 <- data.frame(Time = seq_along(df5$avgByzN), comp = df5$comp/100)
 
+    dfb <- data.frame(Time = seq_along(dfb$avgByzN), comp = dfb$comp/100)
+
     df0 <- df0 %>% mutate(Source = "Aupe-simple")
     df1 <- df1 %>% mutate(Source = "Aupe-oracle")
     #df2 <- df2 %>% mutate(Source = "Aupe(t=5%)")
@@ -59,7 +61,8 @@ partview_plot <- function(df0, df1, df2, df3, df4, df5, f, rho) {
     df5 <- df5 %>% mutate(Source = "Aupe(t=30%)")
     df6 <- df6 %>% mutate(Source = "Optimal")
     
-    df <- bind_rows(df0, df1, df3, df4, df5, df6)
+    dfb <- dfb %>% mutate(Source = "Brahms")
+    df <- bind_rows(df0, df1, df3, df4, df5, df6, dfb)
     #print(df)
     print(colnames(df))
     
@@ -158,6 +161,7 @@ trust <- function(args, path, topic) {
     path3 = paste(filepath,"/", strat,"/text",f*100,"-", t3, sep="")
     path4 = paste(filepath,"/", strat,"/text",f*100,"-", t4, sep="")
     path5 = paste(filepath,"/", strat,"/text",f*100,"-", t5, sep="")
+    path6 = paste(filepath,"/brahms/text",f*100, sep="")
     print(path0)
     print(path2)
     print(path5)
@@ -174,6 +178,9 @@ trust <- function(args, path, topic) {
     roundNumber4 <- nrow(merge4)
     merge5 <- read.table(path5, header = TRUE)
     roundNumber5 <- nrow(merge5)
+
+    merge6 <- read.table(path6, header = TRUE)
+    roundNumber6 <- nrow(merge6)
 
     print(paste("roundNumber0",roundNumber0, "vs roundNumber2", roundNumber2,
     "and roundNumber5", roundNumber5))
@@ -197,6 +204,7 @@ trust <- function(args, path, topic) {
     merge3$comp=(merge3$avgByzN/v)*100
     merge4$comp=(merge4$avgByzN/v)*100
     merge5$comp=(merge5$avgByzN/v)*100
+    merge6$comp=(merge6$avgByzN/v)*100
 
     title="Aupe Merge studying"
     title=paste(title, #"\n Byzantine proportion inside parts of the view over Time \n", 
@@ -213,7 +221,7 @@ trust <- function(args, path, topic) {
     "and resilience5", resilience5))
     
     #PLOTS
-    print(partview_plot(merge0, merge1, merge2, merge3, merge4, merge5, f*100, k))
+    print(partview_plot(merge0, merge1, merge2, merge3, merge4, merge5, merge6, f*100, k))
    
     ttc0 <- detect_first_convergence_index(merge0$comp, f, roundNumber0)
     ttc1 <- detect_first_convergence_index(merge1$comp, f, roundNumber1)

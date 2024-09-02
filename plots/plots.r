@@ -46,20 +46,40 @@ custom_shapes <- c('Basalt' = 16, 'Brahms' = 16,
 'Aupe-simple' = 16,'Optimal'=NA)
 
 levels=c('Aupe-simple', 'Aupe(t=10%)',
-    'Aupe(t=20%)','Aupe(t=30%)', 'Aupe-oracle', 
-    'Basalt','Brahms', 'Optimal')
+    'Aupe(t=20%)','Aupe(t=30%)', 'Aupe-oracle')
+
+base = data[data$Strat %in% c("Brahms"), ]
+
+df = data.frame()
+faultys=unique(data$faulty)
+
+faultys
+
+for (S in levels){
+  dfi = data[data$Strat %in% c(S), ]
+    for (f in faultys){
+      dfi$improvement[which(dfi$faulty==f)] = (base$resilience[which(base$faulty==f)] - 
+      dfi$resilience[which(dfi$faulty==f)])*
+      100/base$resilience[which(base$faulty==f)]
+  }
+  df = rbind(df, dfi)
+}
+
+data = df
 
 data$Strat <- factor(data$Strat, levels = levels)
 data <- data[(data$Strat %in% levels), ]
-data
 
+data
+max(data$improvement)
+min(data$improvement)
 line_size <- 1
 point_size <- 1.5
 create_plot <- function(df) {
   x_breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)
 
   print(x_breaks)
-  ggplot(df, aes(x = faulty, y = resilience, color = Strat, linetype = Strat, shape=Strat)) +
+  ggplot(df, aes(x = faulty, y = improvement, color = Strat, linetype = Strat, shape=Strat)) +
     geom_point(size=point_size) +
     geom_line(linewidth=line_size) +
     scale_color_manual(values = custom_colors) +
@@ -67,26 +87,26 @@ create_plot <- function(df) {
     scale_shape_manual(values = custom_shapes) +
     labs(
       x = "Proportion of Byzantine nodes", 
-      y = "Proportion of Byzantine samples") +
-    coord_cartesian(xlim = c(0.07, 0.5), ylim = c(0, 1))+
+      y = "Resilience Gains (%)") +
+    coord_cartesian(xlim = c(0.07, 0.5), ylim = c(0, 100))+
     scale_x_continuous(breaks = x_breaks) +
-    scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
-    coord_cartesian(ylim = c(0, 1))+
+    scale_y_continuous(breaks = c(0, 20, 40, 60, 80, 100)) +
+    coord_cartesian(ylim = c(0, 100))+
     theme(
       panel.grid.major = element_blank(),  # Remove major gridlines
       panel.grid.minor = element_blank(),  # Remove minor gridlines
       panel.background = element_rect("white"),
       panel.border = element_rect(colour = "black", size=1,
        fill = NA),  # Optional: add border
-      legend.position = c(0.65, 0.1),
+      legend.position = c(0.7, 0.85),
       legend.spacing.y = unit(0.005, "cm"),
       text = element_text(size = 12, color="black"),
-      axis.title.x = element_text(size = 14, face = "bold"),  # Increase x-axis title size
-      axis.title.y = element_text(size = 14, face = "bold"),  # Increase y-axis title size
+      axis.title.x = element_text(size = 16, face = "bold"),  # Increase x-axis title size
+      axis.title.y = element_text(size = 16, face = "bold"),  # Increase y-axis title size
       axis.text.x = element_text(size = 14),  # Increase x-axis text size
       axis.text.y = element_text(size = 14),  # Increase y-axis text size
       plot.title = element_text(size = 14, face = "bold"),  # Increase plot title size
-      legend.text = element_text(size = 14),  # Increase legend text size
+      legend.text = element_text(size = 16),  # Increase legend text size
       legend.title = element_blank(), 
       legend.key = element_blank(),              # Remove the background from legend keys
       legend.background = element_blank(), 
@@ -101,7 +121,7 @@ ratio <- 16 / 9
 width <- 8   # largeur en pouces
 height <- width / ratio
 
-pdf("resilience_plotswithTNew.pdf", width = width, height = height)
+pdf("Improvment.pdf", width = width, height = height)
 
 p <- create_plot(data)
 print(p)
