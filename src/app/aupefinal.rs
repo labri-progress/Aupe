@@ -359,7 +359,7 @@ impl Aupe {
                 average_freq = self.omniscient_freq_array[id].max(0.0) + 
                     other_omniscient_freq_array[id].max(0.0);
             }
-            self.update_omn_freq_value(id, average_freq/2.0);
+            self.update_omn_freq_value(id, average_freq/2.0); // put inside the loop
         }
         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
             println!("{:?} ",
@@ -380,6 +380,7 @@ impl Aupe {
     fn is_trusted(&self, id:PeerRef) -> bool {
         return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
     }
+    
     fn show_role(&self) {
         let role;
         if self.is_byzantine{
