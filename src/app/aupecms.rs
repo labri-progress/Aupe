@@ -128,7 +128,6 @@ pub struct AupeCMS {
     n_received: usize,
     n_byzantine_received: usize,
 
-    omniscient_freq_array: Vec<f64>,
     cms: CountMinSketch, // size d*h
     cms_width: usize,
     cms_depth: usize,
@@ -303,7 +302,7 @@ impl AupeCMS {
         }
     }
 
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+    fn debiais_stream_with_Kfree(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
         //println!("++");
         let mut rng = thread_rng();
@@ -311,7 +310,7 @@ impl AupeCMS {
         rng.shuffle(&mut shuffled_input[..]);
         
         for element in &shuffled_input {
-            let occur :f64= self.omniscient_freq_array[*element];
+            let occur :f64= self.cms.estimate(element);
             if self.minvalue > occur { // new minval
                 self.minvalue = occur;
                 self.minkey = *element;
@@ -349,45 +348,8 @@ impl AupeCMS {
         outputstream
     }
 
-    
-    fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<f64>) {
-        /* if DEBUG {
-            let strategy = "addition";
-            println!("**********merge_knowledge_both_ways { }*********", strategy);
-        } */
-        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-            println!("{:?} MERGE {:?} =",
-            print_vector_with_two_digits(self.omniscient_freq_array.clone()),
-            print_vector_with_two_digits(other_omniscient_freq_array.clone()));
-        }
-        for id in 0..self.params.nodes {
-            let average_freq:f64;
-            if self.omniscient_freq_array[id] <=0.0 && other_omniscient_freq_array[id] <=0.0 {
-                average_freq = -1.0; // Both didn't see the node id
-            } else{
-                average_freq = self.omniscient_freq_array[id].max(0.0) + 
-                    other_omniscient_freq_array[id].max(0.0);
-            }
-            self.update_omn_freq_value(id, average_freq/2.0); // put inside the loop
-        }
-        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-            println!("{:?} ",
-            print_vector_with_two_digits(self.omniscient_freq_array.clone()));
-        }
-        
-    }
-
-    fn update_omn_freq(&mut self, item: PeerRef) {
-        let value = self.omniscient_freq_array[item.clone()] + 1.0;
-        self.omniscient_freq_array[item.clone()] = value.max(1.0);
-    }
-
     pub fn update_cms_freq(&mut self, item: PeerRef) {
         self.cms.insert(&item);
-    }
-
-    fn update_omn_freq_value(&mut self, item: PeerRef, value: f64) {
-        self.omniscient_freq_array[item.clone()] = value
     }
 
     fn update_contact(&mut self, item: PeerRef) {
@@ -452,7 +414,7 @@ impl App for AupeCMS {
             n_received: 0,
             n_byzantine_received: 0,
 
-            omniscient_freq_array: Vec::new(),
+            //omniscient_freq_array: Vec::new(),
             cms_width: 0,
             cms_depth: 0,
             cms: CountMinSketch::new(0, 0),
@@ -471,7 +433,7 @@ impl App for AupeCMS {
         self.params = init.clone();
     
         // Init preallocated vectors
-        self.omniscient_freq_array = vec![-1.0; self.params.nodes];
+        //self.omniscient_freq_array = vec![-1.0; self.params.nodes];
         self.cms_width = init.width; 
         self.cms_depth = init.depth;
         self.cms = CountMinSketch::new(self.cms_width, self.cms_depth);

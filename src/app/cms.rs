@@ -7,6 +7,7 @@ pub struct CountMinSketch {
     depth: usize,
     matrix: Vec<Vec<f64>>,
     hash_seeds: Vec<u64>,
+    min_value: f64,
 }
 
 impl CountMinSketch {
@@ -18,6 +19,7 @@ impl CountMinSketch {
                 depth,
                 matrix: Vec::new(),
                 hash_seeds: Vec::new(),
+                min_value: 0.0,
             }
         }else {
             let matrix = vec![vec![0.0; width]; depth];
@@ -28,6 +30,7 @@ impl CountMinSketch {
                 depth,
                 matrix,
                 hash_seeds,
+                min_value: f64::MAX,
             }
         }
         
@@ -57,6 +60,17 @@ impl CountMinSketch {
             .map(|(i, seed)| self.matrix[i][self.hash(item, *seed)])  // Renvoie des f64 depuis la table
             .min_by(|a, b| a.partial_cmp(b).unwrap())  // Comparaison de f64
             .unwrap_or(0.0)
+    }
+
+    // add min
+    pub fn min(&self) {
+        for row in self.matrix {
+            for value in row {
+                if value < self.min_value {
+                    self.min_value = value;
+                }
+            }
+        }
     }
 
     pub fn print(&self) {
