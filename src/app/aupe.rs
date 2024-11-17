@@ -9,6 +9,8 @@ use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
 const DEBUG: bool = false;
+const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
+const REPLACEMENT_COUNT: usize=0;
 
 pub enum Msg {
     SelfNotif,
@@ -40,14 +42,6 @@ pub struct Init {
     /// Byzantine attack start time
     #[structopt(short = "s", long = "attack-start-time", default_value = "0")]
     pub attack_start_time: u64,
-
-    /// Replacement frequency: replace k samples every r (this paramter) time units
-    #[structopt(short = "r", long = "replacement-frequency")]
-    pub replacement_frequency: Option<u64>,
-
-    /// Replacement count: replace k (this parameter) samples every r time units
-    #[structopt(short = "k", long = "replacement-count", default_value = "1")]
-    pub replacement_count: usize,
 
     /// Peer sampling view size
     #[structopt(short = "v", long = "view-size")]
@@ -528,7 +522,7 @@ impl App for Aupe {
         } else if self.is_trusted{
             match msg {
                 Msg::SelfNotif => {
-                    if let Some(rf) = self.params.replacement_frequency {
+                    if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
                             let view = self.view.clone();
@@ -536,8 +530,8 @@ impl App for Aupe {
                                 .filter(|(_, x)| x.is_some())
                                 .map(|(_, x)| x.unwrap())
                                 .collect::<Vec<_>>();
-                            for k in 0..self.params.replacement_count {
-                                let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.sample_view.len();
+                            for k in 0..REPLACEMENT_COUNT {
+                                let i_replace = ((net.time() / rf) as usize * REPLACEMENT_COUNT + k) % self.sample_view.len();
                                 if let Some(sample) = self.sample_view[i_replace].1 {
                                     if self.out_samples.len() < 200 {
                                         self.out_samples.push(sample);
@@ -703,7 +697,7 @@ impl App for Aupe {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    if let Some(rf) = self.params.replacement_frequency {
+                    if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
                             let view = self.view.clone();
@@ -711,8 +705,8 @@ impl App for Aupe {
                                 .filter(|(_, x)| x.is_some())
                                 .map(|(_, x)| x.unwrap())
                                 .collect::<Vec<_>>();
-                            for k in 0..self.params.replacement_count {
-                                let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.sample_view.len();
+                            for k in 0..REPLACEMENT_COUNT {
+                                let i_replace = ((net.time() / rf) as usize * REPLACEMENT_COUNT + k) % self.sample_view.len();
                                 if let Some(sample) = self.sample_view[i_replace].1 {
                                     if self.out_samples.len() < 200 {
                                         self.out_samples.push(sample);

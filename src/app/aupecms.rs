@@ -624,13 +624,6 @@ impl App for AupeCMS {
                             }
                         });
                         
-                    /* let contact= trusted_nodes.iter().map(|x| x).filter(|x| **x!=self.my_id).collect::<Vec<_>>();
-                                                    
-                    sample(&contact, self.params.nb_merge).iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
-                        });
-                    */
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
                     self.to_conctact, self.params.nb_merge, self.oldest);

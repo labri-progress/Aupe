@@ -16,9 +16,6 @@ use net::{Simulator, App};
 #[derive(StructOpt, Debug)]
 #[structopt(name = "bignetrs")]
 pub struct Opt {
-    /// Iteration number for a repeated experiment (ignored)
-    /* #[structopt(short = "i", long = "iteration", default_value = "0")]
-    iteration: usize, */
     /// Number of simulation steps
     #[structopt(short = "T", long = "time", default_value = "100")]
     n_steps: usize,
