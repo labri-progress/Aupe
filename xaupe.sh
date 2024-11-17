@@ -38,7 +38,7 @@ expe=0
 r=1
 count=0
 
-for strat in 0 1 2 3 4
+for strat in 0 1 2 3 4 #trusted
 do   
     for k in 0 1 
     do   
