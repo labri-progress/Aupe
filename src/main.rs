@@ -35,8 +35,8 @@ pub struct Opt {
 #[derive(StructOpt, Debug)]
 pub enum WhichApp {
     /// Aupe RPS
-    #[structopt(name = "aupecms")]
-    AupeCMS(app::aupe::Init),
+    #[structopt(name = "cms")]
+    AupeCMS(app::aupecms::Init),
     
     /// Brahms RPS
     #[structopt(name = "brahms")]
@@ -60,9 +60,9 @@ fn main() {
     match opt.app {
         WhichApp::AupeCMS(pp) => {
             if let Some(rs) = opt.random_samples {
-                sim_rps_rng::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, rs);
+                sim_rps_rng::<app::aupecms::AupeCMS>(opt.n_steps, opt.nodes, &pp, rs);
             } else {
-                sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp);
+                sim::<app::aupecms::AupeCMS>(opt.n_steps, opt.nodes, &pp);
             }   
         }
         WhichApp::Brahms(pp) => {

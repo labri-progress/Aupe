@@ -12,15 +12,25 @@ pub struct CountMinSketch {
 impl CountMinSketch {
     /// Crée un nouveau Count-Min Sketch avec une largeur et une profondeur définies
     pub fn new(width: usize, depth: usize) -> Self {
-        let matrix = vec![vec![0.0; width]; depth];
-        let hash_seeds = (0..depth).map(|i| i as u64 + 1).collect();
+        if width == 0 || depth == 0 {
+            Self {
+                width,
+                depth,
+                matrix: Vec::new(),
+                hash_seeds: Vec::new(),
+            }
+        }else {
+            let matrix = vec![vec![0.0; width]; depth];
+            let hash_seeds = (0..depth).map(|i| i as u64 + 1).collect();
 
-        Self {
-            width,
-            depth,
-            matrix,
-            hash_seeds,
+            Self {
+                width,
+                depth,
+                matrix,
+                hash_seeds,
+            }
         }
+        
     }
 
     /// Fonction pour générer des indices à partir de plusieurs fonctions de hachage
@@ -56,16 +66,15 @@ impl CountMinSketch {
             println!("     Row {}: {:?}", i, row);
         }
     }
-}
 
-pub fn merge_cms(mut first_omn_array: CountMinSketch, second_omn_array: CountMinSketch) -> CountMinSketch {
+    pub fn merge_cms(&mut self, second_omn_array: CountMinSketch) -> CountMinSketch {
 
-    for i in 0..first_omn_array.depth {
-        for j in 0..first_omn_array.width {
-            first_omn_array.matrix[i][j] += second_omn_array.matrix[i][j];
-            first_omn_array.matrix[i][j] /=2.0;
+        for i in 0..self.depth {
+            for j in 0..self.width {
+                self.matrix[i][j] += second_omn_array.matrix[i][j];
+                self.matrix[i][j] /=2.0;
+            }
         }
+        self.clone()
     }
-
-    first_omn_array
 }

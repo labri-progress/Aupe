@@ -8,7 +8,11 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = false;
+use super::cms::{CountMinSketch};
+
+const DEBUG: bool = true;
+const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
+const REPLACEMENT_COUNT: usize=0;
 
 pub enum Msg {
     SelfNotif,
@@ -41,14 +45,6 @@ pub struct Init {
     #[structopt(short = "s", long = "attack-start-time", default_value = "0")]
     pub attack_start_time: u64,
 
-    /// Replacement frequency: replace k samples every r (this paramter) time units
-    #[structopt(short = "r", long = "replacement-frequency")]
-    pub replacement_frequency: Option<u64>,
-
-    /// Replacement count: replace k (this parameter) samples every r time units
-    #[structopt(short = "k", long = "replacement-count", default_value = "1")]
-    pub replacement_count: usize,
-
     /// Peer sampling view size
     #[structopt(short = "v", long = "view-size")]
     pub view_size: usize,
@@ -72,6 +68,14 @@ pub struct Init {
     /// How many sup merges should be used
     #[structopt(short = "p", long = "nb_merges")]
     pub nb_merge: usize,
+
+    /// How many sup merges should be used
+    #[structopt(short = "h", long = "number_of_hash_function", default_value = "2")]
+    pub width: usize,
+
+    /// How many sup merges should be used
+    #[structopt(short = "d", long = "number_of_discrete_values", default_value = "5")]
+    pub depth: usize,
 } 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -125,6 +129,9 @@ pub struct AupeCMS {
     n_byzantine_received: usize,
 
     omniscient_freq_array: Vec<f64>,
+    cms: CountMinSketch, // size d*h
+    cms_width: usize,
+    cms_depth: usize,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
     minvalue: f64,
@@ -375,6 +382,10 @@ impl AupeCMS {
         self.omniscient_freq_array[item.clone()] = value.max(1.0);
     }
 
+    pub fn update_cms_freq(&mut self, item: PeerRef) {
+        self.cms.insert(&item);
+    }
+
     fn update_omn_freq_value(&mut self, item: PeerRef, value: f64) {
         self.omniscient_freq_array[item.clone()] = value
     }
@@ -442,6 +453,9 @@ impl App for AupeCMS {
             n_byzantine_received: 0,
 
             omniscient_freq_array: Vec::new(),
+            cms_width: 0,
+            cms_depth: 0,
+            cms: CountMinSketch::new(0, 0),
             omniscient_memory: Vec::new(),
             minkey: 0,
             minvalue: std::isize::MAX as f64,
@@ -458,13 +472,19 @@ impl App for AupeCMS {
     
         // Init preallocated vectors
         self.omniscient_freq_array = vec![-1.0; self.params.nodes];
+        self.cms_width = init.width; 
+        self.cms_depth = init.depth;
+        self.cms = CountMinSketch::new(self.cms_width, self.cms_depth);
 
+        if DEBUG {
+            self.cms.print();
+        }
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
         if self.params.use_omn_merge {
             self.is_trusted = self.is_trusted(id);
             // the rest is correct node
             if DEBUG {
-                self.show_role();
+                //self.show_role();
             }
         }
         if !self.is_byzantine {
@@ -478,6 +498,7 @@ impl App for AupeCMS {
            
             for item in self.view.clone() {
                 self.update_omn_freq(item.clone());
+                self.update_cms_freq(item.clone());
             }
         }
         // init toc_contact list
@@ -528,7 +549,7 @@ impl App for AupeCMS {
         } else if self.is_trusted{
             match msg {
                 Msg::SelfNotif => {
-                    if let Some(rf) = self.params.replacement_frequency {
+                    if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
                             let view = self.view.clone();
@@ -536,8 +557,8 @@ impl App for AupeCMS {
                                 .filter(|(_, x)| x.is_some())
                                 .map(|(_, x)| x.unwrap())
                                 .collect::<Vec<_>>();
-                            for k in 0..self.params.replacement_count {
-                                let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.sample_view.len();
+                            for k in 0..REPLACEMENT_COUNT {
+                                let i_replace = ((net.time() / rf) as usize * REPLACEMENT_COUNT + k) % self.sample_view.len();
                                 if let Some(sample) = self.sample_view[i_replace].1 {
                                     if self.out_samples.len() < 200 {
                                         self.out_samples.push(sample);
@@ -624,6 +645,13 @@ impl App for AupeCMS {
                             }
                         });
                         
+                    /* let contact= trusted_nodes.iter().map(|x| x).filter(|x| **x!=self.my_id).collect::<Vec<_>>();
+                                                    
+                    sample(&contact, self.params.nb_merge).iter()
+                        .for_each(|p| {
+                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                        });
+                    */
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
                     self.to_conctact, self.params.nb_merge, self.oldest);
@@ -645,8 +673,8 @@ impl App for AupeCMS {
                 },
                 Msg::PullReply(lst) => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        eprintln!("message PlRy from {} : {:?}", 
-                        from.to_string(), lst);
+                        /* eprintln!("message PlRy from {} : {:?}", 
+                        from.to_string(), lst); */
                     }
                     self.n_received += lst.len();
                     self.n_byzantine_received += lst.iter()
@@ -656,11 +684,12 @@ impl App for AupeCMS {
                     
                     for item in lst {
                         self.update_omn_freq(item.clone());
+                        self.update_cms_freq(item.clone());
                     }
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        eprintln!("message PushR from {} ", from.to_string());
+                        //eprintln!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
@@ -669,12 +698,13 @@ impl App for AupeCMS {
                     self.v_push.push(from);
                     
                     self.update_omn_freq(from.clone());
+                    self.update_cms_freq(from.clone());
                
                 },
                 Msg::MergeRequest(lst) => {
 
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("message MergeRq from {} :{:?} ", from.to_string(), lst);
+                        //println!("message MergeRq from {} :{:?} ", from.to_string(), lst);
                     }
                     net.send(from, Msg::MergeReply(
                         vec_to_string(&self.omniscient_freq_array.clone()))); //send its array before merging
@@ -685,7 +715,7 @@ impl App for AupeCMS {
                 },
                 Msg::MergeReply(lst) => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("message MergeRy from {} :{:?} ", from.to_string(), lst);
+                        //println!("message MergeRy from {} :{:?} ", from.to_string(), lst);
                     }
                     match string_to_vec(lst) {
                         Ok(vec) => self.merge_knowledge_both_ways(vec),
@@ -696,7 +726,7 @@ impl App for AupeCMS {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    if let Some(rf) = self.params.replacement_frequency {
+                    if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
                             let view = self.view.clone();
@@ -704,8 +734,8 @@ impl App for AupeCMS {
                                 .filter(|(_, x)| x.is_some())
                                 .map(|(_, x)| x.unwrap())
                                 .collect::<Vec<_>>();
-                            for k in 0..self.params.replacement_count {
-                                let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.sample_view.len();
+                            for k in 0..REPLACEMENT_COUNT {
+                                let i_replace = ((net.time() / rf) as usize * REPLACEMENT_COUNT + k) % self.sample_view.len();
                                 if let Some(sample) = self.sample_view[i_replace].1 {
                                     if self.out_samples.len() < 200 {
                                         self.out_samples.push(sample);
@@ -790,8 +820,8 @@ impl App for AupeCMS {
                 },
                 Msg::PullReply(lst) => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
-                        eprintln!("message PlRy from {} : {:?}", 
-                        from.to_string(), lst);
+                        /* eprintln!("message PlRy from {} : {:?}", 
+                        from.to_string(), lst); */
                     }
                     self.n_received += lst.len();
                     self.n_byzantine_received += lst.iter()
@@ -801,11 +831,12 @@ impl App for AupeCMS {
                     
                     for item in lst {
                         self.update_omn_freq(item.clone());
+                        self.update_cms_freq(item.clone());
                     }
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
-                        eprintln!("message PushR from {} ", from.to_string());
+                        //eprintln!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
@@ -813,13 +844,14 @@ impl App for AupeCMS {
                     }
                     self.v_push.push(from);
                     self.update_omn_freq(from.clone());
+                    self.update_cms_freq(from.clone());
                
                 },
                 Msg::MergeRequest(_lst) => {
-                    println!("NO MERGERq ");    
+                    //println!("NO MERGERq ");    
                 },
                 Msg::MergeReply(_lst) => {
-                    eprintln!("NO MERGERply"); 
+                    //eprintln!("NO MERGERply"); 
                 },
             }
         }
