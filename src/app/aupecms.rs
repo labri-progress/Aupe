@@ -59,13 +59,9 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
-
-    /// Use merge with omniscient strategy
-    #[structopt(short = "O", long = "use-omn-merge")]
-    pub use_omn_merge: bool,
     
     /// How many sup merges should be used
-    #[structopt(short = "p", long = "nb_merges")]
+    #[structopt(short = "p", long = "nb_merges", default_value = "0")]
     pub nb_merge: usize,
 
     /// How many sup merges should be used
@@ -76,6 +72,54 @@ pub struct Init {
     #[structopt(short = "w", long = "number_of_discrete_values", default_value = "5")]
     pub width: usize,
 } 
+
+impl Init {
+    /// Validates the parameters of the `Init` struct.
+    /// Exits the program with an error message if the parameters are invalid.
+    pub fn validate(&self) {
+        if self.nodes == 0 {
+            eprintln!("Error: The number of nodes must be greater than zero.");
+            std::process::exit(1);
+        }
+        if self.view_size >= self.nodes || self.memory_size >= self.nodes {
+            eprintln!(
+                "Error: The view size/the sample memory size ({}/{}) cannot exceed the total number of nodes ({}).",
+                self.view_size, self.memory_size, self.nodes
+            );
+            std::process::exit(1);
+        }
+        if self.view_size != self.sample_view_size {
+            eprintln!(
+                "Error: The sample_view size ({}) must be equal to the view size ({}).",
+                self.sample_view_size, self.view_size
+            );
+            std::process::exit(1);
+        }
+        if self.n_trusted >= self.nodes || self.n_byzantine > self.nodes{
+            eprintln!(
+                "Error: The number of trusted/byzantine nodes ({}/{}) cannot exceed the total number of nodes ({}).",
+                self.n_trusted, self.n_byzantine, self.nodes
+            );
+            std::process::exit(1);
+        }
+
+        if self.n_trusted == 0 && self.nb_merge != 0 {
+            eprintln!("Error: The number of trusted nodes must be non null OR You have to unset the use of nb_merge");
+            std::process::exit(1);
+        }
+
+        if self.depth >= self.nodes || self.width >= self.nodes || self.depth > self.width {
+            eprintln!("Error: The CMS ({}x{}) is too big. The total number of nodes is {}", 
+                self.depth, self.width,self.nodes);
+            std::process::exit(1);
+        }
+
+        if false{
+            println!("Parameters are valid: nodes = {}, trusted nodes = {}", self.nodes, self.n_trusted);
+        }
+        
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum WhichGraphStats {
@@ -419,6 +463,7 @@ impl App for AupeCMS {
     
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
+        init.validate();
         self.params = init.clone();
     
         // Init preallocated vectors
@@ -432,13 +477,12 @@ impl App for AupeCMS {
             println!("dimensions of the cms {:?}", self.cms.dim());
         }
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
-        if self.params.use_omn_merge {
-            self.is_trusted = self.is_trusted(id);
-            // the rest is correct node
-            if false {
-                self.show_role();
-            }
+        self.is_trusted = self.is_trusted(id); // F to F + T-1
+        // the rest is correct node
+        if false {
+            self.show_role();
         }
+        
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
@@ -451,8 +495,8 @@ impl App for AupeCMS {
             self.update_cms_freq(self.view.clone());
             
         }
-        // init toc_contact list
-        if self.is_trusted {
+        // init to_ccontact list
+        if self.is_trusted && self.params.nb_merge != 0{
             let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 println!("trusted_nodes {:?}", trusted_nodes);
@@ -468,9 +512,10 @@ impl App for AupeCMS {
             }
             let missing_len = self.params.nb_merge - self.to_conctact.len();
             // select missing trusted neighbors and avoid himself
-            sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
+            if missing_len > 0 {
+                sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
                     missing_len , self.my_id);
-
+            }
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
                     self.to_conctact, self.params.nb_merge, self.oldest);
@@ -582,7 +627,7 @@ impl App for AupeCMS {
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
-                            if self.is_trusted(*p) {
+                            if self.params.nb_merge != 0{
                                 self.update_contact(*p);
                             }
                         });
@@ -590,14 +635,15 @@ impl App for AupeCMS {
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
-                            if self.is_trusted(*p) {
+                            if self.params.nb_merge != 0 {
                                 self.update_contact(*p);
                             }
                         });
                         
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                    if DEBUG && self.params.nb_merge != 0 &&
+                        self.my_id == self.params.n_trusted + self.params.n_byzantine -1 {
                         println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
-                    self.to_conctact, self.params.nb_merge, self.oldest);
+                            self.to_conctact, self.params.nb_merge, self.oldest);
                     }
 
                     self.to_conctact.iter()

@@ -34,7 +34,6 @@ impl CountMinSketch {
                 min_value: f64::MAX,
             }
         }
-        
     }
 
     /// Fonction pour générer des indices à partir de plusieurs fonctions de hachage

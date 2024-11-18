@@ -58,8 +58,7 @@ pub enum WhichApp {
 fn main() {
     let opt = Opt::from_args();
     match opt.app {
-// cargo run -- -T 10 -n 10 cms -O -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 10 -n 10 -p 1
-// cargo run -- -T 200 -n 1000 cms -O -G samples -f 10 -t 100 -x 10 -v 20 -u $20 -m 100 -n 1000 -p 1
+// cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5
         WhichApp::AupeCMS(pp) => {
             if let Some(rs) = opt.random_samples {
                 sim_rps_rng::<app::aupecms::AupeCMS>(opt.n_steps, opt.nodes, &pp, rs);
