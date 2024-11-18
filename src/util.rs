@@ -8,7 +8,7 @@ use super::net::PeerRef;
 pub fn either_or_if_both<T: Clone>(a: &Option<T>, b: &Option<T>, f: fn(&T, &T) -> T) -> Option<T> {
     match (a, b) {
         (None, x) => x.clone(),
-        (x, None) => x.clone(),
+        (x, none) => x.clone(),
         (Some(x), Some(y)) => Some(f(x, y)),
     }
 }
@@ -21,8 +21,6 @@ pub fn hash(seed: u64, peer: PeerRef) -> u64 {
     s.finish()
 }
 
-/* pub fn sample_exclude<T: PartialEq + Clone>(from: Vec<usize>, to: & Vec<usize>, 
-        n: usize, id: usize) { */
 pub fn sample_exclude<T>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: usize)
         where
             T: PartialEq + Clone {
@@ -79,6 +77,16 @@ pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
     }
 }
 
+pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
+    print!("SampleList [");
+    for (_, opt_peer_ref) in sample_view.iter_mut() {
+        if let Some(peer_ref) = opt_peer_ref {
+            print!("{:?} ", peer_ref);
+        }
+    }
+    println!("]");
+}
+
 pub fn get_min_key_value(from: &[f64]) -> Option<(usize, f64)> {
     let mut min_value = None;
     let mut min_index = None;
@@ -102,16 +110,6 @@ pub fn get_min_key_value(from: &[f64]) -> Option<(usize, f64)> {
         (Some(i), Some(v)) => Some((i, v)),
         _ => None,
     }
-}
-
-pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
-    print!("SampleList [");
-    for (_, opt_peer_ref) in sample_view.iter_mut() {
-        if let Some(peer_ref) = opt_peer_ref {
-            print!("{:?} ", peer_ref);
-        }
-    }
-    println!("]");
 }
 
 pub fn print_vector_with_two_digits(v: Vec<f64>) {

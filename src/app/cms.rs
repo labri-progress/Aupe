@@ -65,9 +65,10 @@ impl CountMinSketch {
 
     // add min
     pub fn min(&mut self) {
+        self.min_value = f64::MAX;
         for row in &self.matrix {
             for &value in row {
-                if value < self.min_value {
+                if value != 0.0 && value < self.min_value {
                     self.min_value = value;
                 }
             }
@@ -101,7 +102,7 @@ impl CountMinSketch {
     }
     
     pub fn print(&self) {
-        println!("Count-Min Sketch of width {} and depth {}:", self.width, self.depth);
+        println!("Count-Min Sketch:"); // of width {} and depth {}:", self.width, self.depth);
 
         for (i, row) in self.matrix.iter().enumerate() {
             println!("     Row {}: {:?}", i, row);
@@ -109,13 +110,15 @@ impl CountMinSketch {
     }
     
     pub fn merge_cms(&mut self, second_cms_matrix: Vec<Vec<f64>>) -> CountMinSketch {
-
         for i in 0..self.depth {
             for j in 0..self.width {
                 self.matrix[i][j] += second_cms_matrix[i][j];
                 self.matrix[i][j] /=2.0;
             }
         }
+        // update min 
+        self.min();
+
         self.clone()
     }
 }
