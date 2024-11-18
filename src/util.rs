@@ -142,24 +142,19 @@ pub fn string_to_vec(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError> {
         .collect()
 }
 
-pub fn vec_to_string_slow(vec: &Vec<f64>) -> String {
-    let precision = 2;
-    vec.iter()
-    .map(|num| format!("{:.1$}", num, precision))
-        .collect::<Vec<String>>()
-        .join(",")
+pub fn string_to_matrix(input: &str) -> Vec<Vec<f64>> {
+    input
+        .lines() // Split the string into rows using newlines
+        .map(|line| {
+            line.split(',') // Split each row into elements using commas
+                .map(|num| num.trim().parse::<f64>().expect("Invalid float")) // Parse each element into f64
+                .collect::<Vec<f64>>() // Collect elements into a vector
+        })
+        .collect::<Vec<Vec<f64>>>() // Collect rows into a matrix
 }
 
-pub fn string_to_vec_slow(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError> {
-    s.split(',')
-        .map(|num_str| num_str.trim().parse::<f64>())
-        .collect()
+pub fn get_matrix_dimensions(matrix: &[Vec<f64>]) -> (usize, usize) {
+    let rows = matrix.len();
+    let cols = if rows > 0 { matrix[0].len() } else { 0 };
+    (rows, cols)
 }
-
-
-/* fn string_to_vec(s: &str) -> Result<Vec<f64>, std::num::ParseIntError> {
-    s.split(',')
-        .map(|num_str| num_str.trim().parse::<i32>())
-        .collect()
-}
- */
