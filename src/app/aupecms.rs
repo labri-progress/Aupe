@@ -9,7 +9,7 @@ use crate::graph::ByzConnGraph;
 
 use super::cms::CountMinSketch;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -29,7 +29,7 @@ pub struct Init {
     pub nodes: usize,
 
     /// Number of SGX nodes
-    #[structopt(short = "x", long = "trusted-nodes")]
+    #[structopt(short = "x", long = "trusted-nodes", default_value = "0")]
     pub n_trusted: usize,
  
     /// Number of Byzantine nodes
@@ -108,6 +108,11 @@ impl Init {
             std::process::exit(1);
         }
 
+        if self.n_trusted != 0 && self.nb_merge == 0 {
+            eprintln!("Error: Set the number of merge for the {} trusted nodes", self.n_trusted);
+            std::process::exit(1);
+        }
+
         if self.depth >= self.nodes || self.width >= self.nodes || self.depth > self.width {
             eprintln!("Error: The CMS ({}x{}) is too big. The total number of nodes is {}", 
                 self.depth, self.width,self.nodes);
@@ -115,7 +120,8 @@ impl Init {
         }
 
         if false{
-            println!("Parameters are valid: nodes = {}, trusted nodes = {}", self.nodes, self.n_trusted);
+            println!("Parameters are valid: nodes = {}, trusted nodes = {} number of merge = {}", 
+            self.nodes, self.n_trusted, self.nb_merge);
         }
         
     }
