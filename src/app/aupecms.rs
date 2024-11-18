@@ -3,12 +3,11 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude,
-    get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
+use crate::util::{either_or_if_both, get_matrix_dimensions, hash, print_samples, print_vector_with_two_digits, sample, sample_exclude, sample_nocopy, string_to_matrix};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
-use super::cms::{CountMinSketch};
+use super::cms::CountMinSketch;
 
 const DEBUG: bool = true;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
@@ -70,12 +69,12 @@ pub struct Init {
     pub nb_merge: usize,
 
     /// How many sup merges should be used
-    #[structopt(short = "h", long = "number_of_hash_function", default_value = "2")]
-    pub width: usize,
+    #[structopt(short = "d", long = "number_of_hash_function", default_value = "2")]
+    pub depth: usize,
 
     /// How many sup merges should be used
-    #[structopt(short = "d", long = "number_of_discrete_values", default_value = "5")]
-    pub depth: usize,
+    #[structopt(short = "w", long = "number_of_discrete_values", default_value = "5")]
+    pub width: usize,
 } 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -128,12 +127,12 @@ pub struct AupeCMS {
     n_received: usize,
     n_byzantine_received: usize,
 
-    cms: CountMinSketch, // size d*h
-    cms_width: usize,
+    cms: CountMinSketch, // size d*w
     cms_depth: usize,
+    cms_width: usize,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
-    minvalue: f64,
+    //minvalue: f64,
 
     omniscient_freq_array_string: String,
     to_conctact: Vec<PeerRef>,
@@ -302,7 +301,7 @@ impl AupeCMS {
         }
     }
 
-    fn debiais_stream_with_Kfree(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+    fn debiais_stream_with_kfree(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
         //println!("++");
         let mut rng = thread_rng();
@@ -311,26 +310,21 @@ impl AupeCMS {
         
         for element in &shuffled_input {
             let occur :f64= self.cms.estimate(element);
-            if self.minvalue > occur { // new minval
-                self.minvalue = occur;
+            if self.cms.min_value > occur { // new minval
+                self.cms.min_value = occur;
                 self.minkey = *element;
+                if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                    println!("self.minkey {} element {}", self.minkey, *element);
+                }
             }else if *element == self.minkey { // search min if it was him
-                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
-                    if self.my_id == self.params.nodes -1 && DEBUG{
-                        eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
-                    }
-                    self.minvalue = min_value;
-                    self.minkey = min_index; 
-                } else {
-                    println!("The vector is empty.");
-                }  
+                self.cms.min();
             }
             if self.omniscient_memory.len() < self.params.memory_size {
                 if !self.omniscient_memory.contains(element) {
                     self.omniscient_memory.push(*element);
                 }
             }else {
-                let prob = self.minvalue as f64/ occur as f64;
+                let prob = self.cms.min_value as f64/ occur as f64;
                 let random_float: f64 = rand::thread_rng().gen(); 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
@@ -414,13 +408,11 @@ impl App for AupeCMS {
             n_received: 0,
             n_byzantine_received: 0,
 
-            //omniscient_freq_array: Vec::new(),
-            cms_width: 0,
             cms_depth: 0,
+            cms_width: 0,
             cms: CountMinSketch::new(0, 0),
             omniscient_memory: Vec::new(),
             minkey: 0,
-            minvalue: std::isize::MAX as f64,
 
             omniscient_freq_array_string: String::new(),
             to_conctact: Vec::new(),
@@ -434,12 +426,13 @@ impl App for AupeCMS {
     
         // Init preallocated vectors
         //self.omniscient_freq_array = vec![-1.0; self.params.nodes];
-        self.cms_width = init.width; 
         self.cms_depth = init.depth;
+        self.cms_width = init.width; 
         self.cms = CountMinSketch::new(self.cms_width, self.cms_depth);
-
+        
         if DEBUG {
-            self.cms.print();
+            //self.cms.print();
+            //println!("dimensions of the cms {:?}", self.cms.dim());
         }
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
         if self.params.use_omn_merge {
@@ -459,7 +452,6 @@ impl App for AupeCMS {
             self.view = view;
            
             for item in self.view.clone() {
-                self.update_omn_freq(item.clone());
                 self.update_cms_freq(item.clone());
             }
         }
@@ -547,8 +539,8 @@ impl App for AupeCMS {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        v_push = self.debiais_stream_with_omni(v_push);
-                        v_pull = self.debiais_stream_with_omni(v_pull);
+                        v_push = self.debiais_stream_with_kfree(v_push);
+                        v_pull = self.debiais_stream_with_kfree(v_pull);
                         
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             eprintln!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
@@ -580,20 +572,19 @@ impl App for AupeCMS {
                     }
 
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("omniscient_freq_array {:?} of node { }",
-                        self.omniscient_freq_array, self.my_id);
+                        println!("cms {:?} of node { }",
+                        self.cms.print(), self.my_id);
                         
                         println!("sample memory {:?} of node { }",
                             self.omniscient_memory, self.my_id);
                         println!("The key with the minimum value is '{}' with a value of {}.", 
-                            self.minkey, self.minvalue);
+                            self.minkey, self.cms.min_value);
                     }
-                    self.omniscient_freq_array_string = vec_to_string(&self.omniscient_freq_array.clone());
+                    self.omniscient_freq_array_string = self.cms.matrix_to_string();
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             if self.is_trusted(*p) {
-                                //net.send(*p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
                                 self.update_contact(*p);
                             }
                         });
@@ -602,18 +593,10 @@ impl App for AupeCMS {
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             if self.is_trusted(*p) {
-                                //net.send(*p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
                                 self.update_contact(*p);
                             }
                         });
                         
-                    /* let contact= trusted_nodes.iter().map(|x| x).filter(|x| **x!=self.my_id).collect::<Vec<_>>();
-                                                    
-                    sample(&contact, self.params.nb_merge).iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
-                        });
-                    */
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
                     self.to_conctact, self.params.nb_merge, self.oldest);
@@ -645,7 +628,6 @@ impl App for AupeCMS {
                     self.v_pull.extend(lst);
                     
                     for item in lst {
-                        self.update_omn_freq(item.clone());
                         self.update_cms_freq(item.clone());
                     }
                 },
@@ -659,29 +641,40 @@ impl App for AupeCMS {
                     }
                     self.v_push.push(from);
                     
-                    self.update_omn_freq(from.clone());
                     self.update_cms_freq(from.clone());
                
                 },
                 Msg::MergeRequest(lst) => {
-
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        //println!("message MergeRq from {} :{:?} ", from.to_string(), lst);
-                    }
-                    net.send(from, Msg::MergeReply(
-                        vec_to_string(&self.omniscient_freq_array.clone()))); //send its array before merging
-                    match string_to_vec(lst) {
-                        Ok(vec) => self.merge_knowledge_both_ways(vec),
-                        Err(e) => println!("Error parsing string: {}", e),
+                    net.send(from, Msg::MergeReply(self.cms.matrix_to_string())); //send its struct before merging
+                   
+                    let other_cms = string_to_matrix(lst);
+                    
+                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) {
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                            self.cms.print();
+                            println!("Merged with {} ", lst);
+                        }
+                        self.cms.merge_cms(other_cms);
+                    }else{
+                        println!("Error parsing string {:?} ({},{})", 
+                        get_matrix_dimensions(&other_cms), self.cms_depth, self.cms_width);
                     }
                 },
                 Msg::MergeReply(lst) => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         //println!("message MergeRy from {} :{:?} ", from.to_string(), lst);
                     }
-                    match string_to_vec(lst) {
-                        Ok(vec) => self.merge_knowledge_both_ways(vec),
-                        Err(e) => println!("Error parsing string: {}", e),
+                    let other_cms = string_to_matrix(lst);
+                    
+                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) {
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                            self.cms.print();
+                            println!("Merged with {} ", lst);
+                        }
+                        self.cms.merge_cms(other_cms);
+                    }else{
+                        println!("Error parsing string {:?} ({},{})", 
+                        get_matrix_dimensions(&other_cms), self.cms_depth, self.cms_width);
                     }
                 },
             }
@@ -710,13 +703,13 @@ impl App for AupeCMS {
                         }
                     }
                     if self.my_id == self.params.nodes-1 && DEBUG{
-                        println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
+                        //println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
                     }
                     //
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         
                         if self.my_id == self.params.nodes-1 && DEBUG{
-                            println!("vpush({}) vpull({})", self.v_push.len(), self.v_pull.len());
+                            //println!("vpush({}) vpull({})", self.v_push.len(), self.v_pull.len());
                         }
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
@@ -724,11 +717,11 @@ impl App for AupeCMS {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        v_push = self.debiais_stream_with_omni(v_push);
-                        v_pull = self.debiais_stream_with_omni(v_pull);
+                        v_push = self.debiais_stream_with_kfree(v_push);
+                        v_pull = self.debiais_stream_with_kfree(v_pull);
                         
                         if self.my_id == self.params.nodes-1 && DEBUG{
-                            eprintln!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
+                            //eprintln!("AFTER debiasing vpush{:?} vpull{:?}",v_push, v_pull);
                         }
 
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
@@ -749,20 +742,21 @@ impl App for AupeCMS {
                         self.view = view;
                     }
                     
-                    if self.my_id == self.params.nodes-1 && DEBUG{
+                    /* if self.my_id == self.params.nodes-1 && DEBUG{
                         println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
                             self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
                         print_samples(&mut self.sample_view);
                     }
 
-                    if self.my_id == self.params.nodes-1 && DEBUG{
-                        println!("omniscient_freq_array {:?} of node { }",
-                        self.omniscient_freq_array, self.my_id);
+                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                        println!("cms {:?} of node { }",
+                        self.cms.print(), self.my_id);
+                        
                         println!("sample memory {:?} of node { }",
                             self.omniscient_memory, self.my_id);
                         println!("The key with the minimum value is '{}' with a value of {}.", 
-                            self.minkey, self.minvalue);
-                    }
+                            self.minkey, self.cms.min_value);
+                    } */
                     
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
@@ -792,7 +786,6 @@ impl App for AupeCMS {
                     self.v_pull.extend(lst);
                     
                     for item in lst {
-                        self.update_omn_freq(item.clone());
                         self.update_cms_freq(item.clone());
                     }
                 },
@@ -805,7 +798,6 @@ impl App for AupeCMS {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    self.update_omn_freq(from.clone());
                     self.update_cms_freq(from.clone());
                
                 },

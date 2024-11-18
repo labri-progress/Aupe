@@ -1,5 +1,6 @@
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+use std::fmt::Write; // Import the Write trait
 
 #[derive(Debug, Clone)]
 pub struct CountMinSketch {
@@ -7,7 +8,7 @@ pub struct CountMinSketch {
     depth: usize,
     matrix: Vec<Vec<f64>>,
     hash_seeds: Vec<u64>,
-    min_value: f64,
+    pub min_value: f64,
 }
 
 impl CountMinSketch {
@@ -63,29 +64,55 @@ impl CountMinSketch {
     }
 
     // add min
-    pub fn min(&self) {
-        for row in self.matrix {
-            for value in row {
+    pub fn min(&mut self) {
+        for row in &self.matrix {
+            for &value in row {
                 if value < self.min_value {
                     self.min_value = value;
                 }
             }
         }
     }
+    
+    pub fn dim(&self) -> (usize, usize) {
+        let rows = self.matrix.len();
+        let cols = if rows > 0 { self.matrix[0].len() } else { 0 };
+        (rows, cols)
+    }
 
+    pub fn matrix_to_string(&self) -> String {
+        let precision = 2;
+        let mut result = String::new(); // Start with an empty String
+    
+        for (row_index, row) in self.matrix.iter().enumerate() {
+            if row_index > 0 {
+                result.push('\n'); // Separate rows with a newline
+            }
+    
+            for (col_index, num) in row.iter().enumerate() {
+                if col_index > 0 {
+                    result.push(','); // Separate elements in a row with a comma
+                }
+                let _ = write!(&mut result, "{:.1$}", num, precision); // Format each number
+            }
+        }
+    
+        result
+    }
+    
     pub fn print(&self) {
-        println!("Count-Min Sketch:");
+        println!("Count-Min Sketch of width {} and depth {}:", self.width, self.depth);
 
         for (i, row) in self.matrix.iter().enumerate() {
             println!("     Row {}: {:?}", i, row);
         }
     }
-
-    pub fn merge_cms(&mut self, second_omn_array: CountMinSketch) -> CountMinSketch {
+    
+    pub fn merge_cms(&mut self, second_cms_matrix: Vec<Vec<f64>>) -> CountMinSketch {
 
         for i in 0..self.depth {
             for j in 0..self.width {
-                self.matrix[i][j] += second_omn_array.matrix[i][j];
+                self.matrix[i][j] += second_cms_matrix[i][j];
                 self.matrix[i][j] /=2.0;
             }
         }
