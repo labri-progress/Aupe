@@ -13,7 +13,8 @@
 # $11 : share knowledge
 # $12 : replacement count
 # $13 : replacement frequency
-# ./merge.sh 0 1000 20 0.1 10 100 200 0 0 1 10 &
+
+# ./cms.sh 0 1000 20 0.1 10 100 200 0 0 1 10 &
 expe="${1:-0}"
 shift
 echo "Experiment ($expe) with params $@" 
@@ -26,9 +27,9 @@ sm="${5:-100}"
 roundMax="${6:-200}"
 strat="${7:-1}"
 sup="${8:-30}"
-k="${9:-0}" 
-s="${10:-1}" 
-stratLitt="aupe-merge-sup"$sup
+k="${9:-50}" 
+s="${10:-10}" 
+stratLitt="cms-merge-sup"$sup
 
 if [ $strat -eq 0 ]; then
     t=0
@@ -54,9 +55,12 @@ byz=$(echo "scale=0; $N * $f / 1" | bc)
 T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
- # sup Merges
-    cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
--v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
-
+if [ $strat -eq 0 ]; then
+    cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz \
+    -v $v -u $v -m $sm -n $N -d $s -w $k > $folder"/text"$F
+else
+    cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz -v $v \
+ -u $v -m $sm -n $N -d $s -w $k -x $trust -p $sup > $folder"/text"$F"-"$T
+fi
 
 echo "Done------------------------"
