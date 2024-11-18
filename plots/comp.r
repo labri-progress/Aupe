@@ -1,87 +1,88 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 
-library(dplyr)
+PVIEW     = "partView"
+BAGS    = "bags"
+CVIEW   = "compoVIEW.txt"
+COV     = "coverage.txt"
+INDEG   = "indegree.txt"
+OUTDEG  = "outdegree.txt"
+SAMPLE = "sample.txt"
+ARR     = "globalarray.txt"
 
-# 0. Loading
-filename2="../dsncompoVIEW"
-filename1="../dsncompoVIEW.txt"
-df1 <- read.table(filename1, header = TRUE, sep = "", stringsAsFactors = FALSE)
 
-df2 <- read.table(filename2, header = TRUE, sep = "", stringsAsFactors = FALSE)
-k=as.integer(args[1])
-rho_value=paste("rho", k, sep="")
-print(rho_value)
-df1 <- df1 %>% filter(rho == rho_value)
-df2 <- df2 %>% filter(rho == rho_value)
+library(miscTools)
 
-df1$Strat <- paste("Aupe(t=",df1$trusty,"%)", sep = "")
+source("aupe.r")
 
-unique(df1)
-unique(df2)
-merged_df <- inner_join(df1, df2, by = "faulty", 
-    suffix = c("_df1", "_df2"),
-    relationship = "many-to-many")
+n_values = c(1000) #10000
 
-# Filtrer pour obtenir les lignes où la résilience de df1 dépasse celle de df2
-result <- merged_df %>%
-  mutate(difference = resilience_df2 - resilience_df1) %>%  # Calculer la différence de résilience
-  #filter(difference > 0) %>%  # Filtrer les lignes où la différence est positive
-  select(faulty, Strat_df1, difference)
+all_f_values= c(0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 
+    0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
+    0.42, 0.44, 0.46, 0.48, 0.50 ) #c(0.06, 0.10, 0.14, 0.18, 0.20, 0.24, 0.30, 0.36, 0.40, 0.50)
 
-print(unique(result))
+#strats = c("aupe-merge", "aupe-global", "aupe", 
+strats = c("cms-merge-sup1", "aupe-merge-sup1")
+f_values=c(0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 
+    0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
+    0.42, 0.44, 0.46, 0.48, 0.50 )
+     #c(0.22) #c(0.10,0.20, 0.30, 0.40, 0.50)  #c(0.22, 0.24, 0.26, 0.28) #c(0.22) #c(0.10,0.20, 0.30, 0.40, 0.50) #all_f_values
 
-print(min(result$difference))
-print(max(result$difference))
+#f_values = all_f_values
 
-library(ggplot2)
-custom_colors <- c("Basalt" = "#2CA02C", "Brahms" = "#FF7F00",
-"Aupe(t=0%)" = "#C77CFF", "Aupe(t=100%)" = "#00BFC4", "Aupe(t=1%)"="#FFFF00", 
-"Aupe(t=5%)"="#FF3399", "Aupe(t=10%)"="#996600", 
-"Aupe(t=20%)"="darkgreen", "Aupe(t=30%)"="black", 
-"AupeGlobal" = "#FF0033")
+f_values=c(0.08, 0.10, 0.20, 0.24, 0.30, 0.40, 0.50)
+print(args)
+print(f_values)
+thrshold = 0 #as.numeric(args[1])
+#rep = as.integer(args[2])
+rep=1
 
-ratio <- 1
-width <- 8 
+merge = "yes"
+Method = "moy"
+gamma = 0.3
+rMAX = 200
+
+#CMS
+k=272
+s=10
+
+t_values=c(0, 0.01, 0.1)
+expe=0
+sm=100
+local1 = "machines"
+local2 = "serveur9/data"
+local = "data"  
+partview=FALSE
+if (as.integer(args[1])==1){
+    partview=TRUE
+    ratio <- 0.75
+}else{
+    ratio <- 16 / 9
+}
+width <- 8   # largeur en pouces
 height <- width / ratio
-pdf(paste("comparisonWithBasaltrho=", rho_value, sep=""), width = width, height = height)
+expe = 0
+for (n in n_values){
+    v=20
+        
+    folder = paste("../analysis/", n, sep="")
 
-kept <- c("Aupe(t=0%)", "Aupe(t=0%)", "Aupe(t=5%)", "Aupe(t=10%)",
-    "Aupe(t=20%)", "Aupe(t=30%)", "Aupe(t=100%)", "AupeGlobal")
+    for (f in f_values){
+        for (t in t_values){
+            params = c(n, v, f, t, sm, strats[1], strats[2], #merge, gamma, 
+                rMAX, folder, k, s)
 
-result <- result[(result$Strat_df1 %in% kept), ]
-print(unique(result$Strat_df1))
-line_size <- 1
-point_size <- 1.5
-y_breaks <- seq(-40, 40, 5) #append(c(0.0), seq(max(-40, min(result$difference)), min(40, max(result$difference)), by=5))
-y_breaks
-ggplot(result, aes(x = faulty, 
-    y = difference, color = Strat_df1)) + #, linetype = Strat_df1)) +
-        geom_point(size=point_size) +
-        geom_line(linewidth=line_size) +
-        geom_abline(intercept = 0, slope = 0, linetype = "dashed", color = "black") + 
-        labs(#title = paste("Resilience in ", component, sep=""),
-          x = "Prop. of Byz. nodes", 
-          y = "Difference with Basalt") +
-            theme_minimal() +
-            scale_y_continuous(breaks = ) +
-            scale_color_manual(values = custom_colors) +
-            theme(legend.position = c(0.7, 0.15),
-                legend.title = element_blank(),
-                #panel.grid.major = element_blank(),  # Remove major gridlines
-                #panel.grid.minor = element_blank(),  # Remove minor gridlines
-                panel.background = element_rect("white"),
-                panel.border = element_rect(colour = "black", linewidth=1,
-                fill = NA),  
-                legend.spacing.y = unit(0.001, "cm"),
-                text = element_text(size = 12, color="black"),
-                axis.title.x = element_text(size = 13, face = "bold"),  
-                axis.title.y = element_text(size = 13, face = "bold"),  
-                axis.text.x = element_text(size = 13),  
-                axis.text.y = element_text(size = 13), 
-                plot.title = element_text(size = 13, face = "bold"),  
-                legend.text = element_text(size = 10),  
-                legend.key.width= unit(0.75, 'cm'),
-                axis.ticks = element_line(color = "black", linewidth=1), 
-            )
-dev.off()
+            pdf(paste(folder, "/expe", expe, ".pdf", sep="")) #, width = width, height = height)
+            #par(mfrow = c(1, 1))  # 3 rows and 2 columns
+            
+            cms(params, CVIEW, "System faulty proportion  (%)")
+        
+            dev.off()
+            expe = expe +1
+            #quit()
+        }
+        
+    }
+}
+print("NEXT")
+#print(warnings()
