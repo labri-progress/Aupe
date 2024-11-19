@@ -15,7 +15,7 @@ nohup echo "[Experiments : $@]"
 
 thrshold="${1:-0}"
 limit="${2:-10000}"
-sup=1 #"${3:-30}"
+sup=5 #"${3:-30}"
 
 batch_max=5
 
@@ -45,6 +45,7 @@ do
             then
                 echo "Expe: $expe"
                 echo "$PWD"
+                echo ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s >> log.txt
                 nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
 
                 if [ $? -eq 0 ]; then
