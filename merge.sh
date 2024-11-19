@@ -13,7 +13,7 @@
 # $11 : share knowledge
 # $12 : replacement count
 # $13 : replacement frequency
-# ./merge.sh 0 1000 20 0.1 10 100 200 0 0 1 10 &
+# ./merge.sh 0 1000 20 0.3 10 100 200 2 1 1 10 &
 expe="${1:-0}"
 shift
 echo "Experiment ($expe) with params $@" 
@@ -55,7 +55,8 @@ T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
  # sup Merges
-    cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+    #cargo run -- 
+    ./bin/aupe -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
 -v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
 
 

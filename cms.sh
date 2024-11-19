@@ -14,7 +14,7 @@
 # $12 : replacement count
 # $13 : replacement frequency
 
-# ./cms.sh 0 1000 20 0.1 10 100 200 0 0 1 10 &
+# ./cms.sh 0 1000 20 0.3 10 100 200 2 1 272 10 &
 expe="${1:-0}"
 shift
 echo "Experiment ($expe) with params $@" 
@@ -60,7 +60,7 @@ if [ $strat -eq 0 ]; then
     -v $v -u $v -m $sm -n $N -d $s -w $k > $folder"/text"$F
 else
     cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz -v $v \
- -u $v -m $sm -n $N -d $s -w $k -x $trust -p $sup > $folder"/text"$F"-"$T
+    -u $v -m $sm -n $N -d $s -w $k -x $trust -p $sup > $folder"/text"$F"-"$T
 fi
 
 echo "Done------------------------"
