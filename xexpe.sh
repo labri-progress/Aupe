@@ -34,9 +34,9 @@ echo "DATE: $(date)" > nohup.out
 expe=0
 count=0
 
-for strat in 0 #1 2 #trusted
+for strat in 0 1 2 #trusted
 do   
-    for f in 0.40 0.50 #0.08 0.10 0.20 0.24 0.30 0.40 0.50
+    for f in 0.08 0.10 0.20 0.24 0.30 0.40 0.50
     do  
         for a in 1 #$( eval echo {1..$(($A))}) # run each experiment many times
         do    

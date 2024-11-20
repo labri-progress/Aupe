@@ -32,6 +32,7 @@ cms <- function(args, path, topic) {
     folder = args[9]
     k=as.numeric(args[10])
     s=as.numeric(args[11])
+    m=as.numeric(args[12])
 
     print(args)
     # 1. Plots
@@ -73,7 +74,7 @@ cms <- function(args, path, topic) {
         strat2$comp=(strat2$avgByzN/v)*100
         title=paste("Byzantine proportion inside view over Time f=", 
             f*100,"%","  t=", t*100,"%  
-            N=", N, " v=s=", v, " m=1 F=10 rounds=", roundNumber1, sep="")
+            N=", N, " v=s=", v, " m=", m, " F=10 rounds=", roundNumber1, sep="")
     }else if(path == SAMPLE){
         strat1$comp=(strat1$avgByzSamp/v)*100
         strat2$comp=(strat2$avgByzSamp/v)*100
@@ -110,14 +111,17 @@ cms <- function(args, path, topic) {
         if (comment==""){
         comment="RAS"
         }
+        param = paste("m=", m, sep="")
         system = paste("N=", N, " v=",  v, sep="")
         #study = paste("strat=", strat, sep="")
         mainDir = "../results/"
-        dir.create(file.path(mainDir, system)) # check folder existence
-        new = paste(mainDir, system, sep="")
+        dir.create(file.path(mainDir, param)) # check folder existence
+        new = paste(mainDir, param, sep="")
+        dir.create(file.path(new, system)) 
+        new = paste(new, system, sep="")
         #dir.create(file.path(new, study))
         print(paste("name", name))
-        filename = paste(new, "/","dsn", name,  sep="")
+        filename = paste(new, "/", name,  sep="")
         
         print(filename)
         dim = paste("cms(", s, ",", k, ")", sep="")
