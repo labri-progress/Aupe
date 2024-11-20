@@ -1,3 +1,6 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
 #Rscript strategy.r 10000
 library(ggplot2)
 library(dplyr)
@@ -7,8 +10,10 @@ library(tidyr)
 N=1000
 v=20
 
-filename=paste("../results/N=", N, 
-" v=", v, "/dsncompoVIEW", sep="")
+sup = as.integer(args[1])
+
+filename=paste("../results/m=", sup, "/N=", N, 
+" v=", v, "/compoVIEW", sep="")
 data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 
 # 1. Cleaning
@@ -16,7 +21,7 @@ data$faulty= data$faulty/100
 data$resilience= data$resilience/100
 k=272
 s=10
-sup=1
+
 data$Strat = paste(data$dim, "(t=",data$trusty,"%)", sep="")
 
 # Define trust levels
@@ -50,6 +55,7 @@ data <- data[(data$Strat %in% levels), ]
 line_size <- 0.5
 point_size <- 1.5
 create_plot <- function(df) {
+  y_breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)
   x_breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)
   if (length(intersect(x_breaks, unique(df$faulty))) < 3){
     x_breaks = append(0.0,unique(df$faulty))
@@ -67,6 +73,7 @@ create_plot <- function(df) {
       y = "Proportion of Byzantine samples") +
     coord_cartesian(xlim = c(0.07, 0.5), ylim = c(0, 1))+
     scale_x_continuous(breaks = x_breaks) +
+    scale_y_continuous(breaks = y_breaks) +
     coord_cartesian(ylim = c(0, 1))+
     theme(
       panel.grid.major = element_blank(),  # Remove major gridlines

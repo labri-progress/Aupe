@@ -21,8 +21,9 @@ all_f_values= c(0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
     0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
     0.42, 0.44, 0.46, 0.48, 0.50 ) #c(0.06, 0.10, 0.14, 0.18, 0.20, 0.24, 0.30, 0.36, 0.40, 0.50)
 
-#strats = c("aupe-merge", "aupe-global", "aupe", 
-strats = c("cms-merge-sup1", "aupe-merge-sup1")
+m = as.integer(args[1])
+
+strats = c(paste("cms-merge-sup", m, sep=""), paste("aupe-merge-sup", m, sep=""))
 f_values=c(0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 
     0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
     0.42, 0.44, 0.46, 0.48, 0.50 )
@@ -70,7 +71,7 @@ for (n in n_values){
     for (f in f_values){
         for (t in t_values){
             params = c(n, v, f, t, sm, strats[1], strats[2], #merge, gamma, 
-                rMAX, folder, k, s)
+                rMAX, folder, k, s, m)
 
             pdf(paste(folder, "/expe", expe, ".pdf", sep="")) #, width = width, height = height)
             #par(mfrow = c(1, 1))  # 3 rows and 2 columns

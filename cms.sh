@@ -46,8 +46,8 @@ mkdir analysis
 mkdir "./analysis/"
 mkdir "./analysis/"$N
 mkdir "./analysis/"$N"/"$stratLitt
-folder="./analysis/"$N"/"$stratLitt"/expe"$expe
-mkdir $folder
+folder="./analysis/"$N"/"$stratLitt #"/expe"$expe
+#mkdir $folder
 F=$(echo "scale=0; 100.0 * $f / 1" | bc)
 echo $folder"/text"$F
 byz=$(echo "scale=0; $N * $f / 1" | bc)
