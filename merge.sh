@@ -54,10 +54,15 @@ byz=$(echo "scale=0; $N * $f / 1" | bc)
 T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
- # sup Merges
-    #cargo run -- 
+
+if [ $strat -eq 0 ]; then
     ./bin/aupe -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
--v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
+    -v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F
+else
+    ./bin/aupe -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+    -v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
+fi
+    
 
 
 echo "Done------------------------"

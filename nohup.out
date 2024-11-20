@@ -1,69 +1,28 @@
-DATE: mar. 19 nov. 2024 16:17:46 CET
-Experiment (0) with params 1000 20 0.20 10 100 200 0 5 272 10
-Experiment (0) with params 1000 20 0.08 10 100 200 0 5 272 10
-Experiment (0) with params 1000 20 0.10 10 100 200 0 5 272 10
-Experiment (0) with params 1000 20 0.24 10 100 200 0 5 272 10
-Experiment (0) with params 1000 20 0.30 10 100 200 0 5 272 10
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existemkdir: impossible de créer le répertoire «analysis»: Le fichier existe
+DATE: mer. 20 nov. 2024 10:11:02 CET
+Experiment (0) with params 1000 20 0.40 10 100 200 0 5 272 10
+Experiment (0) with params 1000 20 0.50 10 100 200 0 5 272 10
 mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
-mkdir: impossible de créer le répertoire «analysis»: Le fichier existemkdir: impossible de créer le répertoire «analysis»
-
-: Le fichier existe
+mkdir: impossible de créer le répertoire «analysis»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/1000»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/»: Le fichier existe
-mkdir: mkdir: impossible de créer le répertoire «./analysis/1000»impossible de créer le répertoire «./analysis/1000»: Le fichier existe
-: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/1000»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/1000»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5/expe0»: Le fichier existe
 mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5/expe0»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5/expe0»: Le fichier existe
-mkdir: impossible de créer le répertoire «./analysis/1000/cms-merge-sup5/expe0»: Le fichier existe
-./analysis/1000/cms-merge-sup5/expe0/text10
-./analysis/1000/cms-merge-sup5/expe0/text24
-./analysis/1000/cms-merge-sup5/expe0/text20
-./analysis/1000/cms-merge-sup5/expe0/text30
-./analysis/1000/cms-merge-sup5/expe0/text8
-./analysis/1000/cms-merge-sup5/expe0/text24-0
-./analysis/1000/cms-merge-sup5/expe0/text10-0
-./analysis/1000/cms-merge-sup5/expe0/text20-0
-./analysis/1000/cms-merge-sup5/expe0/text30-0
-./analysis/1000/cms-merge-sup5/expe0/text8-0
+./analysis/1000/cms-merge-sup5/expe0/text40
+./analysis/1000/cms-merge-sup5/expe0/text50
+./analysis/1000/cms-merge-sup5/expe0/text40-0
+./analysis/1000/cms-merge-sup5/expe0/text50-0
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-warning    Blocking waiting for file lock on package cache
-: unreachable pattern
-  --> src/util.rs:12:9    Blocking
-   |
-11 |         (x, none) => x.clone(),
-   |         --------- matches any value
-12 |         (Some(x), Some(y)) => Some(f(x, y)),
-   |         ^^^^^^^^^^^^^^^^^^ unreachable pattern
-   |
-   = note: `#[warn(unreachable_patterns)]` on by default
-
-warning: unused variable: `none`
-  --> src/util.rs:11:13
-   |
-11 |         (x, none) => x.clone(),
-   |             ^^^^ help: if this is intentional, prefix it with an underscore: `_none`
-   |
-   = note: `#[warn(unused_variables)]` on by default
-
-warning: `aupe` (bin "aupe") generated 2 warnings (run `cargo fix --bin "aupe"` to apply 1 suggestion)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.33s
- waiting for file lock on package cache
-     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 240 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling aupe v0.1.0 (/home/amukam/thss/simulation/Aupe)
 warning: unreachable pattern
   --> src/util.rs:12:9
    |
@@ -83,14 +42,8 @@ warning: unused variable: `none`
    = note: `#[warn(unused_variables)]` on by default
 
 warning: `aupe` (bin "aupe") generated 2 warnings (run `cargo fix --bin "aupe"` to apply 1 suggestion)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.35s
-     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking    Blocking waiting for file lock on build directory
- waiting for file lock on build directory
+    Finished dev [unoptimized + debuginfo] target(s) in 1.31s
+     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 500 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
 warning: unreachable pattern
   --> src/util.rs:12:9
    |
@@ -110,47 +63,7 @@ warning: unused variable: `none`
    = note: `#[warn(unused_variables)]` on by default
 
 warning: `aupe` (bin "aupe") generated 2 warnings (run `cargo fix --bin "aupe"` to apply 1 suggestion)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.55s
-     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 200 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
-warning: unreachable pattern
-  --> src/util.rs:12:9
-   |
-11 |         (x, none) => x.clone(),
-   |         --------- matches any value
-12 |         (Some(x), Some(y)) => Some(f(x, y)),
-   |         ^^^^^^^^^^^^^^^^^^ unreachable pattern
-   |
-   = note: `#[warn(unreachable_patterns)]` on by default
-
-warning: unused variable: `none`
-  --> src/util.rs:11:13
-   |
-11 |         (x, none) => x.clone(),
-   |             ^^^^ help: if this is intentional, prefix it with an underscore: `_none`
-   |
-   = note: `#[warn(unused_variables)]` on by default
-
-warning: `aupe` (bin "aupe") generated 2 warnings (run `cargo fix --bin "aupe"` to apply 1 suggestion)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.66s
-     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 80 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
-warning: unreachable pattern
-  --> src/util.rs:12:9
-   |
-11 |         (x, none) => x.clone(),
-   |         --------- matches any value
-12 |         (Some(x), Some(y)) => Some(f(x, y)),
-   |         ^^^^^^^^^^^^^^^^^^ unreachable pattern
-   |
-   = note: `#[warn(unreachable_patterns)]` on by default
-
-warning: unused variable: `none`
-  --> src/util.rs:11:13
-   |
-11 |         (x, none) => x.clone(),
-   |             ^^^^ help: if this is intentional, prefix it with an underscore: `_none`
-   |
-   = note: `#[warn(unused_variables)]` on by default
-
-warning: `aupe` (bin "aupe") generated 2 warnings (run `cargo fix --bin "aupe"` to apply 1 suggestion)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.81s
-     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 300 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
+    Finished dev [unoptimized + debuginfo] target(s) in 1.31s
+     Running `target/debug/aupe -T 200 -n 1000 cms -G samples -f 10 -t 400 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272`
+Done------------------------
+Done------------------------
