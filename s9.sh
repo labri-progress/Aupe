@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Script to run all the experiment
+
+# ./xexpe.sh 0 10 1
+echo "[Experiments : $@]"
+
+nohup echo "[Experiments : $@]"
+# $1 : expe to begin with (threshold): defaut expe 0
+# $2 : give the number of expe to run: default 5
+# $3 : protocol strategy
+# $4 : merge strategy
+# $5 : Expe at wich we end (limit): default no limit
+# $6 : number of rounds for all my expe: default 400
+
+thrshold="${1:-0}"
+limit="${2:-10000}"
+
+sup=10 #"${3:-30}"
+
+batch_max=8
+
+round=200
+force=10
+N=10000
+
+v=160
+k=272
+s=10
+sm=100
+
+echo $N $v $sm $sup $round CMS $s $k
+echo "DATE: $(date)" 
+echo "DATE: $(date)" > nohup.out
+expe=0
+count=0
+
+for strat in 0 1 2 #trusted
+do   
+    for f in 0.08 0.10 0.20 0.24 0.30 0.40 0.50
+    do  
+        for a in 1
+        do    
+            
+            if (( expe >= thrshold && expe < limit ))
+            then
+                echo "Expe: $expe"
+                echo "$PWD"
+                echo ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s >> log.txt
+                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
+
+                if [ $? -eq 0 ]; then
+                    echo "Expe succeeded"
+                    let count=count+1
+                else
+                    echo "Expe failed"
+                fi
+            fi
+            
+            result=$(($count % $batch_max)) 
+            if (( result == 0 ))
+            then
+                count=0
+                wait
+            fi
+            
+        done
+    done
+done
+
+echo "*****************END($expe)*****************"
