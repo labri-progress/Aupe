@@ -19,7 +19,7 @@
       when: p.stat.exists
     - name: Execute the script
       ansible.builtin.debug:
-        msg: "test {{ begin }} {{ rep }} {{ end }}"
+        msg: "test {{ begin }} {{ bash }} {{ end }}"
     - name: Execute the script
       command: sh /root/Aupe/s9.sh {{ bash |int }} {{ begin |int }}  {{ end |int }}
       register: receivers
