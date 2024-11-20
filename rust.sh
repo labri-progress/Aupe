@@ -16,7 +16,7 @@ done < "$machine"
 
 a=${#machines[@]}
 
-numberofexpe=132
+numberofexpe=22
 numberpermachine=$(echo "scale=0; $numberofexpe/10 / 1" | bc)
 echo "array length $a and $numberpermachine processes"
 
@@ -30,7 +30,7 @@ if [ $copy_file -eq 0 ]; then
     done
 fi
 
-rep=1
+bash=8
 if [ $copy_file -eq 1 ]; then # expe
   count=0
   while [ $count -lt $numberofexpe ];
@@ -41,7 +41,7 @@ if [ $copy_file -eq 1 ]; then # expe
     echo "-------["$element"] --> count"$count >> log.txt
     ansible-playbook playbook/expe.yml \
         --extra-vars \
-        "node=$element target=$element ansible_user=root begin=$count rep=$rep end=$count" &
+        "node=$element target=$element ansible_user=root begin=$count bash=$bash end=$count" &
     
     let count=count+1
   done

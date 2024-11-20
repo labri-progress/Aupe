@@ -4,7 +4,7 @@
   become: yes
   vars:
     begin: 0
-    rep: 3
+    bash: 8
     end: 50
   tasks:
     - name: Get current working directory
@@ -21,7 +21,7 @@
       ansible.builtin.debug:
         msg: "test {{ begin }} {{ rep }} {{ end }}"
     - name: Execute the script
-      command: sh /root/Aupe/expe.sh {{ begin |int }} {{ rep |int }} {{ end |int }}
+      command: sh /root/Aupe/s9.sh {{ bash |int }} {{ begin |int }}  {{ end |int }}
       register: receivers
     - debug:
        var: receivers.stdout
