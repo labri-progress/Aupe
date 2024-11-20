@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#./rust.sh 1
+#./rust.sh 1 5
 machine="/etc/ansible/hosts" # "machines_g5k.txt" 
 if [ ! -f "$machine" ]; then
     echo "Le fichier $machine n'existe pas."
@@ -32,7 +32,7 @@ fi
 
 bash=8
 if [ $copy_file -eq 1 ]; then # expe
-  count=0
+  count="${2:-0}"
   while [ $count -lt $numberofexpe ];
   do 
     index=$(($count % $a))
