@@ -108,7 +108,7 @@ impl Init {
             std::process::exit(1);
         }
 
-        if (self.n_trusted != 0 && self.nb_merge == 0) || (self.n_trusted == self.nb_merge){
+        if self.n_trusted != 0 && (self.nb_merge == 0 || self.n_trusted == self.nb_merge){
             eprintln!("Error: Set the number of merge {} for the {} trusted nodes", self.nb_merge, self.n_trusted);
             std::process::exit(1);
         }
