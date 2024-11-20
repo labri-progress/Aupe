@@ -13,12 +13,13 @@ nohup echo "[Experiments : $@]"
 # $5 : Expe at wich we end (limit): default no limit
 # $6 : number of rounds for all my expe: default 400
 
-thrshold="${1:-0}"
-limit="${2:-10000}"
+batch_max="${1:-5}"
+thrshold="${2:-0}"
+limit="${3:-10000}"
 
 sup=10 #"${3:-30}"
 
-batch_max=8
+
 
 round=200
 force=10
@@ -44,10 +45,8 @@ do
             
             if (( expe >= thrshold && expe < limit ))
             then
-                echo "Expe: $expe"
                 echo "$PWD"
-                echo ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s >> log.txt
-                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
+                nohup ./bin.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe succeeded"
