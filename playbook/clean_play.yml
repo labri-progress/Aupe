@@ -13,7 +13,7 @@
         - /root/Aupe
     - name: Check if the process is running
       ansible.builtin.shell:
-        cmd: ps aux | grep -v grep | grep "basalt"
+        cmd: ps aux | grep -v grep | grep "aupe"
       register: process_status
       ignore_errors: yes  # Ignore errors to continue the playbook even if the process is not found
 

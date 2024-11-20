@@ -46,7 +46,8 @@ do
             if (( expe >= thrshold && expe < limit ))
             then
                 echo "$PWD"
-                nohup ./bin.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
+                #nohup ./bin.sh 
+                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe succeeded"
