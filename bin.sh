@@ -56,7 +56,7 @@ T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
 if [ $strat -eq 0 ]; then
-    ./bin/cms -- -T $roundMax -n $N cms -G samples -f $force -t $byz \
+    ./bin/cms -T $roundMax -n $N cms -G samples -f $force -t $byz \
     -v $v -u $v -m $sm -n $N -d $s -w $k > $folder"/text"$F
 else
     ./bin/cms -T $roundMax -n $N cms -G samples -f $force -t $byz -v $v \

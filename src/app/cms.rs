@@ -9,6 +9,7 @@ pub struct CountMinSketch {
     matrix: Vec<Vec<f64>>,
     hash_seeds: Vec<u64>,
     pub min_value: f64,
+    pub omniscient_memory: Vec<usize>,
 }
 
 impl CountMinSketch {
@@ -21,6 +22,7 @@ impl CountMinSketch {
                 matrix: Vec::new(),
                 hash_seeds: Vec::new(),
                 min_value: 0.0,
+                omniscient_memory: Vec::new(),
             }
         }else {
             let matrix = vec![vec![0.0; width]; depth];
@@ -32,6 +34,7 @@ impl CountMinSketch {
                 matrix,
                 hash_seeds,
                 min_value: f64::MAX,
+                omniscient_memory: Vec::new(),
             }
         }
     }
@@ -119,5 +122,13 @@ impl CountMinSketch {
         self.min();
 
         self.clone()
+    }
+
+    pub fn update_cms_freq(&mut self, items: Vec<usize>) {
+        for item in items {
+            self.insert(&item);
+        }
+        //Update min for the debiasing algorithm
+        self.min();
     }
 }
