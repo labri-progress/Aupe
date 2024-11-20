@@ -63,7 +63,7 @@ do
                 count=0
                 wait
             fi
-            
+            let expe=expe+1 
         done
     done
 done

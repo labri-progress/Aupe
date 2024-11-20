@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 
-#Rscript strategy.r 10000
+#Rscript strategy.r 1
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -20,7 +20,7 @@ data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 data$faulty= data$faulty/100
 data$resilience= data$resilience/100
 k=272
-s=10
+s=272 #10
 
 data$Strat = paste(data$dim, "(t=",data$trusty,"%)", sep="")
 
