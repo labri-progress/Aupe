@@ -118,7 +118,7 @@ cms <- function(args, path, topic) {
         dir.create(file.path(mainDir, param)) # check folder existence
         new = paste(mainDir, param, sep="")
         dir.create(file.path(new, system)) 
-        new = paste(new, system, sep="")
+        new = paste(new, "/", system, sep="")
         #dir.create(file.path(new, study))
         print(paste("name", name))
         filename = paste(new, "/", name,  sep="")
