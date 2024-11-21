@@ -50,7 +50,7 @@ do
                 nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
 
                 if [ $? -eq 0 ]; then
-                    echo "Expe $count succeeded"
+                    echo "Expe $expe succeeded"
                     let count=count+1
                 else
                     echo "Expe failed"

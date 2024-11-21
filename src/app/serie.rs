@@ -484,6 +484,7 @@ impl App for Serie {
         self.cms_depth = init.depth;
         self.cms_width = init.width; 
 
+        //TODO: change cms parameters
         (0..self.params.serie).for_each(|_| {
             self.cms.push(CountMinSketch::new(self.cms_width, self.cms_depth));
         });
@@ -511,6 +512,9 @@ impl App for Serie {
             self.update_samples(&view[..]);
             self.view = view;
            
+            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                println!("Init VIEW {:?}", self.view);
+            }
             self.debiais_stream_with_kfree(self.view.clone());
             
         }
@@ -638,7 +642,7 @@ impl App for Serie {
                             print!("-------CMS {}", i);
                             cms.print();
                             //println!("dimensions of the cms {:?}", cms.dim());
-                            println!("Sample memory{:?} and minvalue {}", 
+                            println!("    Sample memory{} : {:?} and minvalue {}", i,
                                 cms.omniscient_memory, cms.min_value);
                         }
                     }
@@ -669,45 +673,31 @@ impl App for Serie {
                         self.omniscient_freq_array_string = cms.matrix_to_string();
 
                         self.to_conctact.iter()
-                        .filter(|x| **x!=self.my_id) // contact only not contacted nodes
-                        .map(|x| x)
-                        .collect::<Vec<_>>().iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(i, self.omniscient_freq_array_string.to_string())) 
-                        });
+                            .filter(|x| **x!=self.my_id) // contact only not contacted nodes
+                            .map(|x| x)
+                            .collect::<Vec<_>>().iter()
+                            .for_each(|p| {
+                                net.send(**p, Msg::MergeRequest(i, self.omniscient_freq_array_string.to_string())) 
+                            });
                     }
-                        net.send(self.my_id, Msg::SelfNotif);
-                    
+                        net.send(self.my_id, Msg::SelfNotif); 
                 },
                 Msg::PullRequest => {
-                    //println!("message PlRq ");
                     net.send(from, Msg::PullReply(self.view.clone()));
                 },
                 Msg::PullReply(lst) => {
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        /* eprintln!("message PlRy from {} : {:?}", 
-                        from.to_string(), lst); */
-                    }
                     self.n_received += lst.len();
                     self.n_byzantine_received += lst.iter()
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
                     self.v_pull.extend(lst);
-                    
-                    
                 },
                 Msg::PushRequest => {
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        //eprintln!("message PushR from {} ", from.to_string());
-                    }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    //Transfer to SN
-                    //self.update_cms_freq(std::iter::once(from)); 
-               
                 },
                 Msg::MergeRequest(cmsid,lst) => {
                     net.send(from, Msg::MergeReply(*cmsid, 
@@ -715,10 +705,11 @@ impl App for Serie {
                    
                     let other_cms = string_to_matrix(lst);
                     
-                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) {
+                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) && 
+                        *cmsid < self.params.serie{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms[*cmsid].print();
-                            print!("+++ MERGE ");
+                            print!("+++ MERGE({}) ", cmsid);
                             println!(" with {} +++", lst);
                         }
                         self.cms[*cmsid].merge_cms(other_cms);
@@ -733,10 +724,11 @@ impl App for Serie {
                     }
                     let other_cms = string_to_matrix(lst);
                     
-                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) {
+                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) && 
+                        *cmsid < self.params.serie{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms[*cmsid].print();
-                            print!("+++ MERGE ");
+                            print!("+++ MERGE({}) ", cmsid);
                             println!(" with {} +++", lst);
                         }
                         self.cms[*cmsid].merge_cms(other_cms);
