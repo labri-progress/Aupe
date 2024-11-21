@@ -9,7 +9,7 @@ use crate::graph::ByzConnGraph;
 
 use super::cms::CountMinSketch;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -126,10 +126,22 @@ impl Init {
                 self.depth, self.width,self.nodes);
             std::process::exit(1);
         }
+        /* /TODO: add to AupeCMS
+        if self.depth < 2 || self.width < 2 {
+            eprintln!("Error: The CMS ({}x{}) is too small. The total number of nodes is {} and the minimum dimension is 2", 
+                self.depth, self.width,self.nodes);
+            std::process::exit(1);
+        } */
+        let dim_r_min= 2.0*(self.serie as f64).sqrt();
+
+        if (self.depth as f64) < dim_r_min || (self.width as f64) < dim_r_min || self.memory_size  < 2 * self.serie {
+            eprintln!("Error: The CMS ({}x{})-{} is too small. The minimum dimension is {}-{} with {} series", 
+                self.depth, self.width, self.memory_size, dim_r_min, 2 * self.serie, self.serie);
+            std::process::exit(1);
+        }
 
         if false{
-            println!("Parameters are valid: nodes = {}, trusted nodes = {} number of merge = {}", 
-            self.nodes, self.n_trusted, self.nb_merge);
+            println!("Parameters are valid: {:?}", self);
         }
         
     }
@@ -370,6 +382,7 @@ impl Serie {
         for cms in &mut self.cms {
             // Insert
             cms.update_cms_freq(shuffled_input.clone());
+            // Clean
             for element in &shuffled_input {
                 let occur :f64= cms.estimate(element);
                 // 1. No need to Update Min. It already done in view init, push and pull
@@ -485,21 +498,19 @@ impl App for Serie {
         //self.omniscient_freq_array = vec![-1.0; self.params.nodes];
         
         //TODO: change cms parameters
-        self.cms_depth = init.depth;
-        self.cms_width = init.width; 
-        self.sample_memory_size = init.memory_size;
-        
+        self.cms_depth = (init.depth as f64 / (init.serie as f64).sqrt()) as usize;
+        self.cms_width = (init.width as f64 / (init.serie as f64).sqrt()) as usize;
+        self.sample_memory_size = (init.memory_size as f64 / init.serie as f64) as usize;
+
+        /* print!("-------element of A(r) have dimensions {}x{}-{}", 
+            init.depth as f64 / (init.nodes as f64).sqrt(), 
+            init.width as f64 / (init.nodes as f64).sqrt(),
+            init.memory_size as f64 / init.serie as f64 ); */
+
         (0..self.params.serie).for_each(|_| {
             self.cms.push(CountMinSketch::new(self.cms_width, self.cms_depth));
         });
         
-        if false {
-            for (i,cms) in self.cms.iter().enumerate() {
-                print!("-------CMS {}", i);
-                cms.print();
-                println!("dimensions of the cms {:?}", cms.dim());
-            }  
-        }
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
         self.is_trusted = self.is_trusted(id); // F to F + T-1
         // the rest is correct node
@@ -526,7 +537,10 @@ impl App for Serie {
         if self.is_trusted && self.params.nb_merge != 0{
             let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-                println!("trusted_nodes {:?}", trusted_nodes);
+                for (i,cms) in self.cms.iter().enumerate() {
+                    print!("-------CMS {} of dimensions {:?}-{}", i, cms.dim(), self.sample_memory_size);
+                    cms.print();
+                } 
             }
 
             // update trusted list with view   
@@ -718,7 +732,7 @@ impl App for Serie {
                         }
                         self.cms[*cmsid].merge_cms(other_cms);
                     }else{
-                        println!("Error parsing string {:?} ({},{})", 
+                        println!("MergeRequest: Error parsing string {:?} ({},{})", 
                         get_matrix_dimensions(&other_cms), self.cms_depth, self.cms_width);
                     }
                 },
@@ -737,7 +751,7 @@ impl App for Serie {
                         }
                         self.cms[*cmsid].merge_cms(other_cms);
                     }else{
-                        println!("Error parsing string {:?} ({},{})", 
+                        println!("MergeReply: Error parsing string {:?} ({},{})", 
                         get_matrix_dimensions(&other_cms), self.cms_depth, self.cms_width);
                     }
                 },
