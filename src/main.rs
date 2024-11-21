@@ -62,7 +62,7 @@ pub enum WhichApp {
 fn main() {
     let opt = Opt::from_args();
     match opt.app {
-// cargo run -- -T 10 -n 10 serie -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1 -r 3
+// cargo run -- -T 10 -n 10 serie -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 6 -n 10 -d 4 -w 4 -p 1 -r 3
         WhichApp::Serie(pp) => {
             if let Some(rs) = opt.random_samples {
                 sim_rps_rng::<app::serie::Serie>(opt.n_steps, opt.nodes, &pp, rs);
