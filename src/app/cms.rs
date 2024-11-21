@@ -104,7 +104,7 @@ impl CountMinSketch {
     }
     
     pub fn print(&self) {
-        println!("Count-Min Sketch:"); // of width {} and depth {}:", self.width, self.depth);
+        //println!("Count-Min Sketch:"); // of width {} and depth {}:", self.width, self.depth);
 
         for (i, row) in self.matrix.iter().enumerate() {
             println!("     Row {}: {:?}", i, row);
