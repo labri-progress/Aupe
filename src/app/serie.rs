@@ -188,6 +188,7 @@ pub struct Serie {
     cms: Vec<CountMinSketch>, // r cms of size d*w
     cms_depth: usize,
     cms_width: usize,
+    sample_memory_size: usize,
 
     omniscient_freq_array_string: String,
     to_conctact: Vec<PeerRef>,
@@ -373,7 +374,7 @@ impl Serie {
                 let occur :f64= cms.estimate(element);
                 // 1. No need to Update Min. It already done in view init, push and pull
                 // 2. Sample memory
-                if cms.omniscient_memory.len() < self.params.memory_size {
+                if cms.omniscient_memory.len() < self.sample_memory_size {
                     if !cms.omniscient_memory.contains(element) {
                         cms.omniscient_memory.push(*element);
                     }
@@ -381,7 +382,7 @@ impl Serie {
                     let prob = cms.min_value as f64/ occur as f64;
                     let random_float: f64 = rand::thread_rng().gen(); 
                     if random_float < prob && !cms.omniscient_memory.contains(element) {
-                        let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
+                        let i = rng.gen_range(0, self.sample_memory_size);//omniscient_memory.len());
                         if let Some(tobereplaced) = cms.omniscient_memory.get_mut(i) {
                             *tobereplaced = *element;
                         } else {
@@ -466,6 +467,7 @@ impl App for Serie {
 
             cms_depth: 0,
             cms_width: 0,
+            sample_memory_size: 0,
             cms: Vec::new(),
 
             omniscient_freq_array_string: String::new(),
@@ -481,10 +483,12 @@ impl App for Serie {
     
         // Init preallocated vectors
         //self.omniscient_freq_array = vec![-1.0; self.params.nodes];
+        
+        //TODO: change cms parameters
         self.cms_depth = init.depth;
         self.cms_width = init.width; 
-
-        //TODO: change cms parameters
+        self.sample_memory_size = init.memory_size;
+        
         (0..self.params.serie).for_each(|_| {
             self.cms.push(CountMinSketch::new(self.cms_width, self.cms_depth));
         });
@@ -493,7 +497,7 @@ impl App for Serie {
             for (i,cms) in self.cms.iter().enumerate() {
                 print!("-------CMS {}", i);
                 cms.print();
-                //println!("dimensions of the cms {:?}", cms.dim());
+                println!("dimensions of the cms {:?}", cms.dim());
             }  
         }
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1

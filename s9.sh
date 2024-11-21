@@ -16,7 +16,8 @@ nohup echo "[Experiments : $@]"
 batch_max="${1:-5}"
 thrshold="${2:-0}"
 limit="${3:-10000}"
-
+k="${4:-272}"
+s="${5:-272}"
 sup=10 #"${3:-30}"
 
 
@@ -26,8 +27,7 @@ force=10
 N=10000
 
 v=160
-k=272
-s=10
+
 sm=100
 
 echo $N $v $sm $sup $round CMS $s $k
