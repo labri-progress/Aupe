@@ -32,7 +32,7 @@ sm=100
 
 echo $N $v $sm $sup $round CMS $s $k
 echo "DATE: $(date)" 
-echo "DATE: $(date)" > nohup.out
+echo "$PWD : ; DATE: $(date)" > nohup.out
 expe=0
 count=0
 

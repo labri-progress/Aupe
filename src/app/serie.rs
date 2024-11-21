@@ -9,7 +9,7 @@ use crate::graph::ByzConnGraph;
 
 use super::cms::CountMinSketch;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -484,16 +484,15 @@ impl App for Serie {
         self.cms_depth = init.depth;
         self.cms_width = init.width; 
 
-        for i in 0..self.params.serie as u64 {
-            let cms_i = CountMinSketch::new(self.cms_width, self.cms_depth);
-            self.cms.push(cms_i);
-        }
+        (0..self.params.serie).for_each(|_| {
+            self.cms.push(CountMinSketch::new(self.cms_width, self.cms_depth));
+        });
         
         if false {
             for (i,cms) in self.cms.iter().enumerate() {
                 print!("-------CMS {}", i);
                 cms.print();
-                println!("dimensions of the cms {:?}", cms.dim());
+                //println!("dimensions of the cms {:?}", cms.dim());
             }  
         }
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
@@ -638,7 +637,7 @@ impl App for Serie {
                         for (i,cms) in self.cms.iter().enumerate() {
                             print!("-------CMS {}", i);
                             cms.print();
-                            println!("dimensions of the cms {:?}", cms.dim());
+                            //println!("dimensions of the cms {:?}", cms.dim());
                             println!("Sample memory{:?} and minvalue {}", 
                                 cms.omniscient_memory, cms.min_value);
                         }
@@ -811,21 +810,6 @@ impl App for Serie {
                         self.view = view;
                     }
                     
-                    /* if self.my_id == self.params.nodes-1 && DEBUG{
-                        println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
-                            self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
-                        print_samples(&mut self.sample_view);
-                    }
-
-                    if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("cms {:?} of node { }",
-                        self.cms.print(), self.my_id);
-                        
-                        println!("sample memory {:?} of node { }",
-                            self.omniscient_memory, self.my_id);
-                        println!("The minimum value is {}", self.cms.min_value);
-                    } */
-                    
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest)
@@ -839,7 +823,6 @@ impl App for Serie {
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
-                    //println!("message PlRq ");
                     net.send(from, Msg::PullReply(self.view.clone()));
                 },
                 Msg::PullReply(lst) => {
