@@ -119,6 +119,12 @@ impl Init {
             std::process::exit(1);
         }
 
+        if self.depth < 2 || self.width < 2 {
+            eprintln!("Error: The CMS ({}x{}) is too small. The total number of nodes is {} and the minimum dimension is 2", 
+                self.depth, self.width,self.nodes);
+            std::process::exit(1);
+        }
+        
         if false{
             println!("Parameters are valid: nodes = {}, trusted nodes = {} number of merge = {}", 
             self.nodes, self.n_trusted, self.nb_merge);
