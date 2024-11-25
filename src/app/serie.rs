@@ -126,12 +126,7 @@ impl Init {
                 self.depth, self.width,self.nodes);
             std::process::exit(1);
         }
-        /* /TODO: add to AupeCMS
-        if self.depth < 2 || self.width < 2 {
-            eprintln!("Error: The CMS ({}x{}) is too small. The total number of nodes is {} and the minimum dimension is 2", 
-                self.depth, self.width,self.nodes);
-            std::process::exit(1);
-        } */
+        
         let dim_r_min= 2.0*(self.serie as f64).sqrt();
 
         if (self.depth as f64) < dim_r_min || (self.width as f64) < dim_r_min || self.memory_size  < 2 * self.serie {
@@ -140,7 +135,7 @@ impl Init {
             std::process::exit(1);
         }
 
-        if false{
+        if DEBUG{
             println!("Parameters are valid: {:?}", self);
         }
         
@@ -500,8 +495,10 @@ impl App for Serie {
         //TODO: change cms parameters
         self.cms_depth = (init.depth as f64 / (init.serie as f64).sqrt()) as usize;
         self.cms_width = (init.width as f64 / (init.serie as f64).sqrt()) as usize;
-        self.sample_memory_size = (init.memory_size as f64 / init.serie as f64) as usize;
-
+        //self.sample_memory_size = (init.memory_size as f64 / init.serie as f64) as usize;
+        // ci = 1/r (s1 s2 + c - r s1i s2i)
+        self.sample_memory_size = ((init.depth * init.width + init.memory_size - 
+            init.serie* self.cms_depth * self.cms_width) as f64 / init.serie as f64) as usize;
         /* print!("-------element of A(r) have dimensions {}x{}-{}", 
             init.depth as f64 / (init.nodes as f64).sqrt(), 
             init.width as f64 / (init.nodes as f64).sqrt(),

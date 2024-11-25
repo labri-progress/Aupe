@@ -15,7 +15,7 @@ nohup echo "[Experiments : $@]"
 
 thrshold="${1:-0}"
 limit="${2:-10000}"
-sup=5 #"${3:-30}"
+sup=9 #"${3:-30}"
 
 batch_max=5
 
