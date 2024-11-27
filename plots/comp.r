@@ -9,7 +9,7 @@ INDEG   = "indegree.txt"
 OUTDEG  = "outdegree.txt"
 SAMPLE = "sample.txt"
 ARR     = "globalarray.txt"
-
+# Rscript comp.r 9
 
 library(miscTools)
 
@@ -45,7 +45,7 @@ rMAX = 200
 
 #CMS
 k=272
-s=272 #10
+s=10
 
 t_values=c(0, 0.01, 0.1)
 expe=0

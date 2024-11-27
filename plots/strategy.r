@@ -20,7 +20,7 @@ data <- read.table(filename, header = TRUE, sep = "", stringsAsFactors = FALSE)
 data$faulty= data$faulty/100
 data$resilience= data$resilience/100
 k=272
-s=272 #10
+s=10
 
 data$Strat = paste(data$dim, "(t=",data$trusty,"%)", sep="")
 

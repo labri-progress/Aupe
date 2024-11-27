@@ -10,7 +10,7 @@ OUTDEG  = "outdegree.txt"
 SAMPLE = "sample.txt"
 ARR     = "globalarray.txt"
 
-# comp10k.r 10
+# Rscript comp10k.r 10
 library(miscTools)
 
 source("aupe.r")
@@ -45,7 +45,7 @@ gamma = 0.3
 rMAX = 200
 
 #CMS
-k=272
+k=544
 s=10
 
 t_values=c(0, 0.01, 0.1)

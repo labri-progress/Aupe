@@ -64,11 +64,11 @@ pub struct Init {
     #[structopt(short = "p", long = "nb_merges", default_value = "0")]
     pub nb_merge: usize,
 
-    /// How many sup merges should be used
+    /// number_of_hash_function
     #[structopt(short = "d", long = "number_of_hash_function", default_value = "2")]
     pub depth: usize,
 
-    /// How many sup merges should be used
+    /// Number_of_discrete_values
     #[structopt(short = "w", long = "number_of_discrete_values", default_value = "5")]
     pub width: usize,
 
@@ -403,7 +403,7 @@ impl Serie {
             }
             // series
             shuffled_input = outputstream.to_vec();
-            outputstream = Vec::new()
+            outputstream = Vec::new();
         }
         
             
