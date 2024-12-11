@@ -121,11 +121,11 @@ impl Init {
             std::process::exit(1);
         }
 
-        if self.depth >= self.nodes || self.width >= self.nodes || self.depth > self.width {
+        /* if self.depth >= self.nodes || self.width >= self.nodes || self.depth > self.width {
             eprintln!("Error: The CMS ({}x{}) is too big. The total number of nodes is {}", 
                 self.depth, self.width,self.nodes);
             std::process::exit(1);
-        }
+        } */
         
         let dim_r_min= 2.0*(self.serie as f64).sqrt();
 
@@ -459,15 +459,13 @@ impl App for Serie {
         
         //TODO: change cms parameters
         let cms_depth = (init.depth as f64 / (init.serie as f64).sqrt()) as usize;
-        let cms_width = (init.width as f64 / (init.serie as f64).sqrt()) as usize;
+        let cms_width = (init.width as f64 / (init.serie as f64).sqrt()).ceil() as usize;
         //self.sample_memory_size = (init.memory_size as f64 / init.serie as f64) as usize;
         // ci = 1/r (s1 s2 + c - r s1i s2i)
         let sample_memory_size = ((init.depth * init.width + init.memory_size - 
             init.serie* cms_depth * cms_width) as f64 / init.serie as f64) as usize;
-        /* print!("-------element of A(r) have dimensions {}x{}-{}", 
-            init.depth as f64 / (init.nodes as f64).sqrt(), 
-            init.width as f64 / (init.nodes as f64).sqrt(),
-            init.memory_size as f64 / init.serie as f64 ); */
+        print!("-------element of A(r) have dimensions {}x{}-{}", 
+            cms_depth, cms_width, sample_memory_size);
 
         (0..self.params.serie).for_each(|_| {
             self.cms.push(CountMinSketch::new(cms_width, cms_depth, sample_memory_size));
@@ -501,7 +499,7 @@ impl App for Serie {
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 for (i,cms) in self.cms.iter().enumerate() {
                     print!("-------CMS {} of dimensions {:?}-{}", i, cms.dim(), cms.sample_memory_size);
-                    cms.print();
+                    //cms.print();
                 } 
             }
 
@@ -620,7 +618,7 @@ impl App for Serie {
                         println!("node { }", self.my_id);
                         for (i,cms) in self.cms.iter().enumerate() {
                             print!("-------CMS {}", i);
-                            cms.print();
+                            //cms.print();
                             //println!("dimensions of the cms {:?}", cms.dim());
                             println!("    Sample memory{} : {:?} and minvalue {}", i,
                                 cms.omniscient_memory, cms.min_value);
