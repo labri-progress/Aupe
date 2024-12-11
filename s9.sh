@@ -22,11 +22,13 @@ sup=10 #"${3:-30}"
 
 round=200
 force=10
-N=10000
+N=1000
 
 v=160
 
 sm=100
+
+r=3
 
 echo $N $v $sm $sup $round CMS $s $k
 echo "DATE: $(date)" 
@@ -38,14 +40,14 @@ for strat in 0 1 2 #trusted
 do   
     for f in 0.08 0.10 0.20 0.24 0.30 0.40 0.50
     do  
-        for a in 1
+        for a in "cms" "serie"
         do    
             
             if (( expe >= thrshold && expe < limit ))
             then
                 echo "$PWD"
                 #nohup ./bin.sh 
-                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
+                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s $a &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe $expe succeeded"

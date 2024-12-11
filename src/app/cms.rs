@@ -144,12 +144,6 @@ impl CountMinSketch {
         self.clone()
     }
 
-    fn update_cms_freq(&mut self, items: Vec<usize>) {
-        for item in items {
-            self.insert(&item);
-        }
-    }
-
     pub fn debiais_stream_with_kfree(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
         let mut rng = thread_rng();
