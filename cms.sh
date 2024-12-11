@@ -25,11 +25,13 @@ f="${3:-0.10}"
 force="${4:-10}"
 sm="${5:-100}"
 roundMax="${6:-200}"
-strat="${7:-1}"
+strat="${7:-0}"
 sup="${8:-30}"
 k="${9:-50}" 
 s="${10:-10}" 
-stratLitt="cms-merge-sup"$sup
+method="${11:-"cms"}"
+r="${12:-3}"
+stratLitt=$method"-merge-sup"$sup
 
 if [ $strat -eq 0 ]; then
     t=0
@@ -55,12 +57,27 @@ byz=$(echo "scale=0; $N * $f / 1" | bc)
 T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
+
+#cargo run -- -T 10 -n 10 serie -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 6 -n 10 -d 4 -w 4 -p 1 -r 3
+
 if [ $strat -eq 0 ]; then
-    cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz \
-    -v $v -u $v -m $sm -n $N -d $s -w $k > $folder"/text"$F
+    if [ "$method" == "cms" ]; then
+        cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz \
+        -v $v -u $v -m $sm -n $N -d $s -w $k > $folder"/text"$F
+    else
+        cargo run -- -T $roundMax -n $N serie -G samples -f $force -t $byz \
+        -v $v -u $v -m $sm -n $N -d $s -w $k -r $r > $folder"/text"$F
+    fi
+    
 else
-    cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz -v $v \
-    -u $v -m $sm -n $N -d $s -w $k -x $trust -p $sup > $folder"/text"$F"-"$T
+    if [ "$method" == "cms" ]; then
+        cargo run -- -T $roundMax -n $N cms -G samples -f $force -t $byz -v $v \
+        -u $v -m $sm -n $N -d $s -w $k -x $trust -p $sup > $folder"/text"$F"-"$T
+    else
+        cargo run -- -T $roundMax -n $N serie -G samples -f $force -t $byz -v $v \
+        -u $v -m $sm -n $N -d $s -w $k -x $trust -p $sup -r $r > $folder"/text"$F"-"$T
+    fi
+    
 fi
 
 echo "Done------------------------"
