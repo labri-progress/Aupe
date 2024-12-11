@@ -1,20 +1,23 @@
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use std::fmt::Write; // Import the Write trait
+use rand::{thread_rng, Rng};
 
 #[derive(Debug, Clone)]
+    /// Crée un nouveau Count-Min Sketch avec une largeur et une profondeur définies
 pub struct CountMinSketch {
-    width: usize,
-    depth: usize,
+    pub width: usize,
+    pub depth: usize,
     matrix: Vec<Vec<f64>>,
     hash_seeds: Vec<u64>,
     pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
+    pub sample_memory_size: usize,
 }
 
 impl CountMinSketch {
     /// Crée un nouveau Count-Min Sketch avec une largeur et une profondeur définies
-    pub fn new(width: usize, depth: usize) -> Self {
+    pub fn new(width: usize, depth: usize, sample_memory_size: usize) -> Self {
         if width == 0 || depth == 0 {
             Self {
                 width,
@@ -23,6 +26,7 @@ impl CountMinSketch {
                 hash_seeds: Vec::new(),
                 min_value: 0.0,
                 omniscient_memory: Vec::new(),
+                sample_memory_size,
             }
         }else {
             let matrix = vec![vec![0.0; width]; depth];
@@ -35,6 +39,7 @@ impl CountMinSketch {
                 hash_seeds,
                 min_value: f64::MAX,
                 omniscient_memory: Vec::new(),
+                sample_memory_size,
             }
         }
     }
@@ -55,6 +60,21 @@ impl CountMinSketch {
         }
     }
 
+    /* pub fn insertCU<T: Hash>(&mut self, item: &T) {
+        let mut min_count = f64::MAX;
+        let indices: Vec<_> = self.hash_seeds.iter().map(|&seed| self.hash(item, seed)).collect();
+
+        //println!("indices {:?}", indices);
+        for (i, &index) in indices.iter().enumerate() {
+            min_count = min_count.min(self.matrix[i][index]);
+        }
+        //println!("min_count {}", min_count);
+        for (i, &index) in indices.iter().enumerate() {
+            if self.matrix[i][index] == min_count {
+                self.matrix[i][index] += 1.0;
+            }
+        }
+    } */
     /// Estime la fréquence d'un élément
     pub fn estimate(&self, item: &impl Hash) -> f64 {
         self.hash_seeds
@@ -66,7 +86,7 @@ impl CountMinSketch {
     }
 
     // add min
-    pub fn min(&mut self) {
+    fn min(&mut self) {
         self.min_value = f64::MAX;
         for row in &self.matrix {
             for &value in row {
@@ -124,11 +144,47 @@ impl CountMinSketch {
         self.clone()
     }
 
-    pub fn update_cms_freq(&mut self, items: Vec<usize>) {
+    fn update_cms_freq(&mut self, items: Vec<usize>) {
         for item in items {
             self.insert(&item);
         }
-        //Update min for the debiasing algorithm
-        self.min();
     }
+
+    pub fn debiais_stream_with_kfree(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+        let mut outputstream = Vec::new();
+        let mut rng = thread_rng();
+
+        for element in &inputstream {
+            self.insert(element);
+            
+            // 2. Sample memory
+            if self.omniscient_memory.len() < self.sample_memory_size {
+                if !self.omniscient_memory.contains(element) {
+                    self.omniscient_memory.push(*element);
+                }
+            }else {
+                let occur :f64= self.estimate(element);
+                self.min();
+
+                let prob = self.min_value as f64/ occur as f64;
+                let random_float: f64 = rand::thread_rng().gen(); 
+
+                if random_float < prob && !self.omniscient_memory.contains(element) {
+                    
+                    let i = rng.gen_range(0, self.sample_memory_size);
+                    
+                    if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
+                        *tobereplaced = *element;
+                    } else {
+                        println!("Index out of bounds");
+                    }
+                }
+            }
+            let i = rng.gen_range(0, self.omniscient_memory.len());
+            outputstream.push(self.omniscient_memory[i].clone());
+        }
+            
+        outputstream
+    }
+
 }
