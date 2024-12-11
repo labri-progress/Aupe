@@ -13,11 +13,9 @@ nohup echo "[Experiments : $@]"
 # $5 : Expe at wich we end (limit): default no limit
 # $6 : number of rounds for all my expe: default 400
 
-batch_max="${1:-5}"
-thrshold="${2:-0}"
-limit="${3:-10000}"
-k="${4:-544}"
-s="${5:-10}"
+xpe="${1:-0}"
+k="${2:-1000}"
+s="${3:-10}"
 sup=10 #"${3:-30}"
 
 round=200
@@ -43,11 +41,11 @@ do
         for a in "cms" "serie"
         do    
             
-            if (( expe >= thrshold && expe < limit ))
+            if (( expe == xpe ))
             then
                 echo "$PWD"
                 #nohup ./bin.sh 
-                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s $a &
+                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s $a $r &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe $expe succeeded"
@@ -57,12 +55,6 @@ do
                 fi
             fi
             
-            result=$(($count % $batch_max)) 
-            if (( result == 0 ))
-            then
-                count=0
-                wait
-            fi
             let expe=expe+1 
         done
     done
