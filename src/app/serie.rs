@@ -193,9 +193,6 @@ pub struct Serie {
     n_byzantine_received: usize,
 
     cms: Vec<CountMinSketch>, // r cms of size d*w
-    cms_depth: usize,
-    cms_width: usize,
-    sample_memory_size: usize,
 
     omniscient_freq_array_string: String,
     to_conctact: Vec<PeerRef>,
@@ -370,43 +367,15 @@ impl Serie {
             println!("*** CLEAN ***");
         }
         let mut outputstream = Vec::new();
-        let mut rng = thread_rng();
         let mut shuffled_input = inputstream.to_vec();
-        //rng.shuffle(&mut shuffled_input[..]);
         
         for cms in &mut self.cms {
-            // Insert
-            cms.update_cms_freq(shuffled_input.clone());
-            // Clean
-            for element in &shuffled_input {
-                let occur :f64= cms.estimate(element);
-                // 1. No need to Update Min. It already done in view init, push and pull
-                // 2. Sample memory
-                if cms.omniscient_memory.len() < self.sample_memory_size {
-                    if !cms.omniscient_memory.contains(element) {
-                        cms.omniscient_memory.push(*element);
-                    }
-                }else {
-                    let prob = cms.min_value as f64/ occur as f64;
-                    let random_float: f64 = rand::thread_rng().gen(); 
-                    if random_float < prob && !cms.omniscient_memory.contains(element) {
-                        let i = rng.gen_range(0, self.sample_memory_size);//omniscient_memory.len());
-                        if let Some(tobereplaced) = cms.omniscient_memory.get_mut(i) {
-                            *tobereplaced = *element;
-                        } else {
-                            println!("Index out of bounds");
-                        }
-                    }
-                }
-                let i = rng.gen_range(0, cms.omniscient_memory.len());
-                outputstream.push(cms.omniscient_memory[i].clone());
-            }
-            // series
-            shuffled_input = outputstream.to_vec();
             outputstream = Vec::new();
-        }
-        
+            cms.debiais_stream_with_kfree(shuffled_input.clone());
             
+            shuffled_input = outputstream.to_vec();
+            
+        }
         outputstream
     }
 
@@ -472,10 +441,6 @@ impl App for Serie {
 
             n_received: 0,
             n_byzantine_received: 0,
-
-            cms_depth: 0,
-            cms_width: 0,
-            sample_memory_size: 0,
             cms: Vec::new(),
 
             omniscient_freq_array_string: String::new(),
@@ -493,19 +458,19 @@ impl App for Serie {
         //self.omniscient_freq_array = vec![-1.0; self.params.nodes];
         
         //TODO: change cms parameters
-        self.cms_depth = (init.depth as f64 / (init.serie as f64).sqrt()) as usize;
-        self.cms_width = (init.width as f64 / (init.serie as f64).sqrt()) as usize;
+        let cms_depth = (init.depth as f64 / (init.serie as f64).sqrt()) as usize;
+        let cms_width = (init.width as f64 / (init.serie as f64).sqrt()) as usize;
         //self.sample_memory_size = (init.memory_size as f64 / init.serie as f64) as usize;
         // ci = 1/r (s1 s2 + c - r s1i s2i)
-        self.sample_memory_size = ((init.depth * init.width + init.memory_size - 
-            init.serie* self.cms_depth * self.cms_width) as f64 / init.serie as f64) as usize;
+        let sample_memory_size = ((init.depth * init.width + init.memory_size - 
+            init.serie* cms_depth * cms_width) as f64 / init.serie as f64) as usize;
         /* print!("-------element of A(r) have dimensions {}x{}-{}", 
             init.depth as f64 / (init.nodes as f64).sqrt(), 
             init.width as f64 / (init.nodes as f64).sqrt(),
             init.memory_size as f64 / init.serie as f64 ); */
 
         (0..self.params.serie).for_each(|_| {
-            self.cms.push(CountMinSketch::new(self.cms_width, self.cms_depth));
+            self.cms.push(CountMinSketch::new(cms_width, cms_depth, sample_memory_size));
         });
         
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
@@ -535,7 +500,7 @@ impl App for Serie {
             let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 for (i,cms) in self.cms.iter().enumerate() {
-                    print!("-------CMS {} of dimensions {:?}-{}", i, cms.dim(), self.sample_memory_size);
+                    print!("-------CMS {} of dimensions {:?}-{}", i, cms.dim(), cms.sample_memory_size);
                     cms.print();
                 } 
             }
@@ -720,7 +685,7 @@ impl App for Serie {
                    
                     let other_cms = string_to_matrix(lst);
                     
-                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) && 
+                    if get_matrix_dimensions(&other_cms) == (self.cms[*cmsid].depth, self.cms[*cmsid].width) && 
                         *cmsid < self.params.serie{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms[*cmsid].print();
@@ -730,7 +695,7 @@ impl App for Serie {
                         self.cms[*cmsid].merge_cms(other_cms);
                     }else{
                         println!("MergeRequest: Error parsing string {:?} ({},{})", 
-                        get_matrix_dimensions(&other_cms), self.cms_depth, self.cms_width);
+                        get_matrix_dimensions(&other_cms), self.cms[*cmsid].depth, self.cms[*cmsid].width);
                     }
                 },
                 Msg::MergeReply(cmsid, lst) => {
@@ -739,7 +704,7 @@ impl App for Serie {
                     }
                     let other_cms = string_to_matrix(lst);
                     
-                    if get_matrix_dimensions(&other_cms) == (self.cms_depth, self.cms_width) && 
+                    if get_matrix_dimensions(&other_cms) == (self.cms[*cmsid].depth, self.cms[*cmsid].width) && 
                         *cmsid < self.params.serie{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms[*cmsid].print();
@@ -749,7 +714,7 @@ impl App for Serie {
                         self.cms[*cmsid].merge_cms(other_cms);
                     }else{
                         println!("MergeReply: Error parsing string {:?} ({},{})", 
-                        get_matrix_dimensions(&other_cms), self.cms_depth, self.cms_width);
+                        get_matrix_dimensions(&other_cms), self.cms[*cmsid].depth, self.cms[*cmsid].width);
                     }
                 },
             }
