@@ -21,7 +21,7 @@ batch_max=5
 
 round=200
 force=10
-N=1000
+N=10000
 
 v=160
 
