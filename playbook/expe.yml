@@ -12,7 +12,7 @@
       register: current_directory
     - name: Ansible check file exists.
       stat:
-        path: /root/Aupe/expe.sh
+        path: /root/Aupe/s9.sh
       register: p
     - debug:
         msg: "File exists..."

@@ -26,8 +26,7 @@ sm="${5:-100}"
 roundMax="${6:-200}"
 strat="${7:-1}"
 sup="${8:-30}"
-k="${9:-0}" 
-s="${10:-1}" 
+
 stratLitt="aupe-merge-sup"$sup
 
 if [ $strat -eq 0 ]; then
@@ -55,8 +54,9 @@ T=$(echo "scale=0; 100.0 * $t / 1" | bc)
 echo $folder"/text"$F"-"$T
 trust=$(echo "scale=0; $N * $t / 1" | bc)
 
+#$trust mandatory
 if [ $strat -eq 0 ]; then
-    ./bin/aupe -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+    ./bin/aupe -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \ 
     -v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F
 else
     ./bin/aupe -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \

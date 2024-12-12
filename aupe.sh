@@ -15,20 +15,19 @@ nohup echo "[Experiments : $@]"
 
 thrshold="${1:-0}"
 limit="${2:-10000}"
-sup=9 #"${3:-30}"
+sup=10 #"${3:-30}"
 
 batch_max=5
 
 round=200
 force=10
-N=1000 #10000
+N=10000
 
-v=20
-k=272
-s=10
+v=160
+
 sm=100
 #f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
-echo $N $v $sm $sup $round CMS $s $k
+echo $N $v $sm $sup $round $s $k
 echo "DATE: $(date)" 
 echo "DATE: $(date)" > nohup.out
 expe=0
@@ -45,8 +44,8 @@ do
             then
                 echo "Expe: $expe"
                 echo "$PWD"
-                echo ./merge.sh $expe $N $v $f $force $sm $round $strat $sup $k $s >> log.txt
-                nohup ./merge.sh $expe $N $v $f $force $sm $round $strat $sup $k $s &
+                echo ./merge.sh $expe $N $v $f $force $sm $round $strat $sup >> log.txt
+                nohup ./merge.sh $expe $N $v $f $force $sm $round $strat $sup &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe succeeded"
@@ -62,7 +61,8 @@ do
                 count=0
                 wait
             fi
-            #let expe=expe+1 
+            exit 0
+            let expe=expe+1 
         done
     done
 done
