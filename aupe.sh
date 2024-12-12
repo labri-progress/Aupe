@@ -42,13 +42,12 @@ do
             
             if (( expe >= thrshold && expe < limit ))
             then
-                echo "Expe: $expe"
                 echo "$PWD"
                 echo ./merge.sh $expe $N $v $f $force $sm $round $strat $sup >> log.txt
                 nohup ./merge.sh $expe $N $v $f $force $sm $round $strat $sup &
 
                 if [ $? -eq 0 ]; then
-                    echo "Expe succeeded"
+                    echo "Expe $expe succeeded"
                     let count=count+1
                 else
                     echo "Expe failed"
@@ -61,7 +60,6 @@ do
                 count=0
                 wait
             fi
-            exit 0
             let expe=expe+1 
         done
     done
