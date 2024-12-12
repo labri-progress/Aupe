@@ -126,7 +126,7 @@ v=160
 
 m = as.integer(args[1])
 
-strat = paste("cms-merge-sup", m, sep="")
+strat = paste("serie-merge-sup", m, sep="") #paste("cms-merge-sup", m, sep="")
 
 f_values=c(0.08, 0.10, 0.20, 0.24, 0.30, 0.40, 0.50)
 print(args)
@@ -143,7 +143,7 @@ rMAX = 200
 k=1000
 s=10
 
-t_values=c(0) #, 0.01, 0.1)
+t_values=c(0, 0.01, 0.1)
 expe=0
 sm=100
 local1 = "machines"

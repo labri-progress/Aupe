@@ -298,30 +298,41 @@ impl Aupe {
         rng.shuffle(&mut shuffled_input[..]);
         
         for element in &shuffled_input {
-            let occur :f64= self.omniscient_freq_array[*element];
+            self.update_omn_freq(*element);
+
+            let occur = self.omniscient_freq_array[*element];
+
             if self.minvalue > occur { // new minval
                 self.minvalue = occur;
                 self.minkey = *element;
-            }else if *element == self.minkey { // search min if it was him
+
+            }else if *element == self.minkey { // search new min if it was him
+                
                 if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
                     if self.my_id == self.params.nodes -1 && DEBUG{
                         eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
                     }
                     self.minvalue = min_value;
                     self.minkey = min_index; 
+
                 } else {
                     println!("The vector is empty.");
                 }  
             }
             if self.omniscient_memory.len() < self.params.memory_size {
+
                 if !self.omniscient_memory.contains(element) {
                     self.omniscient_memory.push(*element);
                 }
+
             }else {
                 let prob = self.minvalue as f64/ occur as f64;
                 let random_float: f64 = rand::thread_rng().gen(); 
+
                 if random_float < prob && !self.omniscient_memory.contains(element) {
+                    
                     let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
+                    
                     if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
                         *tobereplaced = *element;
                     } else {
@@ -371,7 +382,7 @@ impl Aupe {
 
     fn update_omn_freq_value(&mut self, item: PeerRef, value: f64) {
         self.omniscient_freq_array[item.clone()] = value
-    }
+    } 
 
     fn update_contact(&mut self, item: PeerRef) {
         if self.is_trusted(item) && item != self.my_id{
@@ -470,9 +481,8 @@ impl App for Aupe {
             self.update_samples(&view[..]);
             self.view = view;
            
-            for item in self.view.clone() {
-                self.update_omn_freq(item.clone());
-            }
+            self.debiais_stream_with_omni(self.view.clone());
+            
         }
         // init toc_contact list
         if self.is_trusted {
@@ -655,9 +665,6 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    for item in lst {
-                        self.update_omn_freq(item.clone());
-                    }
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
@@ -669,7 +676,6 @@ impl App for Aupe {
                     }
                     self.v_push.push(from);
                     
-                    self.update_omn_freq(from.clone());
                
                 },
                 Msg::MergeRequest(lst) => {
@@ -800,9 +806,6 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    for item in lst {
-                        self.update_omn_freq(item.clone());
-                    }
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
@@ -813,7 +816,6 @@ impl App for Aupe {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    self.update_omn_freq(from.clone());
                
                 },
                 Msg::MergeRequest(_lst) => {

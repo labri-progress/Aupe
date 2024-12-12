@@ -457,15 +457,14 @@ impl App for Serie {
         // Init preallocated vectors
         //self.omniscient_freq_array = vec![-1.0; self.params.nodes];
         
-        //TODO: change cms parameters
         let cms_depth = (init.depth as f64 / (init.serie as f64).sqrt()) as usize;
         let cms_width = (init.width as f64 / (init.serie as f64).sqrt()).ceil() as usize;
         //self.sample_memory_size = (init.memory_size as f64 / init.serie as f64) as usize;
         // ci = 1/r (s1 s2 + c - r s1i s2i)
         let sample_memory_size = ((init.depth * init.width + init.memory_size - 
             init.serie* cms_depth * cms_width) as f64 / init.serie as f64) as usize;
-        print!("-------element of A(r) have dimensions {}x{}-{}", 
-            cms_depth, cms_width, sample_memory_size);
+        /* print!("-------element of A(r) have dimensions {}x{}-{}", 
+            cms_depth, cms_width, sample_memory_size); */
 
         (0..self.params.serie).for_each(|_| {
             self.cms.push(CountMinSketch::new(cms_width, cms_depth, sample_memory_size));

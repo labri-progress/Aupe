@@ -87,6 +87,7 @@ fn main() {
                 sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp);
             }   
         }
+// cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
         WhichApp::Aupe(pp) => {
             //println!("Aupe");
             if let Some(rs) = opt.random_samples {
