@@ -489,8 +489,8 @@ impl App for Serie {
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 println!("Init VIEW {:?}", self.view);
             }
+            self.cms[0].update_cms_freq(self.view.clone());
             self.debiais_stream_with_kfree(self.view.clone());
-            
         }
         // init to_ccontact list
         if self.is_trusted && self.params.nb_merge != 0{
@@ -668,6 +668,10 @@ impl App for Serie {
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
                     self.v_pull.extend(lst);
+
+                    for cms in &mut self.cms {
+                        cms.update_cms_freq(lst.clone());
+                    }
                 },
                 Msg::PushRequest => {
                     self.n_received += 1;
@@ -675,6 +679,10 @@ impl App for Serie {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
+
+                    for cms in &mut self.cms {
+                        cms.insert(&from);
+                    }
                 },
                 Msg::MergeRequest(cmsid,lst) => {
                     net.send(from, Msg::MergeReply(*cmsid, 
@@ -805,6 +813,9 @@ impl App for Serie {
                         .count();
                     self.v_pull.extend(lst);
                     
+                    for cms in &mut self.cms {
+                        cms.update_cms_freq(lst.clone());
+                    }
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
@@ -815,6 +826,10 @@ impl App for Serie {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
+
+                    for cms in &mut self.cms {
+                        cms.insert(&from);
+                    }
                
                 },
                 Msg::MergeRequest(_cmsid, _lst) => {

@@ -74,7 +74,7 @@ create_plot <- function(df) {
     geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add y = x line
     scale_color_manual(values = custom_colors) +
     scale_linetype_manual(values = custom_linetypes, guide="none") +
-    labs(title = paste("Series=3 Resilience of strategies depending on f
+    labs(title = paste("Resilience of strategies depending on f
      N=", N," v=", v," F=10 sm=100 m=", sup, sep=""), color=NULL,
       x = "Proportion of Byzantine nodes", 
       y = "Proportion of Byzantine samples") +
