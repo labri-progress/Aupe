@@ -149,7 +149,7 @@ impl CountMinSketch {
         let mut rng = thread_rng();
 
         for element in &inputstream {
-            self.insert(element);
+            //self.insert(element);
             
             // 2. Sample memory
             if self.omniscient_memory.len() < self.sample_memory_size {
@@ -179,6 +179,12 @@ impl CountMinSketch {
         }
             
         outputstream
+    }
+
+    pub fn update_cms_freq(&mut self, items: Vec<usize>) {
+        for item in items {
+            self.insert(&item);
+        }
     }
 
 }
