@@ -8,7 +8,7 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
