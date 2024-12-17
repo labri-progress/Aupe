@@ -9,7 +9,7 @@ use crate::graph::ByzConnGraph;
 
 use super::cms::CountMinSketch;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -136,7 +136,7 @@ impl Init {
         }
 
         if DEBUG{
-            println!("Parameters are valid: {:?}", self);
+            //println!("Parameters are valid: {:?}", self);
         }
         
     }
@@ -366,15 +366,22 @@ impl Serie {
         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
             println!("*** CLEAN ***");
         }
-        let mut outputstream = Vec::new();
-        let mut shuffled_input = inputstream.to_vec();
         
+        let mut shuffled_input = inputstream.to_vec();
+        let mut outputstream = Vec::new();
+        let mut cms_id = 0;
         for cms in &mut self.cms {
-            outputstream = Vec::new();
-            cms.debiais_stream_with_kfree(shuffled_input.clone());
+            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                cms.print();
+            }
             
-            shuffled_input = outputstream.to_vec();
+            if cms_id > 0 {
+                cms.update_cms_freq(shuffled_input.clone());
+            }
+            outputstream = cms.debiais_stream_with_kfree(shuffled_input.clone());
             
+            shuffled_input = outputstream.clone();
+            cms_id +=1;
         }
         outputstream
     }
@@ -617,7 +624,7 @@ impl App for Serie {
                         println!("node { }", self.my_id);
                         for (i,cms) in self.cms.iter().enumerate() {
                             print!("-------CMS {}", i);
-                            //cms.print();
+                            cms.print();
                             //println!("dimensions of the cms {:?}", cms.dim());
                             println!("    Sample memory{} : {:?} and minvalue {}", i,
                                 cms.omniscient_memory, cms.min_value);
@@ -669,9 +676,7 @@ impl App for Serie {
                         .count();
                     self.v_pull.extend(lst);
 
-                    for cms in &mut self.cms {
-                        cms.update_cms_freq(lst.clone());
-                    }
+                    self.cms[0].update_cms_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     self.n_received += 1;
@@ -680,9 +685,7 @@ impl App for Serie {
                     }
                     self.v_push.push(from);
 
-                    for cms in &mut self.cms {
-                        cms.insert(&from);
-                    }
+                    self.cms[0].insert(&from);
                 },
                 Msg::MergeRequest(cmsid,lst) => {
                     net.send(from, Msg::MergeReply(*cmsid, 
@@ -694,8 +697,8 @@ impl App for Serie {
                         *cmsid < self.params.serie{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms[*cmsid].print();
-                            print!("+++ MERGE({}) ", cmsid);
-                            println!(" with {} +++", lst);
+                            /* print!("+++ MERGE({}) ", cmsid);
+                            println!(" with {} +++", lst); */
                         }
                         self.cms[*cmsid].merge_cms(other_cms);
                     }else{
@@ -713,8 +716,8 @@ impl App for Serie {
                         *cmsid < self.params.serie{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms[*cmsid].print();
-                            print!("+++ MERGE({}) ", cmsid);
-                            println!(" with {} +++", lst);
+                            /* print!("+++ MERGE({}) ", cmsid);
+                            println!(" with {} +++", lst); */
                         }
                         self.cms[*cmsid].merge_cms(other_cms);
                     }else{
@@ -787,6 +790,20 @@ impl App for Serie {
                         self.view = view;
                     }
                     
+                    if self.my_id == self.params.nodes-1 && DEBUG{
+                        println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
+                            self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
+                        print_samples(&mut self.sample_view);
+                        
+                        for (i,cms) in self.cms.iter().enumerate() {
+                            print!("-------CMS {}", i);
+                            cms.print();
+                            //println!("dimensions of the cms {:?}", cms.dim());
+                            println!("    Sample memory{} : {:?} and minvalue {}", i,
+                                cms.omniscient_memory, cms.min_value);
+                        }
+                    }
+
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest)
@@ -813,9 +830,7 @@ impl App for Serie {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    for cms in &mut self.cms {
-                        cms.update_cms_freq(lst.clone());
-                    }
+                    self.cms[0].update_cms_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
@@ -826,11 +841,8 @@ impl App for Serie {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-
-                    for cms in &mut self.cms {
-                        cms.insert(&from);
-                    }
                
+                    self.cms[0].insert(&from);
                 },
                 Msg::MergeRequest(_cmsid, _lst) => {
                     //println!("NO MERGERq ");    

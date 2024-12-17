@@ -8,7 +8,7 @@ use crate::graph::ByzConnGraph;
 
 use super::cms::CountMinSketch;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -450,6 +450,7 @@ impl App for AupeCMS {
             self.update_samples(&view[..]);
             self.view = view;
            
+            self.cms.update_cms_freq(self.view.clone());
             self.cms.debiais_stream_with_kfree(self.view.clone());
             
         }
@@ -604,12 +605,12 @@ impl App for AupeCMS {
                     }
 
                     self.to_conctact.iter()
-                    .filter(|x| **x!=self.my_id) // contact only not contacted nodes
-                    .map(|x| x)
-                    .collect::<Vec<_>>().iter()
-                    .for_each(|p| {
-                        net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
-                    });
+                        .filter(|x| **x!=self.my_id) // contact only not contacted nodes
+                        .map(|x| x)
+                        .collect::<Vec<_>>().iter()
+                        .for_each(|p| {
+                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                        });
                 
                     net.send(self.my_id, Msg::SelfNotif);
                 },
@@ -628,7 +629,7 @@ impl App for AupeCMS {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    
+                    self.cms.update_cms_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
@@ -639,6 +640,8 @@ impl App for AupeCMS {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
+
+                    self.cms.insert(&from);
                
                 },
                 Msg::MergeRequest(lst) => {
@@ -649,8 +652,8 @@ impl App for AupeCMS {
                     if get_matrix_dimensions(&other_cms) == (self.cms.depth, self.cms.width) {
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms.print();
-                            print!("+++ MERGE ");
-                            println!(" with {} +++", lst);
+                            /* print!("+++ MERGE ");
+                            println!(" with {} +++", lst); */
                         }
                         self.cms.merge_cms(other_cms);
                     }else{
@@ -667,8 +670,8 @@ impl App for AupeCMS {
                     if get_matrix_dimensions(&other_cms) == (self.cms.depth, self.cms.width) {
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             self.cms.print();
-                            print!("+++ MERGE ");
-                            println!(" with {} +++", lst);
+                            /* print!("+++ MERGE ");
+                            println!(" with {} +++", lst); */
                         }
                         self.cms.merge_cms(other_cms);
                     }else{
@@ -741,6 +744,18 @@ impl App for AupeCMS {
                         self.view = view;
                     }
                     
+                    if self.my_id == self.params.nodes-1 && DEBUG{
+                        println!("View Node{} {:?} : push {:?} pull {:?} sample {:?}", 
+                            self.my_id, self.view, self.push_view, self.pull_view, self.sample_part);
+                        print_samples(&mut self.sample_view);
+                        
+                        println!("cms {:?} of node { }",
+                        self.cms.print(), self.my_id);
+                        
+                        println!("sample memory {:?} of node { }",
+                            self.cms.omniscient_memory, self.my_id);
+                        println!("The minimum value is {}", self.cms.min_value);
+                    }
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest)
@@ -768,6 +783,7 @@ impl App for AupeCMS {
                         .count();
                     self.v_pull.extend(lst);
                     
+                    self.cms.update_cms_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
@@ -779,6 +795,7 @@ impl App for AupeCMS {
                     }
                     self.v_push.push(from);
                
+                    self.cms.insert(&from);
                 },
                 Msg::MergeRequest(_lst) => {
                     //println!("NO MERGERq ");    
