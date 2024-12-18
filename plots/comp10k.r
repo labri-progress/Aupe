@@ -45,7 +45,7 @@ gamma = 0.3
 rMAX = 200
 
 #CMS
-k=544
+k=1000
 s=10
 
 t_values=c(0, 0.01, 0.1)
