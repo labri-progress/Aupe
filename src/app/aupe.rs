@@ -5,10 +5,9 @@ use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude,
     get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
-use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -349,10 +348,6 @@ impl Aupe {
 
     
     fn merge_knowledge_both_ways(&mut self, other_omniscient_freq_array: Vec<f64>) {
-        /* if DEBUG {
-            let strategy = "addition";
-            println!("**********merge_knowledge_both_ways { }*********", strategy);
-        } */
         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
             println!("{:?} MERGE {:?} =",
             print_vector_with_two_digits(self.omniscient_freq_array.clone()),
@@ -457,7 +452,7 @@ impl App for Aupe {
         }
     }
     
-    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
+    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init, nodes: usize) {
         self.my_id = id;
         self.params = init.clone();
     
@@ -630,13 +625,6 @@ impl App for Aupe {
                             }
                         });
                         
-                    /* let contact= trusted_nodes.iter().map(|x| x).filter(|x| **x!=self.my_id).collect::<Vec<_>>();
-                                                    
-                    sample(&contact, self.params.nb_merge).iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
-                        });
-                    */
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
                     self.to_conctact, self.params.nb_merge, self.oldest);
@@ -921,14 +909,5 @@ impl App for Aupe {
           
             ret
         }
-    }
-}
-
-impl RPS for Aupe {
-    fn get_samples(&mut self) -> Vec<PeerRef> {
-        std::mem::replace(&mut self.out_samples, Vec::new())
-    }
-    fn clear_samples(&mut self) {
-        self.out_samples.clear();
     }
 }

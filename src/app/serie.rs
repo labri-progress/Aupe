@@ -4,7 +4,6 @@ use structopt::StructOpt;
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, get_matrix_dimensions, hash, print_samples, sample, sample_exclude, sample_nocopy, string_to_matrix};
-use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
 use super::cms::CountMinSketch;
@@ -456,7 +455,7 @@ impl App for Serie {
         }
     }
     
-    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
+    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init, nodes: usize) {
         self.my_id = id;
         init.validate();
         self.params = init.clone();
@@ -937,14 +936,5 @@ impl App for Serie {
           
             ret
         }
-    }
-}
-
-impl RPS for Serie {
-    fn get_samples(&mut self) -> Vec<PeerRef> {
-        std::mem::replace(&mut self.out_samples, Vec::new())
-    }
-    fn clear_samples(&mut self) {
-        self.out_samples.clear();
     }
 }
