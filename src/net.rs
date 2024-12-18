@@ -30,7 +30,7 @@ pub trait App {
     fn new() -> Self
         where Self: Sized;
 
-    fn init(&mut self, my_id: PeerRef, network: &mut dyn Network<Self::Msg>, init: &Self::Init)
+    fn init(&mut self, my_id: PeerRef, network: &mut dyn Network<Self::Msg>, init: &Self::Init, nodes: usize)
         where Self: Sized;
 
     fn handle(&mut self, network: &mut dyn Network<Self::Msg>, from: PeerRef, msg: &Self::Msg)
@@ -128,6 +128,7 @@ impl<A: App + Send> Simulator<A> {
                 state: A::new()
             });
         }
+        let nodes :usize = net.processes.len();
         let out = net.processes.par_iter_mut()
             .map(|proc| {
                 let mut handler = NetHandler{
@@ -138,7 +139,7 @@ impl<A: App + Send> Simulator<A> {
                     metrics: A::Metrics::empty(),
                     n_recv: 0,
                 };
-                proc.state.init(proc.id, &mut handler, init);
+                proc.state.init(proc.id, &mut handler, init, nodes);
                 handler.metrics = proc.state.metrics(&mut handler);
                 handler
             })
