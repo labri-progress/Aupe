@@ -28,14 +28,15 @@ data$Strat <- ifelse(data$dim != "Basalt" & data$dim != "Brahms",
                      data$dim)
 
 
-#data
+data
 # Define trust levels
 trust_levels <- c(0, 1, 10)
 
 custom_linetypes <- c()
 custom_linetypes[paste("cms(", s, ",", k, ")", sep="")] = "solid"
-custom_linetypes[paste("serie(", s, ",", k, ")", sep="")] = "dotted"
 custom_linetypes["omn"] = "dashed"
+custom_linetypes[paste("serie(", s, ",", k, ")", sep="")] = "dotdashed"
+#custom_linetypes["Aupe"] = "dashed"
 custom_linetypes["Basalt"] = "twodash"
 custom_linetypes["Brahms"] = "longdash"
 
@@ -43,7 +44,7 @@ omn_colors <- c("#006600", "#2CA02C", "#33FF99")
 cms_colors <- c("#FF3399", "#CC6666", "#FF0033")
 serie_colors <- c("#882EE6", "#C42EE6", "#AB6FEB")
 
-custom_colors <- c("Basalt" = "#3399FF", "Brahms" = "#FF7F00")
+custom_colors <- c() #c("Basalt" = "#3399FF", "Brahms" = "#FF7F00")
 
 for (i in seq_along(trust_levels)) {
   custom_colors[paste("omn(t=", trust_levels[i], "%)", sep = "")] <- omn_colors[i]
@@ -57,13 +58,13 @@ for (i in seq_along(trust_levels)) {
   custom_colors[paste("serie(", s, ",", k, ")(t=", trust_levels[i], "%)", sep = "")] <- serie_colors[i]
 }
 
-custom_colors
+
 
 levels = unique(data$Strat)[order(decreasing = c(FALSE),unique(data$Strat))]
 levels
 data$Strat <- factor(data$Strat, levels = levels)
 data <- data[(data$Strat %in% levels), ]
-numb_col = length(levels)/3
+
 
 line_size <- 0.5
 point_size <- 1.5
@@ -105,14 +106,14 @@ create_plot <- function(df) {
       legend.title = element_blank(), 
       axis.ticks = element_line(color = "black", size=1), 
     )+
-   guides(color=guide_legend(ncol=numb_col))
+   guides(color=guide_legend(ncol=2))
 }
 
 # 2. Plots
 ratio <- 16 / 9
 width <- 8   # largeur en pouces
 height <- width / ratio
-pdf(paste(filename, ".pdf", sep=""), width = width, height = height)
+pdf(paste(filename, ".pdf", sep="")) #, width = width, height = height)
 create_plot(data)
   
 dev.off()
