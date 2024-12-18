@@ -22,13 +22,16 @@ data$resilience= data$resilience/100
 k=1000
 s=10
 
+data = data %>% 
+  filter(! dim %in% c("aupe"))
 #data$Strat = paste(data$dim, "(t=",data$trusty,"%)", sep="")
 data$Strat <- ifelse(data$dim != "Basalt" & data$dim != "Brahms", 
                      paste(data$dim, "(t=", data$trusty, "%)", sep=""), 
                      data$dim)
 
 
-#data
+unique(data$Strat)
+
 # Define trust levels
 trust_levels <- c(0, 1, 10)
 
