@@ -23,10 +23,6 @@ pub struct Opt {
     #[structopt(short = "n", long = "nodes", default_value = "1000")]
     nodes: usize,
 
-    /// Show random peer samples instead of metrics after a certain time
-    #[structopt(short="R", long = "random-samples")]
-    random_samples: Option<usize>,
-
     #[structopt(subcommand)]
     app: WhichApp,
 }
