@@ -1,6 +1,10 @@
 use std::hash::{Hash, Hasher};
 use fasthash::*;
 use rand::{thread_rng, Rng};
+use rand::rngs::StdRng;
+use rand::SeedableRng; 
+const SEED: u64 = 4;
+
 use std::fmt::Write; // Import the Write trait
 
 use super::net::PeerRef;
@@ -24,8 +28,9 @@ pub fn hash(seed: u64, peer: PeerRef) -> u64 {
 pub fn sample_exclude<T>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: usize)
         where
             T: PartialEq + Clone {
-    let mut rng = thread_rng();
-    
+    //let mut rng = thread_rng();
+    let mut rng = StdRng::seed_from_u64(SEED);
+
     while to.len() < n {
         let i = rng.gen_range(0, from.len());
         if !to.contains(&from[i]) && from[i].clone() != id {
@@ -39,7 +44,9 @@ pub fn sample<T: PartialEq + Clone>(from: &[T], n: usize) -> Vec<T> {
         return from.to_vec();
     }
 
-    let mut rng = thread_rng();
+    //let mut rng = thread_rng();
+    let mut rng = StdRng::seed_from_u64(SEED);
+
     if n >= from.len() / 4 {
         let mut ret = from.to_vec();
         rng.shuffle(&mut ret[..]);
@@ -56,12 +63,14 @@ pub fn sample<T: PartialEq + Clone>(from: &[T], n: usize) -> Vec<T> {
     }
 }
 
-pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
+pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize, seed: u64) -> Vec<T> {
     if n >= from.len() {
         return from.to_vec();
     }
 
-    let mut rng = thread_rng();
+    //let mut rng = thread_rng();
+    let mut rng = StdRng::seed_from_u64(seed);
+    
     if n >= from.len() / 4 {
         rng.shuffle(from);
         from[..n].iter().cloned().collect::<Vec<T>>()

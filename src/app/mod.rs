@@ -1,4 +1,4 @@
 pub mod aupe;
 pub mod aupecms;
 pub mod cms;
-pub mod serie;
+//pub mod serie;

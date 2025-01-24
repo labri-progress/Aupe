@@ -30,8 +30,8 @@ pub struct Opt {
 #[derive(StructOpt, Debug)]
 pub enum WhichApp {
     /// Aupe cms serie RPS
-    #[structopt(name = "serie")]
-    Serie(app::serie::Init),
+    /* #[structopt(name = "serie")]
+    Serie(app::serie::Init), */
     
     /// Aupe CMS RPS
     #[structopt(name = "cms")]
@@ -46,9 +46,9 @@ fn main() {
     let opt = Opt::from_args();
     match opt.app {
 // cargo run -- -T 10 -n 10 serie -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 6 -n 10 -d 4 -w 4 -p 1 -r 3
-        WhichApp::Serie(pp) => {
+        /* WhichApp::Serie(pp) => {
             sim::<app::serie::Serie>(opt.n_steps, opt.nodes, &pp); 
-        }
+        } */
 // cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1
 // cargo run -- -T 200 -n 1000 cms -G samples -f 10 -x 100 -t 100 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272 -p 1
         WhichApp::AupeCMS(pp) => {

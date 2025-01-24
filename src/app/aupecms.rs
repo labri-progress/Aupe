@@ -1,3 +1,5 @@
+use rand::rngs::StdRng;
+use rand::SeedableRng; 
 use rand::{thread_rng, Rng};
 use structopt::StructOpt;
 use crate::net::{App, PeerRef, Network};
@@ -11,6 +13,9 @@ const DEBUG: bool = false;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
+const SEED: u64 = 4;
+
+#[derive(Debug)]
 pub enum Msg {
     SelfNotif,
     PullRequest,
@@ -183,7 +188,7 @@ pub struct AupeCMS {
 
     cms: CountMinSketch, // size d*w
 
-    omniscient_freq_array_string: String,
+    cms_freq_array_string: String,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -414,13 +419,13 @@ impl App for AupeCMS {
 
             cms: CountMinSketch::new(0, 0, 0),
 
-            omniscient_freq_array_string: String::new(),
+            cms_freq_array_string: String::new(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
     }
     
-    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init, nodes: usize) {
+    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         init.validate();
         self.params = init.clone();
@@ -443,7 +448,9 @@ impl App for AupeCMS {
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
-            let mut rng = thread_rng();
+            //let mut rng = thread_rng();
+            let mut rng = StdRng::seed_from_u64(SEED);
+
             self.sample_view = (0..self.params.sample_view_size)
                 .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
@@ -483,6 +490,7 @@ impl App for AupeCMS {
     }
 
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
+        //println!("Msg {:?}", msg);
         if self.is_byzantine {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
@@ -495,7 +503,7 @@ impl App for AupeCMS {
                     }
                 },
                 Msg::PullRequest => {
-                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size)));
+                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size, self.my_id as u64)));
                 },
                 _ => (),
             }
@@ -504,7 +512,9 @@ impl App for AupeCMS {
                 Msg::SelfNotif => {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
-                            let mut rng = thread_rng();
+                            //let mut rng = thread_rng();
+                            let mut rng = StdRng::seed_from_u64(SEED);
+
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
                                 .filter(|(_, x)| x.is_some())
@@ -580,7 +590,7 @@ impl App for AupeCMS {
                             self.cms.omniscient_memory, self.my_id);
                         println!("The minimum value is {}", self.cms.min_value);
                     }
-                    self.omniscient_freq_array_string = self.cms.matrix_to_string();
+                    self.cms_freq_array_string = self.cms.matrix_to_string();
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
@@ -608,7 +618,7 @@ impl App for AupeCMS {
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
                         .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(self.omniscient_freq_array_string.to_string())) 
+                            net.send(**p, Msg::MergeRequest(self.cms_freq_array_string.to_string())) 
                         });
                 
                     net.send(self.my_id, Msg::SelfNotif);
@@ -684,7 +694,9 @@ impl App for AupeCMS {
                 Msg::SelfNotif => {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
-                            let mut rng = thread_rng();
+                            //let mut rng = thread_rng();
+                            let mut rng = StdRng::seed_from_u64(SEED);
+
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
                                 .filter(|(_, x)| x.is_some())
@@ -704,7 +716,7 @@ impl App for AupeCMS {
                         }
                     }
                     if self.my_id == self.params.nodes-1 && DEBUG{
-                        //println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
+                        println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
                     }
 
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
