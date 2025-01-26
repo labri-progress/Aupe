@@ -38,7 +38,7 @@ for strat in 0 1 2 #trusted
 do   
     for f in 0.08 0.10 0.20 0.24 0.30 0.40 0.50
     do  
-        for a in "cms" "serie"
+        for a in "cms"
         do    
             
             if (( expe == xpe ))
