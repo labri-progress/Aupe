@@ -291,12 +291,8 @@ impl Aupe {
         let mut outputstream = Vec::new();
         //println!("++");
         let mut rng = thread_rng();
-
-        /* let mut shuffled_input = inputstream.to_vec();
-        rng.shuffle(&mut shuffled_input[..]); */
         
         for element in &inputstream {
-            //self.update_omn_freq(*element);
 
             let occur = self.omniscient_freq_array[*element];
 

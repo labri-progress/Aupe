@@ -2,9 +2,6 @@ use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use std::fmt::Write; // Import the Write trait
 use rand::{thread_rng, Rng};
-use rand::rngs::StdRng;
-use rand::SeedableRng; 
-const SEED2: u64 = 4;
 
 #[derive(Debug, Clone)]
     /// Crée un nouveau Count-Min Sketch avec une largeur et une profondeur définies
@@ -149,8 +146,7 @@ impl CountMinSketch {
 
     pub fn debiais_stream_with_kfree(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
-        //let mut rng = thread_rng();
-        let mut rng = StdRng::seed_from_u64(SEED2);
+        let mut rng = thread_rng();
 
         for element in &inputstream {
             //self.insert(element);

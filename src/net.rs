@@ -1,9 +1,7 @@
 use rayon::prelude::*;
 
 use rand::{thread_rng, Rng};
-use rand::rngs::StdRng;
-use rand::SeedableRng; 
-const SEED: u64 = 4;
+
 //use super::metrics::Metric;
 
 const DEBUG: bool = false;
@@ -61,8 +59,7 @@ struct NetHandler<A> where A: App + Send {
 
 impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
     fn sample_peers(&self, n: usize) -> Vec<PeerRef> {
-        //let mut rng = thread_rng();
-        let mut rng = StdRng::seed_from_u64(self.id as u64);
+        let mut rng = thread_rng();
 
         if n <= self.nproc / 10 {
             let mut res = Vec::new();
