@@ -9,7 +9,7 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude
     get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
@@ -473,7 +473,7 @@ impl App for Aupe {
             let view = net.sample_peers(self.params.view_size);
 
             //let mut rng = thread_rng();
-            let mut rng = StdRng::seed_from_u64(SEED);
+            let mut rng = StdRng::seed_from_u64(self.my_id as u64);
 
             self.sample_view = (0..self.params.sample_view_size)
                 .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
@@ -543,7 +543,7 @@ impl App for Aupe {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             //let mut rng = thread_rng();
-                            let mut rng = StdRng::seed_from_u64(SEED);
+                            let mut rng = StdRng::seed_from_u64(self.my_id as u64);
 
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
@@ -710,7 +710,7 @@ impl App for Aupe {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             //let mut rng = thread_rng();
-                            let mut rng = StdRng::seed_from_u64(SEED);
+                            let mut rng = StdRng::seed_from_u64(self.my_id as u64);
 
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()

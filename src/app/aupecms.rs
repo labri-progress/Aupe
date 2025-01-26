@@ -449,7 +449,7 @@ impl App for AupeCMS {
             let view = net.sample_peers(self.params.view_size);
 
             //let mut rng = thread_rng();
-            let mut rng = StdRng::seed_from_u64(SEED);
+            let mut rng = StdRng::seed_from_u64(self.my_id as u64);
 
             self.sample_view = (0..self.params.sample_view_size)
                 .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
@@ -513,7 +513,7 @@ impl App for AupeCMS {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             //let mut rng = thread_rng();
-                            let mut rng = StdRng::seed_from_u64(SEED);
+                            let mut rng = StdRng::seed_from_u64(self.my_id as u64);
 
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
@@ -695,7 +695,7 @@ impl App for AupeCMS {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             //let mut rng = thread_rng();
-                            let mut rng = StdRng::seed_from_u64(SEED);
+                            let mut rng = StdRng::seed_from_u64(self.my_id as u64);
 
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
