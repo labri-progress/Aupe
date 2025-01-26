@@ -1,6 +1,7 @@
 use std::hash::{Hash, Hasher};
 use fasthash::*;
 use rand::{thread_rng, Rng};
+
 use std::fmt::Write; // Import the Write trait
 
 use super::net::PeerRef;
@@ -25,7 +26,7 @@ pub fn sample_exclude<T>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: us
         where
             T: PartialEq + Clone {
     let mut rng = thread_rng();
-    
+
     while to.len() < n {
         let i = rng.gen_range(0, from.len());
         if !to.contains(&from[i]) && from[i].clone() != id {
@@ -40,6 +41,7 @@ pub fn sample<T: PartialEq + Clone>(from: &[T], n: usize) -> Vec<T> {
     }
 
     let mut rng = thread_rng();
+    
     if n >= from.len() / 4 {
         let mut ret = from.to_vec();
         rng.shuffle(&mut ret[..]);
@@ -62,6 +64,7 @@ pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
     }
 
     let mut rng = thread_rng();
+    
     if n >= from.len() / 4 {
         rng.shuffle(from);
         from[..n].iter().cloned().collect::<Vec<T>>()
