@@ -3,6 +3,9 @@ use std::sync::Arc;
 
 use rand::{thread_rng, Rng};
 use rayon::prelude::*;
+use rand::rngs::StdRng;
+use rand::SeedableRng; 
+const SEED: u64 = 4;
 
 use super::net::PeerRef;
 use super::util::either_or_if_both;
@@ -92,7 +95,9 @@ impl ByzConnGraph {
 
         let n_byzantine = self.n_byzantine.unwrap();
 
-        let mut rng = thread_rng();
+        //let mut rng = thread_rng();
+        let mut rng = StdRng::seed_from_u64(SEED);
+
         let roots = (0..32).map(|_| rng.gen_range(0, n_procs) + n_byzantine)
             .collect::<Vec<_>>();
         let avgdist = roots.par_iter().map(|root| {

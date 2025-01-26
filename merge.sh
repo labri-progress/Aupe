@@ -57,11 +57,11 @@ trust=$(echo "scale=0; $N * $t / 1" | bc)
 #$trust mandatory
 if [ $strat -eq 0 ]; then
     #./bin/aupe 
-    cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+    cargo run -- -T $roundMax -n $N aupe -G samples -f $force -t $byz -x $trust \
      -v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F
 else
     #./bin/aupe
-    cargo run -- -T $roundMax -n $N aupe -O -G samples -f $force -t $byz -x $trust \
+    cargo run -- -T $roundMax -n $N aupe -G samples -f $force -t $byz -x $trust \
     -v $v -u $v -m $sm -n $N -p $sup > $folder"/text"$F"-"$T
 fi
     

@@ -1,7 +1,9 @@
 use rayon::prelude::*;
 
 use rand::{thread_rng, Rng};
-
+use rand::rngs::StdRng;
+use rand::SeedableRng; 
+const SEED: u64 = 4;
 //use super::metrics::Metric;
 
 const DEBUG: bool = false;
@@ -30,7 +32,7 @@ pub trait App {
     fn new() -> Self
         where Self: Sized;
 
-    fn init(&mut self, my_id: PeerRef, network: &mut dyn Network<Self::Msg>, init: &Self::Init, nodes: usize)
+    fn init(&mut self, my_id: PeerRef, network: &mut dyn Network<Self::Msg>, init: &Self::Init)
         where Self: Sized;
 
     fn handle(&mut self, network: &mut dyn Network<Self::Msg>, from: PeerRef, msg: &Self::Msg)
@@ -59,7 +61,9 @@ struct NetHandler<A> where A: App + Send {
 
 impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
     fn sample_peers(&self, n: usize) -> Vec<PeerRef> {
-        let mut rng = thread_rng();
+        //let mut rng = thread_rng();
+        let mut rng = StdRng::seed_from_u64(self.id as u64);
+
         if n <= self.nproc / 10 {
             let mut res = Vec::new();
             while res.len() < n {
@@ -139,7 +143,7 @@ impl<A: App + Send> Simulator<A> {
                     metrics: A::Metrics::empty(),
                     n_recv: 0,
                 };
-                proc.state.init(proc.id, &mut handler, init, nodes);
+                proc.state.init(proc.id, &mut handler, init);
                 handler.metrics = proc.state.metrics(&mut handler);
                 handler
             })

@@ -455,7 +455,7 @@ impl App for Serie {
         }
     }
     
-    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init, nodes: usize) {
+    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         init.validate();
         self.params = init.clone();

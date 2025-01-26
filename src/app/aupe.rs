@@ -7,10 +7,12 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude
     get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
 use crate::graph::ByzConnGraph;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
 const REPLACEMENT_COUNT: usize=0;
 
+
+#[derive(Debug)]
 pub enum Msg {
     SelfNotif,
     PullRequest,
@@ -57,10 +59,6 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
-
-    /// Use merge with omniscient strategy
-    #[structopt(short = "O", long = "use-omn-merge")]
-    pub use_omn_merge: bool,
     
     /// How many sup merges should be used
     #[structopt(short = "p", long = "nb_merges")]
@@ -293,10 +291,11 @@ impl Aupe {
         let mut outputstream = Vec::new();
         //println!("++");
         let mut rng = thread_rng();
-        let mut shuffled_input = inputstream.to_vec();
-        rng.shuffle(&mut shuffled_input[..]);
+
+        /* let mut shuffled_input = inputstream.to_vec();
+        rng.shuffle(&mut shuffled_input[..]); */
         
-        for element in &shuffled_input {
+        for element in &inputstream {
             //self.update_omn_freq(*element);
 
             let occur = self.omniscient_freq_array[*element];
@@ -326,7 +325,7 @@ impl Aupe {
 
             }else {
                 let prob = self.minvalue as f64/ occur as f64;
-                let random_float: f64 = rand::thread_rng().gen(); 
+                let random_float: f64 = rng.gen(); 
 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     
@@ -452,7 +451,7 @@ impl App for Aupe {
         }
     }
     
-    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init, nodes: usize) {
+    fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
     
@@ -460,31 +459,33 @@ impl App for Aupe {
         self.omniscient_freq_array = vec![-1.0; self.params.nodes];
 
         self.is_byzantine = id < init.n_byzantine; // 0 to F-1
-        if self.params.use_omn_merge {
-            self.is_trusted = self.is_trusted(id);
-            // the rest is correct node
-            if DEBUG {
-                self.show_role();
-            }
+        self.is_trusted = self.is_trusted(id); // F to F + T-1
+        // the rest is correct node
+        if false {
+            self.show_role();
         }
+        
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
             let mut rng = thread_rng();
+            
             self.sample_view = (0..self.params.sample_view_size)
                 .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
            
-           // update trusted list with view   
-           for item in self.view.clone() {
-                self.update_contact(item.clone()); 
+            // update trusted list with view   
+            for item in self.view.clone() {
+                self.update_omn_freq(item.clone());
             }
+            
             self.debiais_stream_with_omni(self.view.clone());
             
         }
+        
         // init toc_contact list
-        if self.is_trusted {
+        if self.is_trusted && self.params.nb_merge != 0{
             let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 println!("trusted_nodes {:?}", trusted_nodes);
@@ -500,8 +501,10 @@ impl App for Aupe {
             }
             let missing_len = self.params.nb_merge - self.to_conctact.len();
             // select missing trusted neighbors and avoid himself
-            sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
+            if missing_len > 0 {
+                sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
                     missing_len , self.my_id);
+            }
 
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
@@ -512,6 +515,7 @@ impl App for Aupe {
     }
 
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
+        //println!("Msg {:?}", msg);
         if self.is_byzantine {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
@@ -534,6 +538,7 @@ impl App for Aupe {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
+                            
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
                                 .filter(|(_, x)| x.is_some())
@@ -627,7 +632,7 @@ impl App for Aupe {
                         
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
-                    self.to_conctact, self.params.nb_merge, self.oldest);
+                            self.to_conctact, self.params.nb_merge, self.oldest);
                     }
 
                     self.to_conctact.iter()
@@ -661,7 +666,7 @@ impl App for Aupe {
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        eprintln!("message PushR from {} ", from.to_string());
+                        //eprintln!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
@@ -699,6 +704,7 @@ impl App for Aupe {
                     if let Some(rf) = REPLACEMENT_FREQUENCY {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             let mut rng = thread_rng();
+                            
                             let view = self.view.clone();
                             let sample_view = self.sample_view.iter()
                                 .filter(|(_, x)| x.is_some())
@@ -724,7 +730,7 @@ impl App for Aupe {
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         
                         if self.my_id == self.params.nodes-1 && DEBUG{
-                            println!("vpush({}) vpull({})", self.v_push.len(), self.v_pull.len());
+                            //println!("vpush({}) vpull({})", self.v_push.len(), self.v_pull.len());
                         }
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
@@ -805,7 +811,7 @@ impl App for Aupe {
                 },
                 Msg::PushRequest => {
                     if self.my_id == self.params.nodes-1 && DEBUG{
-                        eprintln!("message PushR from {} ", from.to_string());
+                        //eprintln!("message PushR from {} ", from.to_string());
                     }
                     self.n_received += 1;
                     if from < self.params.n_byzantine {
@@ -817,10 +823,10 @@ impl App for Aupe {
                
                 },
                 Msg::MergeRequest(_lst) => {
-                    println!("NO MERGERq ");    
+                    //println!("NO MERGERq ");    
                 },
                 Msg::MergeReply(_lst) => {
-                    eprintln!("NO MERGERply"); 
+                    //eprintln!("NO MERGERply"); 
                 },
             }
         }
