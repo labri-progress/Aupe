@@ -13,11 +13,10 @@ nohup echo "[Experiments : $@]"
 # $5 : Expe at wich we end (limit): default no limit
 # $6 : number of rounds for all my expe: default 400
 
-thrshold="${1:-0}"
-limit="${2:-10000}"
+xpe="${1:-0}"
+k="${2:-1000}"
+s="${3:-10}"
 sup=10 #"${3:-30}"
-
-batch_max=5
 
 round=200
 force=10
@@ -26,25 +25,27 @@ N=10000
 v=160
 
 sm=100
-#f_values=( 0.08 0.10 ) #0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50) 
-echo $N $v $sm $sup $round $s $k
+
+r=3
+
+echo $N $v $sm $sup $round CMS $s $k
 echo "DATE: $(date)" 
-echo "DATE: $(date)" > nohup.out
+echo "$PWD : ; DATE: $(date)" > nohup.out
 expe=0
 count=0
 
 for strat in 0 1 2 #trusted
 do   
-    for f in 0.08 0.10 0.12 0.14 0.16 0.18 0.20 0.22 0.24 0.26 0.28 0.30 0.32 0.34 0.36 0.38 0.40 0.42 0.44 0.46 0.48 0.50 #0.08 0.10 0.20 0.24 0.30 0.40 0.50
+    for f in 0.12 0.14 0.16 0.18 0.22 0.26 0.28 0.32 0.34 0.36 0.38 0.42 0.44 0.46 0.48
     do  
-        for a in 1 #$( eval echo {1..$(($A))}) # run each experiment many times
+        for a in "cms"
         do    
             
-            if (( expe >= thrshold && expe < limit ))
+            if (( expe == xpe ))
             then
                 echo "$PWD"
-                echo ./merge.sh $expe $N $v $f $force $sm $round $strat $sup >> log.txt
-                nohup ./merge.sh $expe $N $v $f $force $sm $round $strat $sup &
+                #nohup ./bin.sh 
+                nohup ./cms.sh $expe $N $v $f $force $sm $round $strat $sup $k $s $a $r &
 
                 if [ $? -eq 0 ]; then
                     echo "Expe $expe succeeded"
@@ -53,13 +54,7 @@ do
                     echo "Expe failed"
                 fi
             fi
-            #echo "*****************NEXT*****************"
-            result=$(($count % $batch_max)) 
-            if (( result == 0 ))
-            then
-                count=0
-                wait
-            fi
+            
             let expe=expe+1 
         done
     done
