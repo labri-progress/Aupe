@@ -19,5 +19,5 @@
 
     - name: Kill the process if it is running
       ansible.builtin.shell:
-        cmd: "pkill -f 'main'"
+        cmd: "pkill -f 'aupe'"
       when: process_status.rc == 0  # Execute only if the process is found
