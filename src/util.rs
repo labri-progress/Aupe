@@ -3,6 +3,11 @@ use fasthash::*;
 use rand::{thread_rng, Rng};
 
 use std::fmt::Write; // Import the Write trait
+use std::fs;
+use std::error::Error;
+
+use std::fs::{File, OpenOptions};
+use std::io::{self};
 
 use super::net::PeerRef;
 
@@ -158,4 +163,22 @@ pub fn get_matrix_dimensions(matrix: &[Vec<f64>]) -> (usize, usize) {
     let rows = matrix.len();
     let cols = if rows > 0 { matrix[0].len() } else { 0 };
     (rows, cols)
+}
+
+pub fn write_results(data:Vec<usize>,file_path:&str) -> io::Result<()> {
+
+    let mut file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(file_path)?; 
+    
+    let data_str = data.iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<String>>()
+                .join(" ");
+    
+    use std::io::Write;
+    writeln!(file, "{}", data_str)?; 
+
+    Ok(())
 }

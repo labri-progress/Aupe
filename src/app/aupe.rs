@@ -5,6 +5,7 @@ use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy, sample_exclude,
     get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
+use crate::util::write_results;
 use crate::graph::ByzConnGraph;
 
 const DEBUG: bool = false;
@@ -470,7 +471,7 @@ impl App for Aupe {
                 .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
-           
+            
             // update trusted list with view   
             for item in self.view.clone() {
                 self.update_omn_freq(item.clone());
@@ -506,6 +507,17 @@ impl App for Aupe {
                 println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
                     self.to_conctact, self.params.nb_merge, self.oldest);
             }
+        }
+        let test_nodes = vec![5000, 6000, 7000, 8000, 9000];
+        if test_nodes.contains(&self.my_id) {
+            let file_path = String::from("node")
+                +&self.my_id.to_string() + ".txt";
+            match write_results(self.view.clone(), &file_path) {
+                Ok(()) => {}
+                Err(e) => {
+                    eprintln!("Error occurred: {}", e); 
+                }
+            };
         }
         net.send(id, Msg::SelfNotif);
     }
@@ -783,6 +795,19 @@ impl App for Aupe {
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest)
                         });
+
+                        //let test_nodes = vec![500, 600, 700, 800, 900];
+                        let test_nodes = vec![5000, 6000, 7000, 8000, 9000];
+                        if test_nodes.contains(&self.my_id) {
+                            let file_path = String::from("node")
+                                +&self.my_id.to_string() + ".txt";
+                            match write_results(self.view.clone(), &file_path) {
+                                Ok(()) => {}
+                                Err(e) => {
+                                    eprintln!("Error occurred: {}", e); 
+                                }
+                            };
+                        }
 
                     net.send(self.my_id, Msg::SelfNotif);
                 },
