@@ -45,6 +45,7 @@ fn main() {
             sim::<app::aupecms::AupeCMS>(opt.n_steps, opt.nodes, &pp);  
         }
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
+// cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -x 0 -v 20 -u 20 -m 10 -n 1000 -p 10
         WhichApp::Aupe(pp) => {
             sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp);  
         }
