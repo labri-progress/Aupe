@@ -1,7 +1,6 @@
 use std::hash::{Hash, Hasher};
 use fasthash::*;
 use rand::{thread_rng, Rng};
-use std::fmt::Write; // Import the Write trait
 
 use super::net::PeerRef;
 
@@ -68,12 +67,12 @@ pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
     from.iter().position(|&x| x == value)
 } */
 
-pub fn get_min_key_value(from: &[f64]) -> Option<(usize, f64)> {
+pub fn get_min_key_value(from: &[isize]) -> Option<(usize, isize)> {
     let mut min_value = None;
     let mut min_index = None;
 
     for (index, &value) in from.iter().enumerate() {
-        if value > 0.0 {
+        if value > 0 {
             match min_value {
                 Some(v) if value < v => {
                     min_value = Some(value);
@@ -103,14 +102,39 @@ pub fn print_samples(sample_view: &mut Vec<(u64, Option<PeerRef>)>) {
     println!("]");
 }
 
-pub fn print_vector_with_two_digits(v: Vec<f64>) {
+pub fn print_vector_with_two_digits(v: Vec<isize>) {
     print!("[");
     for num in v {
         print!("{:.2} ", num);
     }
     print!("]");
 }
+pub fn get_min_key_valuef64(from: &[f64]) -> Option<(usize, f64)> {
+    let mut min_value = None;
+    let mut min_index = None;
 
+    for (index, &value) in from.iter().enumerate() {
+        if value > 0.0 {
+            match min_value {
+                Some(v) if value < v => {
+                    min_value = Some(value);
+                    min_index = Some(index);
+                },
+                None => {
+                    min_value = Some(value);
+                    min_index = Some(index);
+                },
+                _ => {}
+            }
+        }
+    }
+    match (min_index, min_value) {
+        (Some(i), Some(v)) => Some((i, v)),
+        _ => None,
+    }
+}
+
+use std::fmt::Write; // Import the Write trait
 pub fn vec_to_string(vec: &[f64]) -> String {
     let precision = 2;
     let mut result = String::with_capacity(vec.len() * (precision + 3)); // Allocate some capacity to reduce reallocations
@@ -131,29 +155,8 @@ pub fn string_to_vec(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError> {
         .collect()
 }
 
-pub fn vec_to_string_slow(vec: &Vec<f64>) -> String {
-    let precision = 2;
-    vec.iter()
-    .map(|num| format!("{:.1$}", num, precision))
-        .collect::<Vec<String>>()
-        .join(",")
-}
 
-pub fn string_to_vec_slow(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError> {
-    s.split(',')
-        .map(|num_str| num_str.trim().parse::<f64>())
-        .collect()
-}
-
-
-/* fn string_to_vec(s: &str) -> Result<Vec<f64>, std::num::ParseIntError> {
-    s.split(',')
-        .map(|num_str| num_str.trim().parse::<i32>())
-        .collect()
-}
- */
-
- use std::fs::{File, OpenOptions};
+use std::fs::{File, OpenOptions};
 use std::io::{self};
 pub fn write_results(data:Vec<usize>,file_path:&str) -> io::Result<()> {
 
