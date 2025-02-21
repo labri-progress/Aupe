@@ -7,6 +7,7 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy,
     get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
 use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
+use crate::util::write_results;
 
 const DEBUG: bool = false;
 
@@ -727,6 +728,17 @@ impl App for Aupe {
                             net.send(*p, Msg::PullRequest)
                         });
 
+                    let test_nodes = vec![5000, 6000, 7000, 8000, 9000];
+                    if test_nodes.contains(&self.my_id) {
+                        let file_path = String::from("node")
+                            +&self.my_id.to_string() + ".txt";
+                        match write_results(self.view.clone(), &file_path) {
+                            Ok(()) => {}
+                            Err(e) => {
+                                eprintln!("Error occurred: {}", e); 
+                            }
+                        };
+                    }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {

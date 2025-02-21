@@ -152,3 +152,23 @@ pub fn string_to_vec_slow(s: &str) -> Result<Vec<f64>, std::num::ParseFloatError
         .collect()
 }
  */
+
+ use std::fs::{File, OpenOptions};
+use std::io::{self};
+pub fn write_results(data:Vec<usize>,file_path:&str) -> io::Result<()> {
+
+    let mut file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(file_path)?; 
+    
+    let data_str = data.iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<String>>()
+                .join(" ");
+    
+    use std::io::Write;
+    writeln!(file, "{}", data_str)?; 
+
+    Ok(())
+}
