@@ -26,4 +26,4 @@ heap*
 TNcontact
 bin/
 nohup.out
-log/
+log*/
