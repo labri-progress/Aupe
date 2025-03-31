@@ -508,17 +508,7 @@ impl App for Aupe {
                     self.to_conctact, self.params.nb_merge, self.oldest);
             }
         }
-        let test_nodes = vec![5000, 6000, 7000, 8000, 9000];
-        if test_nodes.contains(&self.my_id) {
-            let file_path = String::from("node")
-                +&self.my_id.to_string() + ".txt";
-            match write_results(self.view.clone(), &file_path) {
-                Ok(()) => {}
-                Err(e) => {
-                    eprintln!("Error occurred: {}", e); 
-                }
-            };
-        }
+        
         net.send(id, Msg::SelfNotif);
     }
 
@@ -577,6 +567,19 @@ impl App for Aupe {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
                         
+                        // Log real trace
+                        let mut bags = v_push.clone();
+                        bags.extend(v_pull.clone());
+
+                        let file_path = String::from("log/node")
+                            +&self.my_id.to_string() + ".txt";
+                        match write_results(bags, &file_path) {
+                            Ok(()) => {}
+                            Err(e) => {
+                                eprintln!("Error occurred: {}", e); 
+                            }
+                        }; 
+                        
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
@@ -613,8 +616,8 @@ impl App for Aupe {
                     }
 
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
-                        println!("omniscient_freq_array {:?} of node { }",
-                        self.omniscient_freq_array, self.my_id);
+                        /* println!("omniscient_freq_array {:?} of node { }",
+                        self.omniscient_freq_array, self.my_id); */
                         
                         println!("sample memory {:?} of node { }",
                             self.omniscient_memory, self.my_id);
@@ -743,6 +746,19 @@ impl App for Aupe {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
                         
+                        // Log real trace
+                        let mut bags = v_push.clone();
+                        bags.extend(v_pull.clone());
+
+                        let file_path = String::from("log/node")
+                            +&self.my_id.to_string() + ".txt";
+                        match write_results(bags, &file_path) {
+                            Ok(()) => {}
+                            Err(e) => {
+                                eprintln!("Error occurred: {}", e); 
+                            }
+                        }; 
+                        
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
@@ -778,8 +794,8 @@ impl App for Aupe {
                     }
 
                     if self.my_id == self.params.nodes-1 && DEBUG{
-                        println!("omniscient_freq_array {:?} of node { }",
-                        self.omniscient_freq_array, self.my_id);
+                        /* println!("omniscient_freq_array {:?} of node { }",
+                        self.omniscient_freq_array, self.my_id); */
                         println!("sample memory {:?} of node { }",
                             self.omniscient_memory, self.my_id);
                         println!("The key with the minimum value is '{}' with a value of {}.", 
@@ -794,20 +810,7 @@ impl App for Aupe {
                     sample(&self.view[..], 1).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest)
-                        });
-
-                        //let test_nodes = vec![500, 600, 700, 800, 900];
-                        let test_nodes = vec![5000, 6000, 7000, 8000, 9000];
-                        if test_nodes.contains(&self.my_id) {
-                            let file_path = String::from("node")
-                                +&self.my_id.to_string() + ".txt";
-                            match write_results(self.view.clone(), &file_path) {
-                                Ok(()) => {}
-                                Err(e) => {
-                                    eprintln!("Error occurred: {}", e); 
-                                }
-                            };
-                        }
+                        });   
 
                     net.send(self.my_id, Msg::SelfNotif);
                 },
