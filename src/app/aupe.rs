@@ -571,14 +571,14 @@ impl App for Aupe {
                         let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
 
-                        let file_path = String::from("log/node")
-                            +&self.my_id.to_string() + ".txt";
-                        match write_results(bags, &file_path) {
-                            Ok(()) => {}
-                            Err(e) => {
-                                eprintln!("Error occurred: {}", e); 
-                            }
-                        }; 
+                        let file_path = String::from("log")+&self.params.n_byzantine.to_string() +"/node"
+                        +&self.my_id.to_string() + ".txt";
+                    match write_results(bags, &file_path) {
+                        Ok(()) => {}
+                        Err(e) => {
+                            eprintln!("Error occurred: {} on {}", e, file_path); 
+                        }
+                    }; 
                         
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
@@ -750,12 +750,12 @@ impl App for Aupe {
                         let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
 
-                        let file_path = String::from("log/node")
+                        let file_path = String::from("log")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
                         match write_results(bags, &file_path) {
                             Ok(()) => {}
                             Err(e) => {
-                                eprintln!("Error occurred: {}", e); 
+                                eprintln!("Error occurred: {} on {}", e, file_path); 
                             }
                         }; 
                         
