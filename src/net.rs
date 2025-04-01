@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-
+use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 
 //use super::metrics::Metric;
@@ -73,6 +73,7 @@ impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
         } else {
             let mut vec = (0..self.nproc).collect::<Vec<_>>();
             //rng.shuffle(&mut vec[..]);
+            vec.shuffle(&mut rng);
             vec.iter().cloned().take(n).collect::<Vec<_>>()
         }
     }
