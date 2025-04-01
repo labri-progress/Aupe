@@ -165,7 +165,7 @@ impl CountMinSketch {
 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     
-                    let i = rng.gen_range(0, self.sample_memory_size);
+                    let i = rng.random_range(0..self.sample_memory_size);
                     
                     if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
                         *tobereplaced = *element;
@@ -174,7 +174,7 @@ impl CountMinSketch {
                     }
                 }
             }
-            let i = rng.gen_range(0, self.omniscient_memory.len());
+            let i = rng.random_range(0..self.omniscient_memory.len());
             outputstream.push(self.omniscient_memory[i].clone());
         }
             

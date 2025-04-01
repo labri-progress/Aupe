@@ -209,7 +209,7 @@ impl Basalt {
             self.view[ret].hits += 1;
             self.view[ret].peer
         } else {
-            self.view[rng.gen_range(0, self.view.len())].peer
+            self.view[rng.random_range(0..self.view.len())].peer
         }
     }
 }
@@ -242,7 +242,7 @@ impl App for Basalt {
             let mut rng = thread_rng();
             self.view = (0..self.params.view_size)
                 .map(|_| ViewEntry{
-                    seed: rng.gen_range(0, std::u64::MAX),
+                    seed: rng.random_range(0..std::u64::MAX),
                     peer: id,
                     hits: 1
                 }).collect();
@@ -284,7 +284,7 @@ impl App for Basalt {
                                 if self.out_samples.len() < 200 {
                                     self.out_samples.push(self.view[i_replace].peer);
                                 }
-                                self.view[i_replace].seed = rng.gen_range(0, std::u64::MAX);
+                                self.view[i_replace].seed = rng.random_range(0..std::u64::MAX);
                                 self.view[i_replace].hits = 1;
                                 self.update_sample(i_replace, &view[..]);
                             }

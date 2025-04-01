@@ -325,7 +325,7 @@ impl Aupe {
                 let prob = self.minvalue as f64/ occur as f64;
                 let random_float: f64 = rand::thread_rng().gen(); 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
-                    let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
+                    let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
                     if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
                         *tobereplaced = *element;
                     } else {
@@ -333,7 +333,7 @@ impl Aupe {
                     }
                 }
             }
-            let i = rng.gen_range(0, self.omniscient_memory.len());
+            let i = rng.random_range(0..self.omniscient_memory.len());
             outputstream.push(self.omniscient_memory[i].clone());
         }
             
@@ -449,7 +449,7 @@ impl App for Aupe {
 
             let mut rng = thread_rng();
             self.sample_view = (0..self.params.sample_view_size)
-                .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
+                .map(|_| (rng.random_range(0..std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
            
@@ -499,7 +499,7 @@ impl App for Aupe {
                                         self.out_samples.push(sample);
                                     }
                                 }
-                                self.sample_view[i_replace].0 = rng.gen_range(0, std::u64::MAX);
+                                self.sample_view[i_replace].0 = rng.random_range(0..std::u64::MAX);
                                 self.update_sample(i_replace, &view[..]);
                                 self.update_sample(i_replace, &sample_view[..]);
                             }
@@ -657,7 +657,7 @@ impl App for Aupe {
                                         self.out_samples.push(sample);
                                     }
                                 }
-                                self.sample_view[i_replace].0 = rng.gen_range(0, std::u64::MAX);
+                                self.sample_view[i_replace].0 = rng.random_range(0..std::u64::MAX);
                                 self.update_sample(i_replace, &view[..]);
                                 self.update_sample(i_replace, &sample_view[..]);
                             }

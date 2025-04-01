@@ -94,7 +94,7 @@ impl ByzConnGraph {
 
         let mut rng = thread_rng();
 
-        let roots = (0..32).map(|_| rng.gen_range(0, n_procs) + n_byzantine)
+        let roots = (0..32).map(|_| rng.random_range(0..n_procs) + n_byzantine)
             .collect::<Vec<_>>();
         let avgdist = roots.par_iter().map(|root| {
                 let mut dmap = HashMap::new();
