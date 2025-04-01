@@ -34,6 +34,10 @@ pub enum WhichApp {
     /// Aupe RPS
     #[structopt(name = "aupe")]
     Aupe(app::aupe::Init),
+
+    /// Brahms RPS
+    #[structopt(name = "brahms")]
+    Brahms(app::brahms::Init),
 }
 
 fn main() {
@@ -48,6 +52,10 @@ fn main() {
 // cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -x 0 -v 20 -u 20 -m 10 -n 1000 -p 10
         WhichApp::Aupe(pp) => {
             sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp);  
+        }
+// cargo run -- -T 200 -n 1000 brahms -G samples -f 10 -t 300 -v 20 -u 20 -k 0 -r 1
+        WhichApp::Brahms(pp) => {
+            sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp);  
         }
     }
 }
