@@ -64,7 +64,7 @@ impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
         if n <= self.nproc / 10 {
             let mut res = Vec::new();
             while res.len() < n {
-                let i = rng.gen_range(0, self.nproc);
+                let i = rng.random_range(0..self.nproc);
                 if i != self.id && !res.contains(&i) {
                     res.push(i);
                 }
@@ -72,7 +72,7 @@ impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
             res
         } else {
             let mut vec = (0..self.nproc).collect::<Vec<_>>();
-            rng.shuffle(&mut vec[..]);
+            //rng.shuffle(&mut vec[..]);
             vec.iter().cloned().take(n).collect::<Vec<_>>()
         }
     }

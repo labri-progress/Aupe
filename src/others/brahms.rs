@@ -298,7 +298,7 @@ impl App for Brahms {
 
             let mut rng = thread_rng();
             self.sample_view = (0..self.params.sample_view_size)
-                .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
+                .map(|_| (rng.random_range(0..std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
         }
@@ -347,7 +347,7 @@ impl App for Brahms {
                                         self.out_samples.push(sample);
                                     }
                                 }
-                                self.sample_view[i_replace].0 = rng.gen_range(0, std::u64::MAX);
+                                self.sample_view[i_replace].0 = rng.random_range(0..std::u64::MAX);
                                 self.update_sample(i_replace, &view[..]);
                                 self.update_sample(i_replace, &sample_view[..]);
                             }

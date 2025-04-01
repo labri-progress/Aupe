@@ -9,9 +9,6 @@ use crate::util::write_results;
 use crate::graph::ByzConnGraph;
 
 const DEBUG: bool = false;
-const REPLACEMENT_FREQUENCY: Option<u64> =Some(1);
-const REPLACEMENT_COUNT: usize=0;
-
 
 #[derive(Debug)]
 pub enum Msg {
@@ -326,7 +323,7 @@ impl Aupe {
 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     
-                    let i = rng.gen_range(0, self.params.memory_size);//omniscient_memory.len());
+                    let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
                     
                     if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
                         *tobereplaced = *element;
@@ -335,7 +332,7 @@ impl Aupe {
                     }
                 }
             }
-            let i = rng.gen_range(0, self.omniscient_memory.len());
+            let i = rng.random_range(0..self.omniscient_memory.len());
             outputstream.push(self.omniscient_memory[i].clone());
         }
             
@@ -468,7 +465,7 @@ impl App for Aupe {
             let mut rng = thread_rng();
             
             self.sample_view = (0..self.params.sample_view_size)
-                .map(|_| (rng.gen_range(0, std::u64::MAX), None)).collect();
+                .map(|_| (rng.random_range(0..std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
             
@@ -533,28 +530,6 @@ impl App for Aupe {
         } else if self.is_trusted{
             match msg {
                 Msg::SelfNotif => {
-                    if let Some(rf) = REPLACEMENT_FREQUENCY {
-                        if (self.my_id as u64 + net.time()) % rf == 0 {
-                            let mut rng = thread_rng();
-                            
-                            let view = self.view.clone();
-                            let sample_view = self.sample_view.iter()
-                                .filter(|(_, x)| x.is_some())
-                                .map(|(_, x)| x.unwrap())
-                                .collect::<Vec<_>>();
-                            for k in 0..REPLACEMENT_COUNT {
-                                let i_replace = ((net.time() / rf) as usize * REPLACEMENT_COUNT + k) % self.sample_view.len();
-                                if let Some(sample) = self.sample_view[i_replace].1 {
-                                    if self.out_samples.len() < 200 {
-                                        self.out_samples.push(sample);
-                                    }
-                                }
-                                self.sample_view[i_replace].0 = rng.gen_range(0, std::u64::MAX);
-                                self.update_sample(i_replace, &view[..]);
-                                self.update_sample(i_replace, &sample_view[..]);
-                            }
-                        }
-                    }
                     if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                         println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
                     }
@@ -712,28 +687,6 @@ impl App for Aupe {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    if let Some(rf) = REPLACEMENT_FREQUENCY {
-                        if (self.my_id as u64 + net.time()) % rf == 0 {
-                            let mut rng = thread_rng();
-                            
-                            let view = self.view.clone();
-                            let sample_view = self.sample_view.iter()
-                                .filter(|(_, x)| x.is_some())
-                                .map(|(_, x)| x.unwrap())
-                                .collect::<Vec<_>>();
-                            for k in 0..REPLACEMENT_COUNT {
-                                let i_replace = ((net.time() / rf) as usize * REPLACEMENT_COUNT + k) % self.sample_view.len();
-                                if let Some(sample) = self.sample_view[i_replace].1 {
-                                    if self.out_samples.len() < 200 {
-                                        self.out_samples.push(sample);
-                                    }
-                                }
-                                self.sample_view[i_replace].0 = rng.gen_range(0, std::u64::MAX);
-                                self.update_sample(i_replace, &view[..]);
-                                self.update_sample(i_replace, &sample_view[..]);
-                            }
-                        }
-                    }
                     if self.my_id == self.params.nodes-1 && DEBUG{
                         println!("vpush({:?}) vpull({:?})",self.v_push, self.v_pull);
                     }
