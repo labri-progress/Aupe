@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
@@ -326,9 +326,9 @@ impl Aupe {
  fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
     let mut outputstream = Vec::new();
 
-    let mut rng = thread_rng();
+    let mut rng = rng();
     
-    self.update_freq(inputstream.clone()); // w min()
+    //self.update_freq(inputstream.clone()); // w min()
 
     for element in &inputstream {
         //println!("element: {}", element);
@@ -357,7 +357,7 @@ impl Aupe {
         let i = rng.random_range(0..self.omniscient_memory.len());
         outputstream.push(self.omniscient_memory[i].clone());
     }
-    println!("sample memory: {:?}", self.omniscient_memory);  
+    //println!("sample memory: {:?}", self.omniscient_memory);  
     outputstream
 }
 
@@ -419,7 +419,7 @@ impl App for Aupe {
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
-            let mut rng = thread_rng();
+            let mut rng = rng();
 
             self.sample_view = (0..self.params.sample_view_size)
                 .map(|_| (rng.random_range(0..std::u64::MAX), None)).collect();
@@ -520,9 +520,10 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    for item in lst {
+                    /* for item in lst {
                         self.update_omn_freq(item.clone());
-                    }
+                    } */
+                   self.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
