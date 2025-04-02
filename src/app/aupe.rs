@@ -324,7 +324,7 @@ impl Aupe {
  */
     
  fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-    let mut outputstream = Vec::new();
+    /* let mut outputstream = Vec::new();
 
     let mut rng = rng();
     
@@ -336,29 +336,31 @@ impl Aupe {
 
         if self.omniscient_memory.len() < self.params.memory_size {
 
-            if !self.omniscient_memory.contains(element) {
+            if !self.omniscient_memory.contains(*element) {
                 self.omniscient_memory.push(*element);
             }
 
         }else {
             let prob = self.min_value as f64/ occur as f64;
             let random_float: f64 = rng.random(); 
-            if random_float < prob && !self.omniscient_memory.contains(element) {
+            if random_float < prob && !self.omniscient_memory.contains(*element) {
                 
                 let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
                 
-                if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
+                /* if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
                     *tobereplaced = *element;
                 } else {
                     println!("Index out of bounds");
-                }
+                } */
             }
         }
         let i = rng.random_range(0..self.omniscient_memory.len());
-        outputstream.push(self.omniscient_memory[i].clone());
+        outputstream.push(self.omniscient_memory[i]);
     }
-    //println!("sample memory: {:?}", self.omniscient_memory);  
+    //println!("sample memory: {:?}", self.omniscient_memory);   
     outputstream
+    */
+    inputstream
 }
 
     fn update_freq(&mut self, items: Vec<PeerRef>) {
