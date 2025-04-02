@@ -267,6 +267,16 @@ impl Aupe {
         }
     }
 
+    fn min(&mut self) {
+        self.minvalue = f64::MAX;
+        for (index, &value) in self.omniscient_freq_array.iter().enumerate() {
+            if value > 0.0  && value < self.minvalue  {
+                self.minvalue = value;
+                self.minkey = index;
+            }
+        }
+    }
+
     fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
         //println!("++");
@@ -281,17 +291,8 @@ impl Aupe {
                 self.minkey = *element;
 
             }else if *element == self.minkey { // search new min if it was him
-                
-                if let Some((min_index, min_value)) = get_min_key_value(&self.omniscient_freq_array) {
-                    if self.my_id == self.params.nodes -1 { //&& DEBUG{
-                        eprintln!("Minimum value: {}, at index: {}", min_value, min_index);
-                    }
-                    self.minvalue = min_value;
-                    self.minkey = min_index; 
+                self.min();
 
-                } else {
-                    println!("The vector is empty.");
-                }  
             }
             if self.omniscient_memory.len() < self.params.memory_size {
 
@@ -301,7 +302,7 @@ impl Aupe {
 
             }else {
                 let prob = self.minvalue as f64/ occur as f64;
-                let random_float: f64 = rng.gen(); //rng.random(); 
+                let random_float: f64 = rng.random(); 
 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     
