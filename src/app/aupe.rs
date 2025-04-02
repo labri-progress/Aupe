@@ -324,7 +324,7 @@ impl Aupe {
  */
     
  fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-    /* let mut outputstream = Vec::new();
+    let mut outputstream = Vec::new();
 
     let mut rng = rng();
     
@@ -352,6 +352,7 @@ impl Aupe {
                 } else {
                     println!("Index out of bounds");
                 } */
+               self.omniscient_memory[i] = *element;
             }
         }
         let i = rng.random_range(0..self.omniscient_memory.len());
@@ -359,8 +360,7 @@ impl Aupe {
     }
     //println!("sample memory: {:?}", self.omniscient_memory);   
     outputstream
-    */
-    inputstream
+   
 }
 
     fn update_freq(&mut self, items: Vec<PeerRef>) {
