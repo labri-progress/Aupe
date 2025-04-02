@@ -98,10 +98,10 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    omniscient_freq_array: Vec<f64>,
+    omniscient_freq_array: Vec<u64>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
-    minvalue: f64,
+    minvalue: u64,
 
 }
 
@@ -268,9 +268,9 @@ impl Aupe {
     }
 
     fn min(&mut self) {
-        self.minvalue = f64::MAX;
+        self.minvalue = u64::MAX;
         for (index, &value) in self.omniscient_freq_array.iter().enumerate() {
-            if value > 0.0  && value < self.minvalue  {
+            if value > 0  && value < self.minvalue  {
                 self.minvalue = value;
                 self.minkey = index;
             }
@@ -322,14 +322,18 @@ impl Aupe {
         outputstream
     }
 
-    fn update_omn_freq(&mut self, item: PeerRef) {
-        let value = self.omniscient_freq_array[item.clone()] + 1.0;
-        self.omniscient_freq_array[item.clone()] = value.max(1.0);
+    fn update_freq(&mut self, items: Vec<PeerRef>) {
+        for item in items {
+            self.omniscient_freq_array[item] += 1;
+        }
+        self.min();
     }
 
-    fn update_omn_freq_value(&mut self, item: PeerRef, value: f64) {
-        self.omniscient_freq_array[item.clone()] = value
-    } 
+    fn update_omn_freq(&mut self, item: PeerRef) {
+        /* let value = self.omniscient_freq_array[item.clone()] + 1.0;
+        self.omniscient_freq_array[item.clone()] = value.max(1.0); */
+        self.omniscient_freq_array[item] += 1;
+    }
 
 }
 
@@ -360,7 +364,7 @@ impl App for Aupe {
             omniscient_freq_array: Vec::new(),
             omniscient_memory: Vec::new(),
             minkey: 0,
-            minvalue: std::isize::MAX as f64,
+            minvalue: std::usize::MAX as u64,
 
         }
     }
@@ -370,7 +374,7 @@ impl App for Aupe {
         self.params = init.clone();
 
         // Init preallocated vectors
-        self.omniscient_freq_array = vec![-1.0; self.params.nodes];
+        self.omniscient_freq_array = vec![0; self.params.nodes];
 
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
@@ -430,8 +434,8 @@ impl App for Aupe {
                             }
                         }; 
 
-                        self.update_samples(&v_push[..]);
-                        self.update_samples(&v_pull[..]);
+                        self.update_samples(&v_push.clone()[..]);
+                        self.update_samples(&v_pull.clone()[..]);
                         
                         v_push = self.debiais_stream_with_omni(v_push);
                         v_pull = self.debiais_stream_with_omni(v_pull);
