@@ -101,7 +101,7 @@ pub struct Aupe {
     omniscient_freq_array: Vec<u64>,
     omniscient_memory: Vec<PeerRef>,
     minkey: PeerRef,
-    minvalue: u64,
+    min_value: u64,
 
 }
 
@@ -268,16 +268,16 @@ impl Aupe {
     }
 
     fn min(&mut self) {
-        self.minvalue = u64::MAX;
+        self.min_value = u64::MAX;
         for (index, &value) in self.omniscient_freq_array.iter().enumerate() {
-            if value > 0  && value < self.minvalue  {
-                self.minvalue = value;
+            if value > 0  && value < self.min_value  {
+                self.min_value = value;
                 self.minkey = index;
             }
         }
     }
 
-    fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+   /*  fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
         //println!("++");
         let mut rng = thread_rng();
@@ -321,10 +321,49 @@ impl Aupe {
             
         outputstream
     }
+ */
+    
+ fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+    let mut outputstream = Vec::new();
+
+    let mut rng = thread_rng();
+    
+    self.update_freq(inputstream.clone()); // w min()
+
+    for element in &inputstream {
+        //println!("element: {}", element);
+        let occur = self.omniscient_freq_array[*element];
+
+        if self.omniscient_memory.len() < self.params.memory_size {
+
+            if !self.omniscient_memory.contains(element) {
+                self.omniscient_memory.push(*element);
+            }
+
+        }else {
+            let prob = self.min_value as f64/ occur as f64;
+            let random_float: f64 = rng.random(); 
+            if random_float < prob && !self.omniscient_memory.contains(element) {
+                
+                let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
+                
+                if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
+                    *tobereplaced = *element;
+                } else {
+                    println!("Index out of bounds");
+                }
+            }
+        }
+        let i = rng.random_range(0..self.omniscient_memory.len());
+        outputstream.push(self.omniscient_memory[i].clone());
+    }
+    println!("sample memory: {:?}", self.omniscient_memory);  
+    outputstream
+}
 
     fn update_freq(&mut self, items: Vec<PeerRef>) {
         for item in items {
-            self.omniscient_freq_array[item] += 1;
+            self.omniscient_freq_array[item.clone()] += 1;
         }
         self.min();
     }
@@ -332,7 +371,7 @@ impl Aupe {
     fn update_omn_freq(&mut self, item: PeerRef) {
         /* let value = self.omniscient_freq_array[item.clone()] + 1.0;
         self.omniscient_freq_array[item.clone()] = value.max(1.0); */
-        self.omniscient_freq_array[item] += 1;
+        self.omniscient_freq_array[item.clone()] += 1;
     }
 
 }
@@ -364,7 +403,7 @@ impl App for Aupe {
             omniscient_freq_array: Vec::new(),
             omniscient_memory: Vec::new(),
             minkey: 0,
-            minvalue: std::usize::MAX as u64,
+            min_value: u64::MAX,
 
         }
     }
@@ -427,15 +466,14 @@ impl App for Aupe {
 
                         let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
-                        match write_results(bags, &file_path) {
+                        match write_results(bags.clone(), &file_path) {
                             Ok(()) => {}
                             Err(e) => {
                                 eprintln!("Error occurred: {} on {}", e, file_path); 
                             }
                         }; 
 
-                        self.update_samples(&v_push.clone()[..]);
-                        self.update_samples(&v_pull.clone()[..]);
+                        //self.update_samples(&v_pull.clone()[..]);
                         
                         v_push = self.debiais_stream_with_omni(v_push);
                         v_pull = self.debiais_stream_with_omni(v_pull);
@@ -456,6 +494,8 @@ impl App for Aupe {
 
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
+
+                        self.update_samples(&bags[..]);
 
                         //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
