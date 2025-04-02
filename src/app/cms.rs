@@ -161,7 +161,7 @@ impl CountMinSketch {
                 self.min();
 
                 let prob = self.min_value as f64/ occur as f64;
-                let random_float: f64 = rng.gen(); 
+                let random_float: f64 = rng.random(); 
 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     
