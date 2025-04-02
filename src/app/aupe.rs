@@ -336,14 +336,14 @@ impl Aupe {
 
         if self.omniscient_memory.len() < self.params.memory_size {
 
-            if !self.omniscient_memory.contains(*element) {
+            if !self.omniscient_memory.contains(element) {
                 self.omniscient_memory.push(*element);
             }
 
         }else {
             let prob = self.min_value as f64/ occur as f64;
             let random_float: f64 = rng.random(); 
-            if random_float < prob && !self.omniscient_memory.contains(*element) {
+            if random_float < prob && !self.omniscient_memory.contains(element) {
                 
                 let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
                 
