@@ -28,8 +28,8 @@ pub struct Opt {
 pub enum WhichApp {
     
     /// Aupe CMS RPS
-    #[structopt(name = "cms")]
-    AupeCMS(app::aupecms::Init),
+    /* #[structopt(name = "cms")]
+    AupeCMS(app::aupecms::Init), */
 
     /// Aupe RPS
     #[structopt(name = "aupe")]
@@ -45,11 +45,12 @@ fn main() {
     match opt.app {
 // cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1
 // cargo run -- -T 200 -n 1000 cms -G samples -f 10 -x 100 -t 100 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272 -p 1
-        WhichApp::AupeCMS(pp) => {
+        /* WhichApp::AupeCMS(pp) => {
             sim::<app::aupecms::AupeCMS>(opt.n_steps, opt.nodes, &pp);  
-        }
+        } */
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
-// cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -x 0 -v 20 -u 20 -m 10 -n 1000 -p 10
+
+// cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -v 20 -u 20 -m 10 -n 1000 
         WhichApp::Aupe(pp) => {
             sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp);  
         }
