@@ -7,9 +7,6 @@ use crate::util::{either_or_if_both, hash, sample, sample_nocopy, write_results}
 use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
 use crate::graph::ByzConnGraph;
 
-use super::kvs::Kvs;
-use super::cf::CF;
-
 pub enum Msg {
     SelfNotif,
     PullRequest,
@@ -50,28 +47,6 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
-    
-    // Cold filter
-    #[structopt(short = "a", long = "threshold_layer_1", default_value = "15")]
-    pub t1: u32,
-    /// Threshold value of layer 2
-    #[structopt(short = "b", long = "threshold_layer_2", default_value = "31")]
-    pub t2: u32,
-    /// number_of_hash_function of layer i
-    #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
-    pub replicates: usize,
-    /// Number_of_discrete_values of layer 1
-    #[structopt(long = "w1", default_value = "10000")]
-    pub counter1: usize,
-    /// Number_of_discrete_values of layer 2
-    #[structopt(long = "w2", default_value = "245")]
-    pub counter2: usize,
-    /// number_of_hash_function
-    #[structopt(short = "h", long = "number_of_hash_functions", default_value = "3")]
-    pub depth: usize,
-    /// Number_of_discrete_values
-    #[structopt(short = "w", long = "number_of_discrete_values", default_value = "100")]
-    pub width: usize,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -123,7 +98,10 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: CF, //Kvs,
+    omniscient_freq_array: Vec<u64>,
+    omniscient_memory: Vec<PeerRef>,
+    minkey: PeerRef,
+    min_value: u64,
 
 }
 
@@ -289,6 +267,115 @@ impl Aupe {
         }
     }
 
+    fn min(&mut self) {
+        self.min_value = u64::MAX;
+        for (index, &value) in self.omniscient_freq_array.iter().enumerate() {
+            if value > 0  && value < self.min_value  {
+                self.min_value = value;
+                self.minkey = index;
+            }
+        }
+    }
+
+   /*  fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+        let mut outputstream = Vec::new();
+        //println!("++");
+        let mut rng = thread_rng();
+        
+        for element in &inputstream {
+
+            let occur = self.omniscient_freq_array[*element];
+
+            if self.minvalue > occur { // new minval
+                self.minvalue = occur;
+                self.minkey = *element;
+
+            }else if *element == self.minkey { // search new min if it was him
+                self.min();
+
+            }
+            if self.omniscient_memory.len() < self.params.memory_size {
+
+                if !self.omniscient_memory.contains(element) {
+                    self.omniscient_memory.push(*element);
+                }
+
+            }else {
+                let prob = self.minvalue as f64/ occur as f64;
+                let random_float: f64 = rng.random(); 
+
+                if random_float < prob && !self.omniscient_memory.contains(element) {
+                    
+                    let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
+                    
+                    if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
+                        *tobereplaced = *element;
+                    } else {
+                        println!("Index out of bounds");
+                    }
+                }
+            }
+            let i = rng.random_range(0..self.omniscient_memory.len());
+            outputstream.push(self.omniscient_memory[i].clone());
+        }
+            
+        outputstream
+    }
+ */
+    
+ fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
+    let mut outputstream = Vec::new();
+
+    let mut rng = rng();
+    
+    //self.update_freq(inputstream.clone()); // w min()
+
+    for element in &inputstream {
+        //println!("element: {}", element);
+        let occur = self.omniscient_freq_array[*element];
+
+        if self.omniscient_memory.len() < self.params.memory_size {
+
+            if !self.omniscient_memory.contains(element) {
+                self.omniscient_memory.push(*element);
+            }
+
+        }else {
+            let prob = self.min_value as f64/ occur as f64;
+            let random_float: f64 = rng.random(); 
+            if random_float < prob && !self.omniscient_memory.contains(element) {
+                
+                let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
+                
+                /* if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
+                    *tobereplaced = *element;
+                } else {
+                    println!("Index out of bounds");
+                } */
+               self.omniscient_memory[i] = *element;
+            }
+        }
+        let i = rng.random_range(0..self.omniscient_memory.len());
+        outputstream.push(self.omniscient_memory[i]);
+    }
+    //println!("sample memory: {:?}", self.omniscient_memory);   
+    outputstream
+   
+}
+
+    fn update_freq(&mut self, items: Vec<PeerRef>) {
+        for item in items {
+            self.omniscient_freq_array[item.clone()] += 1;
+        }
+        self.min();
+    }
+
+    fn update_omn_freq(&mut self, item: PeerRef) {
+        /* let value = self.omniscient_freq_array[item.clone()] + 1.0;
+        self.omniscient_freq_array[item.clone()] = value.max(1.0); */
+        self.omniscient_freq_array[item.clone()] += 1;
+    }
+
 }
 
 impl App for Aupe {
@@ -315,7 +402,10 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: CF::new(), //Kvs::new(),
+            omniscient_freq_array: Vec::new(),
+            omniscient_memory: Vec::new(),
+            minkey: 0,
+            min_value: u64::MAX,
 
         }
     }
@@ -325,7 +415,7 @@ impl App for Aupe {
         self.params = init.clone();
 
         // Init preallocated vectors
-        self.sketch.init(self.params.nodes, self.params.clone());
+        self.omniscient_freq_array = vec![0; self.params.nodes];
 
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
@@ -338,7 +428,7 @@ impl App for Aupe {
             self.update_samples(&view[..]);
             self.view = view;
 
-            self.sketch.debiais_stream(self.view.clone());
+            self.debiais_stream_with_omni(self.view.clone());
         }
         net.send(id, Msg::SelfNotif);
     }
@@ -376,17 +466,19 @@ impl App for Aupe {
                         let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
 
-                        /* let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
+                        let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
                         match write_results(bags.clone(), &file_path) {
                             Ok(()) => {}
                             Err(e) => {
                                 eprintln!("Error occurred: {} on {}", e, file_path); 
                             }
-                        };  */
+                        }; 
+
+                        //self.update_samples(&v_pull.clone()[..]);
                         
-                        v_push = self.sketch.debiais_stream(v_push);
-                        v_pull = self.sketch.debiais_stream(v_pull);
+                        v_push = self.debiais_stream_with_omni(v_push);
+                        v_pull = self.debiais_stream_with_omni(v_pull);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
@@ -433,7 +525,7 @@ impl App for Aupe {
                     /* for item in lst {
                         self.update_omn_freq(item.clone());
                     } */
-                   self.sketch.update_freq(lst.clone());
+                   self.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
@@ -443,10 +535,7 @@ impl App for Aupe {
                     }
                     self.v_push.push(from);
                     
-                    // create a vector containing item from only
-                    let mut lst = Vec::new();
-                    lst.push(from);
-                    self.sketch.update_freq(lst.clone());
+                    self.update_omn_freq(from.clone());
                 },
             }
         }

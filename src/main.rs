@@ -38,6 +38,7 @@ pub enum WhichApp {
     /// Brahms RPS
     #[structopt(name = "brahms")]
     Brahms(app::brahms::Init),
+
 }
 
 fn main() {
