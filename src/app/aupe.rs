@@ -123,7 +123,7 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: CF, //Kvs,
+    sketch: Kvs, // CF, //Kvs,
 
 }
 
@@ -315,7 +315,7 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: CF::new(), //Kvs::new(),
+            sketch: Kvs::new(), // CF::new(), //Kvs::new(),
 
         }
     }
@@ -443,7 +443,7 @@ impl App for Aupe {
                     }
                     self.v_push.push(from);
                     
-                    // create a vector containing item from only
+                    // create a vector containing only item from 
                     let mut lst = Vec::new();
                     lst.push(from);
                     self.sketch.update_freq(lst.clone());
