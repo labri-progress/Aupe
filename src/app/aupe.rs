@@ -123,7 +123,7 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: Kvs, // CF, //Kvs,
+    sketch: CF, //Kvs,
 
 }
 
@@ -315,7 +315,7 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: Kvs::new(), // CF::new(), //Kvs::new(),
+            sketch: CF::new(), //Kvs::new(),
 
         }
     }
