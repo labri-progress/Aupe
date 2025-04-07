@@ -2,7 +2,7 @@ run="${1:-0}"
 if [ $run -eq 0 ]; then
     extension=""
 else
-    extension=""+$run
+    extension=""$run
 fi
 
 N=10000

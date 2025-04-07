@@ -166,14 +166,10 @@ impl CF {
     
         self.params = init;
         
-        println!("init {:?}", self.params);
-
         self.sketch.matrix = vec![vec![0; self.params.width]; self.params.depth];
         self.sketch.hash_seeds = (0..self.params.depth).map(|i| i as u64 + 1).collect();
         self.sketch.params.depth = self.params.depth;
         self.sketch.params.width = self.params.width;
-        println!("Size Mt {}x{}", self.sketch.params.depth, self.sketch.params.width);
-
         //self.sketch.params.memory_size = self.params.memory_size;
         //self.layer1.matrix = vec![vec![0; self.params.counter1]; self.params.replicates];
         self.layer1.counters = vec![0; self.params.counter1];
@@ -181,26 +177,21 @@ impl CF {
                 //.map(|i| i as u64 + self.params.depth as u64 + 1).collect();
         self.layer1.params.depth = self.params.replicates;
         self.layer1.params.width = self.params.counter1;
-        println!("Size M1 {}x{}", self.layer1.params.depth, self.layer1.params.width);
 
         self.layer2.matrix = vec![vec![0; self.params.counter2]; self.params.replicates];
         self.layer2.hash_seeds = (0..self.params.replicates).map(|i| i as u64 + 1).collect();
                 //.map(|i| i as u64 + self.params.replicates as u64 + self.params.depth as u64 + 1).collect();
         self.layer2.params.depth = self.params.replicates;
         self.layer2.params.width = self.params.counter2;
-        println!("Size M2 {}x{}", self.layer2.params.depth, self.layer2.params.width);
 
         // compute logarithm of 2 and rount to sup inteeger
         
         let gamma1 = (self.params.t1 as f64).log2().ceil() as usize;
         let gamma2 = (self.params.t2 as f64).log2().ceil() as usize;
         let gamma = 32;
-        println!("gamma1: {} gamma2: {}", gamma1, gamma2);
-        println!("gamma2: {}", gamma);
-        //let gamma1 = 
+        
         let mcf = self.layer1.params.depth * self.layer1.params.width * gamma1 + 
             self.layer2.params.depth * self.layer2.params.width * gamma2 ;
-        println!("Size Mcf/Mt = {}", mcf as f64 /(self.sketch.params.depth * self.sketch.params.width * gamma) as f64);
         
     }
     
