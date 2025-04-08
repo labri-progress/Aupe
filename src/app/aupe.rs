@@ -59,7 +59,7 @@ pub struct Init {
     #[structopt(short = "a", long = "threshold_layer_1", default_value = "15")]
     pub t1: u32,
     /// Threshold value of layer 2
-    #[structopt(short = "b", long = "threshold_layer_2", default_value = "31")]
+    #[structopt(short = "b", long = "threshold_layer_2", default_value = "241")]
     pub t2: u32,
     /// number_of_hash_function of layer i
     #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
