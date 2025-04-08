@@ -1,9 +1,13 @@
 use rand::{rng, Rng};
-use crate::net::App;
+//use crate::net::App;
 use super::aupe::Init;
 
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+
+use std::fmt::Write; // Import the Write trait
+use std::fs;
+use std::error::Error;
 
 
 /* #[derive(Clone, Default, StructOpt, Debug)]
@@ -27,6 +31,7 @@ pub struct CmsCu {
     pub hash_seeds: Vec<u64>,
     pub min_value: u32,
     pub omniscient_memory: Vec<usize>,
+    pub freq_array_string: String,
 }
 
 
@@ -107,6 +112,7 @@ impl CmsCu {
             hash_seeds: Vec::new(),
             min_value: u32::MAX,
             omniscient_memory: Vec::new(),
+            freq_array_string: String::new(),
         }
     }
     
@@ -126,6 +132,49 @@ impl CmsCu {
         println!("min_value {}", self.min_value);
         println!("...");
         //self.print_full();
+    }
+
+    pub fn to_string(&mut self) {
+        let precision = 2;
+        let mut result = String::new(); // Start with an empty String
+    
+        for (row_index, row) in self.matrix.iter().enumerate() {
+            if row_index > 0 {
+                result.push('\n'); // Separate rows with a newline
+            }
+    
+            for (col_index, num) in row.iter().enumerate() {
+                if col_index > 0 {
+                    result.push(','); // Separate elements in a row with a comma
+                }
+                let _ = write!(&mut result, "{:.1$}", num, precision); // Format each number
+            }
+        }
+    
+        self.freq_array_string=result;
+    }
+
+    pub fn string_to_matrix(&mut self, input: &str)  -> Vec<Vec<u32>>{
+        let result = input
+            .lines() // Split the string into rows using newlines
+            .map(|line| {
+                line.split(',') // Split each row into elements using commas
+                    .map(|num| num.trim().parse::<u32>().expect("Invalid float")) // Parse each element into u32
+                    .collect::<Vec<u32>>() // Collect elements into a vector
+            })
+            .collect::<Vec<Vec<u32>>>(); // Collect rows into a matrix
+        
+        result
+    }
+
+    pub fn merge(&mut self, second_cms_matrix: Vec<Vec<u32>>) {
+        for i in 0..self.params.depth {
+            for j in 0..self.params.width {
+                self.matrix[i][j] += second_cms_matrix[i][j];
+                //self.matrix[i][j] /=2;
+                self.matrix[i][j] = (self.matrix[i][j] as f64 /2.0).ceil() as u32;
+            }
+        }
     }
 
     fn name(&self) -> String{

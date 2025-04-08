@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 use rayon::prelude::*;
 
 use super::net::PeerRef;
@@ -92,7 +92,7 @@ impl ByzConnGraph {
 
         let n_byzantine = self.n_byzantine.unwrap();
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         let roots = (0..32).map(|_| rng.random_range(0..n_procs) + n_byzantine)
             .collect::<Vec<_>>();

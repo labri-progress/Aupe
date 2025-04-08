@@ -4,17 +4,21 @@ use structopt::StructOpt;
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy, write_results};
-use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
+use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, 
+    sample_exclude, vec_to_string, string_to_vec};
 use crate::graph::ByzConnGraph;
 
 use super::kvs::Kvs;
 use super::cf::CF;
 
+const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
+    MergeRequest(usize, String),
+    MergeReply(usize, String),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -61,7 +65,7 @@ pub struct Init {
     #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
     pub replicates: usize,
     /// Number_of_discrete_values of layer 1
-    #[structopt(long = "w1", default_value = "10000")]
+    #[structopt(long = "w1", default_value = "10000")] //10000
     pub counter1: usize,
     /// Number_of_discrete_values of layer 2
     #[structopt(long = "w2", default_value = "245")]
@@ -72,6 +76,14 @@ pub struct Init {
     /// Number_of_discrete_values
     #[structopt(short = "w", long = "number_of_discrete_values", default_value = "100")]
     pub width: usize,
+
+    /// Number of SGX nodes
+    #[structopt(short = "x", long = "trusted-nodes")]
+    pub n_trusted: usize,
+
+    /// How many sup merges should be used
+    #[structopt(short = "p", long = "nb_merges")]
+    pub nb_merge: usize,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -107,6 +119,7 @@ pub struct Aupe {
 
     my_id: PeerRef,
     is_byzantine: bool,
+    is_trusted: bool,
 
     view: Vec<PeerRef>,
     push_view: Vec<PeerRef>,
@@ -124,7 +137,8 @@ pub struct Aupe {
     n_byzantine_received: usize,
 
     sketch: CF, //Kvs,
-
+    to_conctact: Vec<PeerRef>,
+    oldest: PeerRef,
 }
 
 pub struct Metrics {
@@ -289,6 +303,32 @@ impl Aupe {
         }
     }
 
+    fn update_contact(&mut self, item: PeerRef) {
+        if self.is_trusted && self.params.nb_merge !=0 {
+            if self.is_trusted(item) && item != self.my_id{
+                if !self.to_conctact.contains(&item) {
+                    if self.to_conctact.len() < self.params.nb_merge {
+                        self.to_conctact.push(item.clone());
+                    }else{ //full
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                            println!("id_oldest {:?}", self.to_conctact.get_mut(self.oldest));
+                        }
+                        if let Some(to_be_replaced) = self.to_conctact.get_mut(self.oldest) {
+                            *to_be_replaced = item;
+                            self.oldest +=1; // update oldest id in to_contact list
+                            self.oldest = self.oldest % (self.params.nb_merge );
+                        }
+                    }
+                } 
+            }
+            /* println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
+                            self.to_conctact, self.params.nb_merge, self.oldest); */
+        }
+    }
+
+    fn is_trusted(&self, id:PeerRef) -> bool {
+        return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
+    }
 }
 
 impl App for Aupe {
@@ -302,6 +342,8 @@ impl App for Aupe {
 
             my_id: 0,
             is_byzantine: false,
+            is_trusted: false,
+
             view: Vec::new(),
             push_view: Vec::new(),
             pull_view: Vec::new(),
@@ -316,7 +358,8 @@ impl App for Aupe {
             n_byzantine_received: 0,
 
             sketch: CF::new(), //Kvs::new(),
-
+            to_conctact: Vec::new(),
+            oldest: 0,
         }
     }
     
@@ -328,6 +371,8 @@ impl App for Aupe {
         self.sketch.init(self.params.nodes, self.params.clone());
 
         self.is_byzantine = id < init.n_byzantine;
+        self.is_trusted = self.is_trusted(id); // F to F + T-1
+
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
@@ -338,8 +383,33 @@ impl App for Aupe {
             self.update_samples(&view[..]);
             self.view = view;
 
+            self.sketch.update_freq(self.view.clone());
             self.sketch.debiais_stream(self.view.clone());
         }
+
+        if self.is_trusted && self.params.nb_merge != 0{
+            let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
+
+            // update trusted list with view   
+            for item in self.view.clone() {
+                self.update_contact(item.clone()); 
+            }
+
+            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                println!("intermediaire CONTACT {:?}", self.to_conctact);
+            }
+            let missing_len = self.params.nb_merge - self.to_conctact.len();
+            // select missing trusted neighbors and avoid himself
+            if missing_len > 0 {
+                sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
+                    missing_len , self.my_id);
+            }
+            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
+                    self.to_conctact, self.params.nb_merge, self.oldest);
+            }
+        }
+
         net.send(id, Msg::SelfNotif);
     }
 
@@ -411,11 +481,37 @@ impl App for Aupe {
                     }
                     
                     sample(&self.view[..], 1).iter()
-                        .for_each(|p| net.send(*p, Msg::PushRequest));
+                        .for_each(|p| {
+                            net.send(*p, Msg::PushRequest);
+                            self.update_contact(*p); // if trusted
+                        });
 
                     sample(&self.view[..], 1).iter()
-                        .for_each(|p| net.send(*p, Msg::PullRequest));
+                        .for_each(|p| {
+                            net.send(*p, Msg::PullRequest);
+                            self.update_contact(*p); // if trusted
+                        });
 
+                    if self.is_trusted{
+                        self.sketch.to_string(3);
+                        let vec = self.sketch.freq_array_string.clone();
+                        //println!("vec len {}", vec.len());
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                            self.sketch.print();
+                            //println!("layers {:?}", vec);
+                        }
+                        self.to_conctact.iter()
+                        .filter(|x| **x!=self.my_id) // contact only not contacted nodes
+                        .map(|x| x)
+                        .collect::<Vec<_>>().iter()
+                        .for_each(|p| {
+                            let layer = 3;
+                            
+                            for (i, layer) in vec.iter().enumerate() {
+                                net.send(**p, Msg::MergeRequest(i, layer.clone())); 
+                            }
+                        });
+                    }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -430,9 +526,6 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    /* for item in lst {
-                        self.update_omn_freq(item.clone());
-                    } */
                    self.sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
@@ -447,6 +540,27 @@ impl App for Aupe {
                     let mut lst = Vec::new();
                     lst.push(from);
                     self.sketch.update_freq(lst.clone());
+                },
+
+                Msg::MergeRequest(i, lst) => {
+                    //
+                    if self.is_trusted{
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
+
+                        self.sketch.to_string(*i);
+                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string[*i].clone()));
+                    }else {
+                        println!("message MergeR ");
+                    }
+                },
+                Msg::MergeReply(i, lst) => {
+                    //println!("message MergeR ");
+                    if self.is_trusted{
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
+                        
+                    }
                 },
             }
         }
