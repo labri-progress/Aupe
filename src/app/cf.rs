@@ -100,10 +100,10 @@ impl CF {
     fn min(&mut self) {
         self.layer1.min();
         self.min_value = self.layer1.min_value;
-        if self.min_value == self.params.t1 {
+        if self.layer1.min_value == self.params.t1 {
             self.layer2.min();
             self.min_value = self.params.t1 + self.layer2.min_value;
-            if self.min_value == self.params.t2 {
+            if self.layer2.min_value == self.params.t2 {
                 self.sketch.min();
                 self.min_value = self.params.t1 + self.params.t2 + 
                     self.sketch.min_value;
