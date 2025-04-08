@@ -63,11 +63,11 @@ impl CmsCu {
     pub fn insert(&mut self, item: &impl Hash) {
         
         let min_count = self.estimate(item);
-        const threshold: u32 = 31;
+        //const threshold: u32 = 31;
         // panic if min_count i greater than threshold
-        if min_count > threshold {
+        /* if min_count > threshold {
             panic!("min_count {} is greater than threshold {}", min_count, threshold);
-        }
+        } */
         for (i, seed) in self.hash_seeds.iter().enumerate() {
             let index = self.hash(item, *seed);
             if self.matrix[i][index] == min_count {
