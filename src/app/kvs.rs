@@ -1,6 +1,10 @@
 use rand::{rng, Rng};
-use crate::net::App;
+//use crate::net::App;
 use super::aupe::Init;
+
+use std::fmt::Write; // Import the Write trait
+use std::fs;
+use std::error::Error;
 
 /* #[derive(Clone, Default, StructOpt, Debug)]
 pub struct Init {
@@ -14,6 +18,7 @@ pub struct Kvs {
     min_index: usize, 
     min_value: u32,
     omniscient_memory: Vec<usize>,
+    pub freq_array_string: String,
 }
 
 impl Kvs {
@@ -34,6 +39,7 @@ impl Kvs {
             min_value: u32::MAX,
             min_index: 0,
             omniscient_memory: Vec::new(), 
+            freq_array_string: String::new(),
         }
     }
     
@@ -46,6 +52,35 @@ impl Kvs {
         println!("...");
     }
 
+    pub fn to_string(&mut self) {
+        let precision = 2;
+        let mut result = String::with_capacity(self.omn_array.len() * (precision + 3)); // Allocate some capacity to reduce reallocations
+        for (i, num) in self.omn_array.iter().enumerate() {
+            if i > 0 {
+                result.push(','); // Append a comma between elements
+            }
+            // Use a buffer to format the number directly
+            let _ = write!(&mut result, "{:.1$}", num, precision);
+        }
+        self.freq_array_string = result;
+    }
+
+    pub fn string_to_matrix(&mut self, input: &str) -> Vec<u32>{
+        let result = input
+        .split(',')
+        .map(str::trim) // Trim whitespace
+        .map(|s| s.parse::<u32>().expect("Invalid integer in input")) // Parse and panic on error
+        .collect::<Vec<u32>>(); // Collect into a Vec<u32>
+         
+        result
+    }
+
+    pub fn merge(&mut self, second_vec: Vec<u32>) {
+        for i in 0..self.omn_array.len() {
+            self.omn_array[i] += second_vec[i];
+            self.omn_array[i] /=2;
+        }
+    }
 
     pub fn init(&mut self, nodes: usize, init: Init) {
     

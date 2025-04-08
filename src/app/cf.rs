@@ -2,13 +2,15 @@ use crate::app::cmscu::CmsCu;
 use crate::app::bf::BF;
 
 use rand::{rng, Rng};
-use crate::net::App;
+//use crate::net::App;
 use super::aupe::Init;
 
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 
-
+use std::fmt::Write; // Import the Write trait
+use std::fs;
+use std::error::Error;
 
 /* #[derive(Clone, Default, StructOpt, Debug)]
 pub struct Init {
@@ -57,6 +59,7 @@ pub struct CF {
     sketch: CmsCu,
     pub min_value: u32,
     pub omniscient_memory: Vec<usize>,
+    pub freq_array_string: Vec<String>,
 }
 
 
@@ -116,11 +119,13 @@ impl CF {
             sketch: CmsCu::new(),
             min_value: u32::MAX,
             omniscient_memory: Vec::new(),
+            freq_array_string: Vec::new(),
         }
     }
     
-    fn print(&self) {
+    pub fn print(&self) {
         println!("Colf Filter");
+        //print!("{:?} ", self.layer1.counters);
         println!("Layer 1 of width {} and depth {}: threshold {}", 
             self.params.counter1, self.params.replicates, self.params.t1);
         let size = 3;
@@ -157,6 +162,74 @@ impl CF {
         //self.print_full();
     }
 
+    /* pub fn to_string(&mut self) {
+
+        self.layer1.to_string();
+        self.layer2.to_string();
+        self.sketch.to_string();
+
+        self.freq_array_string[0] = self.layer1.freq_array_string.clone();
+        self.freq_array_string[1] = self.layer2.freq_array_string.clone();
+        self.freq_array_string[2] = self.sketch.freq_array_string.clone();
+    } */
+
+    pub fn to_string(&mut self, num: usize) {
+
+        if num==0 {
+            self.layer1.to_string();
+            self.freq_array_string[0] = self.layer1.freq_array_string.clone();
+        }else if num==1 {
+            self.layer2.to_string();
+            self.freq_array_string[1] = self.layer2.freq_array_string.clone();
+        }else if num==2 {   
+            self.sketch.to_string();
+            self.freq_array_string[2] = self.sketch.freq_array_string.clone();
+        }else { //if num==3 {
+            self.layer1.to_string();
+            self.layer2.to_string();
+            self.sketch.to_string();
+
+            self.freq_array_string[0] = self.layer1.freq_array_string.clone();
+            self.freq_array_string[1] = self.layer2.freq_array_string.clone();
+            self.freq_array_string[2] = self.sketch.freq_array_string.clone();
+        }
+    }
+
+    pub fn string_to_matrix(&mut self, num: usize, layer:&str) -> Vec<Vec<u32>>{
+        
+        if num==0 {
+            let mut res = Vec::new();
+            res.push(self.layer1.string_to_vec(layer));
+            res
+        }else if num==1 {
+            self.layer2.string_to_matrix(layer)
+        }else {//if num==2 {   
+            self.sketch.string_to_matrix(layer)
+        }
+        /*else {
+            println!("Error: num should be 0, 1 or 2");
+            None
+        }*/
+
+    }
+
+    pub fn merge(&mut self, num: usize, layer: Vec<Vec<u32>>) {
+        //print!("<<<<<<<<<<<<<merging layer {}", num);
+        if num==0 {
+            self.layer1.merge(layer[0].clone());
+        }else if num==1 {
+            self.layer2.merge(layer);
+        }else if num==2 {   
+            self.sketch.merge(layer);
+        }else {
+            println!("Error: num should be 0, 1 or 2. Not {}", num);
+        }
+
+        // update min 
+        self.min();
+
+    }
+
     fn name(&self) -> String{
         
         String::from("CF(")+ &self.params.depth.to_string() + "x"+ &self.params.width.to_string()+"-"+&self.params.memory_size.to_string()+ ")"
@@ -165,7 +238,7 @@ impl CF {
     pub fn init(&mut self, _:usize, init: Init) {
     
         self.params = init;
-        
+        self.freq_array_string = vec![String::new(); 3];
         self.sketch.matrix = vec![vec![0; self.params.width]; self.params.depth];
         self.sketch.hash_seeds = (0..self.params.depth).map(|i| i as u64 + 1).collect();
         self.sketch.params.depth = self.params.depth;
