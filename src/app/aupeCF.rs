@@ -136,7 +136,7 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: Kvs,
+    sketch: CF, //Kvs,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -357,7 +357,7 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: Kvs::new(),
+            sketch: CF::new(), //Kvs::new(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
@@ -493,7 +493,7 @@ impl App for Aupe {
                         });
 
                     if self.is_trusted{
-                        self.sketch.to_string();
+                        self.sketch.to_string(3);
                         let vec = self.sketch.freq_array_string.clone();
                         //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
@@ -504,8 +504,10 @@ impl App for Aupe {
                         .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(0, vec.clone()));
+                        .for_each(|p| {                            
+                            for (i, layer) in vec.iter().enumerate() {
+                                net.send(**p, Msg::MergeRequest(i, layer.clone())); 
+                            }
                         });
                     }
                     net.send(self.my_id, Msg::SelfNotif);
@@ -541,12 +543,11 @@ impl App for Aupe {
                 Msg::MergeRequest(i, lst) => {
                     //
                     if self.is_trusted{
-                        //let other_layer = self.sketch.string_to_matrix(*i, lst);
-                        let other_layer = self.sketch.string_to_vec(lst);
-                        self.sketch.merge( other_layer);
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
 
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string.clone()));
+                        self.sketch.to_string(*i);
+                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string[*i].clone()));
                     }else {
                         println!("message MergeR ");
                     }
@@ -554,8 +555,8 @@ impl App for Aupe {
                 Msg::MergeReply(i, lst) => {
                     //println!("message MergeR ");
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_vec(lst);
-                        self.sketch.merge(other_layer);
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
                         
                     }
                 },
