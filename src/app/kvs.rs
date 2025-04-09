@@ -43,7 +43,7 @@ impl Kvs {
         }
     }
     
-    fn print(&self) {
+    pub fn print(&self) {
         for i in 0..10 {
             print!(" {}: {:?}", i, self.omn_array[i]);
         }
@@ -65,7 +65,7 @@ impl Kvs {
         self.freq_array_string = result;
     }
 
-    pub fn string_to_matrix(&mut self, input: &str) -> Vec<u32>{
+    pub fn string_to_vec(&mut self, input: &str) -> Vec<u32>{
         let result = input
         .split(',')
         .map(str::trim) // Trim whitespace
