@@ -9,10 +9,9 @@ use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digit
 use crate::graph::ByzConnGraph;
 
 use super::kvs::Kvs;
-use super::pbs::PBS;
 use super::cf::CF;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
     PullRequest,
@@ -72,7 +71,7 @@ pub struct Init {
     #[structopt(long = "w2", default_value = "245")]
     pub counter2: usize,
     /// number_of_hash_function
-    #[structopt(short = "h", long = "number_of_hash_functions", default_value = "2")]
+    #[structopt(short = "h", long = "number_of_hash_functions", default_value = "3")]
     pub depth: usize,
     /// Number_of_discrete_values
     #[structopt(short = "w", long = "number_of_discrete_values", default_value = "100")]
@@ -137,7 +136,7 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: PBS, //Kvs,
+    sketch: Kvs,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -358,7 +357,7 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: PBS::new(), //Kvs::new(),
+            sketch: Kvs::new(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
@@ -505,8 +504,8 @@ impl App for Aupe {
                         .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
-                        .for_each(|p| {                            
-                            net.send(**p, Msg::MergeRequest(0, vec.clone())); 
+                        .for_each(|p| {
+                            net.send(**p, Msg::MergeRequest(0, vec.clone()));
                         });
                     }
                     net.send(self.my_id, Msg::SelfNotif);
@@ -542,7 +541,8 @@ impl App for Aupe {
                 Msg::MergeRequest(i, lst) => {
                     //
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_matrix( lst);
+                        //let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        let other_layer = self.sketch.string_to_vec(lst);
                         self.sketch.merge( other_layer);
 
                         self.sketch.to_string();
@@ -554,7 +554,7 @@ impl App for Aupe {
                 Msg::MergeReply(i, lst) => {
                     //println!("message MergeR ");
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_matrix(lst);
+                        let other_layer = self.sketch.string_to_vec(lst);
                         self.sketch.merge(other_layer);
                         
                     }
