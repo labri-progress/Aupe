@@ -3,6 +3,7 @@ pub mod aupe;
 pub mod cf;
 pub mod bf;
 pub mod cmscu;
+pub mod pbs;
 pub mod kvs;
 pub mod cms;
 pub mod brahms;
