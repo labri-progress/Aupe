@@ -51,9 +51,9 @@ impl PBS {
             self.width = 2f64.powi(self.n_bits as i32) as usize;
         }
 
-        self.n_bits = self.range as usize;
+        /* self.n_bits = self.range as usize;
         
-        self.width = 2f64.powi(self.n_bits as i32) as usize;
+        self.width = 2f64.powi(self.n_bits as i32) as usize; */
 
         println!("n={} range={} b={} w={}", 
             nodes, self.range, self.n_bits, self.width);
@@ -87,7 +87,7 @@ impl PBS {
             let mut j = 0;
             for j in 0..self.n_bits {
                 //print!("decomposed {:?} ", decomposed);
-                let bit = binary[self.order[j] as usize -1];//self.order[i*self.n_bits+j] as usize -1];
+                let bit = binary[self.order[i*self.n_bits+j] as usize -1];
                 //print!("decomposed shifted={:?} ", decomposed[i]<< 1);
                 //print!("bit {:?} ", bit);
                 decomposed[i] = (decomposed[i] << 1) | bit ;
