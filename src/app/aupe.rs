@@ -498,7 +498,11 @@ impl App for Aupe {
                         let vec = self.sketch.freq_array_string.clone();
                         //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-                            self.sketch.print();
+                            //self.sketch.print();
+                            println!("Node { } : min_value {} min _index {} ", self.my_id, self.sketch.min_value,
+                            self.sketch.min_index);
+                            
+                            //println!("Node { } : to_contacted({:?}) M={} oldest=Node{}", self.my_id, self.to_conctact, self.params.nb_merge, self.oldest);
                             //println!("layers {:?}", vec);
                         }
                         self.to_conctact.iter()
