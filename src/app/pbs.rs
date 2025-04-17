@@ -55,8 +55,8 @@ impl PBS {
         
         self.width = 2f64.powi(self.n_bits as i32) as usize; */
 
-        println!("n={} range={} b={} w={}", 
-            nodes, self.range, self.n_bits, self.width);
+        /* println!("n={} range={} b={} w={}", 
+            nodes, self.range, self.n_bits, self.width); */
 
         // Item maps
 
@@ -208,7 +208,7 @@ impl PBS {
     
         self.params = init.clone();
         
-        println!("init {:?}", self.params);
+        //println!("init {:?}", self.params);
 
         self.get_size(nodes);
         let mut rng = StdRng::seed_from_u64(SEED2);
@@ -217,7 +217,7 @@ impl PBS {
         order.shuffle(&mut rng);
         self.order = order; //vec!{1,3,4,2,5,7,6,8,9,10,11,12,13,14,16,15};//
         
-        println!("order {:?}", self.order);
+        //println!("order {:?}", self.order);
 
         self.matrix = vec![vec![0; self.width]; self.params.depth];
         
