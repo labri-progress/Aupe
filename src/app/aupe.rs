@@ -12,7 +12,7 @@ use super::kvs::Kvs;
 use super::pbs::PBS;
 use super::cf::CF;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
     PullRequest,
