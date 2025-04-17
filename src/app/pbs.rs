@@ -27,6 +27,8 @@ pub struct PBS {
     range: u8,
     order: Vec<u8>, // size of range
     pub min_value: f64,
+    pub min_index: usize, 
+    encounter_ids: Vec<usize>,
     pub omniscient_memory: Vec<usize>,
     pub width: usize,
     n_bits: usize,
@@ -113,6 +115,17 @@ impl PBS {
         occurence
     }
 
+    pub fn min(&mut self) {
+        self.min_value = f64::MAX;
+        for (_, &item) in self.encounter_ids.iter().enumerate() {
+            let value = self.estimate(&item);
+            if value > 0.0  && value < self.min_value  {
+                self.min_value = value;
+                self.min_index = item;
+            }
+        }
+    }
+
     fn print_full(&self) {
 
         for (i, row) in self.matrix.iter().enumerate() {
@@ -133,6 +146,8 @@ impl PBS {
             n_bits: 0,
             total_items: 0,
             freq_array_string: String::new(),
+            min_index: usize::MAX,
+            encounter_ids: Vec::new(),
         }
     }
     
@@ -228,6 +243,7 @@ impl PBS {
         
         for item in items {
             self.insert(&item);
+            self.encounter_ids.push(item);
         }
     }
 
@@ -243,8 +259,11 @@ impl PBS {
         for element in &inputstream {
             //println!("element: {}", element);
             let occur = self.estimate(element);
-            if occur > 0.0  && occur < self.min_value  {
+            if occur < self.min_value{
                 self.min_value = occur;
+                self.min_index = *element;
+            } else if *element == self.min_index {
+                self.min();
             }
             // 2. Sample memory
             if self.omniscient_memory.len() < self.params.memory_size {
