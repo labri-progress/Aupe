@@ -26,7 +26,7 @@ pub struct PBS {
     pub matrix: Vec<Vec<u32>>,
     range: u8,
     order: Vec<u8>, // size of range
-    pub min_value: u32,
+    pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
     pub width: usize,
     n_bits: usize,
@@ -86,12 +86,8 @@ impl PBS {
         for i in 0..self.params.depth {
             let mut j = 0;
             for j in 0..self.n_bits {
-                //print!("decomposed {:?} ", decomposed);
                 let bit = binary[self.order[i*self.n_bits+j] as usize -1];
-                //print!("decomposed shifted={:?} ", decomposed[i]<< 1);
-                //print!("bit {:?} ", bit);
                 decomposed[i] = (decomposed[i] << 1) | bit ;
-                //println!("After : decomposed {:?}", decomposed);
             }
         }
         decomposed
@@ -100,7 +96,6 @@ impl PBS {
     pub fn insert(&mut self, item: &usize) {
         
         let decomposed = self.decomposition(*item);
-        //println!("item {} = {:?}", *item, decomposed);
         for (i, index) in decomposed.iter().enumerate() {
             self.matrix[i][*index] += 1;
         }
@@ -109,15 +104,12 @@ impl PBS {
     /// Estime la fréquence d'un élément
     pub fn estimate(&self, item: &usize) -> f64 {
         let decomposed = self.decomposition(*item);
-        //println!("decomposed {:?}", decomposed);
 
         let mut occurence :f64 = self.total_items as f64;
         for (i, index) in decomposed.iter().enumerate() {
             let value = self.matrix[i][*index] as f64 / self.total_items as f64;
             occurence = occurence * value;
-            //println!("occurence {} {}", occurence,value);
         }
-        //println!("occurence {:?}", occurence );
         occurence
     }
 
@@ -129,24 +121,13 @@ impl PBS {
         println!("min_value {}", self.min_value);
     }
 
-    pub fn min(&mut self) {
-        self.min_value = u32::MAX;
-        for row in &self.matrix {
-            for &value in row {
-                if value != 0 && value < self.min_value {
-                    self.min_value = value;
-                }
-            }
-        }
-    }
-
     pub fn new() -> Self {
         Self {
             params: Init::default(),
             matrix: Vec::new(),
             range: 0,
             order: Vec::new(),
-            min_value: u32::MAX,
+            min_value: f64::MAX,
             omniscient_memory: Vec::new(),
             width: 0,
             n_bits: 0,
@@ -215,7 +196,7 @@ impl PBS {
     
     pub fn merge(&mut self, second_cms_matrix: Vec<Vec<u32>>) {
         for i in 0..self.params.depth {
-            for j in 0..self.params.width {
+            for j in 0..self.width {
                 self.matrix[i][j] += second_cms_matrix[i][j];
                 //self.matrix[i][j] /=2;
                 self.matrix[i][j] = (self.matrix[i][j] as f64 /2.0).ceil() as u32;
@@ -248,8 +229,6 @@ impl PBS {
         for item in items {
             self.insert(&item);
         }
-        //Update min for the debiasing algorithm
-        self.min();
     }
 
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
@@ -264,6 +243,9 @@ impl PBS {
         for element in &inputstream {
             //println!("element: {}", element);
             let occur = self.estimate(element);
+            if occur > 0.0  && occur < self.min_value  {
+                self.min_value = occur;
+            }
             // 2. Sample memory
             if self.omniscient_memory.len() < self.params.memory_size {
                 if !self.omniscient_memory.contains(element) {
@@ -285,8 +267,6 @@ impl PBS {
             }
             let i = rng.random_range(0..self.omniscient_memory.len());
             outputstream.push(self.omniscient_memory[i].clone());
-            //println!("sample memory: {:?}", self.omniscient_memory);
-            //println!("output stream: {:?}", outputstream);
 
         }
      
