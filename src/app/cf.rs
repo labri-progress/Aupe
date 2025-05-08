@@ -57,7 +57,7 @@ pub struct CF {
     layer1: BF,
     layer2: CmsCu,
     sketch: CmsCu,
-    pub min_value: u32,
+    pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
     pub freq_array_string: Vec<String>,
 }
@@ -67,12 +67,12 @@ impl CF {
     /// CF algorithm: returns wheteher it is a cold item or not
     fn insert(&mut self, item: &impl Hash) -> bool{
         let v1 = self.layer1.estimate(item);
-        if v1 < self.params.t1 {
+        if v1 < self.params.t1 as f64{
             self.layer1.insert(item); // Cold item
             true
         }else {
             let v2 = self.layer2.estimate(item); 
-            if v2 < self.params.t2 {
+            if v2 < self.params.t2 as f64{
                 self.layer2.insert(item); // Hot item
                 true
             }else {
@@ -83,13 +83,13 @@ impl CF {
     }
 
     /// Estime la fréquence d'un élément
-    pub fn estimate(&self, item: &impl Hash) -> u32 {
+    pub fn estimate(&self, item: &impl Hash) -> f64 {
         let v1 = self.layer1.estimate(item);
-        if v1 < self.params.t1 {
+        if v1 < self.params.t1 as f64{
             v1 // Cold item
         }else {
             let v2 = self.layer2.estimate(item); 
-            if v2 < self.params.t2 {
+            if v2 < self.params.t2 as f64{
                 v1 + v2 // Hot item
             }else {
                 v1 + v2 + self.sketch.estimate(item) // Very hot item
@@ -100,12 +100,12 @@ impl CF {
     fn min(&mut self) {
         self.layer1.min();
         self.min_value = self.layer1.min_value;
-        if self.layer1.min_value == self.params.t1 {
+        if self.layer1.min_value == self.params.t1 as f64{
             self.layer2.min();
-            self.min_value = self.params.t1 + self.layer2.min_value;
-            if self.layer2.min_value == self.params.t2 {
+            self.min_value = self.params.t1 as f64+ self.layer2.min_value;
+            if self.layer2.min_value == self.params.t2 as f64{
                 self.sketch.min();
-                self.min_value = self.params.t1 + self.params.t2 + 
+                self.min_value = (self.params.t1 + self.params.t2) as f64 + 
                     self.sketch.min_value;
             }
         }
@@ -117,7 +117,7 @@ impl CF {
             layer1: BF::new(),
             layer2: CmsCu::new(),
             sketch: CmsCu::new(),
-            min_value: u32::MAX,
+            min_value: f64::MAX,
             omniscient_memory: Vec::new(),
             freq_array_string: Vec::new(),
         }
@@ -195,7 +195,7 @@ impl CF {
         }
     }
 
-    pub fn string_to_matrix(&mut self, num: usize, layer:&str) -> Vec<Vec<u32>>{
+    pub fn string_to_matrix(&mut self, num: usize, layer:&str) -> Vec<Vec<f64>>{
         
         if num==0 {
             let mut res = Vec::new();
@@ -213,7 +213,7 @@ impl CF {
 
     }
 
-    pub fn merge(&mut self, num: usize, layer: Vec<Vec<u32>>) {
+    pub fn merge(&mut self, num: usize, layer: Vec<Vec<f64>>) {
         //print!("<<<<<<<<<<<<<merging layer {}", num);
         if num==0 {
             self.layer1.merge(layer[0].clone());
@@ -239,19 +239,19 @@ impl CF {
     
         self.params = init;
         self.freq_array_string = vec![String::new(); 3];
-        self.sketch.matrix = vec![vec![0; self.params.width]; self.params.depth];
+        self.sketch.matrix = vec![vec![0.0; self.params.width]; self.params.depth];
         self.sketch.hash_seeds = (0..self.params.depth).map(|i| i as u64 + 1).collect();
         self.sketch.params.depth = self.params.depth;
         self.sketch.params.width = self.params.width;
         //self.sketch.params.memory_size = self.params.memory_size;
         //self.layer1.matrix = vec![vec![0; self.params.counter1]; self.params.replicates];
-        self.layer1.counters = vec![0; self.params.counter1];
+        self.layer1.counters = vec![0.0; self.params.counter1];
         self.layer1.hash_seeds = (0..self.params.replicates).map(|i| i as u64 + 1).collect();
                 //.map(|i| i as u64 + self.params.depth as u64 + 1).collect();
         self.layer1.params.depth = self.params.replicates;
         self.layer1.params.width = self.params.counter1;
 
-        self.layer2.matrix = vec![vec![0; self.params.counter2]; self.params.replicates];
+        self.layer2.matrix = vec![vec![0.0; self.params.counter2]; self.params.replicates];
         self.layer2.hash_seeds = (0..self.params.replicates).map(|i| i as u64 + 1).collect();
                 //.map(|i| i as u64 + self.params.replicates as u64 + self.params.depth as u64 + 1).collect();
         self.layer2.params.depth = self.params.replicates;

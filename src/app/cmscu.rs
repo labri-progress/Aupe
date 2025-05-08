@@ -27,9 +27,9 @@ pub struct Init {
 #[derive(Debug, Clone, Default)]
 pub struct CmsCu {
     pub params: Init,
-    pub matrix: Vec<Vec<u32>>,
+    pub matrix: Vec<Vec<f64>>,
     pub hash_seeds: Vec<u64>,
-    pub min_value: u32,
+    pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
     pub freq_array_string: String,
 }
@@ -71,19 +71,19 @@ impl CmsCu {
         for (i, seed) in self.hash_seeds.iter().enumerate() {
             let index = self.hash(item, *seed);
             if self.matrix[i][index] == min_count {
-                self.matrix[i][index] += 1;
+                self.matrix[i][index] += 1.0;
             }
         }
     }
     
     /// Estime la fréquence d'un élément
-    pub fn estimate(&self, item: &impl Hash) -> u32 {
+    pub fn estimate(&self, item: &impl Hash) -> f64 {
         self.hash_seeds
-            .iter()
-            .enumerate()
-            .map(|(i, seed)| self.matrix[i][self.hash(item, *seed)]) 
-            .min() 
-            .unwrap_or(0)
+        .iter()
+        .enumerate()
+        .map(|(i, seed)| self.matrix[i][self.hash(item, *seed)]) // Access float values in the matrix
+        .min_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)) // Handle float comparison safely
+        .unwrap_or(0.0)
     }
 
     fn print_full(&self) {
@@ -95,10 +95,10 @@ impl CmsCu {
     }
 
     pub fn min(&mut self) {
-        self.min_value = u32::MAX;
+        self.min_value = f64::MAX;
         for row in &self.matrix {
             for &value in row {
-                if value != 0 && value < self.min_value {
+                if value != 0.0 && value < self.min_value {
                     self.min_value = value;
                 }
             }
@@ -110,7 +110,7 @@ impl CmsCu {
             params: Init::default(),
             matrix: Vec::new(),
             hash_seeds: Vec::new(),
-            min_value: u32::MAX,
+            min_value: f64::MAX,
             omniscient_memory: Vec::new(),
             freq_array_string: String::new(),
         }
@@ -154,25 +154,32 @@ impl CmsCu {
         self.freq_array_string=result;
     }
 
-    pub fn string_to_matrix(&mut self, input: &str)  -> Vec<Vec<u32>>{
+    pub fn string_to_matrix(&mut self, input: &str)  -> Vec<Vec<f64>>{
         let result = input
             .lines() // Split the string into rows using newlines
             .map(|line| {
                 line.split(',') // Split each row into elements using commas
-                    .map(|num| num.trim().parse::<u32>().expect("Invalid float")) // Parse each element into u32
-                    .collect::<Vec<u32>>() // Collect elements into a vector
+                    .map(|num| num.trim().parse::<f64>().expect("Invalid float")) // Parse each element into u32
+                    .collect::<Vec<f64>>() // Collect elements into a vector
             })
-            .collect::<Vec<Vec<u32>>>(); // Collect rows into a matrix
+            .collect::<Vec<Vec<f64>>>(); // Collect rows into a matrix
         
         result
     }
 
-    pub fn merge(&mut self, second_cms_matrix: Vec<Vec<u32>>) {
+    pub fn merge(&mut self, second_cms_matrix: Vec<Vec<f64>>) {
         for i in 0..self.params.depth {
             for j in 0..self.params.width {
+                let mut flag = true;
+                if self.matrix[i][j]*second_cms_matrix[i][j] == 0.0{
+                    flag = false;
+                }
                 self.matrix[i][j] += second_cms_matrix[i][j];
-                //self.matrix[i][j] /=2;
-                self.matrix[i][j] = (self.matrix[i][j] as f64 /2.0).ceil() as u32;
+                if flag{
+                    self.matrix[i][j] = self.matrix[i][j] /2.0;
+                
+                }
+                //self.matrix[i][j] = self.matrix[i][j].min(second_cms_matrix[i][j]);
             }
         }
     }
@@ -188,7 +195,7 @@ impl CmsCu {
         
         println!("init {:?}", self.params);
 
-        self.matrix = vec![vec![0; self.params.width]; self.params.depth];
+        self.matrix = vec![vec![0.0; self.params.width]; self.params.depth];
         self.hash_seeds = (0..self.params.depth).map(|i| i as u64 + 1).collect();
 
     }
