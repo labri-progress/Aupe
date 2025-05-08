@@ -11,7 +11,7 @@ use crate::graph::ByzConnGraph;
 use super::kvs::Kvs;
 use super::cf::CF;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
     PullRequest,
