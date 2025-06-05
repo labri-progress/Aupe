@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 mod net;
 mod util;
 mod graph;
