@@ -9,7 +9,7 @@ use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digit
 use crate::graph::ByzConnGraph;
 
 use super::kvs::Kvs;
-use super::bitmatcher::BM;
+use super::cf::CF;
 
 const DEBUG: bool = false;
 pub enum Msg {
@@ -17,8 +17,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(String),
-    MergeReply(String),
+    MergeRequest(usize, String),
+    MergeReply(usize, String),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -61,14 +61,6 @@ pub struct Init {
     /// Threshold value of layer 2
     #[structopt(short = "b", long = "threshold_layer_2", default_value = "241")]
     pub t2: u32,
-
-    //BitMatcher
-    #[structopt(short = "c", long = "n_bucket", default_value = "0")]
-    pub n_bucket: u64,
-
-    #[structopt(short = "d", long = "budget", default_value = "5")]
-    pub space: u64,
-    
     /// number_of_hash_function of layer i
     #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
     pub replicates: usize,
@@ -144,7 +136,7 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: BM, //Kvs,
+    sketch: CF, //Kvs,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -365,7 +357,7 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: BM::new(), //Kvs::new(),
+            sketch: CF::new(), //Kvs::new(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
@@ -505,7 +497,7 @@ impl App for Aupe {
                         //println!("layers {:?}", vec);
                     }
                     if self.is_trusted{
-                        self.sketch.to_string();
+                        self.sketch.to_string(3);
                         let vec = self.sketch.freq_array_string.clone();
                         //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
@@ -517,7 +509,9 @@ impl App for Aupe {
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
                         .for_each(|p| {                            
-                            net.send(**p, Msg::MergeRequest(vec.clone())); 
+                            for (i, layer) in vec.iter().enumerate() {
+                                net.send(**p, Msg::MergeRequest(i, layer.clone())); 
+                            }
                         });
                     }
                     net.send(self.my_id, Msg::SelfNotif);
@@ -550,26 +544,23 @@ impl App for Aupe {
                     self.sketch.update_freq(lst.clone());
                 },
 
-                Msg::MergeRequest(lst) => {
+                Msg::MergeRequest(i, lst) => {
                     //
                     if self.is_trusted{
-                        /* 1. Receive sketch */
-                        let other_layer = self.sketch.string_to_matrix(lst);
-                        /* 2. Send yours */
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
-                        /* 3. Merge */
-                        self.sketch.merge(other_layer);
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
 
+                        self.sketch.to_string(*i);
+                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string[*i].clone()));
                     }else {
                         println!("message MergeR ");
                     }
                 },
-                Msg::MergeReply(lst) => {
-                    /* Receive and merge */
+                Msg::MergeReply(i, lst) => {
+                    //println!("message MergeR ");
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_matrix(lst);
-                        self.sketch.merge(other_layer);
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
                         
                     }
                 },
