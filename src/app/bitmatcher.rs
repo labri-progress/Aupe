@@ -5,7 +5,7 @@ use rand::prelude::SliceRandom;
 
 use structopt::StructOpt;
 
-use super::aupe::Init;
+use super::aupebm::Init;
 
 use cxx::UniquePtr;
 use cxx::CxxString;
@@ -69,6 +69,10 @@ pub struct BM {
     pub freq_array_string: String,
 }
 
+fn count_digits(n: usize) -> usize {
+    n.to_string().chars().count()
+}
+
 impl BM {
 
     pub fn insert(&mut self, item: &usize) { 
@@ -109,10 +113,15 @@ impl BM {
         //println!("\nmin_value {}", self.min_value);
     }
 
-    pub fn init(&mut self, _: usize, init: Init) {
+    pub fn getparams(&mut self, init: Init) {
+        self.params = init;
+        self.params.n_bucket = self.params.space * 1024 / 8 / 2;
+    }
+
+    pub fn init(&mut self, nodes: usize, init: Init) {
     
-        self.params = init.clone();
-        
+        self.getparams(init.clone());
+        self.key_len = count_digits(nodes -1);
         //println!("init {:?}", self.params);
         if self.params.n_bucket == 0 {
             self.params.n_bucket = self.params.space * 1024 / 8 / 2;

@@ -3,7 +3,7 @@ use crate::app::bf::BF;
 
 use rand::{rng, Rng};
 //use crate::net::App;
-use super::aupe::Init;
+use super::aupecf::Init;
 
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
@@ -162,17 +162,6 @@ impl CF {
         //self.print_full();
     }
 
-    /* pub fn to_string(&mut self) {
-
-        self.layer1.to_string();
-        self.layer2.to_string();
-        self.sketch.to_string();
-
-        self.freq_array_string[0] = self.layer1.freq_array_string.clone();
-        self.freq_array_string[1] = self.layer2.freq_array_string.clone();
-        self.freq_array_string[2] = self.sketch.freq_array_string.clone();
-    } */
-
     pub fn to_string(&mut self, num: usize) {
 
         if num==0 {
@@ -235,9 +224,29 @@ impl CF {
         String::from("CF(")+ &self.params.depth.to_string() + "x"+ &self.params.width.to_string()+"-"+&self.params.memory_size.to_string()+ ")"
     }
 
+    pub fn getparams(&mut self, init: Init) {
+        self.params = init;
+        match self.params.space  {
+            6 => {
+                self.params.counter1 = 10000;
+                self.params.counter2 = 245;
+                self.params.t1 = 15;
+                self.params.t2 = 31;
+            },
+            12 => {
+                self.params.counter1 = 20000;
+                self.params.counter2 = 1600;
+                self.params.t1 = 31;
+                self.params.t2 = 63;
+            },
+            0_u64..=5_u64 | 7_u64..=11_u64 | 13_u64..=u64::MAX => todo!(),
+        }
+    }
+
     pub fn init(&mut self, _:usize, init: Init) {
     
-        self.params = init;
+        self.getparams(init.clone());
+
         self.freq_array_string = vec![String::new(); 3];
         self.sketch.matrix = vec![vec![0.0; self.params.width]; self.params.depth];
         self.sketch.hash_seeds = (0..self.params.depth).map(|i| i as u64 + 1).collect();
