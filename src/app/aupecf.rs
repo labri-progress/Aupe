@@ -4,14 +4,21 @@ use structopt::StructOpt;
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy, write_results};
-use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, vec_to_string, string_to_vec};
+use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, 
+    sample_exclude, vec_to_string, string_to_vec};
 use crate::graph::ByzConnGraph;
 
+use super::kvs::Kvs;
+use super::cf::CF;
+
+const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
+    MergeRequest(usize, String),
+    MergeReply(usize, String),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -47,6 +54,40 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
+    
+    #[structopt(short = "y", long = "budget", default_value = "6")]
+    pub space: u64,
+
+    /// Number of SGX nodes
+    #[structopt(short = "x", long = "trusted-nodes", default_value = "0")]
+    pub n_trusted: usize,
+
+    /// How many sup merges should be used
+    #[structopt(short = "p", long = "nb_merges", default_value = "0")]
+    pub nb_merge: usize,
+
+    // Cold filter
+    #[structopt(short = "a", long = "threshold_layer_1", default_value = "15")]
+    pub t1: u32,
+    /// Threshold value of layer 2
+    #[structopt(short = "b", long = "threshold_layer_2", default_value = "241")]
+    pub t2: u32,
+    
+    /// number_of_hash_function of layer i
+    #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
+    pub replicates: usize,
+    /// Number_of_discrete_values of layer 1
+    #[structopt(long = "w1", default_value = "10000")] //10000
+    pub counter1: usize,
+    /// Number_of_discrete_values of layer 2
+    #[structopt(long = "w2", default_value = "245")]
+    pub counter2: usize,
+    /// number_of_hash_function
+    #[structopt(short = "h", long = "number_of_hash_functions", default_value = "3")]
+    pub depth: usize,
+    /// Number_of_discrete_values
+    #[structopt(short = "w", long = "number_of_discrete_values", default_value = "100")]
+    pub width: usize,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -77,11 +118,12 @@ impl std::str::FromStr for WhichGraphStats {
     }
 }
 
-pub struct Aupe {
+pub struct AupeCF {
     params: Init,
 
     my_id: PeerRef,
     is_byzantine: bool,
+    is_trusted: bool,
 
     view: Vec<PeerRef>,
     push_view: Vec<PeerRef>,
@@ -98,11 +140,9 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    omniscient_freq_array: Vec<u64>,
-    omniscient_memory: Vec<PeerRef>,
-    minkey: PeerRef,
-    min_value: u64,
-
+    sketch: CF, //Kvs,
+    to_conctact: Vec<PeerRef>,
+    oldest: PeerRef,
 }
 
 pub struct Metrics {
@@ -246,7 +286,7 @@ impl NetMetrics for Metrics {
 type Net<'a> = &'a mut dyn Network<Msg>;
 
 
-impl Aupe {
+impl AupeCF {
     fn update_samples(&mut self, candidates: &[PeerRef]) {
         //println!("len {}", self.sample_view.len());
         for i in 0..self.sample_view.len() {
@@ -267,118 +307,35 @@ impl Aupe {
         }
     }
 
-    fn min(&mut self) {
-        self.min_value = u64::MAX;
-        for (index, &value) in self.omniscient_freq_array.iter().enumerate() {
-            if value > 0  && value < self.min_value  {
-                self.min_value = value;
-                self.minkey = index;
-            }
-        }
-    }
-
-   /*  fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-        let mut outputstream = Vec::new();
-        //println!("++");
-        let mut rng = thread_rng();
-        
-        for element in &inputstream {
-
-            let occur = self.omniscient_freq_array[*element];
-
-            if self.minvalue > occur { // new minval
-                self.minvalue = occur;
-                self.minkey = *element;
-
-            }else if *element == self.minkey { // search new min if it was him
-                self.min();
-
-            }
-            if self.omniscient_memory.len() < self.params.memory_size {
-
-                if !self.omniscient_memory.contains(element) {
-                    self.omniscient_memory.push(*element);
-                }
-
-            }else {
-                let prob = self.minvalue as f64/ occur as f64;
-                let random_float: f64 = rng.random(); 
-
-                if random_float < prob && !self.omniscient_memory.contains(element) {
-                    
-                    let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
-                    
-                    if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
-                        *tobereplaced = *element;
-                    } else {
-                        println!("Index out of bounds");
+    fn update_contact(&mut self, item: PeerRef) {
+        if self.is_trusted && self.params.nb_merge !=0 {
+            if self.is_trusted(item) && item != self.my_id{
+                if !self.to_conctact.contains(&item) {
+                    if self.to_conctact.len() < self.params.nb_merge {
+                        self.to_conctact.push(item.clone());
+                    }else{ //full
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                            println!("id_oldest {:?}", self.to_conctact.get_mut(self.oldest));
+                        }
+                        if let Some(to_be_replaced) = self.to_conctact.get_mut(self.oldest) {
+                            *to_be_replaced = item;
+                            self.oldest +=1; // update oldest id in to_contact list
+                            self.oldest = self.oldest % (self.params.nb_merge );
+                        }
                     }
-                }
+                } 
             }
-            let i = rng.random_range(0..self.omniscient_memory.len());
-            outputstream.push(self.omniscient_memory[i].clone());
+            /* println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
+                            self.to_conctact, self.params.nb_merge, self.oldest); */
         }
-            
-        outputstream
     }
- */
-    
- fn debiais_stream_with_omni(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-    let mut outputstream = Vec::new();
 
-    let mut rng = rng();
-    
-    //self.update_freq(inputstream.clone()); // w min()
-
-    for element in &inputstream {
-        //println!("element: {}", element);
-        let occur = self.omniscient_freq_array[*element];
-
-        if self.omniscient_memory.len() < self.params.memory_size {
-
-            if !self.omniscient_memory.contains(element) {
-                self.omniscient_memory.push(*element);
-            }
-
-        }else {
-            let prob = self.min_value as f64/ occur as f64;
-            let random_float: f64 = rng.random(); 
-            if random_float < prob && !self.omniscient_memory.contains(element) {
-                
-                let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
-                
-                /* if let Some(tobereplaced) = self.omniscient_memory.get_mut(i) {
-                    *tobereplaced = *element;
-                } else {
-                    println!("Index out of bounds");
-                } */
-               self.omniscient_memory[i] = *element;
-            }
-        }
-        let i = rng.random_range(0..self.omniscient_memory.len());
-        outputstream.push(self.omniscient_memory[i]);
+    fn is_trusted(&self, id:PeerRef) -> bool {
+        return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
     }
-    //println!("sample memory: {:?}", self.omniscient_memory);   
-    outputstream
-   
 }
 
-    fn update_freq(&mut self, items: Vec<PeerRef>) {
-        for item in items {
-            self.omniscient_freq_array[item.clone()] += 1;
-        }
-        self.min();
-    }
-
-    fn update_omn_freq(&mut self, item: PeerRef) {
-        /* let value = self.omniscient_freq_array[item.clone()] + 1.0;
-        self.omniscient_freq_array[item.clone()] = value.max(1.0); */
-        self.omniscient_freq_array[item.clone()] += 1;
-    }
-
-}
-
-impl App for Aupe {
+impl App for AupeCF {
     type Init = Init;
     type Msg = Msg;
     type Metrics = Metrics;
@@ -389,6 +346,8 @@ impl App for Aupe {
 
             my_id: 0,
             is_byzantine: false,
+            is_trusted: false,
+
             view: Vec::new(),
             push_view: Vec::new(),
             pull_view: Vec::new(),
@@ -402,11 +361,9 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            omniscient_freq_array: Vec::new(),
-            omniscient_memory: Vec::new(),
-            minkey: 0,
-            min_value: u64::MAX,
-
+            sketch: CF::new(), //Kvs::new(),
+            to_conctact: Vec::new(),
+            oldest: 0,
         }
     }
     
@@ -415,9 +372,11 @@ impl App for Aupe {
         self.params = init.clone();
 
         // Init preallocated vectors
-        self.omniscient_freq_array = vec![0; self.params.nodes];
+        self.sketch.init(self.params.nodes, self.params.clone());
 
         self.is_byzantine = id < init.n_byzantine;
+        self.is_trusted = self.is_trusted(id); // F to F + T-1
+
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
@@ -428,8 +387,33 @@ impl App for Aupe {
             self.update_samples(&view[..]);
             self.view = view;
 
-            self.debiais_stream_with_omni(self.view.clone());
+            self.sketch.update_freq(self.view.clone());
+            self.sketch.debiais_stream(self.view.clone());
         }
+
+        if self.is_trusted && self.params.nb_merge != 0{
+            let trusted_nodes = (self.params.n_byzantine..self.params.n_trusted+self.params.n_byzantine).collect::<Vec<_>>();
+
+            // update trusted list with view   
+            for item in self.view.clone() {
+                self.update_contact(item.clone()); 
+            }
+
+            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                println!("intermediaire CONTACT {:?}", self.to_conctact);
+            }
+            let missing_len = self.params.nb_merge - self.to_conctact.len();
+            // select missing trusted neighbors and avoid himself
+            if missing_len > 0 {
+                sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
+                    missing_len , self.my_id);
+            }
+            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
+                    self.to_conctact, self.params.nb_merge, self.oldest);
+            }
+        }
+
         net.send(id, Msg::SelfNotif);
     }
 
@@ -466,19 +450,17 @@ impl App for Aupe {
                         let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
 
-                        let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
+                        /* let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
                         match write_results(bags.clone(), &file_path) {
                             Ok(()) => {}
                             Err(e) => {
                                 eprintln!("Error occurred: {} on {}", e, file_path); 
                             }
-                        }; 
-
-                        //self.update_samples(&v_pull.clone()[..]);
+                        };  */
                         
-                        v_push = self.debiais_stream_with_omni(v_push);
-                        v_pull = self.debiais_stream_with_omni(v_pull);
+                        v_push = self.sketch.debiais_stream(v_push);
+                        v_pull = self.sketch.debiais_stream(v_pull);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
@@ -503,11 +485,39 @@ impl App for Aupe {
                     }
                     
                     sample(&self.view[..], 1).iter()
-                        .for_each(|p| net.send(*p, Msg::PushRequest));
+                        .for_each(|p| {
+                            net.send(*p, Msg::PushRequest);
+                            self.update_contact(*p); // if trusted
+                        });
 
                     sample(&self.view[..], 1).iter()
-                        .for_each(|p| net.send(*p, Msg::PullRequest));
+                        .for_each(|p| {
+                            net.send(*p, Msg::PullRequest);
+                            self.update_contact(*p); // if trusted
+                        });
 
+                    if self.my_id == self.params.nodes -1  && DEBUG{
+                        self.sketch.print();
+                        //println!("layers {:?}", vec);
+                    }
+                    if self.is_trusted{
+                        self.sketch.to_string(3);
+                        let vec = self.sketch.freq_array_string.clone();
+                        //println!("vec len {}", vec.len());
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
+                            //self.sketch.print();
+                            //println!("layers {:?}", vec);
+                        }
+                        self.to_conctact.iter()
+                        .filter(|x| **x!=self.my_id) // contact only not contacted nodes
+                        .map(|x| x)
+                        .collect::<Vec<_>>().iter()
+                        .for_each(|p| {                            
+                            for (i, layer) in vec.iter().enumerate() {
+                                net.send(**p, Msg::MergeRequest(i, layer.clone())); 
+                            }
+                        });
+                    }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -522,10 +532,7 @@ impl App for Aupe {
                         .count();
                     self.v_pull.extend(lst);
                     
-                    /* for item in lst {
-                        self.update_omn_freq(item.clone());
-                    } */
-                   self.update_freq(lst.clone());
+                   self.sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
@@ -535,7 +542,31 @@ impl App for Aupe {
                     }
                     self.v_push.push(from);
                     
-                    self.update_omn_freq(from.clone());
+                    // create a vector containing only item from 
+                    let mut lst = Vec::new();
+                    lst.push(from);
+                    self.sketch.update_freq(lst.clone());
+                },
+
+                Msg::MergeRequest(i, lst) => {
+                    //
+                    if self.is_trusted{
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
+
+                        self.sketch.to_string(*i);
+                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string[*i].clone()));
+                    }else {
+                        println!("message MergeR ");
+                    }
+                },
+                Msg::MergeReply(i, lst) => {
+                    //println!("message MergeR ");
+                    if self.is_trusted{
+                        let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        self.sketch.merge(*i, other_layer);
+                        
+                    }
                 },
             }
         }

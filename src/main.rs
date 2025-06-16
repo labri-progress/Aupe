@@ -29,12 +29,16 @@ pub struct Opt {
 #[derive(StructOpt, Debug)]
 pub enum WhichApp {
     
-    /// Aupe CMS RPS
-    /* #[structopt(name = "cms")]
-    AupeCMS(app::aupecms::Init), */
+    /// Aupe BM RPS
+    #[structopt(name = "bm")]
+    AupeBM(app::aupebm::Init),
+
+    /// Aupe CF RPS
+    #[structopt(name = "cf")]
+    AupeCF(app::aupecf::Init),
 
     /// Aupe RPS
-    #[structopt(name = "aupe")]
+    #[structopt(name = "kvs")]
     Aupe(app::aupe::Init),
 
     /// Brahms RPS
@@ -47,10 +51,15 @@ fn main() {
     let opt = Opt::from_args();
     match opt.app {
 // cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1
-// cargo run -- -T 200 -n 1000 cms -G samples -f 10 -x 100 -t 100 -v 20 -u 20 -m 100 -n 1000 -d 10 -w 272 -p 1
-        /* WhichApp::AupeCMS(pp) => {
-            sim::<app::aupecms::AupeCMS>(opt.n_steps, opt.nodes, &pp);  
-        } */
+// cargo run -- -T 200 -n 1000 bm -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -y 6 
+        WhichApp::AupeCF(pp) => {
+            sim::<app::aupecf::AupeCF>(opt.n_steps, opt.nodes, &pp);  
+        } 
+
+        WhichApp::AupeBM(pp) => {
+            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp);  
+        } 
+
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
 
 // cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -v 20 -u 20 -m 10 -n 1000 

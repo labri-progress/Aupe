@@ -9,7 +9,7 @@ use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digit
 use crate::graph::ByzConnGraph;
 
 use super::kvs::Kvs;
-use super::bitmatcher::BM;
+use super::cf::CF;
 
 const DEBUG: bool = false;
 pub enum Msg {
@@ -17,8 +17,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(String),
-    MergeReply(String),
+    MergeRequest(usize, String),
+    MergeReply(usize, String),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -61,14 +61,6 @@ pub struct Init {
     /// Threshold value of layer 2
     #[structopt(short = "b", long = "threshold_layer_2", default_value = "241")]
     pub t2: u32,
-
-    //BitMatcher
-    #[structopt(short = "c", long = "n_bucket", default_value = "0")]
-    pub n_bucket: u64,
-
-    #[structopt(short = "d", long = "budget", default_value = "5")]
-    pub space: u64,
-    
     /// number_of_hash_function of layer i
     #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
     pub replicates: usize,
@@ -86,11 +78,11 @@ pub struct Init {
     pub width: usize,
 
     /// Number of SGX nodes
-    #[structopt(short = "x", long = "trusted-nodes")]
+    #[structopt(short = "x", long = "trusted-nodes", default_value = "0")]
     pub n_trusted: usize,
 
     /// How many sup merges should be used
-    #[structopt(short = "p", long = "nb_merges")]
+    #[structopt(short = "p", long = "nb_merges", default_value = "0")]
     pub nb_merge: usize,
 }
 
@@ -144,7 +136,7 @@ pub struct Aupe {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: BM, //Kvs,
+    sketch: Kvs,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -365,7 +357,7 @@ impl App for Aupe {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: BM::new(), //Kvs::new(),
+            sketch: Kvs::new(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
@@ -378,6 +370,7 @@ impl App for Aupe {
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
 
+        println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
 
@@ -500,24 +493,20 @@ impl App for Aupe {
                             self.update_contact(*p); // if trusted
                         });
 
-                    if self.my_id == self.params.nodes -1  && DEBUG{
-                        self.sketch.print();
-                        //println!("layers {:?}", vec);
-                    }
                     if self.is_trusted{
                         self.sketch.to_string();
                         let vec = self.sketch.freq_array_string.clone();
                         //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-                            //self.sketch.print();
+                            self.sketch.print();
                             //println!("layers {:?}", vec);
                         }
                         self.to_conctact.iter()
                         .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
-                        .for_each(|p| {                            
-                            net.send(**p, Msg::MergeRequest(vec.clone())); 
+                        .for_each(|p| {
+                            net.send(**p, Msg::MergeRequest(0, vec.clone()));
                         });
                     }
                     net.send(self.my_id, Msg::SelfNotif);
@@ -550,25 +539,23 @@ impl App for Aupe {
                     self.sketch.update_freq(lst.clone());
                 },
 
-                Msg::MergeRequest(lst) => {
+                Msg::MergeRequest(i, lst) => {
                     //
                     if self.is_trusted{
-                        /* 1. Receive sketch */
-                        let other_layer = self.sketch.string_to_matrix(lst);
-                        /* 2. Send yours */
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
-                        /* 3. Merge */
-                        self.sketch.merge(other_layer);
+                        //let other_layer = self.sketch.string_to_matrix(*i, lst);
+                        let other_layer = self.sketch.string_to_vec(lst);
+                        self.sketch.merge( other_layer);
 
+                        self.sketch.to_string();
+                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string.clone()));
                     }else {
                         println!("message MergeR ");
                     }
                 },
-                Msg::MergeReply(lst) => {
-                    /* Receive and merge */
+                Msg::MergeReply(i, lst) => {
+                    //println!("message MergeR ");
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_matrix(lst);
+                        let other_layer = self.sketch.string_to_vec(lst);
                         self.sketch.merge(other_layer);
                         
                     }
