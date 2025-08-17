@@ -13,7 +13,7 @@ do
     do
         for faulty in 1000 2000 3000 # 4000 5000
         do
-            cargo run -- -T $round -n $N $strat -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space > "analysis/"$strat"-"$ratio"-"$faulty"-"$space &
+            cargo run -- -T $round -n $N $strat -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space > "analysis/"$strat"-"$ratio"-"$faulty"-"$space
             
         done
     done
