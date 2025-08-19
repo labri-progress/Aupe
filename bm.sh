@@ -6,6 +6,7 @@ space="${2:-10}"
 
 N=10000
 round=2000
+mkdir analysis
 # cargo run -- -T 200 -n 1000 bm -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -y 6
 for strat in "bm" #"kvs" "bm" "cf"
 do

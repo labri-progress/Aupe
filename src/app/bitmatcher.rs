@@ -123,9 +123,9 @@ impl BM {
         self.getparams(init.clone());
         self.key_len = count_digits(nodes -1);
         //println!("init {:?}", self.params);
-        if self.params.n_bucket == 0 {
+        /* if self.params.n_bucket == 0 {
             self.params.n_bucket = self.params.space * 1024 / 8 / 2;
-        }
+        } */
         self.matrix = ffi::new_bitmatcher(self.params.n_bucket);
         
     }
