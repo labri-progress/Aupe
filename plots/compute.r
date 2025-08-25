@@ -128,7 +128,6 @@ compute <- function(args, path, topic) {
         ttc0 <- detect_first_convergence_index(brahms$comp, f, roundNumber1)
         ttc1 <- detect_first_convergence_index(aupe$comp, f, roundNumber2)
         print(paste("ttc0",ttc0, "vs ttc1", ttc1))
-    
-        
+       
     }
 }
