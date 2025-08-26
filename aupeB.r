@@ -65,9 +65,9 @@ cms <- function(args, topic) {
         f*100,"%","  t=", t*100,"%  
         N=", N, " v=s=", v, " r=", r, " rounds=", roundNumber1, sep="")
     
-    # get resilience at rounds c(200, 600, 1000, 1400, 1800, 2000)
-    rounds_to_check = c(200, 600, 1000, 1400, 1800, 2000)
-    #resilience_at_round is a dataframe of rcolumn rounds and resilience
+    
+    rounds_to_check = c(200, 500, 1000, 1500, 2000)
+    #rounds_to_check = c(200, 600, 1000, 1400, 1800, 2000)
     rounds = c()
     resiliences = c()
     for (round in rounds_to_check) {

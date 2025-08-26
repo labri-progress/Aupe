@@ -7,12 +7,15 @@ y_top <- 0.85
 y_low <- 0.1
 
 y_axis_settings <- list(
-  resilience = list(title = "Proportion of Byzantine samples", 
+  resilience = list(title = "Prop. of Byz. samples", 
     limits = c(0, 1), steps = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0), pos = c(x_top, y_top))
 )
 
-ratio <- 0.65 
-width <- 5   # largeur en pouces
+#ratio <- 0.8 
+#width <- 5   # largeur en pouces
+
+ratio <- 4 
+width <- 10
 height <- width / ratio
 
 line_size <- 0.5
@@ -20,8 +23,8 @@ point_size <- 1.5
 numb_col <- 3
 
 #grid settings
-xgrid <- 3
-ygrid <- 1
+xgrid <- 1
+ygrid <- 3
 
 #theme
 mytheme <- theme(
@@ -34,8 +37,8 @@ mytheme <- theme(
       text = element_text(size = 12, color="black"),
       axis.title.x = element_text(size = 14, face = "bold"),  
       axis.title.y = element_text(size = 12, face = "bold"),  
-      axis.text.x = element_text(size = 14, face = "bold"),   
-      axis.text.y = element_text(size = 14, face = "bold"),   
+      axis.text.x = element_text(size = 12, face = "bold"),   
+      axis.text.y = element_text(size = 12, face = "bold"),   
       plot.title = element_text(size = 14, face = "bold"), 
       legend.text = element_text(size = 11, face = "bold"), 
       legend.title = element_blank(), 

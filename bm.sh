@@ -7,7 +7,9 @@ space="${2:-10}"
 N=10000
 round=2000
 mkdir analysis
-# cargo run -- -T 200 -n 1000 bm -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -y 6
+# cargo run -- -T 2000 -n 10000 bm -G samples -f 10 -t 1000 -v 160 -u 160 -m 100 -n 10000 -y 10 > "analysis/bm-10-1000-10"
+#cargo run -- -T 2000 -n 10000 bm -G samples -f 2 -t 2000 -v 160 -u 160 -m 100 -n 10000 -y 40 > "analysis/bm-2-2000-40"
+# cargo run -- -T 2000 -n 10000 kvs -G samples -f 10 -t 1000 -v 160 -u 160 -m 100 -n 10000  > "analysis/kvs-10-1000
 for strat in "bm" #"kvs" "bm" "cf"
 do
     for space in $space #10 20 30 40
