@@ -19,7 +19,7 @@ cat("nodes:", nodes, "\n")
 cat("Force:", force, "\n")
 
 #pdf_title <- paste("Different strategies, space", space, "KB, ", total, "elements in total")
-faulty_plot <- function(data, y_col = "dKL", show_legend = TRUE, show_y_title = TRUE){
+faulty_plot <- function(data, y_col = "dKL", faulty, show_legend = TRUE, show_y_title = TRUE){
   x_name <- "Time steps"
   
   y_info <- y_axis_settings[[y_col]]
@@ -30,10 +30,11 @@ faulty_plot <- function(data, y_col = "dKL", show_legend = TRUE, show_y_title = 
 
   #print(paste("title:", y_title, "pos:", paste(y_pos, collapse=", "), "limits:", paste(y_limits, collapse=", "), "and breaks:", paste(y_breaks, collapse=", ")))
   p <- ggplot(data, aes(x=round, y = .data[[y_col]], color=strat, shape = strat)) 
-  
+  p <- p + geom_hline(yintercept = faulty, linetype = "dashed", color = "gray80")
   p <- p + geom_point(size=point_size) +
   geom_line(linewidth=line_size) +
   scale_color_manual(values = custom_colors) +
+  scale_linetype_manual(values = custom_linetypes, guide="none") +
   labs(#title=pdf_title,
        x=x_name,
        y=y_title) +
@@ -60,18 +61,26 @@ data$strat <- ifelse(data$strat != "KVS",
 cat("Elements retenus:", length(data), "\n")
 unique(data$strat)
 #data
-custom_linetypes <- c()
-custom_linetypes["KVS"] = "solid"
-custom_linetypes["BM"] = "dotted"
+#custom_linetypes <- c()
+#custom_linetypes["KVS"] = "solid"
+#custom_linetypes["BM"] = "dotted"
 
-bm_colors <- c("#3399FF", "#882EE6", "#FF0033", "#CC6666")
+bm_colors <- c("#3399FF", "#882EE6", "#FF0033", "#DEDC26") # F5F227")
+bm_linetype <- c("dotted", "dotted", "dotted", "dotted")
 
-custom_colors <- c("KVS" = "#000000")
+custom_colors <- c("KVS" = "#000000", 
+    "Basalt" = "#2CA02C", "Brahms" = "#FF7F00")
+custom_linetypes <- c("KVS" = "solid")
+custom_linetypes["Basalt"] = "twodash"
+custom_linetypes["Brahms"] = "longdash"
 
 for (i in seq_along(x_breaks_budget)) {
   custom_colors[paste("BM-", x_breaks_budget[i], sep = "")] <- bm_colors[i]
+  custom_linetypes[paste("BM-", x_breaks_budget[i], sep = "")] <- bm_linetype[i]
 }
+
 custom_colors
+custom_linetypes
 
 levels = unique(data$strat)[
       order(decreasing = c(FALSE),unique(data$strat))]
@@ -98,6 +107,7 @@ for (y_col in y_columns) {
     plot <- faulty_plot(
       block_data,
       y_col = y_col,
+      faulty = faulty / nodes,
       show_legend = show_legend,
       show_y_title = show_y_title
     )
