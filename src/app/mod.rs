@@ -8,4 +8,5 @@ pub mod pbs;
 pub mod kvs;
 pub mod cms;
 pub mod brahms;
+pub mod basalt;
 pub mod bitmatcher;

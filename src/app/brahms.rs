@@ -28,14 +28,6 @@ pub struct Init {
     #[structopt(short = "s", long = "attack-start-time", default_value = "0")]
     pub attack_start_time: u64,
 
-    /// Replacement frequency: replace k samples every r (this paramter) time units
-    #[structopt(short = "r", long = "replacement-frequency")]
-    pub replacement_frequency: Option<u64>,
-
-    /// Replacement count: replace k (this parameter) samples every r time units
-    #[structopt(short = "k", long = "replacement-count", default_value = "1")]
-    pub replacement_count: usize,
-
     /// Peer sampling view size
     #[structopt(short = "v", long = "view-size")]
     pub view_size: usize,
@@ -331,28 +323,7 @@ impl App for Brahms {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    //println!("message SN ");
-                    if let Some(rf) = self.params.replacement_frequency {
-                        if (self.my_id as u64 + net.time()) % rf == 0 {
-                            let mut rng = thread_rng();
-                            let view = self.view.clone();
-                            let sample_view = self.sample_view.iter()
-                                .filter(|(_, x)| x.is_some())
-                                .map(|(_, x)| x.unwrap())
-                                .collect::<Vec<_>>();
-                            for k in 0..self.params.replacement_count {
-                                let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.sample_view.len();
-                                if let Some(sample) = self.sample_view[i_replace].1 {
-                                    if self.out_samples.len() < 200 {
-                                        self.out_samples.push(sample);
-                                    }
-                                }
-                                self.sample_view[i_replace].0 = rng.random_range(0..std::u64::MAX);
-                                self.update_sample(i_replace, &view[..]);
-                                self.update_sample(i_replace, &sample_view[..]);
-                            }
-                        }
-                    }
+                    
                     //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         
@@ -363,14 +334,14 @@ impl App for Brahms {
                         let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
 
-                        let file_path = String::from("brahms")+&self.params.n_byzantine.to_string() +"/node"
+                        /* let file_path = String::from("brahms")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
                         match write_results(bags, &file_path) {
                             Ok(()) => {}
                             Err(e) => {
                                 eprintln!("Error occurred: {} on {}", e, file_path); 
                             }
-                        }; 
+                        };  */
 
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3);

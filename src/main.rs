@@ -45,6 +45,9 @@ pub enum WhichApp {
     #[structopt(name = "brahms")]
     Brahms(app::brahms::Init),
 
+    /// Baslt RPS
+    #[structopt(name = "basalt")]
+    Basalt(app::basalt::Init),
 }
 
 fn main() {
@@ -70,6 +73,10 @@ fn main() {
 // cargo run -- -T 200 -n 1000 brahms -G samples -f 10 -t 300 -v 20 -u 20 -k 0 -r 1
         WhichApp::Brahms(pp) => {
             sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp);  
+        }
+
+        WhichApp::Basalt(pp) => {
+            sim::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp);  
         }
     }
 }
