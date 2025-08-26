@@ -34,6 +34,7 @@ faulty_plot <- function(data, y_col = "dKL", faulty, show_legend = TRUE, show_y_
   p <- p + geom_point(size=point_size) +
   geom_line(linewidth=line_size) +
   scale_color_manual(values = custom_colors) +
+  scale_shape_manual(values = custom_scales) +
   scale_linetype_manual(values = custom_linetypes, guide="none") +
   labs(#title=pdf_title,
        x=x_name,
@@ -55,7 +56,7 @@ data <- read.table("analysis/results", header=TRUE)
 
 data <- data[data$force == force, ] #& data$stream == total 
 data$resilience= data$resilience/100
-data$strat <- ifelse(data$strat != "KVS", 
+data$strat <- ifelse(data$strat != "KVS" & data$strat != "Basalt" & data$strat != "Brahms", 
     paste(data$strat, "-", data$budget, sep=""), 
     data$strat)
 cat("Elements retenus:", length(data), "\n")
@@ -67,6 +68,7 @@ unique(data$strat)
 
 bm_colors <- c("#3399FF", "#882EE6", "#FF0033", "#DEDC26") # F5F227")
 bm_linetype <- c("dotted", "dotted", "dotted", "dotted")
+bm_scales <- c(0, 1, 2, 3)
 
 custom_colors <- c("KVS" = "#000000", 
     "Basalt" = "#2CA02C", "Brahms" = "#FF7F00")
@@ -74,9 +76,12 @@ custom_linetypes <- c("KVS" = "solid")
 custom_linetypes["Basalt"] = "twodash"
 custom_linetypes["Brahms"] = "longdash"
 
+custom_scales <- c("KVS" = 7, "Basalt" = 4, "Brahms" = 5)
+
 for (i in seq_along(x_breaks_budget)) {
   custom_colors[paste("BM-", x_breaks_budget[i], sep = "")] <- bm_colors[i]
   custom_linetypes[paste("BM-", x_breaks_budget[i], sep = "")] <- bm_linetype[i]
+  custom_scales[paste("BM-", x_breaks_budget[i], sep = "")] <- bm_scales[i]
 }
 
 custom_colors

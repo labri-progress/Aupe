@@ -3,8 +3,7 @@
 y_columns <- c("resilience")
 
 x_top <- 0.5
-y_top <- 0.85
-y_low <- 0.1
+y_top <- 0.8
 
 y_axis_settings <- list(
   resilience = list(title = "Prop. of Byz. samples", 
