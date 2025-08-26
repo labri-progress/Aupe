@@ -34,6 +34,10 @@ cms <- function(args, topic) {
         filepath = paste(Folder,"kvs-", r, "-", f, sep="")
     } else if (stratname=="bm"){
         filepath = paste(Folder,"bm-", r, "-", f, "-", budget, sep="")
+    } else if (stratname=="Brahms"){
+        filepath = paste(Folder,"br-", r, "-", f, sep="")
+    } else if (stratname=="Basalt"){
+        filepath = paste(Folder,"bs-", r, "-", f, sep="")
     } else {
         print("Error: unknown strategy")
         return
@@ -62,7 +66,7 @@ cms <- function(args, topic) {
     }
     strat$comp=(strat$avgByzN/v)*100
     title=paste("Byzantine proportion inside view over Time f=", 
-        f*100,"%","  t=", t*100,"%  
+        f/100,"%","  t=", t*100,"% Budget=", budget, " 
         N=", N, " v=s=", v, " r=", r, " rounds=", roundNumber1, sep="")
     
     
@@ -104,6 +108,9 @@ cms <- function(args, topic) {
     } else if (stratname=="bm"){
         write_results(filename, expe, f, t, r, "BM", budget, resilience_at_round$resiliences, 
             sm, resilience_at_round$rounds)
+    } else if (stratname=="Brahms" || stratname=="Basalt"){
+        write_results(filename, expe, f, t, r, stratname, budget, resilience_at_round$resiliences, 
+            0, resilience_at_round$rounds)
     } else {
         print("Error: unknown strategy")
         return
@@ -127,23 +134,29 @@ for (f in f_values){
     
         params = c(10000, 160, f, t, r, sm, "kvs", 40)
 
-        pdf(paste(Folder, "kvs-", r, "-", f, ".pdf", sep="")) #, width = width, height = height)
+        pdf(paste(Folder, "kvs-Bs-Br-", r, "-", f, ".pdf", sep="")) #, width = width, height = height)
         #par(mfrow = c(1, 1))  # 3 rows and 2 columns
         
         cms(params, "System faulty proportion  (%)")
 
-        dev.off()
+        params = c(10000, 160, f, t, r, 0, "Brahms", 0)
+        cms(params, "System faulty proportion  (%)")
+        
+        params = c(10000, 160, f, t, r, 0, "Basalt", 0)
+        cms(params, "System faulty proportion  (%)")
+
         
         for (budget in budget_values){
             
             params = c(10000, 160, f, t, r, sm, "bm", budget)
 
-            pdf(paste(Folder, "bm-", r, "-", f, "-", budget, ".pdf", sep=""))
+            #pdf(paste(Folder, "bm-", r, "-", f, "-", budget, ".pdf", sep=""))
             
             cms(params, "System faulty proportion  (%)")
 
-            dev.off()
+            
             expe = expe +1
         }
+        dev.off()
     }
 }

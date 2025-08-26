@@ -200,6 +200,7 @@ impl Basalt {
 
     fn get_exchange_peer(&mut self, rng: &mut ThreadRng) -> PeerRef {
         if self.params.use_hit_counter {
+            println!("Using hit counter");
             let mut ret = 0;
             for i in 1..self.view.len() {
                 if self.view[i].hits < self.view[ret].hits {
@@ -277,6 +278,7 @@ impl App for Basalt {
                 .collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
+                    
                     if let Some(rf) = self.params.replacement_frequency {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             for k in 0..self.params.replacement_count {
