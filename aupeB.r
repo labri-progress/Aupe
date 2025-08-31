@@ -103,7 +103,7 @@ cms <- function(args, topic) {
     
     print(filename)
     if (stratname=="kvs"){
-        write_results(filename, expe, f, t, r, "KVS", budget, resilience_at_round$resiliences, 
+        write_results(filename, expe, f, t, r, "Aupe", budget, resilience_at_round$resiliences, 
             sm, resilience_at_round$rounds)
     } else if (stratname=="bm"){
         write_results(filename, expe, f, t, r, "BM", budget, resilience_at_round$resiliences, 
