@@ -124,7 +124,7 @@ t=0
 expe=0
 f_values=c(1000, 2000, 3000)
 r_values=c(2, 10)
-budget_values=c(10, 20, 30, 40)
+budget_values=c(5) #1, 5, 10, 20, 30, 40)
 roundMAX=2000
 Folder = "./analysis/"
 
