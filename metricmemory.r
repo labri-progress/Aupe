@@ -56,7 +56,7 @@ data <- read.table("analysis/results", header=TRUE)
 
 data <- data[data$force == force, ] #& data$stream == total 
 data$resilience= data$resilience/100
-data$strat <- ifelse(data$strat != "KVS" & data$strat != "Basalt" & data$strat != "Brahms", 
+data$strat <- ifelse(data$strat != "Aupe" & data$strat != "Basalt" & data$strat != "Brahms", 
     paste(data$strat, "-", data$budget, sep=""), 
     data$strat)
 cat("Elements retenus:", length(data), "\n")
@@ -70,13 +70,13 @@ bm_colors <- c("#3399FF", "#882EE6", "#FF0033", "#DEDC26") # F5F227")
 bm_linetype <- c("dotted", "dotted", "dotted", "dotted")
 bm_scales <- c(0, 1, 2, 3)
 
-custom_colors <- c("KVS" = "#000000", 
+custom_colors <- c("Aupe" = "#000000", 
     "Basalt" = "#2CA02C", "Brahms" = "#FF7F00")
-custom_linetypes <- c("KVS" = "solid")
+custom_linetypes <- c("Aupe" = "solid")
 custom_linetypes["Basalt"] = "twodash"
 custom_linetypes["Brahms"] = "longdash"
 
-custom_scales <- c("KVS" = 7, "Basalt" = 4, "Brahms" = 5)
+custom_scales <- c("Aupe" = 7, "Basalt" = 4, "Brahms" = 5)
 
 for (i in seq_along(x_breaks_budget)) {
   custom_colors[paste("BM-", x_breaks_budget[i], sep = "")] <- bm_colors[i]

@@ -10,7 +10,7 @@ mkdir analysis
 # cargo run -- -T 2000 -n 10000 bm -G samples -f 10 -t 1000 -v 160 -u 160 -m 100 -n 10000 -y 10 > "analysis/bm-10-1000-10"
 # cargo run -- -T 2000 -n 10000 kvs -G samples -f 10 -t 1000 -v 160 -u 160 -m 100 -n 10000  > "analysis/kvs-10-1000
 # cargo run -- -T 2000 -n 10000 brahms -G samples -f 10 -t 1000 -v 160 -u 160 > "analysis/br-10-1000"
-# cargo run -- -T 2000 -n 10000 basalt -G -f 10 -t 1000 -v 160 -i 160 > "analysis/bs-10-1000"
+# cargo run -- -T 2000 -n 10000 basalt -G -f 10 -t 1000 -v 160 -i 160 -k 1 -r 1 > "analysis/bs-10-1000"
 
 for strat in "bm" #"kvs" "bm" "cf"
 do
