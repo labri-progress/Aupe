@@ -90,7 +90,7 @@ custom_linetypes
 levels = c("Aupe", "Basalt", "Brahms", "BM-1", 
 "BM-5", "BM-10", "BM-20", "BM-30", "BM-40") #unique(data$strat)[order(decreasing = c(FALSE),unique(data$strat))]
 
-#data$strat <- factor(data$strat, levels = levels)
+data$strat <- factor(data$strat, levels = levels)
 
 list_items = c(1000, 2000, 3000) 
 
