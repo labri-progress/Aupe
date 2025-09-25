@@ -1,6 +1,6 @@
 use rand::{rng, Rng};
 //use crate::net::App;
-use super::aupe::Init;
+use super::aupecmscu::Init;
 
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;

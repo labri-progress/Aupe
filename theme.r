@@ -27,9 +27,9 @@ ygrid <- 3
 
 #theme
 mytheme <- theme(
-      panel.grid.major = element_blank(), 
-      panel.grid.minor = element_blank(), 
-      panel.background = element_rect("white"),
+      #panel.grid.major = element_blank(), 
+      #panel.grid.minor = element_blank(), 
+      #panel.background = element_rect("white"),
       panel.border = element_rect(colour = "black", linewidth=1,
        fill = NA),  
       legend.spacing.y = unit(0.005, "cm"),

@@ -34,8 +34,8 @@ pub enum WhichApp {
     AupeBM(app::aupebm::Init),
 
     /// Aupe CF RPS
-    #[structopt(name = "cf")]
-    AupeCF(app::aupecf::Init),
+    /* #[structopt(name = "cf")]
+    AupeCF(app::aupecf::Init), */
 
     /// Aupe RPS
     #[structopt(name = "kvs")]
@@ -55,9 +55,9 @@ fn main() {
     match opt.app {
 // cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1
 // cargo run -- -T 200 -n 1000 bm -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -y 6 
-        WhichApp::AupeCF(pp) => {
+        /* WhichApp::AupeCF(pp) => {
             sim::<app::aupecf::AupeCF>(opt.n_steps, opt.nodes, &pp);  
-        } 
+        } */ 
 
         WhichApp::AupeBM(pp) => {
             sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp);  
