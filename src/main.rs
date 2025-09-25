@@ -6,10 +6,7 @@ mod graph;
 mod app;
 use structopt::StructOpt;
 use net::{Simulator, App};
-use once_cell::sync::OnceCell;
-use std::sync::RwLock;
 
-static GLOBAL_OMNISCIENT_FREQ_ARRAY: OnceCell<RwLock<Vec<isize>>> = OnceCell::new();
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "bignetrs")]
@@ -82,7 +79,6 @@ fn main() {
 }
 
 fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init) {
-    GLOBAL_OMNISCIENT_FREQ_ARRAY.set(RwLock::new(vec![-1; nproc])).unwrap();
 
     let mut net = Simulator::<A>::new(nproc, init);
     net.print_header();

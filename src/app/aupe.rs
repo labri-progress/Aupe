@@ -3,13 +3,11 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy, write_results};
-use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, 
-    sample_exclude, vec_to_string, string_to_vec};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy}; //y, write_results};
+use crate::util::{print_samples, sample_exclude};
 use crate::graph::ByzConnGraph;
 
 use super::kvs::Kvs;
-//use super::cf::CF;
 
 const DEBUG: bool = false;
 pub enum Msg {
@@ -17,8 +15,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(usize, String),
-    MergeReply(usize, String),
+    MergeRequest(String),
+    MergeReply(String),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -54,28 +52,6 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
-    
-    // Cold filter
-    #[structopt(short = "a", long = "threshold_layer_1", default_value = "15")]
-    pub t1: u32,
-    /// Threshold value of layer 2
-    #[structopt(short = "b", long = "threshold_layer_2", default_value = "241")]
-    pub t2: u32,
-    /// number_of_hash_function of layer i
-    #[structopt(short = "i", long = "layer_i_number_of_hash_functions", default_value = "3")]
-    pub replicates: usize,
-    /// Number_of_discrete_values of layer 1
-    #[structopt(long = "w1", default_value = "10000")] //10000
-    pub counter1: usize,
-    /// Number_of_discrete_values of layer 2
-    #[structopt(long = "w2", default_value = "245")]
-    pub counter2: usize,
-    /// number_of_hash_function
-    #[structopt(short = "h", long = "number_of_hash_functions", default_value = "3")]
-    pub depth: usize,
-    /// Number_of_discrete_values
-    #[structopt(short = "w", long = "number_of_discrete_values", default_value = "100")]
-    pub width: usize,
 
     /// Number of SGX nodes
     #[structopt(short = "x", long = "trusted-nodes", default_value = "0")]
@@ -385,7 +361,7 @@ impl App for Aupe {
             self.view = view;
 
             self.sketch.update_freq(self.view.clone());
-            self.sketch.debiais_stream(self.view.clone());
+            //self.sketch.debiais_stream(self.view.clone());
         }
 
         if self.is_trusted && self.params.nb_merge != 0{
@@ -444,9 +420,10 @@ impl App for Aupe {
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
                         // Log real trace
-                        let mut bags = v_push.clone();
+                        /* let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
-
+                        self.update_samples(&bags[..]); */
+                        
                         /* let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
                         match write_results(bags.clone(), &file_path) {
@@ -456,6 +433,9 @@ impl App for Aupe {
                             }
                         };  */
                         
+                        self.update_samples(&v_push);
+                        self.update_samples(&v_pull);
+
                         v_push = self.sketch.debiais_stream(v_push);
                         v_pull = self.sketch.debiais_stream(v_pull);
                         
@@ -476,7 +456,7 @@ impl App for Aupe {
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
 
-                        self.update_samples(&bags[..]);
+                        //self.update_samples(&bags[..]);
 
                         //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
@@ -506,7 +486,7 @@ impl App for Aupe {
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
                         .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(0, vec.clone()));
+                            net.send(**p, Msg::MergeRequest(vec.clone()));
                         });
                     }
                     net.send(self.my_id, Msg::SelfNotif);
@@ -539,24 +519,25 @@ impl App for Aupe {
                     self.sketch.update_freq(lst.clone());
                 },
 
-                Msg::MergeRequest(i, lst) => {
+                Msg::MergeRequest(lst) => {
                     //
                     if self.is_trusted{
-                        //let other_layer = self.sketch.string_to_matrix(*i, lst);
-                        let other_layer = self.sketch.string_to_vec(lst);
-                        self.sketch.merge( other_layer);
-
+                        /* 1. Receive sketch */
+                        let other_sketch = self.sketch.string_to_vec(lst);
+                        /* 2. Send yours */
                         self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(*i, self.sketch.freq_array_string.clone()));
+                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
+                        /* 3. Merge */
+                        self.sketch.merge(other_sketch);
                     }else {
                         println!("message MergeR ");
                     }
                 },
-                Msg::MergeReply(i, lst) => {
+                Msg::MergeReply(lst) => {
                     //println!("message MergeR ");
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_vec(lst);
-                        self.sketch.merge(other_layer);
+                        let other_sketch = self.sketch.string_to_vec(lst);
+                        self.sketch.merge(other_sketch);
                         
                     }
                 },
@@ -564,6 +545,7 @@ impl App for Aupe {
         }
     }
 
+    
     fn metrics(&mut self, _net: Net) -> Self::Metrics {
         if self.is_byzantine {
             let mut metrics = Self::Metrics::empty();
@@ -593,10 +575,18 @@ impl App for Aupe {
                 nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
                 nbsamp = nbsamp / (self.sample_part.len() as f64);
             }
+            
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
+
+            if self.my_id == self.params.nodes-1 && DEBUG{
+                eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbs={}/{}",
+                nbn, self.view.len(),
+                nbpush, nbpull, nbsamp, 
+                nbs, self.sample_view.len());
+            }
 
             let graph = match self.params.graph_stats {
                 WhichGraphStats::NoGraph => ByzConnGraph::new(),
@@ -636,6 +626,7 @@ impl App for Aupe {
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;
+          
             ret
         }
     }

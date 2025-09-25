@@ -10,8 +10,6 @@ itertools = "0.14.0"
 rayon = "1.10.0"
 fasthash = "0.4.0"
 structopt = "0.3.26"
-once_cell = "1.21.3"
-lazy_static = "1.5.0"
 round = "0.1.0"
 cxx = "1.0"
 

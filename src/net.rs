@@ -1,7 +1,7 @@
 use rayon::prelude::*;
-use rand::seq::SliceRandom;
-use rand::{rng, Rng};
-
+use rand::{thread_rng, Rng, SeedableRng};
+use rand::rngs::StdRng;
+use rand::prelude::SliceRandom;
 //use super::metrics::Metric;
 
 const DEBUG: bool = false;
@@ -59,12 +59,11 @@ struct NetHandler<A> where A: App + Send {
 
 impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
     fn sample_peers(&self, n: usize) -> Vec<PeerRef> {
-        let mut rng = rng();
-
+        let mut rng = thread_rng(); // let mut rng: StdRng = SeedableRng::from_seed(SEED); 
         if n <= self.nproc / 10 {
             let mut res = Vec::new();
             while res.len() < n {
-                let i = rng.random_range(0..self.nproc);
+                let i = rng.random_range(0.. self.nproc);
                 if i != self.id && !res.contains(&i) {
                     res.push(i);
                 }
@@ -72,7 +71,6 @@ impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
             res
         } else {
             let mut vec = (0..self.nproc).collect::<Vec<_>>();
-            //rng.shuffle(&mut vec[..]);
             vec.shuffle(&mut rng);
             vec.iter().cloned().take(n).collect::<Vec<_>>()
         }
@@ -130,7 +128,6 @@ impl<A: App + Send> Simulator<A> {
                 state: A::new()
             });
         }
-        let nodes :usize = net.processes.len();
         let out = net.processes.par_iter_mut()
             .map(|proc| {
                 let mut handler = NetHandler{

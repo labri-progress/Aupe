@@ -3,7 +3,7 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy, write_results};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy};
 //use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
