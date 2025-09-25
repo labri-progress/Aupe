@@ -3,12 +3,10 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy, write_results};
-use crate::util::{ get_min_key_value, print_samples, print_vector_with_two_digits, 
-    sample_exclude, vec_to_string, string_to_vec};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy};
+use crate::util::{print_samples,sample_exclude};
 use crate::graph::ByzConnGraph;
 
-use super::kvs::Kvs;
 use super::bitmatcher::BM;
 
 const DEBUG: bool = false;
@@ -122,7 +120,7 @@ pub struct AupeBM {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: BM, //Kvs,
+    sketch: BM,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -370,7 +368,7 @@ impl App for AupeBM {
             self.view = view;
 
             self.sketch.update_freq(self.view.clone());
-            self.sketch.debiais_stream(self.view.clone());
+            //self.sketch.debiais_stream(self.view.clone());
         }
 
         if self.is_trusted && self.params.nb_merge != 0{
@@ -428,18 +426,8 @@ impl App for AupeBM {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
-                        // Log real trace
-                        let mut bags = v_push.clone();
-                        bags.extend(v_pull.clone());
-
-                        /* let file_path = String::from("aupe")+&self.params.n_byzantine.to_string() +"/node"
-                            +&self.my_id.to_string() + ".txt";
-                        match write_results(bags.clone(), &file_path) {
-                            Ok(()) => {}
-                            Err(e) => {
-                                eprintln!("Error occurred: {} on {}", e, file_path); 
-                            }
-                        };  */
+                        self.update_samples(&v_push);
+                        self.update_samples(&v_pull);
                         
                         v_push = self.sketch.debiais_stream(v_push);
                         v_pull = self.sketch.debiais_stream(v_pull);
@@ -460,8 +448,6 @@ impl App for AupeBM {
 
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
-
-                        self.update_samples(&bags[..]);
 
                         //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
@@ -532,12 +518,12 @@ impl App for AupeBM {
                     //
                     if self.is_trusted{
                         /* 1. Receive sketch */
-                        let other_layer = self.sketch.string_to_matrix(lst);
+                        let other_sketch = self.sketch.string_to_matrix(lst);
                         /* 2. Send yours */
                         self.sketch.to_string();
                         net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
                         /* 3. Merge */
-                        self.sketch.merge(other_layer);
+                        self.sketch.merge(other_sketch);
 
                     }else {
                         println!("message MergeR ");
@@ -546,8 +532,8 @@ impl App for AupeBM {
                 Msg::MergeReply(lst) => {
                     /* Receive and merge */
                     if self.is_trusted{
-                        let other_layer = self.sketch.string_to_matrix(lst);
-                        self.sketch.merge(other_layer);
+                        let other_sketch = self.sketch.string_to_matrix(lst);
+                        self.sketch.merge(other_sketch);
                         
                     }
                 },

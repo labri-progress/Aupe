@@ -14,18 +14,18 @@ pub struct Init {
 #[derive(Debug, Clone)]
 pub struct Kvs {
     params: Init,
-    omn_array: Vec<u32>, // size n
+    omn_array: Vec<f64>, // size n
     min_index: usize, 
-    min_value: u32,
+    min_value: f64,
     omniscient_memory: Vec<usize>,
     pub freq_array_string: String,
 }
 
 impl Kvs {
     pub fn min(&mut self) {
-        self.min_value = u32::MAX;
+        self.min_value = f64::MAX;
         for (index, &value) in self.omn_array.iter().enumerate() {
-            if value > 0  && value < self.min_value  {
+            if value > 0.0  && value < self.min_value  {
                 self.min_value = value;
                 self.min_index = index;
             }
@@ -36,7 +36,7 @@ impl Kvs {
         Self {
             params: Init::default(),
             omn_array: Vec::new(),
-            min_value: u32::MAX,
+            min_value: f64::MAX,
             min_index: 0,
             omniscient_memory: Vec::new(), 
             freq_array_string: String::new(),
@@ -65,33 +65,33 @@ impl Kvs {
         self.freq_array_string = result;
     }
 
-    pub fn string_to_vec(&mut self, input: &str) -> Vec<u32>{
+    pub fn string_to_vec(&mut self, input: &str) -> Vec<f64>{
         let result = input
         .split(',')
         .map(str::trim) // Trim whitespace
-        .map(|s| s.parse::<u32>().expect("Invalid integer in input")) // Parse and panic on error
-        .collect::<Vec<u32>>(); // Collect into a Vec<u32>
+        .map(|s| s.parse::<f64>().expect("Invalid integer in input")) // Parse and panic on error
+        .collect::<Vec<f64>>(); // Collect into a Vec<u32>
          
         result
     }
 
-    pub fn merge(&mut self, second_vec: Vec<u32>) {
+    pub fn merge(&mut self, second_vec: Vec<f64>) {
         for i in 0..self.omn_array.len() {
             self.omn_array[i] += second_vec[i];
-            self.omn_array[i] /=2;
+            self.omn_array[i] /=2.0;
         }
     }
 
     pub fn init(&mut self, nodes: usize, init: Init) {
     
         self.params = init;
-        self.omn_array = vec![0; nodes];
+        self.omn_array = vec![0.0; nodes];
         
     }
 
     pub fn update_freq(&mut self, items: Vec<usize>) {
         for item in items {
-            self.omn_array[item] += 1;
+            self.omn_array[item] += 1.0;
         }
         self.min();
     }
@@ -112,7 +112,7 @@ impl Kvs {
                 }
 
             }else {
-                let prob = self.min_value as f64/ occur as f64;
+                let prob = self.min_value / occur;
                 let random_float: f64 = rng.random(); 
                 //println!("prob: {}", prob);
                 if random_float < prob && !self.omniscient_memory.contains(element) {
