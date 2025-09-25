@@ -3,8 +3,8 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy};
-use crate::util::{print_samples,sample_exclude};
+use crate::util::{either_or_if_both, hash, sample, sample_nocopy}; //y, write_results};
+use crate::util::{print_samples, sample_exclude};
 use crate::graph::ByzConnGraph;
 
 use super::bitmatcher::BM;
@@ -52,9 +52,6 @@ pub struct Init {
     /// Enable detailed graph statistics
     #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
     pub graph_stats: WhichGraphStats,
-    
-    #[structopt(short = "y", long = "budget", default_value = "6")]
-    pub space: u64,
 
     /// Number of SGX nodes
     #[structopt(short = "x", long = "trusted-nodes", default_value = "0")]
@@ -63,11 +60,13 @@ pub struct Init {
     /// How many sup merges should be used
     #[structopt(short = "p", long = "nb_merges", default_value = "0")]
     pub nb_merge: usize,
-    
+
     //BitMatcher
     #[structopt(short = "c", long = "n_bucket", default_value = "0")]
     pub n_bucket: u64,
 
+    #[structopt(short = "y", long = "budget", default_value = "6")]
+    pub space: u64,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -305,8 +304,6 @@ impl AupeBM {
                     }
                 } 
             }
-            /* println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
-                            self.to_conctact, self.params.nb_merge, self.oldest); */
         }
     }
 
@@ -341,7 +338,7 @@ impl App for AupeBM {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: BM::new(), //Kvs::new(),
+            sketch: BM::new(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
@@ -354,6 +351,7 @@ impl App for AupeBM {
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
 
+        //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
 
@@ -426,9 +424,10 @@ impl App for AupeBM {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
+                        
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
-                        
+
                         v_push = self.sketch.debiais_stream(v_push);
                         v_pull = self.sketch.debiais_stream(v_pull);
                         
@@ -449,7 +448,6 @@ impl App for AupeBM {
                         view.extend(sample(&self.view[..], self.params.view_size - view.len()));
                         self.view = view;
 
-                        //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
                     
                     sample(&self.view[..], 1).iter()
@@ -464,24 +462,20 @@ impl App for AupeBM {
                             self.update_contact(*p); // if trusted
                         });
 
-                    if self.my_id == self.params.nodes -1  && DEBUG{
-                        self.sketch.print();
-                        //println!("layers {:?}", vec);
-                    }
                     if self.is_trusted{
                         self.sketch.to_string();
                         let vec = self.sketch.freq_array_string.clone();
                         //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-                            //self.sketch.print();
+                            self.sketch.print();
                             //println!("layers {:?}", vec);
                         }
                         self.to_conctact.iter()
                         .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                         .map(|x| x)
                         .collect::<Vec<_>>().iter()
-                        .for_each(|p| {                            
-                            net.send(**p, Msg::MergeRequest(vec.clone())); 
+                        .for_each(|p| {
+                            net.send(**p, Msg::MergeRequest(vec.clone()));
                         });
                     }
                     net.send(self.my_id, Msg::SelfNotif);
@@ -524,13 +518,12 @@ impl App for AupeBM {
                         net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
                         /* 3. Merge */
                         self.sketch.merge(other_sketch);
-
                     }else {
                         println!("message MergeR ");
                     }
                 },
                 Msg::MergeReply(lst) => {
-                    /* Receive and merge */
+                    //println!("message MergeR ");
                     if self.is_trusted{
                         let other_sketch = self.sketch.string_to_matrix(lst);
                         self.sketch.merge(other_sketch);
@@ -541,6 +534,7 @@ impl App for AupeBM {
         }
     }
 
+    
     fn metrics(&mut self, _net: Net) -> Self::Metrics {
         if self.is_byzantine {
             let mut metrics = Self::Metrics::empty();
@@ -570,10 +564,18 @@ impl App for AupeBM {
                 nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
                 nbsamp = nbsamp / (self.sample_part.len() as f64);
             }
+            
             let samp = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some());
             let nsamp = samp.clone().count();
             let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
+
+            if self.my_id == self.params.nodes-1 && DEBUG{
+                eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbs={}/{}",
+                nbn, self.view.len(),
+                nbpush, nbpull, nbsamp, 
+                nbs, self.sample_view.len());
+            }
 
             let graph = match self.params.graph_stats {
                 WhichGraphStats::NoGraph => ByzConnGraph::new(),
@@ -613,6 +615,7 @@ impl App for AupeBM {
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;
+          
             ret
         }
     }
