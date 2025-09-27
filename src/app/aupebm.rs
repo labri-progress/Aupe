@@ -511,13 +511,24 @@ impl App for AupeBM {
                 Msg::MergeRequest(lst) => {
                     //
                     if self.is_trusted{
-                        /* 1. Receive sketch */
+                        /* /* 1. Receive sketch */
                         let other_sketch = self.sketch.string_to_matrix(lst);
                         /* 2. Send yours */
                         self.sketch.to_string();
                         net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
                         /* 3. Merge */
+                        self.sketch.merge(other_sketch); */
+
+                        /* 1. Receive sketch */
+                        let other_sketch = self.sketch.string_to_matrix(lst);
+                        
+                        /* 2. Merge */
                         self.sketch.merge(other_sketch);
+
+                        /* 2. Send results */
+                        self.sketch.to_string();
+                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
+                        
                     }else {
                         println!("message MergeR ");
                     }
@@ -525,8 +536,11 @@ impl App for AupeBM {
                 Msg::MergeReply(lst) => {
                     //println!("message MergeR ");
                     if self.is_trusted{
-                        let other_sketch = self.sketch.string_to_matrix(lst);
-                        self.sketch.merge(other_sketch);
+                        /* let other_sketch = self.sketch.string_to_matrix(lst);
+                        self.sketch.merge(other_sketch); */
+
+                        let merged_sketch = self.sketch.string_to_matrix(lst);
+                        self.sketch.copy(merged_sketch);
                         
                     }
                 },
