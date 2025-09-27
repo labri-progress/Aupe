@@ -75,6 +75,10 @@ impl Kvs {
         result
     }
 
+    pub fn copy(&mut self, new_vec: Vec<f64>) {
+        self.omn_array = new_vec;
+    }
+
     pub fn merge(&mut self, second_vec: Vec<f64>) {
         for i in 0..self.omn_array.len() {
             self.omn_array[i] += second_vec[i];

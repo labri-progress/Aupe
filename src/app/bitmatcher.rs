@@ -141,14 +141,18 @@ impl BM {
 
     }
 
-    pub fn string_to_matrix(&mut self, input: &str)  -> Vec<Vec<f64>>{
-        Vec::new()
+    pub fn string_to_matrix(&mut self, input: &str)  -> UniquePtr<BitMatcher>{
+        ffi::new_bitmatcher(0)
     }
     
-    pub fn merge(&mut self, second_cms_matrix: Vec<Vec<f64>>) {
+    pub fn merge(&mut self, second_cms_matrix: UniquePtr<BitMatcher>) {
     
     }
     
+    pub fn copy(&mut self, new_matrix: UniquePtr<BitMatcher>) {
+        self.matrix = new_matrix;
+    }
+
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         
         let mut outputstream = Vec::new();
