@@ -52,6 +52,10 @@ impl Kvs {
         println!("...");
     }
 
+    pub fn getdata(&self) -> Vec<f64>{
+        return self.omn_array.clone()
+    }
+    
     pub fn to_string(&mut self) {
         let precision = 2;
         let mut result = String::with_capacity(self.omn_array.len() * (precision + 3)); // Allocate some capacity to reduce reallocations

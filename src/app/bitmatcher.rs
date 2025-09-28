@@ -12,51 +12,38 @@ use cxx::CxxString;
 use std::pin::Pin;
 
 #[cxx::bridge(namespace = "org::blobstore")]
-mod ffi {
-    // Shared structs with fields visible to both languages.
-    /* struct BlobMetadata {
-        size: usize,
-        tags: Vec<String>,
-    }
 
-    // Rust types and signatures exposed to C++.
-    extern "Rust" {
-        type MultiBuf;
-
-        fn next_chunk(buf: &mut MultiBuf) -> &[u8];
-    } */
-
-    // C++ types and signatures exposed to Rust.
+pub mod ffi {
     unsafe extern "C++" {
         include!("aupe/include/bitmatcher.h");
 
         type BitMatcher;
 
+        fn clone(self: &BitMatcher)-> UniquePtr<BitMatcher>;
         fn new_bitmatcher(bucket: u64) -> UniquePtr<BitMatcher>;
         fn Insert(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16); //key: &str,key_len: u16);
         //double Query(const char *key, const int16_t key_len = 0) 
         fn Query(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16) -> f64;
         fn print_buckets(self: &BitMatcher);
+        fn merge(self: Pin<&mut BitMatcher>, other: &BitMatcher);
     }
 }
 unsafe impl Send for ffi::BitMatcher {}
 unsafe impl Sync for ffi::BitMatcher {}
+impl Clone for BM {
+    fn clone(&self) -> Self {
+        BM {
+            params: self.params.clone(),
+            matrix: self.matrix.as_ref().unwrap().clone(), 
+            key_len: self.key_len,
+            min_value: self.min_value,
+            omniscient_memory: self.omniscient_memory.clone(),
+        }
+    }
+}
 
 use crate::app::bitmatcher::ffi::BitMatcher;
 
-/* #[derive(Clone, Default, StructOpt, Debug)]
-pub struct Init {
-    /// number_of_elements_of_an_item
-    #[structopt(short = "c", long = "n_bucket", default_value = "0")]
-    pub n_bucket: u64,
-
-    #[structopt(short = "s", long = "sm", default_value = "5")]
-    pub sample_memory_size: usize,
-
-    #[structopt(short = "b", long = "budget", default_value = "5")]
-    pub space: u64,
-
-}  */
 
 use cxx::let_cxx_string;
 
@@ -66,7 +53,6 @@ pub struct BM {
     pub key_len: usize,
     pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
-    pub freq_array_string: String,
 }
 
 fn count_digits(n: usize) -> usize {
@@ -103,7 +89,6 @@ impl BM {
             key_len: 4,
             min_value: f64::MAX,
             omniscient_memory: Vec::new(),
-            freq_array_string: String::new(),
         }
     }
     
@@ -115,7 +100,9 @@ impl BM {
 
     pub fn getparams(&mut self, init: Init) {
         self.params = init;
-        self.params.n_bucket = self.params.space * 1024 / 8 / 2;
+        if self.params.n_bucket == 0 {
+            self.params.n_bucket = self.params.space as u64 * 1024 / 8 / 2;
+        }
     }
 
     pub fn init(&mut self, nodes: usize, init: Init) {
@@ -137,21 +124,20 @@ impl BM {
         }
     }
 
-    pub fn to_string(&mut self) {
-
+    pub fn getdata(&self) -> UniquePtr<BitMatcher>{
+        return self.matrix.as_ref().unwrap().clone()
     }
 
-    pub fn string_to_matrix(&mut self, input: &str)  -> UniquePtr<BitMatcher>{
-        ffi::new_bitmatcher(0)
+    pub fn merge(&mut self, other: &BitMatcher) {
+        /* println!("FISRT");
+        self.matrix.print_buckets();
+        println!("SECOND");
+        other.print_buckets(); */
+        self.matrix.as_mut().unwrap().merge(&other);
+        /* println!("RESULT");
+        self.matrix.print_buckets(); */
     }
     
-    pub fn merge(&mut self, second_cms_matrix: UniquePtr<BitMatcher>) {
-    
-    }
-    
-    pub fn copy(&mut self, new_matrix: UniquePtr<BitMatcher>) {
-        self.matrix = new_matrix;
-    }
 
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         

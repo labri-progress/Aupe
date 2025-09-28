@@ -15,8 +15,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(String),
-    MergeReply(String),
+    MergeRequest(Vec<f64>),
+    MergeReply(Vec<f64>),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -474,20 +474,17 @@ impl App for Aupe {
                         });
 
                     if self.is_trusted{
-                        self.sketch.to_string();
-                        let vec = self.sketch.freq_array_string.clone();
-                        //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                             self.sketch.print();
-                            //println!("layers {:?}", vec);
                         }
-                        self.to_conctact.iter()
-                        .filter(|x| **x!=self.my_id) // contact only not contacted nodes
-                        .map(|x| x)
-                        .collect::<Vec<_>>().iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(vec.clone()));
-                        });
+                        let contactlist: Vec<PeerRef> = self.to_conctact.iter()
+                            .filter(|x| **x!=self.my_id) // contact only not contacted nodes
+                            .copied() //.map(|x| x)
+                            .collect::<Vec<_>>();
+
+                        for p in contactlist {
+                            net.send(p, Msg::MergeRequest(self.sketch.getdata()));
+                        }
                     }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
@@ -519,40 +516,27 @@ impl App for Aupe {
                     self.sketch.update_freq(lst.clone());
                 },
 
-                Msg::MergeRequest(lst) => {
+                Msg::MergeRequest(other_sketch) => {
                     //
                     if self.is_trusted{
-                        /* /* 1. Receive sketch */
-                        let other_sketch = self.sketch.string_to_vec(lst);
-                        /* 2. Send yours */
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
-                        /* 3. Merge */
-                        self.sketch.merge(other_sketch); */
 
                         /* 1. Receive sketch */
-                        let other_sketch = self.sketch.string_to_vec(lst);
-                        
                         /* 2. Merge */
-                        self.sketch.merge(other_sketch);
+                        self.sketch.merge(other_sketch.to_vec());
 
                         /* 2. Send results */
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
+                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
                         
                     }else {
                         println!("message MergeR ");
                     }
                 },
-                Msg::MergeReply(lst) => {
+                Msg::MergeReply(merged_sketch) => {
                     //println!("message MergeR ");
                     if self.is_trusted{
-                        /* let other_sketch = self.sketch.string_to_vec(lst);
-                        self.sketch.merge(other_sketch); */
 
                         /* update my sketch */
-                        let merged_sketch = self.sketch.string_to_vec(lst);
-                        self.sketch.copy(merged_sketch);
+                        self.sketch.copy(merged_sketch.to_vec());
                         
                     }
                 },
