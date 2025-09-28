@@ -93,7 +93,7 @@ impl BM {
     }
     
     pub fn print(& self) {
-        println!("BM of 2 arrays, each of {:?} buckets of size 64 bits", self.params.n_bucket); 
+        //println!("BM of 2 arrays, each of {:?} buckets of size 64 bits", self.params.n_bucket); 
         self.matrix.print_buckets();
         //println!("\nmin_value {}", self.min_value);
     }
