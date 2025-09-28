@@ -264,8 +264,8 @@ public:
     void dump_to_file(FILE* fp);
     void Delete(char *key, const int16_t key_len = 0);
 
-	double QueryByFp(uint8_t fingerprint_value, int first_hash_table_idx) const; 
-	void InsertByFp(uint8_t fingerprint_value, int first_hash_table_idx); 
+	double QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const; 
+	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx); 
 	std::unique_ptr<BitMatcher> clone() const;
 	void merge(const BitMatcher& other);
 

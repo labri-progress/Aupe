@@ -477,6 +477,10 @@ impl App for AupeBM {
                             net.send(p, Msg::MergeRequest(self.sketch.getdata()));
                         }
                     }
+                    if self.my_id == self.params.n_byzantine && DEBUG{
+                        self.sketch.print();
+                    }
+                    
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {

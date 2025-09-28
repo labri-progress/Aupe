@@ -381,16 +381,67 @@ double BitMatcher::Query(const std::string& key, int16_t key_len){ //const char 
 	}
 }
 
-double BitMatcher::QueryByFp(uint8_t fingerprint_value, int first_hash_table_idx) const{ 
+
+void BitMatcher::InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx){
+	maxloop = 1;		
+	
 	uint8_t fp = fingerprint_value;
 	uint32_t h1 = first_hash_table_idx;
 	uint32_t h2 = (h1 ^ fingerprint_value) % bucket_num;
-	/* if (pos == 1) {
-		h2 = first_hash_table_idx;
-		h1 = (h2 ^ fingerprint_value) % bucket_num;
-	} */
 	uint hash[2] = {h1, h2};
+
+	bool flag = 0;
+	int empty_jj, empty_type_id;
+	ec_bucket* empty_bucket;
+	for (int i = 0; i < 2; i++) {
+		ec_bucket *b = bucket[i] + hash[i];
+		uint32_t type_id = get_bucket_type_id(b);
+		uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (int j = fingerprint_num-1; j >= 0; j--) {
+			if ( get_bucket_fingerprint(b, j) == fp ) {
+				if (plus(b, j, type_id, i, hash[i])){
+					//printf("plus");
+				}
+				return;
+			} else if ( !flag && get_bucket_fingerprint(b, j) == 0) {
+				empty_bucket = b;
+				empty_jj = j;
+				empty_type_id = type_id;
+				flag = 1;
+			}
+		}
+	}
+	if (flag) {
+		set_bucket_fingerprint(empty_bucket, empty_jj, fp);
+		set_bucket_count(empty_bucket, empty_jj, 1, empty_type_id);
+		return;
+	} else {
+		int error_num = 0;
+		error_num++;
+		int i = fp & 0x1;
+		ec_bucket *b = bucket[i] + hash[i];
+		uint32_t type_id = get_bucket_type_id(b);
+		uint32_t count = get_bucket_count(b, 0, type_id);
+		/* printf("Error happens when inserting fp %u to table %d, bucket %d, type %d\n", fp, i, hash[i], type_id);
+		printf("The count of the first item is %lu\n", count);
+		printf("fp & 0x2is %d\n", fp & 0x2);
+		printf("((error_num & 0x1) << 1) is %d\n", ((error_num & 0x1) << 1)); */
+		if ( count == 1 && (fp & 0x2) == ((error_num & 0x1) << 1) ) {
+			set_bucket_fingerprint(b, 0, fp);
+			set_bucket_count(b, 0, 1, type_id);
+		} else {
+			set_bucket_count(b, 0, count - 1, type_id);
+		}
+	}
+}
+
+double BitMatcher::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const{ //const char *key, const int16_t key_len) {
 	
+	uint8_t fp = fingerprint_value;
+	uint32_t h1 = first_hash_table_idx;
+	uint32_t h2 = (h1 ^ fingerprint_value) % bucket_num;
+	uint hash[2] = {h1, h2};
+
 	bool flag=0;
 	uint64_t min_value = UINT64_MAX; uint64_t table_min[2];
 	__builtin_prefetch(bucket[0] + hash[0], 0, 2);
@@ -419,59 +470,6 @@ double BitMatcher::QueryByFp(uint8_t fingerprint_value, int first_hash_table_idx
 	}
 }
 
-void BitMatcher::InsertByFp(uint8_t fingerprint_value, int first_hash_table_idx) { 
-	uint8_t fp = fingerprint_value;
-	uint32_t h1 = first_hash_table_idx;
-	uint32_t h2 = (h1 ^ fingerprint_value) % bucket_num;
-	/* if (pos == 1) {
-		h2 = first_hash_table_idx;
-		h1 = (h2 ^ fingerprint_value) % bucket_num;
-	} */
-	uint hash[2] = {h1, h2};
-	
-	maxloop = 1;		
-	bool flag = 0;
-	int empty_jj, empty_type_id;
-	ec_bucket* empty_bucket;
-	for (int i = 0; i < 2; i++) {
-		//printf("Insert: i=%d, hash=%d, fp=%d\n", i, hash[i], fp);
-		ec_bucket *b = bucket[i] + hash[i];
-		uint32_t type_id = get_bucket_type_id(b);
-		uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
-		for (int j = fingerprint_num-1; j >= 0; j--) {
-			if ( get_bucket_fingerprint(b, j) == fp ) {
-				if (plus(b, j, type_id, i, hash[i])){
-					//printf("plus");
-				}
-				return;
-			} else if ( !flag && get_bucket_fingerprint(b, j) == 0) {
-				empty_bucket = b;
-				empty_jj = j;
-				empty_type_id = type_id;
-				flag = 1;
-			}
-		}
-	}
-	if (flag) {
-		set_bucket_fingerprint(empty_bucket, empty_jj, fp);
-		set_bucket_count(empty_bucket, empty_jj, 1, empty_type_id);
-		return;
-	} else {
-		static int error_num2 = 0;
-		error_num2++;
-		int i = fp & 0x1;
-		ec_bucket *b = bucket[i] + hash[i];
-		uint32_t type_id = get_bucket_type_id(b);
-		uint32_t count = get_bucket_count(b, 0, type_id);
-
-		if ( count == 1 && (fp & 0x2) == ((error_num2 & 0x1) << 1) ) {
-			set_bucket_fingerprint(b, 0, fp);
-			set_bucket_count(b, 0, 1, type_id);
-		} else {
-			set_bucket_count(b, 0, count - 1, type_id);
-		}
-	}
-}
 
 struct FingerprintKey {
     uint32_t bucket_idx;
@@ -523,20 +521,28 @@ void BitMatcher::merge(const BitMatcher& other) {
 	//printf("all_tuples %zu\n", all_tuples.size());
 
     // Merge counts
-    for (const auto& key : all_tuples) {
-        double cnt_this  = this->QueryByFp(key.fp, key.bucket_idx);
-        double cnt_other = other.QueryByFp(key.fp, key.bucket_idx);
-		uint32_t mean = 0;
-		if ((key.fp &0x1) == 1 || cnt_this*cnt_other == 0) {
-			mean = static_cast<uint32_t>(std::ceil((cnt_this + cnt_other) / 2.0));
-		}else{
-			mean = static_cast<uint32_t>(std::floor((cnt_this + cnt_other) / 2.0));
-		}
 
-        for (uint32_t c = 0; c < mean; ++c) {
-            result.InsertByFp(key.fp, key.bucket_idx);
-        }
-    }
+	for (const auto& key : all_tuples) {
+		double cnt_this  = this->QueryByFp(key.fp, key.bucket_idx);
+		double cnt_other = other.QueryByFp(key.fp, key.bucket_idx);
+
+		int mean = 0;
+		double avg = (cnt_this + cnt_other) / 2.0;
+		mean = static_cast<int>(std::ceil(avg));
+		/* if ((key.fp & 0x1) == 1 || cnt_this * cnt_other == 0) {
+			mean = static_cast<int>(std::ceil(avg));
+		} else {
+			mean = static_cast<int>(std::floor(avg));
+		} */
+
+		//printf("Merge: bucket(%u)-fp(%u) (%.1f + %.1f)/2.0 = %d\n", static_cast<unsigned>(key.bucket_idx),
+		//	static_cast<unsigned>(key.fp), cnt_this, cnt_other, mean);
+
+		for (int c = 0; c < mean; ++c) {
+			result.InsertByFp(key.fp, key.bucket_idx);
+		}
+		//result.print_buckets();
+	}
 
     *this = result;
 }
