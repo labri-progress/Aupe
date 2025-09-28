@@ -17,7 +17,7 @@ mkdir analysis
 
 for space in $space #1 5 10 20 30 40
 do
-    for faulty in 800 1200 1400 1600 1800 2200 2400 2600 2800 # 800 1200 1400 1600 1800 2200 2400 2600 2800 4000 # 1000 2000 3000 # 4000 5000
+    for faulty in 2000 # 800 1200 1400 1600 1800 2200 2400 2600 2800 # 800 1200 1400 1600 1800 2200 2400 2600 2800 4000 # 1000 2000 3000 # 4000 5000
     do
         if [ "$strat" == "kvs" ]; then
             cargo run -- -T $round -n $N kvs -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N > "analysis/kvs-$ratio-$faulty"
@@ -25,6 +25,12 @@ do
         if [ "$strat" == "bm" ]; then
             cargo run -- -T $round -n $N bm -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space > "analysis/bm-$ratio-$faulty-$space"
         fi
+
+        if [ "$strat" == "merge" ]; then
+            cargo run -- -T $round -n $N bm -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space -x 1000 -p 10\ 
+                > "analysis/mergebm-$ratio-$faulty-$space"
+        fi
+
         if [ "$strat" == "basalt" ]; then
             cargo run -- -T $round -n $N basalt -G -f $ratio -t $faulty -v 160 -i 160 -k 1 -r 1 > "analysis/bs-$ratio-$faulty"
         fi
