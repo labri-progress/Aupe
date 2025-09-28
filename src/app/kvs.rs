@@ -56,29 +56,6 @@ impl Kvs {
         return self.omn_array.clone()
     }
     
-    pub fn to_string(&mut self) {
-        let precision = 2;
-        let mut result = String::with_capacity(self.omn_array.len() * (precision + 3)); // Allocate some capacity to reduce reallocations
-        for (i, num) in self.omn_array.iter().enumerate() {
-            if i > 0 {
-                result.push(','); // Append a comma between elements
-            }
-            // Use a buffer to format the number directly
-            let _ = write!(&mut result, "{:.1$}", num, precision);
-        }
-        self.freq_array_string = result;
-    }
-
-    pub fn string_to_vec(&mut self, input: &str) -> Vec<f64>{
-        let result = input
-        .split(',')
-        .map(str::trim) // Trim whitespace
-        .map(|s| s.parse::<f64>().expect("Invalid integer in input")) // Parse and panic on error
-        .collect::<Vec<f64>>(); // Collect into a Vec<u32>
-         
-        result
-    }
-
     pub fn copy(&mut self, new_vec: Vec<f64>) {
         self.omn_array = new_vec;
     }
