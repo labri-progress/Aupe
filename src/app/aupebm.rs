@@ -1,4 +1,5 @@
 use rand::{rng, Rng};
+use cxx::UniquePtr;
 use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
@@ -8,6 +9,7 @@ use crate::util::{print_samples, sample_exclude};
 use crate::graph::ByzConnGraph;
 
 use super::bitmatcher::BM;
+use crate::app::bitmatcher::ffi::BitMatcher;
 
 const DEBUG: bool = false;
 pub enum Msg {
@@ -15,8 +17,8 @@ pub enum Msg {
     PullRequest,
     PullReply(Vec<PeerRef>),
     PushRequest,
-    MergeRequest(String),
-    MergeReply(String),
+    MergeRequest(UniquePtr<BitMatcher>),
+    MergeReply(UniquePtr<BitMatcher>),
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -463,20 +465,17 @@ impl App for AupeBM {
                         });
 
                     if self.is_trusted{
-                        self.sketch.to_string();
-                        let vec = self.sketch.freq_array_string.clone();
-                        //println!("vec len {}", vec.len());
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                             self.sketch.print();
-                            //println!("layers {:?}", vec);
                         }
-                        self.to_conctact.iter()
-                        .filter(|x| **x!=self.my_id) // contact only not contacted nodes
-                        .map(|x| x)
-                        .collect::<Vec<_>>().iter()
-                        .for_each(|p| {
-                            net.send(**p, Msg::MergeRequest(vec.clone()));
-                        });
+                        let contactlist: Vec<PeerRef> = self.to_conctact.iter()
+                            .filter(|x| **x!=self.my_id) // contact only not contacted nodes
+                            .copied() //.map(|x| x)
+                            .collect::<Vec<_>>();
+
+                        for p in contactlist {
+                            net.send(p, Msg::MergeRequest(self.sketch.getdata()));
+                        }
                     }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
@@ -508,39 +507,23 @@ impl App for AupeBM {
                     self.sketch.update_freq(lst.clone());
                 },
 
-                Msg::MergeRequest(lst) => {
-                    //
+                Msg::MergeRequest(other_sketch) => {
+                    //println!("node {} receive MergeRequest from {}", self.my_id, from);
                     if self.is_trusted{
-                        /* /* 1. Receive sketch */
-                        let other_sketch = self.sketch.string_to_matrix(lst);
-                        /* 2. Send yours */
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
-                        /* 3. Merge */
-                        self.sketch.merge(other_sketch); */
-
                         /* 1. Receive sketch */
-                        let other_sketch = self.sketch.string_to_matrix(lst);
-                        
-                        /* 2. Merge */
-                        self.sketch.merge(other_sketch);
-
-                        /* 2. Send results */
-                        self.sketch.to_string();
-                        net.send(from, Msg::MergeReply(self.sketch.freq_array_string.clone()));
+                        /* 2. Send yours */
+                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
+                        /* 3. Merge */
+                        self.sketch.merge(other_sketch); 
                         
                     }else {
                         println!("message MergeR ");
                     }
                 },
-                Msg::MergeReply(lst) => {
-                    //println!("message MergeR ");
+                Msg::MergeReply(other_sketch) => {
+                    //println!("node {} receive MergeReply from {}", self.my_id, from);
                     if self.is_trusted{
-                        /* let other_sketch = self.sketch.string_to_matrix(lst);
-                        self.sketch.merge(other_sketch); */
-
-                        let merged_sketch = self.sketch.string_to_matrix(lst);
-                        self.sketch.copy(merged_sketch);
+                        self.sketch.merge(other_sketch);
                         
                     }
                 },

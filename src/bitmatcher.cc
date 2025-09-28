@@ -9,6 +9,22 @@ std::unique_ptr<BitMatcher> new_bitmatcher(uint64_t _bucket) {
   return std::make_unique<BitMatcher>(_bucket);
 }
 
+std::unique_ptr<BitMatcher> BitMatcher::clone() const{
+    auto copy = std::make_unique<BitMatcher>(bucket_num);
+    copy->maxloop = maxloop;
+    copy->h1 = h1;
+    copy->h2 = h2;
+
+    for (int i = 0; i < 2; i++) {
+        delete copy->bucket[i]; // in case constructor allocated them
+        copy->bucket[i] = bucket[i];
+        delete copy->bobhash[i];
+        copy->bobhash[i] = bobhash[i];
+    }
+
+    return copy;
+}
+
 BitMatcher::BitMatcher(uint64_t _bucket) {
 	bucket_num = _bucket;
 	for (int i = 0; i < 2; i++) {
@@ -312,7 +328,7 @@ void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str ke
 			set_bucket_fingerprint(b, 0, fp);
 			set_bucket_count(b, 0, 1, type_id);
 		} else {
-			 set_bucket_count(b, 0, count - 1, type_id);
+			set_bucket_count(b, 0, count - 1, type_id);
 		}
 	}
 }
@@ -363,6 +379,166 @@ double BitMatcher::Query(const std::string& key, int16_t key_len){ //const char 
 	else {
 		return min_value;
 	}
+}
+
+double BitMatcher::QueryByFp(uint8_t fingerprint_value, int first_hash_table_idx) const{ 
+	uint8_t fp = fingerprint_value;
+	uint32_t h1 = first_hash_table_idx;
+	uint32_t h2 = (h1 ^ fingerprint_value) % bucket_num;
+	/* if (pos == 1) {
+		h2 = first_hash_table_idx;
+		h1 = (h2 ^ fingerprint_value) % bucket_num;
+	} */
+	uint hash[2] = {h1, h2};
+	
+	bool flag=0;
+	uint64_t min_value = UINT64_MAX; uint64_t table_min[2];
+	__builtin_prefetch(bucket[0] + hash[0], 0, 2);
+	__builtin_prefetch(bucket[1] + hash[1], 0, 2);
+	for (uint8_t i = 0; i < 2; i++) {
+		ec_bucket* b = bucket[i] + hash[i];
+		const uint32_t type_id = get_bucket_type_id(b);
+		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		table_min[i] = get_bucket_count(b, 0, type_id);
+		for (uint8_t fpt_idx = 0; fpt_idx < fingerprint_num; fpt_idx++) {
+			const uint8_t stored_fingerprint = get_bucket_fingerprint(b, fpt_idx);
+			const uint64_t stored_count = get_bucket_count(b, fpt_idx, type_id);
+			if ( stored_fingerprint == fp ) {
+				return stored_count;
+			}
+			if (!flag && stored_fingerprint == 0) {
+				flag = 1;
+			}
+			if (flag) {continue;}  
+			if (stored_fingerprint != 0 && min_value > stored_count) { min_value = stored_count;}
+		}
+	}
+	if (flag) { return 0; } 
+	else {
+		return min_value;
+	}
+}
+
+void BitMatcher::InsertByFp(uint8_t fingerprint_value, int first_hash_table_idx) { 
+	uint8_t fp = fingerprint_value;
+	uint32_t h1 = first_hash_table_idx;
+	uint32_t h2 = (h1 ^ fingerprint_value) % bucket_num;
+	/* if (pos == 1) {
+		h2 = first_hash_table_idx;
+		h1 = (h2 ^ fingerprint_value) % bucket_num;
+	} */
+	uint hash[2] = {h1, h2};
+	
+	maxloop = 1;		
+	bool flag = 0;
+	int empty_jj, empty_type_id;
+	ec_bucket* empty_bucket;
+	for (int i = 0; i < 2; i++) {
+		//printf("Insert: i=%d, hash=%d, fp=%d\n", i, hash[i], fp);
+		ec_bucket *b = bucket[i] + hash[i];
+		uint32_t type_id = get_bucket_type_id(b);
+		uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (int j = fingerprint_num-1; j >= 0; j--) {
+			if ( get_bucket_fingerprint(b, j) == fp ) {
+				if (plus(b, j, type_id, i, hash[i])){
+					//printf("plus");
+				}
+				return;
+			} else if ( !flag && get_bucket_fingerprint(b, j) == 0) {
+				empty_bucket = b;
+				empty_jj = j;
+				empty_type_id = type_id;
+				flag = 1;
+			}
+		}
+	}
+	if (flag) {
+		set_bucket_fingerprint(empty_bucket, empty_jj, fp);
+		set_bucket_count(empty_bucket, empty_jj, 1, empty_type_id);
+		return;
+	} else {
+		static int error_num2 = 0;
+		error_num2++;
+		int i = fp & 0x1;
+		ec_bucket *b = bucket[i] + hash[i];
+		uint32_t type_id = get_bucket_type_id(b);
+		uint32_t count = get_bucket_count(b, 0, type_id);
+
+		if ( count == 1 && (fp & 0x2) == ((error_num2 & 0x1) << 1) ) {
+			set_bucket_fingerprint(b, 0, fp);
+			set_bucket_count(b, 0, 1, type_id);
+		} else {
+			set_bucket_count(b, 0, count - 1, type_id);
+		}
+	}
+}
+
+struct FingerprintKey {
+    uint32_t bucket_idx;
+    uint8_t fp;
+
+    bool operator==(const FingerprintKey& other) const {
+        return bucket_idx == other.bucket_idx && fp == other.fp;
+    }
+};
+
+// Custom hash for unordered_set
+struct FingerprintHash {
+    size_t operator()(const FingerprintKey& k) const {
+        return (static_cast<size_t>(k.bucket_idx) << 8) ^ k.fp;
+    }
+};
+
+void BitMatcher::merge(const BitMatcher& other) {
+    BitMatcher result(bucket_num);
+
+    // Preallocate near maximum expected size (bucket_num * 5 * 4)
+    std::unordered_set<FingerprintKey, FingerprintHash> all_tuples;
+    all_tuples.reserve(bucket_num * 20); // 2 BitMatchers, 2 arrays per BitMatcher, 2 buckets per array and 5 counter per buckets
+
+    auto collect = [&](const BitMatcher& bm) {
+        for (int i = 0; i < 2; i++) {
+            for (uint j = 0; j < bm.bucket_num; j++) {
+                ec_bucket* b = bm.bucket[i] + j;
+                uint32_t type_id = get_bucket_type_id(b);
+                uint8_t slot_num = get_item_num_in_bucket_type(type_id);
+                for (uint k = 0; k < slot_num; k++) {
+                    uint8_t fp = get_bucket_fingerprint(b, k);
+                    if (fp != 0) {
+                        uint bucket_idx0 = j;
+                        if (i != 0) {
+                            bucket_idx0 = (j ^ fp) % bucket_num;
+                        }
+                        all_tuples.insert({bucket_idx0, fp});
+                    }
+                }
+            }
+        }
+    };
+
+    // Collect from both
+    collect(*this);
+    collect(other);
+
+	printf("all_tuples %zu\n", all_tuples.size());
+
+    // Merge counts
+    for (const auto& key : all_tuples) {
+        double cnt_this  = this->QueryByFp(key.fp, key.bucket_idx);
+        double cnt_other = other.QueryByFp(key.fp, key.bucket_idx);
+		uint32_t mean = 0;
+		if ((key.fp &0x1) == 1 || cnt_this*cnt_other == 0) {
+			mean = static_cast<uint32_t>(std::ceil((cnt_this + cnt_other) / 2.0));
+		}else{
+			mean = static_cast<uint32_t>(std::floor((cnt_this + cnt_other) / 2.0));
+		}
+
+        for (uint32_t c = 0; c < mean; ++c) {
+            result.InsertByFp(key.fp, key.bucket_idx);
+        }
+    }
+
+    *this = result;
 }
 
 int BitMatcher::Mem(const char *key, const int16_t key_len) {

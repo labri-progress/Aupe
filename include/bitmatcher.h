@@ -17,6 +17,9 @@
 #include <memory>
 #include "rust/cxx.h"
 
+#include <cmath>
+#include <unordered_set>
+
 #define ENABLE_CM_SKETCH 0
 /* the bucket type macro */
 #define FINGERPRINT_LENGTH 8
@@ -260,8 +263,15 @@ public:
     double Ratio();
     void dump_to_file(FILE* fp);
     void Delete(char *key, const int16_t key_len = 0);
+
+	double QueryByFp(uint8_t fingerprint_value, int first_hash_table_idx) const; 
+	void InsertByFp(uint8_t fingerprint_value, int first_hash_table_idx); 
+	std::unique_ptr<BitMatcher> clone() const;
+	void merge(const BitMatcher& other);
+
     ~BitMatcher();
 };
 std::unique_ptr<BitMatcher> new_bitmatcher(uint64_t bucket);
+//std::unique_ptr<BitMatcher> BitMatcher::clone() const;
 };
 }
