@@ -168,29 +168,6 @@ impl BM {
      
         outputstream
     }
-
-
-    fn count_occurence_and_frequency(&mut self, system_size: usize, real_occurences: Vec<f64>) -> (Vec<f64>, Vec<f64>){
-        let mut occurences = vec![0.0; system_size];
-        let mut frequencies = vec![0.0; system_size];
-
-        for id in 0..system_size {
-            if real_occurences[id] != 0.0 {
-                occurences[id]=self.estimate(&id);
-               // let decomposed = self.decomposition(id);
-                //println!("item {} = {:?}", id, decomposed);
-                if occurences[id] > 0.0  && occurences[id] < self.min_value  {
-                    self.min_value = occurences[id];
-                }
-            }
-        }
-        let sum = occurences.iter().sum::<f64>(); 
-        for (i, &occurrence) in occurences.iter().enumerate() {
-            frequencies[i] = occurrence / sum;
-        }
-        
-        (occurences, frequencies)
-    }
    
 }
     

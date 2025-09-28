@@ -520,7 +520,7 @@ void BitMatcher::merge(const BitMatcher& other) {
     collect(*this);
     collect(other);
 
-	printf("all_tuples %zu\n", all_tuples.size());
+	//printf("all_tuples %zu\n", all_tuples.size());
 
     // Merge counts
     for (const auto& key : all_tuples) {
