@@ -554,6 +554,8 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 	for (int i = 0; i < 2; i++) {
         std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
+		delete[]result.bucket[i];
+		delete result.bobhash[i];
 	}
 }
 
