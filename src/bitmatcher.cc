@@ -526,7 +526,7 @@ void BitMatcher::merge(const BitMatcher& other) {
     collect(*this);
     collect(other);
 
-	printf("all_tuples %zu\n", all_tuples.size());
+	//printf("all_tuples %zu\n", all_tuples.size());
 
     // Merge counts
 
@@ -536,12 +536,12 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 		int mean = 0;
 		double avg = (cnt_this + cnt_other) / 2.0;
-		mean = static_cast<int>(std::ceil(avg));
-		/* if ((key.fp & 0x1) == 1 || cnt_this * cnt_other == 0) {
+		//mean = static_cast<int>(std::ceil(avg));
+		if ((key.fp & 0x1) == 1 || cnt_this * cnt_other == 0) {
 			mean = static_cast<int>(std::ceil(avg));
 		} else {
 			mean = static_cast<int>(std::floor(avg));
-		} */
+		}
 
 		//printf("Merge: bucket(%u)-fp(%u) (%.1f + %.1f)/2.0 = %d\n", static_cast<unsigned>(key.bucket_idx),
 		//	static_cast<unsigned>(key.fp), cnt_this, cnt_other, mean);
@@ -552,7 +552,11 @@ void BitMatcher::merge(const BitMatcher& other) {
 		//result.print_buckets();
 	}
 
-    *this = result;
+    //*this = result;
+	for (int i = 0; i < 2; i++) {
+        //delete this->bucket[i]; // in case constructor allocated them
+        this->bucket[i] = result.bucket[i];
+	}
 }
 
 int BitMatcher::Mem(const char *key, const int16_t key_len) {
@@ -645,12 +649,12 @@ void BitMatcher::Delete(char *key, const int16_t key_len) {
 }
 
 BitMatcher::~BitMatcher() {
-	for (int i = 0; i < 2; i++) {
+	/* for (int i = 0; i < 2; i++) {
 		delete[]bucket[i];
 	}
 	for (int i = 0; i < 1; i++) {
 		delete bobhash[i];
-	}
+	} */
 }
 
 } // namespace blobstore
