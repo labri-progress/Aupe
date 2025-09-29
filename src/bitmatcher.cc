@@ -552,10 +552,8 @@ void BitMatcher::merge(const BitMatcher& other) {
 		//result.print_buckets();
 	}
 
-    //*this = result;
 	for (int i = 0; i < 2; i++) {
-        //delete this->bucket[i]; // in case constructor allocated them
-        this->bucket[i] = result.bucket[i];
+        std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
 	}
 }
 

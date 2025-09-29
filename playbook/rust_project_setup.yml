@@ -31,7 +31,7 @@
       cmd: rustup default stable
   - name: Install build-essential
     action: apt pkg=build-essential
-  - name: Clone the GitHub repository
+  - name: IV-Clone the GitHub repository
     git:
       repo: 'https://github.com/labri-progress/Aupe.git'
       dest: ~/Aupe
