@@ -27,8 +27,7 @@ do
         fi
 
         if [ "$strat" == "merge" ]; then
-            cargo run -- -T $round -n $N bm -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space -x 1000 -p 10\ 
-                > "analysis/mergebm-$ratio-$faulty-$space"
+            cargo run -- -T $round -n $N bm -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space -x 1000 -p 10  > "analysis/mergebm-$ratio-$faulty-$space"
         fi
 
         if [ "$strat" == "basalt" ]; then

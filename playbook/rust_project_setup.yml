@@ -6,12 +6,12 @@
   vars:
     user: "{{ ansible_user_id }}"
   tasks:
-  - name: check if cargo is installed
+  - name: I- check if cargo is installed
     shell: command -v cargo
     register: cargo_exists
     ignore_errors: yes
 
-  - name: Download Installer
+  - name: II- Download Installer
     when: cargo_exists is failed
     get_url:
       url: https://sh.rustup.rs
@@ -20,7 +20,7 @@
       force: 'yes'
     tags:
       - rust
-  - name: Install a snap package
+  - name: III- Install a snap package
     ansible.builtin.command:
       cmd: sudo apt update
   - name: Install a snap package
