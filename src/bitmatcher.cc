@@ -40,23 +40,31 @@ BitMatcher::BitMatcher(uint64_t _bucket) {
 }
 
 void BitMatcher::print_buckets() const {
-	for (int i = 0; i < 2; i++) {
-		printf("A %d:\n", i);
-		for (uint j = 0; j < bucket_num; j++) {
-			printf("B %d: S=%d, fp1=%d, fp2=%d, fp3=%d, fp4=%d, fp5=%d, count1=%lu, count2=%lu, count3=%lu, count4=%lu, count5=%lu\n",
-				j, get_bucket_type_id(&bucket[i][j]),
-				get_bucket_fingerprint(&bucket[i][j], 0),
-				get_bucket_fingerprint(&bucket[i][j], 1),
-				get_bucket_fingerprint(&bucket[i][j], 2),
-				get_bucket_fingerprint(&bucket[i][j], 3),
-				get_bucket_fingerprint(&bucket[i][j], 4),
-				get_bucket_count(&bucket[i][j], 0, get_bucket_type_id(&bucket[i][j])),
-				get_bucket_count(&bucket[i][j], 1, get_bucket_type_id(&bucket[i][j])),
-				get_bucket_count(&bucket[i][j], 2, get_bucket_type_id(&bucket[i][j])),
-				get_bucket_count(&bucket[i][j], 3, get_bucket_type_id(&bucket[i][j])),
-				get_bucket_count(&bucket[i][j], 4, get_bucket_type_id(&bucket[i][j])));
-		}
+	int flag = 0;
+	if (bucket_num <= 20) {
+		flag = 1;
 	}
+	if (flag){
+		for (int i = 0; i < 2; i++) {
+			printf("A %d:\n", i);
+			for (uint j = 0; j < bucket_num; j++) {
+				printf("B %d: S=%d, fp1=%d, fp2=%d, fp3=%d, fp4=%d, fp5=%d, count1=%lu, count2=%lu, count3=%lu, count4=%lu, count5=%lu\n",
+					j, get_bucket_type_id(&bucket[i][j]),
+					get_bucket_fingerprint(&bucket[i][j], 0),
+					get_bucket_fingerprint(&bucket[i][j], 1),
+					get_bucket_fingerprint(&bucket[i][j], 2),
+					get_bucket_fingerprint(&bucket[i][j], 3),
+					get_bucket_fingerprint(&bucket[i][j], 4),
+					get_bucket_count(&bucket[i][j], 0, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(&bucket[i][j], 1, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(&bucket[i][j], 2, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(&bucket[i][j], 3, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(&bucket[i][j], 4, get_bucket_type_id(&bucket[i][j])));
+			}
+		}
+	}/* else{
+		this->Ratio();
+	} */
 }
 
 int BitMatcher::CM_insert(const char *key, const int16_t key_len) {
@@ -518,7 +526,7 @@ void BitMatcher::merge(const BitMatcher& other) {
     collect(*this);
     collect(other);
 
-	//printf("all_tuples %zu\n", all_tuples.size());
+	printf("all_tuples %zu\n", all_tuples.size());
 
     // Merge counts
 
@@ -637,12 +645,12 @@ void BitMatcher::Delete(char *key, const int16_t key_len) {
 }
 
 BitMatcher::~BitMatcher() {
-	// for (int i = 0; i < 2; i++) {
-	// 	delete[]bucket[i];
-	// }
-	// for (int i = 0; i < 1; i++) {
-	// 	delete bobhash[i];
-	// }
+	for (int i = 0; i < 2; i++) {
+		delete[]bucket[i];
+	}
+	for (int i = 0; i < 1; i++) {
+		delete bobhash[i];
+	}
 }
 
 } // namespace blobstore
