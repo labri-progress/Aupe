@@ -205,6 +205,8 @@ static inline __attribute__((always_inline)) uint64_t get_bucket_count(ec_bucket
 }
 
 static inline __attribute__((always_inline)) void set_bucket_count(ec_bucket* bkt, int count_index, uint64_t count_value, const uint32_t type_id) {
+	assert(type_id < BUCKET_TYPE_NUM);
+	assert(count_index < FINGERPRINT_MAX_NUM);
 	bkt->value = (bkt->value & ~(((1UL << COUNT_LEN[type_id][count_index]) - 1UL) << COUNT_LOC[type_id][count_index])) | ((count_value & ((1UL << COUNT_LEN[type_id][count_index]) - 1UL)) << COUNT_LOC[type_id][count_index]);
 }
 
