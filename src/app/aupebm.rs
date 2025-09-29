@@ -11,6 +11,8 @@ use crate::graph::ByzConnGraph;
 use super::bitmatcher::BM;
 use crate::app::bitmatcher::ffi::BitMatcher;
 
+use std::sync::Mutex;
+
 const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
@@ -121,7 +123,7 @@ pub struct AupeBM {
     n_received: usize,
     n_byzantine_received: usize,
 
-    sketch: BM,
+    sketch: Mutex<BM>,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
 }
@@ -340,7 +342,7 @@ impl App for AupeBM {
             n_received: 0,
             n_byzantine_received: 0,
 
-            sketch: BM::new(),
+            sketch: BM::new().into(),
             to_conctact: Vec::new(),
             oldest: 0,
         }
@@ -351,7 +353,7 @@ impl App for AupeBM {
         self.params = init.clone();
 
         // Init preallocated vectors
-        self.sketch.init(self.params.nodes, self.params.clone());
+        self.sketch.lock().unwrap().init(self.params.nodes, self.params.clone());
 
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
@@ -367,7 +369,7 @@ impl App for AupeBM {
             self.update_samples(&view[..]);
             self.view = view;
 
-            self.sketch.update_freq(self.view.clone());
+            self.sketch.lock().unwrap().update_freq(self.view.clone());
             //self.sketch.debiais_stream(self.view.clone());
         }
 
@@ -430,8 +432,9 @@ impl App for AupeBM {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        v_push = self.sketch.debiais_stream(v_push);
-                        v_pull = self.sketch.debiais_stream(v_pull);
+                        let mut sketch = self.sketch.lock().unwrap();
+                        v_push = sketch.debiais_stream(v_push);
+                        v_pull = sketch.debiais_stream(v_pull);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
@@ -464,9 +467,10 @@ impl App for AupeBM {
                             self.update_contact(*p); // if trusted
                         });
 
+                    let mut sketch = self.sketch.lock().unwrap();
                     if self.is_trusted{
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-                            self.sketch.print();
+                            sketch.print();
                         }
                         let contactlist: Vec<PeerRef> = self.to_conctact.iter()
                             .filter(|x| **x!=self.my_id) // contact only not contacted nodes
@@ -474,11 +478,12 @@ impl App for AupeBM {
                             .collect::<Vec<_>>();
 
                         for p in contactlist {
-                            net.send(p, Msg::MergeRequest(self.sketch.getdata()));
+                            net.send(p, Msg::MergeRequest(sketch.getdata()));
                         }
                     }
                     if self.my_id == self.params.n_byzantine{ //} && DEBUG{
-                        self.sketch.print();
+                        
+                        sketch.print();
                     }
                     
                     net.send(self.my_id, Msg::SelfNotif);
@@ -495,7 +500,8 @@ impl App for AupeBM {
                         .count();
                     self.v_pull.extend(lst);
                     
-                   self.sketch.update_freq(lst.clone());
+                   let mut sketch = self.sketch.lock().unwrap();
+                   sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
@@ -508,7 +514,8 @@ impl App for AupeBM {
                     // create a vector containing only item from 
                     let mut lst = Vec::new();
                     lst.push(from);
-                    self.sketch.update_freq(lst.clone());
+                    let mut sketch = self.sketch.lock().unwrap();
+                    sketch.update_freq(lst.clone());
                 },
 
                 Msg::MergeRequest(other_sketch) => {
@@ -516,9 +523,10 @@ impl App for AupeBM {
                     if self.is_trusted{
                         /* 1. Receive sketch */
                         /* 2. Send yours */
-                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
+                        let mut sketch = self.sketch.lock().unwrap();
+                        net.send(from, Msg::MergeReply(sketch.getdata()));
                         /* 3. Merge */
-                        self.sketch.merge(other_sketch); 
+                        sketch.merge(other_sketch); 
                         
                     }else {
                         println!("message MergeR ");
@@ -527,7 +535,8 @@ impl App for AupeBM {
                 Msg::MergeReply(other_sketch) => {
                     //println!("node {} receive MergeReply from {}", self.my_id, from);
                     if self.is_trusted{
-                        self.sketch.merge(other_sketch);
+                        let mut sketch = self.sketch.lock().unwrap();
+                        sketch.merge(other_sketch);
                         
                     }
                 },
