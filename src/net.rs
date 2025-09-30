@@ -3,6 +3,7 @@ use rand::{rng, Rng, SeedableRng};
 use rand::rngs::StdRng;
 use rand::prelude::SliceRandom;
 //use super::metrics::Metric;
+pub const SEED: u64 = 4;
 
 const DEBUG: bool = false;
 const STEP_LENGTH: u64 = 1;
@@ -55,11 +56,12 @@ struct NetHandler<A> where A: App + Send {
     outbox: Vec<Box<Message<A::Msg>>>,
     metrics: A::Metrics,
     n_recv: usize,
+    myrng: StdRng,
 }
 
 impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
     fn sample_peers(&self, n: usize) -> Vec<PeerRef> {
-        let mut rng = rng(); // let mut rng: StdRng = SeedableRng::from_seed(SEED); 
+        let mut rng = self.myrng.clone();; // let mut rng: StdRng = SeedableRng::from_seed(SEED); 
         if n <= self.nproc / 10 {
             let mut res = Vec::new();
             while res.len() < n {
@@ -137,6 +139,7 @@ impl<A: App + Send> Simulator<A> {
                     outbox: Vec::new(),
                     metrics: A::Metrics::empty(),
                     n_recv: 0,
+                    myrng: StdRng::seed_from_u64(SEED),
                 };
                 proc.state.init(proc.id, &mut handler, init);
                 handler.metrics = proc.state.metrics(&mut handler);
@@ -254,6 +257,7 @@ impl<A: App + Send> Simulator<A> {
                     outbox: Vec::new(),
                     metrics: A::Metrics::empty(),
                     n_recv: to_handle.len(),
+                    myrng: StdRng::seed_from_u64(SEED),
                 };
                 to_handle.sort_by(|a, b| a.arrival_time.cmp(&b.arrival_time));
                 
