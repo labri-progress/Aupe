@@ -11,8 +11,11 @@ use cxx::UniquePtr;
 use cxx::CxxString;
 use std::pin::Pin;
 
-#[cxx::bridge(namespace = "org::blobstore")]
 
+use std::sync::{Arc, Mutex};
+use rayon::prelude::*;
+
+#[cxx::bridge(namespace = "org::blobstore")]
 pub mod ffi {
     unsafe extern "C++" {
         include!("aupe/include/bitmatcher.h");
@@ -34,7 +37,7 @@ impl Clone for BM {
     fn clone(&self) -> Self {
         BM {
             params: self.params.clone(),
-            matrix: self.matrix.as_ref().unwrap().clone(), 
+            matrix: self.matrix.clone(), //.as_ref().unwrap().clone(), 
             key_len: self.key_len,
             min_value: self.min_value,
             omniscient_memory: self.omniscient_memory.clone(),
@@ -49,7 +52,7 @@ use cxx::let_cxx_string;
 
 pub struct BM {
     pub params: Init,
-    pub matrix: UniquePtr<BitMatcher>,
+    pub matrix: Arc<Mutex<UniquePtr<BitMatcher>>>,
     pub key_len: usize,
     pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
@@ -66,7 +69,7 @@ impl BM {
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         //println!("insert item: {}", item_str);
         let_cxx_string!(key = item_str);
-        self.matrix.as_mut().unwrap().Insert(&key, self.key_len as i16)
+        self.matrix.lock().unwrap().as_mut().unwrap().Insert(&key, self.key_len as i16)
     }
     
     /// Estime la fréquence d'un élément
@@ -74,7 +77,7 @@ impl BM {
 
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         let_cxx_string!(key = item_str);
-        let result = self.matrix.as_mut().unwrap().Query(&key, self.key_len as i16);
+        let result = self.matrix.lock().unwrap().as_mut().unwrap().Query(&key, self.key_len as i16);
         //println!("item {} occurence {}", item, result);
         if result !=0.0 && result < self.min_value {
             self.min_value = result;
@@ -85,7 +88,7 @@ impl BM {
     pub fn new() -> Self {
         Self {
             params: Init::default(),
-            matrix: ffi::new_bitmatcher(0),
+            matrix: Arc::new(Mutex::new(ffi::new_bitmatcher(0))),
             key_len: 4,
             min_value: f64::MAX,
             omniscient_memory: Vec::new(),
@@ -94,7 +97,7 @@ impl BM {
     
     pub fn print(& self) {
         //println!("BM of 2 arrays, each of {:?} buckets of size 64 bits", self.params.n_bucket); 
-        self.matrix.print_buckets();
+        self.matrix.lock().unwrap().print_buckets();
         //println!("\nmin_value {}", self.min_value);
     }
 
@@ -113,7 +116,7 @@ impl BM {
         /* if self.params.n_bucket == 0 {
             self.params.n_bucket = self.params.space * 1024 / 8 / 2;
         } */
-        self.matrix = ffi::new_bitmatcher(self.params.n_bucket);
+        self.matrix = Arc::new(Mutex::new(ffi::new_bitmatcher(self.params.n_bucket)));
         
     }
 
@@ -125,11 +128,11 @@ impl BM {
     }
 
     pub fn getdata(&self) -> UniquePtr<BitMatcher>{
-        return self.matrix.as_ref().unwrap().clone()
+        return self.matrix.lock().unwrap().as_ref().unwrap().clone()
     }
 
     pub fn copy(&mut self, other: &BitMatcher) {
-        self.matrix = other.clone();
+        self.matrix = Arc::new(Mutex::new(other.clone()));
     }
 
     pub fn merge(&mut self, other: &BitMatcher) {
@@ -137,7 +140,7 @@ impl BM {
         self.matrix.print_buckets();
         println!("SECOND");
         other.print_buckets(); */
-        self.matrix.as_mut().unwrap().merge(&other);
+        self.matrix.lock().unwrap().as_mut().unwrap().merge(&other);
         /* println!("RESULT");
         self.matrix.print_buckets(); */
     }
