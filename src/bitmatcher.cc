@@ -16,10 +16,6 @@ std::unique_ptr<BitMatcher> BitMatcher::clone() const{
     copy->h2 = h2;
 
     for (int i = 0; i < 2; i++) {
-        /* delete copy->bucket[i]; // in case constructor allocated them
-        copy->bucket[i] = bucket[i];
-        delete copy->bobhash[i];
-        copy->bobhash[i] = bobhash[i]; */
 		copy->bucket[i] = new ec_bucket[bucket_num];
 		std::memcpy(copy->bucket[i], bucket[i], sizeof(ec_bucket) * bucket_num);
 		copy->bobhash[i] = new BOBHash(*bobhash[i]);

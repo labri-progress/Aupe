@@ -518,16 +518,15 @@ impl App for AupeBM {
                     if self.is_trusted{
                         /* 1. Receive sketch */
                         /* 2. Send yours */
-                        /* let mut sketch = self.sketch.lock().unwrap();
-                        net.send(from, Msg::MergeReply(sketch.getdata())); */
+                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
                         /* 3. Merge */
-                        //sketch.merge(other_sketch); 
+                        self.sketch.merge(other_sketch); 
 
                         /* 1. Receive sketch */
                         /* 2. Merge */
-                        self.sketch.merge(other_sketch);
+                        //self.sketch.merge(other_sketch);
                         /* 2. Send results */
-                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
+                        //net.send(from, Msg::MergeReply(self.sketch.getdata()));
                         
                     }else {
                         println!("message MergeR ");
@@ -536,10 +535,10 @@ impl App for AupeBM {
                 Msg::MergeReply(other_sketch) => {
                     //println!("node {} receive MergeReply from {}", self.my_id, from);
                     if self.is_trusted{
-                        //self.sketch.lock().unwrap().merge(other_sketch);
+                        self.sketch.merge(other_sketch);
                         
                         /* update my sketch */
-                        self.sketch.copy(other_sketch);
+                        //self.sketch.copy(other_sketch);
                         
                     }
                 },
