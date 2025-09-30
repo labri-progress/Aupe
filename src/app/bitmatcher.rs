@@ -24,8 +24,7 @@ pub mod ffi {
 
         fn clone(self: &BitMatcher)-> UniquePtr<BitMatcher>;
         fn new_bitmatcher(bucket: u64) -> UniquePtr<BitMatcher>;
-        fn Insert(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16); //key: &str,key_len: u16);
-        //double Query(const char *key, const int16_t key_len = 0) 
+        fn Insert(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16);
         fn Query(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16) -> f64;
         fn print_buckets(self: &BitMatcher);
         fn merge(self: Pin<&mut BitMatcher>, other: &BitMatcher);
@@ -37,7 +36,7 @@ impl Clone for BM {
     fn clone(&self) -> Self {
         BM {
             params: self.params.clone(),
-            matrix: self.matrix.clone(), //.as_ref().unwrap().clone(), 
+            matrix: self.matrix.clone(), 
             key_len: self.key_len,
             min_value: self.min_value,
             omniscient_memory: self.omniscient_memory.clone(),
@@ -67,7 +66,6 @@ impl BM {
     pub fn insert(&mut self, item: &usize) { 
 
         let item_str = format!("{:0>width$}", item, width = self.key_len);
-        //println!("insert item: {}", item_str);
         let_cxx_string!(key = item_str);
         self.matrix.lock().unwrap().as_mut().unwrap().Insert(&key, self.key_len as i16)
     }
@@ -78,7 +76,6 @@ impl BM {
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         let_cxx_string!(key = item_str);
         let result = self.matrix.lock().unwrap().as_mut().unwrap().Query(&key, self.key_len as i16);
-        //println!("item {} occurence {}", item, result);
         if result !=0.0 && result < self.min_value {
             self.min_value = result;
         }
@@ -112,10 +109,7 @@ impl BM {
     
         self.getparams(init.clone());
         self.key_len = count_digits(nodes -1);
-        //println!("init {:?}", self.params);
-        /* if self.params.n_bucket == 0 {
-            self.params.n_bucket = self.params.space * 1024 / 8 / 2;
-        } */
+        
         self.matrix = Arc::new(Mutex::new(ffi::new_bitmatcher(self.params.n_bucket)));
         
     }
@@ -136,13 +130,9 @@ impl BM {
     }
 
     pub fn merge(&mut self, other: &BitMatcher) {
-        /* println!("FISRT");
-        self.matrix.print_buckets();
-        println!("SECOND");
-        other.print_buckets(); */
+        
         self.matrix.lock().unwrap().as_mut().unwrap().merge(&other);
-        /* println!("RESULT");
-        self.matrix.print_buckets(); */
+        
     }
     
 
