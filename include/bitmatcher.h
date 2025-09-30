@@ -243,10 +243,9 @@ static inline __attribute__((always_inline)) void set_bucket_count(ec_bucket* bk
 			else {fp = 1;} \
 			}\
 		h1 = h1 % bucket_num; \
-		assert( (h1^(fp)) <= bucket_num - 1 );\
 		h2 = ( h1 ^ (fp) ) % bucket_num; \
 		uint hash[2] = {h1, h2};
-
+//assert( (h1^(fp)) <= bucket_num - 1 );\
 //using namespace std;
 namespace org {
 namespace blobstore {
