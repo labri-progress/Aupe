@@ -66,29 +66,6 @@ void BitMatcher::print_buckets() const {
 	} */
 }
 
-int BitMatcher::CM_insert(const char *key, const int16_t key_len) {
-	uint cm_idx[CM_SKETCH_WIDTH];
-	for (int i = 0; i < CM_SKETCH_WIDTH; i++) {
-		cm_idx[i] = (cm_hash[i]->run(key, key_len)) % cm_sketch_num;
-		if ( cm_sketch[i][cm_idx[i]] != CM_MAX_CNT ) {
-			cm_sketch[i][cm_idx[i]]++;
-		}
-	}
-	return 0;
-}
-
-uint64_t BitMatcher::CM_query(const char *key, const int16_t key_len) {
-	uint cm_idx[CM_SKETCH_WIDTH];
-	int min_value = CM_MAX_CNT;
-	for (int i = 0; i < CM_SKETCH_WIDTH; i++) {
-		cm_idx[i] = (cm_hash[i]->run(key, key_len)) % cm_sketch_num;
-		if (cm_sketch[i][cm_idx[i]] < min_value) {
-			min_value = cm_sketch[i][cm_idx[i]];
-		}
-	}
-	return (min_value < CM_MAX_CNT)? min_value: ((1L<<60));
-}
-
 void BitMatcher::copy_items_one_by_one(ec_bucket *dst, ec_bucket *src) {
 	const uint32_t src_type_id = get_bucket_type_id(src);
 	const uint32_t dst_type_id = get_bucket_type_id(dst);
@@ -478,77 +455,8 @@ double BitMatcher::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_id
 	}
 }
 
-struct FingerprintKeyList {
-    uint8_t fps[20];  // max 20 fingerprints
-    uint8_t count;   // number of valid fingerprints in the bucket
-};
 
-void BitMatcher::merge(const BitMatcher& other) {
-    BitMatcher result(bucket_num);
-
-    std::vector<FingerprintKeyList> all_tuples(bucket_num);
-
-
-    auto collect = [&](const BitMatcher& bm) {
-		for (int i = 0; i < 2; ++i) {
-			for (uint j = 0; j < bm.bucket_num; ++j) {
-				ec_bucket* b = bm.bucket[i] + j;
-				uint32_t type_id = get_bucket_type_id(b);
-				uint8_t slot_num = get_item_num_in_bucket_type(type_id);
-				for (uint k = 0; k < slot_num; ++k) {
-					uint8_t fp = get_bucket_fingerprint(b, k);
-					if (fp != 0) {
-						uint bucket_idx0 = j;
-						if (i != 0) {
-							bucket_idx0 = (j ^ fp) % bucket_num;
-						}
-
-						// insert fp into small array if not already present
-						auto& lst = all_tuples[bucket_idx0];
-						bool exists = false;
-						for (uint8_t m = 0; m < lst.count; ++m)
-							if (lst.fps[m] == fp) { exists = true; break; }
-						if (!exists && lst.count < 20) lst.fps[lst.count++] = fp; //2 * 2* 5
-					}
-				}
-			}
-		}
-	};
-
-
-    // Collect from both
-    collect(*this);
-    collect(other);
-
-	//printf("all_tuples %zu\n", all_tuples.size());
-
-    // Merge counts
-
-	for (uint j = 0; j < bucket_num; ++j) {
-		auto& lst = all_tuples[j];
-		for (uint8_t idx = 0; idx < lst.count; ++idx) {
-			uint8_t fp = lst.fps[idx];
-			double cnt_this  = this->QueryByFp(fp, j);
-			double cnt_other = other.QueryByFp(fp, j);
-			double avg = (cnt_this + cnt_other)/2.0;
-			int mean = ((fp & 0x1) == 1 || cnt_this * cnt_other == 0)
-						? static_cast<int>(std::ceil(avg))
-						: static_cast<int>(std::floor(avg));
-			for (int c = 0; c < mean; ++c) {
-				result.InsertByFp(fp, j);
-			}
-		}
-	}
-
-
-	for (int i = 0; i < 2; i++) {
-        std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
-		delete[] result.bucket[i];
-		delete result.bobhash[i];
-	}
-}
-
-/* struct FingerprintKey {
+struct FingerprintKey {
     uint32_t bucket_idx;
     uint8_t fp;
 
@@ -626,7 +534,7 @@ void BitMatcher::merge(const BitMatcher& other) {
 		delete[] result.bucket[i];
 		delete result.bobhash[i];
 	}
-} */
+}
 
 int BitMatcher::Mem(const char *key, const int16_t key_len) {
 	GET_HASH_VALUE_SENTENCE(key);
