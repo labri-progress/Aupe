@@ -242,7 +242,7 @@ bool BitMatcher::solve_overflow_locally(ec_bucket* b, const int finger_idx, cons
 					return true;
 				} else {
 					set_bucket_fingerprint(b, finger_idx, out_finger);
-					printf("type_id = %d", type_id);
+					//printf("type_id = %d", type_id);
 					set_bucket_count(b, finger_idx, 0, type_id); //out_count);
 					return false;
 				}
