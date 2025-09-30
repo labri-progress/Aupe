@@ -128,6 +128,10 @@ impl BM {
         return self.matrix.as_ref().unwrap().clone()
     }
 
+    pub fn copy(&mut self, other: &BitMatcher) {
+        self.matrix = other.clone();
+    }
+
     pub fn merge(&mut self, other: &BitMatcher) {
         /* println!("FISRT");
         self.matrix.print_buckets();

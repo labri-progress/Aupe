@@ -500,8 +500,7 @@ impl App for AupeBM {
                         .count();
                     self.v_pull.extend(lst);
                     
-                   let mut sketch = self.sketch.lock().unwrap();
-                   sketch.update_freq(lst.clone());
+                   self.sketch.lock().unwrap().update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
@@ -523,10 +522,17 @@ impl App for AupeBM {
                     if self.is_trusted{
                         /* 1. Receive sketch */
                         /* 2. Send yours */
-                        let mut sketch = self.sketch.lock().unwrap();
-                        net.send(from, Msg::MergeReply(sketch.getdata()));
+                        /* let mut sketch = self.sketch.lock().unwrap();
+                        net.send(from, Msg::MergeReply(sketch.getdata())); */
                         /* 3. Merge */
-                        sketch.merge(other_sketch); 
+                        //sketch.merge(other_sketch); 
+
+                        /* 1. Receive sketch */
+                        /* 2. Merge */
+                        let mut sketch = self.sketch.lock().unwrap();
+                        sketch.merge(other_sketch);
+                        /* 2. Send results */
+                        net.send(from, Msg::MergeReply(sketch.getdata()));
                         
                     }else {
                         println!("message MergeR ");
@@ -535,8 +541,10 @@ impl App for AupeBM {
                 Msg::MergeReply(other_sketch) => {
                     //println!("node {} receive MergeReply from {}", self.my_id, from);
                     if self.is_trusted{
-                        let mut sketch = self.sketch.lock().unwrap();
-                        sketch.merge(other_sketch);
+                        //self.sketch.lock().unwrap().merge(other_sketch);
+                        
+                        /* update my sketch */
+                        self.sketch.lock().unwrap().copy(other_sketch);
                         
                     }
                 },
