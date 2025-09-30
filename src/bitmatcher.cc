@@ -553,8 +553,8 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 	for (int i = 0; i < 2; i++) {
         std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
-		delete[]result.bucket[i];
-		delete result.bobhash[i];
+		/* delete[]result.bucket[i];
+		delete result.bobhash[i]; */
 	}
 }
 
@@ -648,12 +648,12 @@ void BitMatcher::Delete(char *key, const int16_t key_len) {
 }
 
 BitMatcher::~BitMatcher() {
-	/* for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 2; i++) {
 		delete[]bucket[i];
 	}
 	for (int i = 0; i < 1; i++) {
 		delete bobhash[i];
-	} */
+	}
 }
 
 } // namespace blobstore
