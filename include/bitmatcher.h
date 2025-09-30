@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "BOBHash.h"
 #include <stdint.h>
-#define NDEBUG
+//#define NDEBUG
 #include <cassert>
 #include <unordered_map>
 #include "BOBHash.h"
