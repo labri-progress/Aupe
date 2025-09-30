@@ -190,6 +190,8 @@ static inline __attribute__((always_inline)) uint8_t get_item_num_in_bucket_type
 		case 0: return 5;
 		case 1 ... 3: return 4;
 		case 4 ... 11: return 3;
+		case 12 ... 28: return 2;
+		case 29 ... 29: return 1;
 		default: assert(0);
 		return 0; // Should never reach here
 	}
@@ -257,18 +259,11 @@ private:
     ec_bucket *bucket[2];
     BOBHash * bobhash[2];
 
-    #define CM_SKETCH_WIDTH 2
-    #define CM_MAX_CNT 3
-    uint cm_sketch_num;
-    uint8_t *cm_sketch[CM_SKETCH_WIDTH];
-    BOBHash *cm_hash[CM_SKETCH_WIDTH];
 
 public:
     BitMatcher(uint64_t _bucket);
 	
     void print_buckets() const;
-    int CM_insert(const char *key, const int16_t key_len = 0);
-    uint64_t CM_query(const char *key, const int16_t key_len = 0);
     void copy_items_one_by_one(ec_bucket *dst, ec_bucket *src);
     void copy_items_upflow(ec_bucket *dst, ec_bucket *src);
     bool kick_to(int origin_hash_table_idx, uint32_t origin_bucket_item_idx, uint8_t fingerprint_value, uint64_t count_value);
