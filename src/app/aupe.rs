@@ -523,7 +523,6 @@ impl App for Aupe {
                         /* 1. Receive sketch */
                         /* 2. Merge */
                         self.sketch.merge(other_sketch.to_vec());
-
                         /* 2. Send results */
                         net.send(from, Msg::MergeReply(self.sketch.getdata()));
                         
