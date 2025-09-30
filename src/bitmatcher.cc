@@ -265,7 +265,7 @@ bool BitMatcher::solve_overflow_locally(ec_bucket* b, const int finger_idx, cons
 					return true;
 				} else {
 					set_bucket_fingerprint(b, finger_idx, out_finger);
-					printf("type_id = %d\n", type_id);
+					printf("type_id = %d", type_id);
 					set_bucket_count(b, finger_idx, 0, type_id); //out_count);
 					return false;
 				}
@@ -554,8 +554,8 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 	for (int i = 0; i < 2; i++) {
         std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
-		/* delete[]result.bucket[i];
-		delete result.bobhash[i]; */
+		delete[] result.bucket[i];
+		delete result.bobhash[i];
 	}
 }
 
@@ -649,12 +649,12 @@ void BitMatcher::Delete(char *key, const int16_t key_len) {
 }
 
 BitMatcher::~BitMatcher() {
-	for (int i = 0; i < 2; i++) {
+	/* for (int i = 0; i < 2; i++) {
 		delete[]bucket[i];
 	}
 	for (int i = 0; i < 1; i++) {
 		delete bobhash[i];
-	}
+	} */
 }
 
 } // namespace blobstore
