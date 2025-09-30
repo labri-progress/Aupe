@@ -110,7 +110,7 @@ const uint8_t BUCKET_ITEM_SIZE[BUCKET_TYPE_NUM][CONFIG_LENGTH] = {
 	{26, 2, 19, 25, 0, 0, 0},
 	{27, 2, 20, 24, 0, 0, 0},
 	{28, 2, 21, 23, 0, 0, 0},
-	{29, 1, 60, 0, 0, 0, 0}
+	{29, 1, 52, 0, 0, 0, 0}
 };
 
 define_type_5_fingerprint(0, 2, 3, 4, 5, 6);
@@ -150,6 +150,7 @@ static inline void init_bucket_parameters() {
 		for (int j = 2; j < 2+fingerprint_num; j++) {
 			total_bit += BUCKET_ITEM_SIZE[i][j];
 		}
+		//printf("Type %d: fingerprint num %d, total bit %d %d\n", i, fingerprint_num, total_bit, 8 * sizeof(ec_bucket));
 		assert(total_bit == 8 * sizeof(ec_bucket));
 		for (int j = 2+fingerprint_num; j < CONFIG_LENGTH; j++) {
 			assert(BUCKET_ITEM_SIZE[i][j] == 0);
