@@ -77,7 +77,7 @@ typedef struct {
 //       0: bucket_type_index, i.e. the type_id of the bucket
 //       5: bucket_fingerprint_size, i.e. how many fingerprints are in the bucket
 //       2, 3, 4, 5, 6: the each item bit size
-#define BUCKET_TYPE_NUM 12
+#define BUCKET_TYPE_NUM 30 //12
 #define FINGERPRINT_MAX_NUM 5
 #define CONFIG_LENGTH (2+FINGERPRINT_MAX_NUM)
 const uint8_t BUCKET_ITEM_SIZE[BUCKET_TYPE_NUM][CONFIG_LENGTH] = {
@@ -92,7 +92,25 @@ const uint8_t BUCKET_ITEM_SIZE[BUCKET_TYPE_NUM][CONFIG_LENGTH] = {
 	{8, 3, 8, 9, 19, 0, 0},
 	{9, 3, 9, 10, 17, 0, 0},
 	{10, 3, 10, 11, 15, 0, 0},
-	{11, 3, 11, 12, 13, 0, 0}
+	{11, 3, 11, 12, 13, 0, 0},
+	{12, 2, 5, 39, 0, 0, 0},
+	{13, 2, 6, 38, 0, 0, 0},
+	{14, 2, 7, 37, 0, 0, 0},
+	{15, 2, 8, 36, 0, 0, 0},
+	{16, 2, 9, 35, 0, 0, 0},
+	{17, 2, 10, 34, 0, 0, 0},
+	{18, 2, 11, 33, 0, 0, 0},
+	{19, 2, 12, 32, 0, 0, 0},
+	{20, 2, 13, 31, 0, 0, 0},
+	{21, 2, 14, 30, 0, 0, 0},
+	{22, 2, 15, 29, 0, 0, 0},
+	{23, 2, 16, 28, 0, 0, 0},
+	{24, 2, 17, 27, 0, 0, 0},
+	{25, 2, 18, 26, 0, 0, 0},
+	{26, 2, 19, 25, 0, 0, 0},
+	{27, 2, 20, 24, 0, 0, 0},
+	{28, 2, 21, 23, 0, 0, 0},
+	{29, 1, 60, 0, 0, 0, 0}
 };
 
 define_type_5_fingerprint(0, 2, 3, 4, 5, 6);
