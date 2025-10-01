@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 use rand::rngs::ThreadRng;
 use structopt::StructOpt;
 
@@ -6,7 +6,9 @@ use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample_nocopy};
 use crate::graph::ByzConnGraph;
-
+use rand::{SeedableRng};
+use rand::rngs::StdRng;
+use crate::util::SEED2;
 
 pub enum Msg {
     SelfNotif,
@@ -65,6 +67,7 @@ pub struct Basalt {
 
     n_received: usize,
     n_byzantine_received: usize,
+    rng: StdRng,
 }
 
 struct ViewEntry {
@@ -198,7 +201,7 @@ impl Basalt {
         }
     }
 
-    fn get_exchange_peer(&mut self, rng: &mut ThreadRng) -> PeerRef {
+    fn get_exchange_peer(&mut self, rng: &mut StdRng) -> PeerRef {
         if self.params.use_hit_counter {
             println!("Using hit counter");
             let mut ret = 0;
@@ -231,19 +234,20 @@ impl App for Basalt {
 
             n_received: 0,
             n_byzantine_received: 0,
+            rng: StdRng::seed_from_u64(SEED2),
         }
     }
     
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-
+        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
-            let mut rng = thread_rng();
+            //let mut rng = thread_rng();
             self.view = (0..self.params.view_size)
                 .map(|_| ViewEntry{
-                    seed: rng.random_range(0..std::u64::MAX),
+                    seed: self.rng.random_range(0..std::u64::MAX),
                     peer: id,
                     hits: 1
                 }).collect();
@@ -263,16 +267,16 @@ impl App for Basalt {
                     if net.time() >= self.params.attack_start_time {
                         net.sample_peers(self.params.byzantine_flood_factor)
                             .iter()
-                            .for_each(|p| net.send(*p, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size))));
+                            .for_each(|p| net.send(*p, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng))));
                     }
                 },
                 Msg::Pull => {
-                    net.send(from, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size)));
+                    net.send(from, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                 },
                 _ => (),
             }
         } else {
-            let mut rng = thread_rng();
+            let mut rng = StdRng::seed_from_u64(SEED2); //thread_rng();
             let view = self.view.iter()
                 .map(|entry| entry.peer)
                 .collect::<Vec<_>>();

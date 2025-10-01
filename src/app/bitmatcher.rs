@@ -11,6 +11,7 @@ use cxx::UniquePtr;
 use cxx::CxxString;
 use std::pin::Pin;
 
+use crate::util::SEED2;
 
 #[cxx::bridge(namespace = "org::blobstore")]
 pub mod ffi {
@@ -146,7 +147,7 @@ impl BM {
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         
         let mut outputstream = Vec::new();
-        let mut rng = rng();
+        let mut rng =  StdRng::seed_from_u64(SEED2); //rng();
         
         for element in &inputstream {
             

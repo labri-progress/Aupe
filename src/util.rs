@@ -3,6 +3,9 @@ use fasthash::*;
 use rand::{rng, Rng};
 use super::net::PeerRef;
 use rand::seq::SliceRandom;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+pub const SEED2: u64 = 42;
 
 pub fn either_or_if_both<T: Clone>(a: &Option<T>, b: &Option<T>, f: fn(&T, &T) -> T) -> Option<T> {
     match (a, b) {
@@ -20,10 +23,9 @@ pub fn hash(seed: u64, peer: PeerRef) -> u64 {
     s.finish()
 }
 
-pub fn sample_exclude<T>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: usize)
+pub fn sample_exclude<T, R: Rng + ?Sized>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: usize, rng: &mut R)
         where
             T: PartialEq + Clone {
-    let mut rng = rng();
 
     while to.len() < n {
         let i = rng.random_range(0..from.len());
@@ -33,17 +35,15 @@ pub fn sample_exclude<T>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: us
     }
 }
 
-pub fn sample<T: PartialEq + Clone>(from: &[T], n: usize) -> Vec<T> {
+pub fn sample<T: PartialEq + Clone, R: Rng + ?Sized>(from: &[T], n: usize, rng: &mut R) -> Vec<T> {
     if n >= from.len() {
         return from.to_vec();
     }
-
-    let mut rng = rng();
     
     if n >= from.len() / 4 {
         let mut ret = from.to_vec();
         //ret.shuffle(&mut rng);
-        ret.shuffle(&mut rng);
+        ret.shuffle(rng);
         ret.drain(..n).collect::<Vec<T>>()
     } else {
         let mut ret = vec![];
@@ -57,16 +57,16 @@ pub fn sample<T: PartialEq + Clone>(from: &[T], n: usize) -> Vec<T> {
     }
 }
 
-pub fn sample_nocopy<T: PartialEq + Clone>(from: &mut [T], n: usize) -> Vec<T> {
+pub fn sample_nocopy<T: PartialEq + Clone, R: Rng + ?Sized>(from: &mut [T], n: usize, rng: &mut R) -> Vec<T> {
     if n >= from.len() {
         return from.to_vec();
     }
 
-    let mut rng = rng();
+    //let mut rng = GLOBAL_RNG.lock().unwrap(); //rng();
     
     if n >= from.len() / 4 {
         //rng.shuffle(from);
-        from.shuffle(&mut rng);
+        from.shuffle(rng);
         from[..n].iter().cloned().collect::<Vec<T>>()
     } else {
         let mut ret = vec![];
