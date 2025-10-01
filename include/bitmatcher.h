@@ -176,7 +176,7 @@ static inline void init_bucket_parameters() {
 	}
 }
 
-static inline __attribute__((always_inline)) uint32_t get_bucket_type_id(ec_bucket* bkt) {
+static inline __attribute__((always_inline)) uint32_t get_bucket_type_id(const ec_bucket* bkt) {
 	return (bkt->value & (TYPE_ID_BITMASK));
 }
 
@@ -197,7 +197,7 @@ static inline __attribute__((always_inline)) uint8_t get_item_num_in_bucket_type
 	}
 }
 
-static inline __attribute__((always_inline)) uint8_t get_bucket_fingerprint(ec_bucket* bkt, int fingerprint_index) {
+static inline __attribute__((always_inline)) uint8_t get_bucket_fingerprint(const ec_bucket* bkt, int fingerprint_index) {
 	return ((bkt->value >> FINGERPRINT_LOC[fingerprint_index]) & FINGERPRINT_BITMASK);
 	// switch (fingerprint_index) {
 	// 	case 0: return (bkt->type0.fingerprint1);
@@ -277,7 +277,7 @@ public:
     //double Query(const char *key, const int16_t key_len = 0);
 	double Query(const std::string& key, int16_t key_len);
     int Mem(const char *key, const int16_t key_len = 0);
-    double Ratio();
+    double Ratio() const;
     void dump_to_file(FILE* fp);
     void Delete(char *key, const int16_t key_len = 0);
 

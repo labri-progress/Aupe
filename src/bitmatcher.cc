@@ -124,28 +124,34 @@ void BitMatcher::print_buckets() const {
 	if (bucket_num <= 20) {
 		flag = 1;
 	}
-	//this->Ratio();
-	/* if (flag){
-		for (int i = 0; i < 2; i++) {
-			printf("A %d:\n", i);
-			for (uint j = 0; j < bucket_num; j++) {
-				printf("B %d: S=%d, fp1=%d, fp2=%d, fp3=%d, fp4=%d, fp5=%d, count1=%lu, count2=%lu, count3=%lu, count4=%lu, count5=%lu\n",
-					j, get_bucket_type_id(&bucket[i][j]),
-					get_bucket_fingerprint(&bucket[i][j], 0),
-					get_bucket_fingerprint(&bucket[i][j], 1),
-					get_bucket_fingerprint(&bucket[i][j], 2),
-					get_bucket_fingerprint(&bucket[i][j], 3),
-					get_bucket_fingerprint(&bucket[i][j], 4),
-					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 0, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 1, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 2, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 3, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 4, get_bucket_type_id(&bucket[i][j])));
-			}
-		}
-	} *//* else{
-		this->Ratio();
-	} */
+	if (flag) {
+        for (int i = 0; i < 2; i++) {
+            printf("A %d:\n", i);
+            for (uint j = 0; j < bucket_num; j++) {
+                const ec_bucket* b = &bucket[i][j];  // const pointer
+                const uint32_t type_id = get_bucket_type_id(b);
+
+                printf(
+                    "B %d: S=%u, fp1=%u, fp2=%u, fp3=%u, fp4=%u, fp5=%u, "
+                    "count1=%lu, count2=%lu, count3=%lu, count4=%lu, count5=%lu\n",
+                    j,
+                    type_id,
+                    get_bucket_fingerprint(b, 0),
+                    get_bucket_fingerprint(b, 1),
+                    get_bucket_fingerprint(b, 2),
+                    get_bucket_fingerprint(b, 3),
+                    get_bucket_fingerprint(b, 4),
+                    get_bucket_count(b, 0, type_id),
+                    get_bucket_count(b, 1, type_id),
+                    get_bucket_count(b, 2, type_id),
+                    get_bucket_count(b, 3, type_id),
+                    get_bucket_count(b, 4, type_id)
+                );
+            }
+        }
+    } else {
+        //this->Ratio();
+    }
 }
 
 void BitMatcher::copy_items_one_by_one(ec_bucket *dst, ec_bucket *src) {
@@ -615,9 +621,6 @@ void BitMatcher::merge(const BitMatcher& other) {
 	all_tuples.clear();
 	for (int i = 0; i < 2; i++) {
         bucket[i] = result.bucket[i];
-		//std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
-		/* delete[] result.bucket[i];
-		delete result.bobhash[i]; */
 	}
 }
 
@@ -635,40 +638,40 @@ int BitMatcher::Mem(const char *key, const int16_t key_len) {
 	return 2;
 }
 
-double BitMatcher::Ratio() {
-	int used_num = 0;
-	int total_slot = 0;
-	std::unordered_map<uint16_t, uint64_t> type_count;
-	type_count.clear();
-	for (int i = 0; i < 2; i++) {
-		for (uint j = 0; j < bucket_num; j++) {
-			ec_bucket* b = bucket[i].data() + j;
-			const uint32_t type_id = get_bucket_type_id(b);
+double BitMatcher::Ratio() const {
+    int used_num = 0;
+    int total_slot = 0;
+    std::unordered_map<uint16_t, uint64_t> type_count;
 
-			if (type_count.find(type_id) == type_count.end()) {
-				type_count[type_id] = 1;
-			} else {
-				type_count[type_id]++;
-			}
+    for (int i = 0; i < 2; i++) {
+        for (uint j = 0; j < bucket_num; j++) {
+            const ec_bucket* b = &bucket[i][j];  // const pointer
+            const uint32_t type_id = get_bucket_type_id(b);
 
-			const uint32_t slot_num = get_item_num_in_bucket_type(type_id);
-			total_slot += slot_num;
-			const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
-			for (uint k = 0; k < fingerprint_num; k++) {
-				if ( get_bucket_count(b, k, type_id) != 0 ) { used_num++; }
-			}
-		}
-	}
+            type_count[type_id]++;
 
-	printf("The bucket number is %d\n", 2*bucket_num);
+            const uint32_t slot_num = get_item_num_in_bucket_type(type_id);
+            total_slot += slot_num;
 
-	for (int i = 0;  i < 12; i++) {
-		if (type_count.find(i) != type_count.end()) {
-			printf("type %d: %lld with ratio %.2f%%\n", i, (long long)type_count[i], ((double) type_count[i] ) * 100 / 2.0 / bucket_num);
-		}
-	}
+            const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+            for (uint k = 0; k < fingerprint_num; k++) {
+                if (get_bucket_count(b, k, type_id) != 0) {
+                    used_num++;
+                }
+            }
+        }
+    }
 
-	return used_num / (total_slot * 1.0);
+    printf("The bucket number is %u\n", 2 * bucket_num);
+
+    for (int i = 0; i < BUCKET_TYPE_NUM; i++) {
+        if (type_count.find(i) != type_count.end()) {
+            printf("type %d: %lld with ratio %.2f%%\n", 
+                i, (long long)type_count[i], ((double)type_count[i]) * 100 / (2.0 * bucket_num));
+        }
+    }
+
+    return used_num / static_cast<double>(total_slot);
 }
 
 void BitMatcher::dump_to_file(FILE* fp) {

@@ -1,22 +1,222 @@
 time       n_sent     n_recv     avgRecv    avgByzRecv pByzRecv   avgByzN    pushByzN   pullByzN   sampByzN   n_isolated avgByzSamp min        max        n_fullbyz  n_fbi      cluscoeff  MPL        id_min     id_d1      id_q1      id_med     id_q3      id_d9      id_max    
-0          1000       0          0.00       0.00       NaN        4.00       0.00       0.00       0.00       0          4.05       0          11         0          0          0.5670     1.3108     0          0          0          0          0          0          459       
-1          5402       1000       0.00       0.00       NaN        4.00       0.00       0.00       0.00       0          4.05       0          11         0          0          0.5670     1.3200     0          0          0          0          0          0          459       
-2          6104       5402       4.24       3.43       0.8094     4.00       0.00       0.00       0.00       0          4.05       0          11         0          0          0.5670     1.3237     0          0          0          0          0          0          459       
-3          6104       6104       24.21      10.88      0.4493     4.08       0.01       0.00       0.01       0          4.15       0          18         0          0          0.3304     2.0869     0          0          0          0          0          0          453       
-4          6104       6104       24.23      11.80      0.4868     4.09       0.01       0.01       0.01       0          4.15       0          17         0          0          0.1637     2.3367     0          0          0          0          0          1          450       
-5          6104       6104       24.23      13.96      0.5761     4.12       0.01       0.01       0.02       0          4.18       0          18         0          0          0.1340     2.4781     0          0          0          0          1          1          447       
-6          6104       6104       24.25      13.71      0.5653     4.19       0.01       0.02       0.02       0          4.25       0          18         0          0          0.1160     2.5819     0          0          0          0          1          1          444       
-7          6104       6104       24.22      13.33      0.5503     4.27       0.01       0.02       0.03       0          4.33       0          18         0          0          0.1149     2.6973     0          0          0          0          1          1          438       
-8          6104       6104       24.20      14.24      0.5885     4.34       0.01       0.03       0.04       0          4.41       0          18         0          0          0.1128     2.7601     0          0          0          0          1          2          435       
-9          6104       6104       24.19      13.34      0.5516     4.42       0.01       0.04       0.04       0          4.49       0          18         0          0          0.1087     2.9767     0          0          0          0          1          2          428       
-10         6104       6104       24.20      13.04      0.5391     4.50       0.02       0.04       0.05       0          4.60       0          18         0          0          0.1075     2.9377     0          0          0          0          1          3          424       
-11         6104       6104       24.22      13.04      0.5385     4.65       0.02       0.06       0.06       0          4.78       0          18         0          0          0.1075     2.9789     0          0          0          0          2          3          414       
-12         6104       6104       24.17      13.37      0.5533     4.86       0.03       0.08       0.08       0          4.94       0          18         0          0          0.1146     3.0841     0          0          0          1          2          4          405       
-13         6104       6104       24.20      13.25      0.5477     4.99       0.03       0.09       0.09       0          5.09       0          18         0          0          0.1199     3.0417     0          0          0          1          2          4          396       
-14         6104       6104       24.20      12.78      0.5283     5.17       0.04       0.10       0.11       0          5.28       0          18         0          0          0.1256     3.0835     0          0          0          1          3          5          387       
-15         6104       6104       24.16      12.67      0.5245     5.45       0.05       0.12       0.13       0          5.50       0          18         0          0          0.1349     3.1235     0          0          0          1          3          6          370       
-16         6104       6104       24.18      13.27      0.5489     5.70       0.06       0.15       0.15       0          5.71       0          18         0          0          0.1429     3.1942     0          0          0          2          4          7          351       
-17         6104       6104       24.15      13.79      0.5711     6.02       0.08       0.17       0.18       0          6.05       0          18         0          0          0.1560     3.1372     0          0          0          2          5          7          331       
-18         6104       6104       24.11      13.31      0.5521     6.42       0.10       0.21       0.21       1          6.39       0          18         0          0          0.1684     3.1861     0          0          1          3          6          9          308       
-19         6104       6104       24.10      14.04      0.5827     6.75       0.13       0.25       0.23       0          6.69       0          18         0          0          0.1779     3.2057     0          0          1          3          6          10         283       
-20         6104       6104       24.10      14.82      0.6149     7.08       0.15       0.27       0.25       0          7.00       0          18         0          0          0.1895     3.1709     0          0          1          3          7          11         263       
+0          1000       0          0.00       0.00       NaN        3.00       0.00       0.00       0.00       0          3.05       0          9          0          0          0.5650     1.3092     0          0          0          0          0          0          537       
+1          4606       1000       0.00       0.00       NaN        3.00       0.00       0.00       0.00       0          3.05       0          9          0          0          0.5650     1.3043     0          0          0          0          0          0          537       
+2          5412       4606       2.83       2.00       0.7079     3.00       0.00       0.00       0.00       0          3.05       0          9          0          0          0.5650     1.2734     0          0          0          0          0          0          537       
+3          5412       5412       22.87      7.36       0.3219     3.08       0.01       0.01       0.01       0          3.14       0          18         0          0          0.2819     2.1742     0          0          0          0          0          1          534       
+4          5412       5412       22.86      9.01       0.3944     3.11       0.01       0.01       0.01       0          3.15       0          16         0          0          0.1286     2.3074     0          0          0          0          0          1          530       
+5          5412       5412       22.86      11.06      0.4838     3.12       0.01       0.01       0.01       0          3.16       0          16         0          0          0.1086     2.5896     0          0          0          0          1          1          526       
+A 0:
+B 0: S=0, fp1=0, fp2=0, fp3=73, fp4=246, fp5=173, count1=0, count2=0, count3=1, count4=1, count5=1
+B 1: S=0, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=1, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=0, fp2=125, fp3=13, fp4=129, fp5=71, count1=0, count2=1, count3=1, count4=1, count5=1
+B 3: S=0, fp1=137, fp2=75, fp3=255, fp4=229, fp5=140, count1=1, count2=1, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=227, count1=0, count2=0, count3=0, count4=0, count5=1
+B 1: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 2: S=0, fp1=0, fp2=0, fp3=0, fp4=141, fp5=25, count1=0, count2=0, count3=0, count4=1, count5=1
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+A 0:
+B 0: S=0, fp1=0, fp2=0, fp3=73, fp4=246, fp5=173, count1=0, count2=0, count3=1, count4=1, count5=1
+B 1: S=0, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=1, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=0, fp2=125, fp3=13, fp4=129, fp5=71, count1=0, count2=1, count3=1, count4=1, count5=1
+B 3: S=0, fp1=137, fp2=75, fp3=255, fp4=229, fp5=140, count1=1, count2=1, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=227, count1=0, count2=0, count3=0, count4=0, count5=1
+B 1: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 2: S=0, fp1=0, fp2=0, fp3=0, fp4=141, fp5=25, count1=0, count2=0, count3=0, count4=1, count5=1
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+A 0:
+B 0: S=0, fp1=0, fp2=0, fp3=73, fp4=246, fp5=173, count1=0, count2=0, count3=1, count4=1, count5=1
+B 1: S=0, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=1, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=0, fp2=125, fp3=13, fp4=129, fp5=71, count1=0, count2=1, count3=1, count4=1, count5=1
+B 3: S=0, fp1=227, fp2=141, fp3=25, fp4=75, fp5=137, count1=1, count2=1, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=255, count1=0, count2=0, count3=0, count4=0, count5=1
+B 1: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 2: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=229, count1=0, count2=0, count3=0, count4=0, count5=1
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=140, count1=0, count2=0, count3=0, count4=0, count5=1
+A 0:
+B 0: S=0, fp1=0, fp2=0, fp3=73, fp4=246, fp5=173, count1=0, count2=0, count3=2, count4=2, count5=2
+B 1: S=0, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=2, count2=1, count3=2, count4=2, count5=2
+B 2: S=0, fp1=252, fp2=125, fp3=13, fp4=129, fp5=71, count1=1, count2=2, count3=2, count4=2, count5=2
+B 3: S=0, fp1=141, fp2=75, fp3=25, fp4=137, fp5=229, count1=2, count2=2, count3=2, count4=2, count5=2
+A 1:
+B 0: S=0, fp1=0, fp2=0, fp3=0, fp4=255, fp5=227, count1=0, count2=0, count3=0, count4=2, count5=2
+B 1: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 2: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=140, count1=0, count2=0, count3=0, count4=0, count5=2
+A 0:
+B 0: S=0, fp1=0, fp2=0, fp3=73, fp4=246, fp5=173, count1=0, count2=0, count3=3, count4=2, count5=3
+B 1: S=0, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=2, count2=2, count3=3, count4=2, count5=2
+B 2: S=0, fp1=252, fp2=125, fp3=13, fp4=129, fp5=71, count1=2, count2=3, count3=3, count4=3, count5=3
+B 3: S=0, fp1=0, fp2=25, fp3=137, fp4=227, fp5=229, count1=0, count2=3, count3=3, count4=2, count5=3
+A 1:
+B 0: S=0, fp1=0, fp2=0, fp3=0, fp4=255, fp5=75, count1=0, count2=0, count3=0, count4=3, count5=3
+B 1: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 2: S=0, fp1=0, fp2=141, fp3=0, fp4=0, fp5=0, count1=0, count2=3, count3=0, count4=0, count5=0
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=140, count1=0, count2=0, count3=0, count4=0, count5=2
+A 0:
+B 0: S=0, fp1=0, fp2=0, fp3=73, fp4=246, fp5=173, count1=0, count2=0, count3=4, count4=1, count5=3
+B 1: S=06          5412       5412       22.87      10.61      0.4640     3.19       0.01       0.02       0.02       0          3.22       0          19         0          0          0.0930     2.6192     0          0          0          0          1          1          521       
+7          5412       5412       22.84      11.05      0.4835     3.27       0.01       0.02       0.02       0          3.29       0          19         0          0          0.0842     2.6204     0          0          0          0          1          2          516       
+8          5412       5412       22.85      10.97      0.4801     3.32       0.01       0.03       0.03       0          3.36       0          17         0          0          0.0819     2.6812     0          0          0          0          1          2          512       
+9          5412       5412       22.83      10.34      0.4531     3.38       0.01       0.03       0.03       0          3.45       0          17         0          0          0.0825     2.7857     0          0          0          0          1          2          509       
+10         5412       5412       22.83      9.92       0.4344     3.55       0.02       0.05       0.05       0          3.60       0          18         0          0          0.0849     2.8699     0          0          0          0          2          3          499       
+, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=2, count2=3, count3=4, count4=2, count5=2
+B 2: S=0, fp1=252, fp2=125, fp3=13, fp4=129, fp5=71, count1=2, count2=4, count3=4, count4=4, count5=3
+B 3: S=0, fp1=140, fp2=227, fp3=229, fp4=75, fp5=141, count1=2, count2=3, count3=4, count4=4, count5=4
+A 1:
+B 0: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=255, count1=0, count2=0, count3=0, count4=0, count5=4
+B 1: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+B 2: S=0, fp1=0, fp2=137, fp3=25, fp4=0, fp5=0, count1=0, count2=4, count3=4, count4=0, count5=0
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=0, count1=0, count2=0, count3=0, count4=0, count5=0
+A 0:
+B 0: S=0, fp1=198, fp2=186, fp3=73, fp4=246, fp5=173, count1=1, count2=1, count3=5, count4=1, count5=3
+B 1: S=0, fp1=224, fp2=183, fp3=143, fp4=212, fp5=30, count1=1, count2=3, count3=4, count4=1, count5=1
+B 2: S=0, fp1=252, fp2=125, fp3=13, fp4=129, fp5=71, count1=3, count2=4, count3=4, count4=3, count5=3
+B 3: S=0, fp1=140, fp2=75, fp3=141, fp4=25, fp5=137, count1=1, count2=4, count3=4, count4=4, count5=5
+A 1:
+B 0: S=0, fp1=223, fp2=227, fp3=172, fp4=48, fp5=255, count1=0, count2=4, count3=1, count4=1, count5=3
+B 1: S=0, fp1=0, fp2=55, fp3=231, fp4=81, fp5=134, count1=0, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=132, fp2=229, fp3=62, fp4=30, fp5=2, count1=1, count2=4, count3=1, count4=1, count5=1
+B 3: S=0, fp1=0, fp2=0, fp3=0, fp4=0, fp5=65, count1=0, count2=0, count3=0, count4=0, count5=1
+A 0:
+B 0: S=0, fp1=132, fp2=57, fp3=73, fp4=220, fp5=173, count1=0, count2=1, count3=3, count4=1, count5=2
+B 1: S=0, fp1=14, fp2=138, fp3=183, fp4=30, fp5=224, count1=1, count2=1, count3=2, count4=1, count5=1
+B 2: S=0, fp1=107, fp2=71, fp3=125, fp4=129, fp5=252, count1=3, count2=3, count3=4, count4=3, count5=1
+B 3: S=0, fp1=2, fp2=25, fp3=191, fp4=137, fp5=229, count1=1, count2=4, count3=1, count4=4, count5=4
+A 1:
+B 0: S=0, fp1=181, fp2=81, fp3=75, fp4=227, fp5=255, count1=3, count2=1, count3=4, count4=4, count5=3
+B 1: S=0, fp1=84, fp2=212, fp3=102, fp4=26, fp5=231, count1=1, count2=1, count3=1, count4=2, count5=1
+B 2: S=0, fp1=117, fp2=143, fp3=204, fp4=185, fp5=141, count1=1, count2=4, count3=1, count4=1, count5=4
+B 3: S=0, fp1=165, fp2=8, fp3=140, fp4=13, fp5=65, count1=0, count2=1, count3=1, count4=5, count5=1
+A 0:
+B 0: S=0, fp1=126, fp2=11, fp3=230, fp4=246, fp5=73, count1=0, count2=1, count3=2, count4=1, count5=2
+B 1: S=0, fp1=82, fp2=183, fp3=224, fp4=212, fp5=111, count1=1, count2=3, count3=1, count4=1, count5=1
+B 2: S=0, fp1=155, fp2=71, fp3=129, fp4=125, fp5=252, count1=1, count2=3, count3=4, count4=4, count5=1
+B 3: S=0, fp1=118, fp2=229, fp3=141, fp4=137, fp5=26, count1=1, count2=4, count3=4, count4=3, count5=1
+A 1:
+B 0: S=0, fp1=191, fp2=7, fp3=75, fp4=227, fp5=255, count1=2, count2=1, count3=4, count4=4, count5=4
+B 1: S=0, fp1=25, fp2=182, fp3=107, fp4=2, fp5=102, count1=1, count2=1, count3=2, count4=1, count5=1
+B 2: S=0, fp1=0, fp2=0, fp3=143, fp4=95, fp5=25, count1=0, count2=0, count3=4, count4=1, count5=4
+B 3: S=0, fp1=127, fp2=8, fp3=140, fp4=160, fp5=13, count1=1, count2=1, count3=1, count4=1, count5=4
+A 0:
+B 0: S=0, fp1=198, fp2=11, fp3=230, fp4=126, fp5=57, count1=1, count2=1, count3=1, count4=1, count5=1
+B 1: S=0, fp1=16, fp2=84, fp3=111, fp4=183, fp5=138, count1=0, count2=2, count3=1, count4=3, count5=1
+B 2: S=0, fp1=229, fp2=141, fp3=125, fp4=71, fp5=129, count1=1, count2=2, count3=3, count4=5, count5=1
+B 3: S=0, fp1=85, fp2=137, fp3=134, fp4=102, fp5=185, count1=2, count2=5, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=239, fp2=191, fp3=255, fp4=227, fp5=75, count1=1, count2=2, count3=4, count4=4, count5=4
+B 1: S=0, fp1=109, fp2=231, fp3=26, fp4=107, fp5=2, count1=1, count2=2, count3=1, count4=2, count5=1
+B 2: S=0, fp1=95, fp2=143, fp3=229, fp4=25, fp5=141, count1=1, count2=4, count3=4, count4=4, count5=4
+B 3: S=0, fp1=140, fp2=160, fp3=8, fp4=13, fp5=65, count1=0, count2=1, count3=1, count4=5, count5=3
+A 0:
+B 0: S=0, fp1=246, fp2=25, fp3=73, fp4=127, fp5=227, count1=1, count2=1, count3=1, count4=1, count5=1
+B 1: S=0, f11         5412       5412       22.83      9.56       0.4187     3.64       0.01       0.06       0.05       0          3.71       0          18         0          0          0.0881     2.9901     0          0          0          1          2          4          489       
+12         5412       5412       22.83      10.02      0.4387     3.82       0.02       0.07       0.07       0          3.89       0          18         0          0          0.0941     3.0616     0          0          0          1          2          5          470       
+13         5412       5412       22.83      10.14      0.4444     4.03       0.03       0.09       0.09       0          4.11       0          18         0          0          0.1009     3.0571     0          0          0          1          3          6          449       
+14         5412       5412       22.82      9.92       0.4347     4.31       0.03       0.11       0.11       0          4.37       0          18         0          0          0.1064     3.0537     0          0          0          2          4          7          431       
+15         5412       5412       22.80      10.73      0.4705     4.63       0.05       0.14       0.13       0          4.69       0          18         0          0          0.1171     3.1156     0          0          0          2          5          8          402       
+p1=138, fp2=143, fp3=224, fp4=82, fp5=95, count1=1, count2=4, count3=1, count4=1, count5=1
+B 2: S=0, fp1=155, fp2=55, fp3=71, fp4=129, fp5=229, count1=3, count2=1, count3=4, count4=2, count5=1
+B 3: S=0, fp1=159, fp2=229, fp3=118, fp4=26, fp5=102, count1=3, count2=4, count3=2, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=223, fp2=191, fp3=255, fp4=227, fp5=75, count1=1, count2=1, count3=5, count4=4, count5=5
+B 1: S=0, fp1=84, fp2=231, fp3=182, fp4=187, fp5=2, count1=2, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=183, fp2=85, fp3=117, fp4=137, fp5=25, count1=2, count2=2, count3=2, count4=4, count5=4
+B 3: S=0, fp1=12, fp2=13, fp3=165, fp4=3, fp5=11, count1=1, count2=5, count3=2, count4=1, count5=1
+A 0:
+B 0: S=0, fp1=50, fp2=62, fp3=3, fp4=126, fp5=220, count1=1, count2=1, count3=2, count4=1, count5=1
+B 1: S=0, fp1=30, fp2=143, fp3=82, fp4=111, fp5=84, count1=2, count2=5, count3=1, count4=1, count5=1
+B 2: S=0, fp1=53, fp2=229, fp3=121, fp4=132, fp5=107, count1=2, count2=1, count3=1, count4=1, count5=2
+B 3: S=0, fp1=117, fp2=160, fp3=8, fp4=26, fp5=194, count1=1, count2=1, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=75, fp2=223, fp3=255, fp4=191, fp5=227, count1=2, count2=2, count3=5, count4=2, count5=4
+B 1: S=0, fp1=231, fp2=71, fp3=118, fp4=182, fp5=2, count1=0, count2=6, count3=1, count4=1, count5=1
+B 2: S=0, fp1=95, fp2=229, fp3=137, fp4=25, fp5=85, count1=0, count2=4, count3=4, count4=4, count5=2
+B 3: S=0, fp1=165, fp2=13, fp3=129, fp4=140, fp5=141, count1=1, count2=5, count3=2, count4=1, count5=2
+A 0:
+B 0: S=0, fp1=62, fp2=127, fp3=180, fp4=25, fp5=126, count1=2, count2=2, count3=1, count4=1, count5=1
+B 1: S=0, fp1=102, fp2=143, fp3=82, fp4=183, fp5=14, count1=1, count2=3, count3=2, count4=3, count5=1
+B 2: S=0, fp1=112, fp2=68, fp3=55, fp4=71, fp5=65, count1=3, count2=3, count3=2, count4=4, count5=2
+B 3: S=0, fp1=54, fp2=26, fp3=102, fp4=185, fp5=117, count1=0, count2=1, count3=1, count4=2, count5=2
+A 1:
+B 0: S=0, fp1=183, fp2=75, fp3=191, fp4=227, fp5=255, count1=0, count2=4, count3=3, count4=4, count5=5
+B 1: S=0, fp1=187, fp2=182, fp3=194, fp4=118, fp5=2, count1=1, count2=1, count3=1, count4=2, count5=1
+B 2: S=0, fp1=111, fp2=25, fp3=85, fp4=141, fp5=229, count1=2, count2=4, count3=3, count4=3, count5=4
+B 3: S=0, fp1=203, fp2=229, fp3=13, fp4=8, fp5=160, count1=2, count2=3, count3=3, count4=1, count5=1
+A 0:
+B 0: S=0, fp1=11, fp2=126, fp3=227, fp4=73, fp5=246, count1=3, count2=1, count3=1, count4=1, count5=1
+B 1: S=0, fp1=90, fp2=95, fp3=111, fp4=30, fp5=143, count1=1, count2=2, count3=2, count4=1, count5=4
+B 2: S=0, fp1=65, fp2=71, fp3=125, fp4=132, fp5=77, count1=1, count2=4, count3=1, count4=1, count5=1
+B 3: S=0, fp1=12, fp2=194, fp3=102, fp4=185, fp5=117, count1=3, count2=1, count3=1, count4=2, count5=2
+A 1:
+B 0: S=0, fp1=239, fp2=191, fp3=255, fp4=75, fp5=227, count1=0, count2=3, count3=5, count4=5, count5=3
+B 1: S=0, fp1=187, fp2=182, fp3=26, fp4=118, fp5=2, count1=0, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=183, fp2=25, fp3=85, fp4=229, fp5=137, count1=2, count2=4, count3=2, count4=3, count5=3
+B 3: S=0, fp1=3, fp2=165, fp3=13, fp4=172, fp5=140, count1=1, count2=2, count3=4, count4=1, count5=1
+A 0:
+B 0: S=0, fp1=50, fp2=227, fp3=173, fp4=198, fp5=73, count1=1, count2=2, count3=2, count4=1, count5=1
+B 1: S=0, fp1=224, fp2=111, fp3=95, fp4=82, fp5=193, count1=0, count2=2, count3=1, count4=1, count5=2
+B 2: S=0, fp1=231, fp2=65, fp3=71, fp4=55, fp5=229, count1=0, count2=2, count3=5, count4=1, count5=1
+B 3: S=0, fp1=134, fp2=118, fp3=7, fp4=137, fp5=229, count1=2, count2=1, count3=2, count4=3, count5=3
+A 1:
+B 0: S=0, fp1=239, fp2=255, fp3=75, fp4=191, fp5=227, count1=2, count2=4, count3=5, count4=3, count5=5
+B 1: S=0, fp1=101, fp2=194, fp3=102, fp4=26, fp5=2, count1=1, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=23, fp2=143, fp3=25, fp4=185, fp5=85, count1=1, count2=3, count3=4, count4=2, count5=2
+B 3: S=0, fp1=11, fp2=8, fp3=13, fp4=172, fp5=165, count1=1, count2=1, count3=3, count4=2, count5=2
+A 0:
+B 0: S=0, fp1=246, fp2=73, fp3=126, fp4=50, fp5=127, count1=3, count2=1, count3=1, count4=1,16         5412       5412       22.78      10.45      0.4587     4.93       0.07       0.16       0.15       0          4.93       0          18         0          0          0.1227     3.0863     0          0          0          2          6          10         379       
+17         5412       5412       22.75      11.34      0.4985     5.26       0.10       0.20       0.18       0          5.21       0          18         0          0          0.1310     3.0801     0          0          1          3          7          11         346       
+18         5412       5412       22.75      11.97      0.5260     5.55       0.11       0.22       0.20       0          5.47       0          18         0          0          0.1396     3.0830     0          0          1          4          7          13         324       
+19         5412       5412       22.72      12.04      0.5298     5.96       0.14       0.26       0.22       0          5.78       0          18         0          0          0.1493     3.1013     0          0          1          4          8          14         301       
+20         5412       5412       22.70      12.27      0.5402     6.29       0.17       0.30       0.24       0          6.04       0          17         0          0          0.1568     3.0787     0          0          2          5          9          15         274       
+ count5=1
+B 1: S=0, fp1=2, fp2=95, fp3=84, fp4=229, fp5=138, count1=3, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=129, fp2=155, fp3=71, fp4=13, fp5=141, count1=1, count2=2, count3=5, count4=4, count5=1
+B 3: S=0, fp1=118, fp2=170, fp3=182, fp4=229, fp5=117, count1=0, count2=1, count3=1, count4=2, count5=1
+A 1:
+B 0: S=0, fp1=227, fp2=223, fp3=7, fp4=255, fp5=191, count1=2, count2=2, count3=2, count4=4, count5=3
+B 1: S=0, fp1=231, fp2=102, fp3=26, fp4=2, fp5=54, count1=3, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=143, fp2=25, fp3=185, fp4=85, fp5=137, count1=0, count2=3, count3=2, count4=3, count5=5
+B 3: S=0, fp1=12, fp2=165, fp3=140, fp4=172, fp5=160, count1=2, count2=2, count3=1, count4=1, count5=1
+A 0:
+B 0: S=0, fp1=172, fp2=127, fp3=254, fp4=73, fp5=227, count1=1, count2=1, count3=1, count4=1, count5=1
+B 1: S=0, fp1=71, fp2=111, fp3=106, fp4=82, fp5=95, count1=1, count2=2, count3=1, count4=1, count5=2
+B 2: S=0, fp1=55, fp2=71, fp3=121, fp4=165, fp5=129, count1=2, count2=5, count3=2, count4=3, count5=3
+B 3: S=0, fp1=28, fp2=134, fp3=181, fp4=12, fp5=118, count1=1, count2=1, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=255, fp2=223, fp3=75, fp4=227, fp5=191, count1=1, count2=2, count3=5, count4=4, count5=3
+B 1: S=0, fp1=231, fp2=194, fp3=26, fp4=2, fp5=102, count1=3, count2=1, count3=1, count4=1, count5=1
+B 2: S=0, fp1=133, fp2=25, fp3=85, fp4=185, fp5=229, count1=1, count2=3, count3=3, count4=3, count5=2
+B 3: S=0, fp1=172, fp2=229, fp3=140, fp4=160, fp5=8, count1=3, count2=1, count3=1, count4=1, count5=1
+A 0:
+B 0: S=0, fp1=198, fp2=62, fp3=246, fp4=11, fp5=126, count1=0, count2=2, count3=1, count4=1, count5=1
+B 1: S=0, fp1=74, fp2=143, fp3=90, fp4=193, fp5=183, count1=1, count2=2, count3=1, count4=1, count5=2
+B 2: S=0, fp1=125, fp2=121, fp3=132, fp4=55, fp5=77, count1=1, count2=1, count3=1, count4=1, count5=2
+B 3: S=0, fp1=134, fp2=12, fp3=182, fp4=183, fp5=7, count1=0, count2=1, count3=1, count4=1, count5=1
+A 1:
+B 0: S=0, fp1=223, fp2=255, fp3=75, fp4=227, fp5=191, count1=3, count2=4, count3=4, count4=4, count5=4
+B 1: S=0, fp1=187, fp2=71, fp3=26, fp4=2, fp5=102, count1=2, count2=4, count3=1, count4=1, count5=1
+B 2: S=0, fp1=111, fp2=85, fp3=25, fp4=133, fp5=229, count1=0, count2=3, count3=3, count4=1, count5=1
+B 3: S=0, fp1=37, fp2=13, fp3=172, fp4=160, fp5=165, count1=0, count2=4, count3=1, count4=2, count5=2
+A 0:
+B 0: S=0, fp1=198, fp2=250, fp3=11, fp4=227, fp5=127, count1=1, count2=1, count3=1, count4=1, count5=1
+B 1: S=0, fp1=138, fp2=71, fp3=143, fp4=90, fp5=95, count1=1, count2=1, count3=3, count4=1, count5=1
+B 2: S=0, fp1=55, fp2=141, fp3=229, fp4=77, fp5=132, count1=1, count2=1, count3=1, count4=1, count5=1
+B 3: S=0, fp1=118, fp2=229, fp3=8, fp4=117, fp5=7, count1=1, count2=1, count3=1, count4=2, count5=1
+A 1:
+B 0: S=0, fp1=183, fp2=255, fp3=75, fp4=227, fp5=191, count1=0, count2=4, count3=3, count4=5, count5=4
+B 1: S=0, fp1=155, fp2=71, fp3=26, fp4=2, fp5=102, count1=1, count2=5, count3=1, count4=1, count5=1
+B 2: S=0, fp1=111, fp2=137, fp3=25, fp4=85, fp5=185, count1=2, count2=3, count3=3, count4=3, count5=2
+B 3: S=0, fp1=3, fp2=12, fp3=140, fp4=13, fp5=172, count1=1, count2=1, count3=1, count4=1, count5=1
+A 0:
+B 0: S=0, fp1=10, fp2=255, fp3=112, fp4=198, fp5=73, count1=1, count2=1, count3=1, count4=1, count5=1
+B 1: S=0, fp1=48, fp2=82, fp3=56, fp4=193, fp5=246, count1=0, count2=2, count3=1, count4=2, count5=1
+B 2: S=0, fp1=13, fp2=165, fp3=204, fp4=121, fp5=129, count1=2, count2=2, count3=1, count4=2, count5=1
+B 3: S=0, fp1=26, fp2=8, fp3=126, fp4=223, fp5=140, count1=1, count2=1, count3=1, count4=2, count5=1
+A 1:
+B 0: S=0, fp1=255, fp2=7, fp3=75, fp4=227, fp5=191, count1=3, count2=2, count3=3, count4=5, count5=4
+B 1: S=0, fp1=173, fp2=71, fp3=2, fp4=102, fp5=54, count1=1, count2=4, count3=2, count4=1, count5=1
+B 2: S=0, fp1=111, fp2=25, fp3=85, fp4=185, fp5=137, count1=3, count2=4, count3=3, count4=3, count5=4
+B 3: S=0, fp1=15, fp2=117, fp3=100, fp4=172, fp5=12, count1=0, count2=1, count3=2, count4=1, count5=4
