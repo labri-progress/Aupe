@@ -5,33 +5,114 @@ namespace org {
 namespace blobstore {
 
 
+	// Copy constructor
+BitMatcher::BitMatcher(const BitMatcher& other)
+    : bucket_num(other.bucket_num),
+      maxloop(other.maxloop),
+      h1(other.h1),
+      h2(other.h2)
+{
+    // Deep copy of bobhash
+    for (int i = 0; i < 2; i++) {
+        if (other.bobhash[i]) {
+            bobhash[i] = std::make_unique<BOBHash>(*other.bobhash[i]);
+        }
+    }
+
+    // Deep copy of buckets
+    for (int i = 0; i < 2; i++) {
+        bucket[i] = other.bucket[i]; // vector copy does deep copy automatically
+    }
+}
+
+// Copy assignment
+BitMatcher& BitMatcher::operator=(const BitMatcher& other) {
+    if (this == &other) return *this;
+
+    bucket_num = other.bucket_num;
+    maxloop = other.maxloop;
+    h1 = other.h1;
+    h2 = other.h2;
+
+    // Deep copy of bobhash
+    for (int i = 0; i < 2; i++) {
+        if (other.bobhash[i]) {
+            bobhash[i] = std::make_unique<BOBHash>(*other.bobhash[i]);
+        } else {
+            bobhash[i].reset();
+        }
+    }
+
+    // Copy buckets
+    for (int i = 0; i < 2; i++) {
+        bucket[i] = other.bucket[i];
+    }
+
+    return *this;
+}
+
+
+// Move constructor
+BitMatcher::BitMatcher(BitMatcher&& other) noexcept
+    : bucket_num(other.bucket_num),
+      maxloop(other.maxloop),
+      h1(other.h1),
+      h2(other.h2)
+{
+    for (int i = 0; i < 2; i++) {
+        bobhash[i] = std::move(other.bobhash[i]); // transfer ownership
+        bucket[i] = std::move(other.bucket[i]);   // move vector
+    }
+
+    // Optionally zero-out other's simple fields
+    other.bucket_num = 0;
+    other.maxloop = 0;
+    other.h1 = 0;
+    other.h2 = 0;
+}
+
+// Move assignment
+BitMatcher& BitMatcher::operator=(BitMatcher&& other) noexcept {
+    if (this == &other) return *this;
+
+    bucket_num = other.bucket_num;
+    maxloop = other.maxloop;
+    h1 = other.h1;
+    h2 = other.h2;
+
+    for (int i = 0; i < 2; i++) {
+        bobhash[i] = std::move(other.bobhash[i]);
+        bucket[i] = std::move(other.bucket[i]);
+    }
+
+    // Zero out other's simple fields
+    other.bucket_num = 0;
+    other.maxloop = 0;
+    other.h1 = 0;
+    other.h2 = 0;
+
+    return *this;
+}
+
 std::unique_ptr<BitMatcher> new_bitmatcher(uint64_t _bucket) {
   return std::make_unique<BitMatcher>(_bucket);
 }
 
+
 std::unique_ptr<BitMatcher> BitMatcher::clone() const{
-    auto copy = std::make_unique<BitMatcher>(bucket_num);
-    copy->maxloop = maxloop;
-    copy->h1 = h1;
-    copy->h2 = h2;
-
-    for (int i = 0; i < 2; i++) {
-		copy->bucket[i] = new ec_bucket[bucket_num];
-		std::memcpy(copy->bucket[i], bucket[i], sizeof(ec_bucket) * bucket_num);
-		copy->bobhash[i] = new BOBHash(*bobhash[i]);
-    }
-
-    return copy;
+	return std::make_unique<BitMatcher>(*this);
 }
 
-BitMatcher::BitMatcher(uint64_t _bucket) {
-	bucket_num = _bucket;
+/* BitMatcher::BitMatcher(uint64_t _bucket) {
+	bucket_num = _bucket; */
+BitMatcher::BitMatcher(uint64_t _bucket) : bucket_num(_bucket) {
 	for (int i = 0; i < 2; i++) {
-		bobhash[i] = new BOBHash(i + 1000);
+		bobhash[i] = std::make_unique<BOBHash>(i + 1000);//bobhash[i] = new BOBHash(i + 1000);
 	}
 	for (int i = 0; i < 2; i++) {	//initialize two arrays 
-		bucket[i] = new ec_bucket[bucket_num];
-		memset(bucket[i], 0, sizeof(ec_bucket) * bucket_num);
+		bucket[i].resize(bucket_num); 
+		/* bucket[i] = new ec_bucket[bucket_num];
+		memset(bucket[i], 0, sizeof(ec_bucket) * bucket_num); */
 	}
 	init_bucket_parameters();
 	/* printf("The bucket number is %d\n", bucket_num);
@@ -43,7 +124,8 @@ void BitMatcher::print_buckets() const {
 	if (bucket_num <= 20) {
 		flag = 1;
 	}
-	if (flag){
+	//this->Ratio();
+	/* if (flag){
 		for (int i = 0; i < 2; i++) {
 			printf("A %d:\n", i);
 			for (uint j = 0; j < bucket_num; j++) {
@@ -54,14 +136,14 @@ void BitMatcher::print_buckets() const {
 					get_bucket_fingerprint(&bucket[i][j], 2),
 					get_bucket_fingerprint(&bucket[i][j], 3),
 					get_bucket_fingerprint(&bucket[i][j], 4),
-					get_bucket_count(&bucket[i][j], 0, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(&bucket[i][j], 1, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(&bucket[i][j], 2, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(&bucket[i][j], 3, get_bucket_type_id(&bucket[i][j])),
-					get_bucket_count(&bucket[i][j], 4, get_bucket_type_id(&bucket[i][j])));
+					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 0, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 1, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 2, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 3, get_bucket_type_id(&bucket[i][j])),
+					get_bucket_count(const_cast<ec_bucket*>(&bucket[i][j]), 4, get_bucket_type_id(&bucket[i][j])));
 			}
 		}
-	}/* else{
+	} *//* else{
 		this->Ratio();
 	} */
 }
@@ -242,7 +324,6 @@ bool BitMatcher::solve_overflow_locally(ec_bucket* b, const int finger_idx, cons
 					return true;
 				} else {
 					set_bucket_fingerprint(b, finger_idx, out_finger);
-					//printf("type_id = %d", type_id);
 					set_bucket_count(b, finger_idx, 0, type_id); //out_count);
 					return false;
 				}
@@ -281,7 +362,7 @@ void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str ke
 	int empty_jj, empty_type_id;
 	ec_bucket* empty_bucket;
 	for (int i = 0; i < 2; i++) {
-		ec_bucket *b = bucket[i] + hash[i];
+		ec_bucket *b = bucket[i].data() + hash[i];
 		uint32_t type_id = get_bucket_type_id(b);
 		uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		for (int j = fingerprint_num-1; j >= 0; j--) {
@@ -306,7 +387,7 @@ void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str ke
 		static int error_num = 0;
 		error_num++;
 		int i = fp & 0x1;
-		ec_bucket *b = bucket[i] + hash[i];
+		ec_bucket *b = bucket[i].data() + hash[i];
 		uint32_t type_id = get_bucket_type_id(b);
 		uint32_t count = get_bucket_count(b, 0, type_id);
 		if ( count == 1 && (fp & 0x2) == ((error_num & 0x1) << 1) ) {
@@ -322,7 +403,7 @@ double BitMatcher::zero() {
 	double cnt[2]={0.0, 0.0};
 	for (int i=0; i<2; i++) {
 		for (uint j=0; j<bucket_num; j++) {
-			ec_bucket* b = bucket[i] + j;
+			ec_bucket* b = bucket[i].data() + j;
 			const uint64_t type_id = get_bucket_type_id(b);
 			const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 			int flag = 1;
@@ -340,10 +421,10 @@ double BitMatcher::Query(const std::string& key, int16_t key_len){ //const char 
 
 	bool flag=0;
 	uint64_t min_value = UINT64_MAX; uint64_t table_min[2];
-	__builtin_prefetch(bucket[0] + hash[0], 0, 2);
-	__builtin_prefetch(bucket[1] + hash[1], 0, 2);
+	__builtin_prefetch(bucket[0].data() + hash[0], 0, 2);
+	__builtin_prefetch(bucket[1].data() + hash[1], 0, 2);
 	for (uint8_t i = 0; i < 2; i++) {
-		ec_bucket* b = bucket[i] + hash[i];
+		ec_bucket* b = bucket[i].data() + hash[i];
 		const uint32_t type_id = get_bucket_type_id(b);
 		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		table_min[i] = get_bucket_count(b, 0, type_id);
@@ -379,7 +460,7 @@ void BitMatcher::InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx
 	int empty_jj, empty_type_id;
 	ec_bucket* empty_bucket;
 	for (int i = 0; i < 2; i++) {
-		ec_bucket *b = bucket[i] + hash[i];
+		ec_bucket *b = bucket[i].data() + hash[i];
 		uint32_t type_id = get_bucket_type_id(b);
 		uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		for (int j = fingerprint_num-1; j >= 0; j--) {
@@ -404,7 +485,7 @@ void BitMatcher::InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx
 		int error_num = 0;
 		error_num++;
 		int i = fp & 0x1;
-		ec_bucket *b = bucket[i] + hash[i];
+		ec_bucket *b = bucket[i].data() + hash[i];
 		uint32_t type_id = get_bucket_type_id(b);
 		uint32_t count = get_bucket_count(b, 0, type_id);
 		/* printf("Error happens when inserting fp %u to table %d, bucket %d, type %d\n", fp, i, hash[i], type_id);
@@ -429,10 +510,11 @@ double BitMatcher::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_id
 
 	bool flag=0;
 	uint64_t min_value = UINT64_MAX; uint64_t table_min[2];
-	__builtin_prefetch(bucket[0] + hash[0], 0, 2);
-	__builtin_prefetch(bucket[1] + hash[1], 0, 2);
+	__builtin_prefetch(bucket[0].data() + hash[0], 0, 2);
+	__builtin_prefetch(bucket[1].data() + hash[1], 0, 2);
 	for (uint8_t i = 0; i < 2; i++) {
-		ec_bucket* b = bucket[i] + hash[i];
+		ec_bucket* b = const_cast<ec_bucket*>(bucket[i].data() + hash[i]);
+//ec_bucket* b = bucket[i].data() + hash[i];
 		const uint32_t type_id = get_bucket_type_id(b);
 		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		table_min[i] = get_bucket_count(b, 0, type_id);
@@ -482,7 +564,8 @@ void BitMatcher::merge(const BitMatcher& other) {
     auto collect = [&](const BitMatcher& bm) {
         for (int i = 0; i < 2; i++) {
             for (uint j = 0; j < bm.bucket_num; j++) {
-                ec_bucket* b = bm.bucket[i] + j;
+                ec_bucket* b = const_cast<ec_bucket*>(bm.bucket[i].data() + j);
+ 				//const ec_bucket* b = bm.bucket[i].data() + j;
                 uint32_t type_id = get_bucket_type_id(b);
                 uint8_t slot_num = get_item_num_in_bucket_type(type_id);
                 for (uint k = 0; k < slot_num; k++) {
@@ -528,18 +611,20 @@ void BitMatcher::merge(const BitMatcher& other) {
 		}
 		//result.print_buckets();
 	}
-
+	// delte all_tuples
+	all_tuples.clear();
 	for (int i = 0; i < 2; i++) {
-        std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
-		delete[] result.bucket[i];
-		delete result.bobhash[i];
+        bucket[i] = result.bucket[i];
+		//std::memcpy(bucket[i], result.bucket[i], sizeof(ec_bucket) * bucket_num);
+		/* delete[] result.bucket[i];
+		delete result.bobhash[i]; */
 	}
 }
 
 int BitMatcher::Mem(const char *key, const int16_t key_len) {
 	GET_HASH_VALUE_SENTENCE(key);
 	for (uint8_t i = 0; i < 2; i++) {
-		ec_bucket* b = bucket[i] + hash[i];
+		ec_bucket* b = bucket[i].data() + hash[i];
 		const uint64_t type_id = get_bucket_type_id(b);
 		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		for (uint8_t j = 0; j < fingerprint_num; j++) {
@@ -557,7 +642,7 @@ double BitMatcher::Ratio() {
 	type_count.clear();
 	for (int i = 0; i < 2; i++) {
 		for (uint j = 0; j < bucket_num; j++) {
-			ec_bucket* b = bucket[i] + j;
+			ec_bucket* b = bucket[i].data() + j;
 			const uint32_t type_id = get_bucket_type_id(b);
 
 			if (type_count.find(type_id) == type_count.end()) {
@@ -591,7 +676,7 @@ void BitMatcher::dump_to_file(FILE* fp) {
 	type_count.clear();
 	for (int i = 0; i < 2; i++) {
 		for (uint j = 0; j < bucket_num; j++) {
-			ec_bucket* b = bucket[i] + j;
+			ec_bucket* b = bucket[i].data() + j;
 			const uint32_t type_id = get_bucket_type_id(b);
 			const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 			fprintf(fp, "%d\t%d\t%d\t%d\t", i, j, type_id, fingerprint_num);
@@ -608,7 +693,7 @@ void BitMatcher::dump_to_file(FILE* fp) {
 void BitMatcher::Delete(char *key, const int16_t key_len) {
 	GET_HASH_VALUE_SENTENCE(key);
 	for (int i = 0; i < 2; i++) {
-		ec_bucket* b = bucket[i] + hash[i];
+		ec_bucket* b = bucket[i].data() + hash[i];
 		const uint32_t type_id = get_bucket_type_id(b);
 		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		for (uint j = 0; j < fingerprint_num; j++) {

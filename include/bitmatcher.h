@@ -221,7 +221,7 @@ static inline __attribute__((always_inline)) void set_bucket_fingerprint(ec_buck
 	// }
 }
 
-static inline __attribute__((always_inline)) uint64_t get_bucket_count(ec_bucket* bkt, int count_index, const uint32_t type_id) {
+static inline __attribute__((always_inline)) uint64_t get_bucket_count(const ec_bucket* bkt, int count_index, const uint32_t type_id) {
 	return (bkt->value >> COUNT_LOC[type_id][count_index]) & ((1UL << COUNT_LEN[type_id][count_index]) - 1UL);
 }
 
@@ -256,8 +256,10 @@ class BitMatcher
 {
 private:
     uint bucket_num, maxloop, h1, h2;
-    ec_bucket *bucket[2];
-    BOBHash * bobhash[2];
+    //ec_bucket *bucket[2];
+    //BOBHash * bobhash[2];
+	std::unique_ptr<BOBHash> bobhash[2];
+	std::vector<ec_bucket> bucket[2];
 
 
 public:
@@ -285,8 +287,24 @@ public:
 	void merge(const BitMatcher& other);
 
     ~BitMatcher();
+	
+	// Copy constructor
+	BitMatcher(const BitMatcher& other);
+
+
+	// Copy assignment
+	BitMatcher& operator=(const BitMatcher& other);
+
+
+	// Move constructor
+	BitMatcher(BitMatcher&& other) noexcept;
+
+	// Move assignment
+	BitMatcher& operator=(BitMatcher&& other) noexcept;
+
 };
 std::unique_ptr<BitMatcher> new_bitmatcher(uint64_t bucket);
 //std::unique_ptr<BitMatcher> BitMatcher::clone() const;
+
 };
 }
