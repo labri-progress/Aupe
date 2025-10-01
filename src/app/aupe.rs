@@ -10,6 +10,11 @@ use crate::graph::ByzConnGraph;
 use super::kvs::Kvs;
 
 const DEBUG: bool = false;
+use rand::{SeedableRng};
+use rand::rngs::StdRng;
+
+use crate::util::SEED2;
+
 pub enum Msg {
     SelfNotif,
     PullRequest,
@@ -115,6 +120,7 @@ pub struct Aupe {
     sketch: Kvs,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
+    rng: StdRng,
 }
 
 pub struct Metrics {
@@ -336,6 +342,7 @@ impl App for Aupe {
             sketch: Kvs::new(),
             to_conctact: Vec::new(),
             oldest: 0,
+            rng: StdRng::seed_from_u64(SEED2),
         }
     }
     
@@ -345,7 +352,7 @@ impl App for Aupe {
 
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
-
+        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
@@ -378,8 +385,8 @@ impl App for Aupe {
             let missing_len = self.params.nb_merge - self.to_conctact.len();
             // select missing trusted neighbors and avoid himself
             if missing_len > 0 {
-                sample_exclude::<usize>( trusted_nodes, &mut self.to_conctact, 
-                    missing_len , self.my_id);
+                sample_exclude::<usize, _>( trusted_nodes, &mut self.to_conctact, 
+                    missing_len , self.my_id, &mut self.rng);
             }
             if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
                 println!("Node { } : to_contacted({:?}) M={} oldest=Node{}",self.my_id,
@@ -405,7 +412,7 @@ impl App for Aupe {
                     }
                 },
                 Msg::PullRequest => {
-                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size)));
+                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                 },
                 _ => (),
             }
@@ -439,8 +446,8 @@ impl App for Aupe {
                         v_push = self.sketch.debiais_stream(v_push);
                         v_pull = self.sketch.debiais_stream(v_pull);
                         
-                        self.push_view = sample(&v_push[..], self.params.view_size / 3);
-                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
+                        self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
+                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
                         view.extend(self.pull_view.clone());
@@ -449,11 +456,11 @@ impl App for Aupe {
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len());
+                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len(), &mut self.rng);
                         
                         view.extend(self.sample_part.clone());
 
-                        view.extend(sample(&self.view[..], self.params.view_size - view.len()));
+                        view.extend(sample(&self.view[..], self.params.view_size - view.len(), &mut self.rng));
                         self.view = view;
 
                         //self.update_samples(&bags[..]);
@@ -461,13 +468,13 @@ impl App for Aupe {
                         //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
                     
-                    sample(&self.view[..], 1).iter()
+                    sample(&self.view[..], 1, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             self.update_contact(*p); // if trusted
                         });
 
-                    sample(&self.view[..], 1).iter()
+                    sample(&self.view[..], 1, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             self.update_contact(*p); // if trusted

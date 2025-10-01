@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
@@ -6,6 +6,10 @@ use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy};
 //use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
+
+use rand::{SeedableRng};
+use rand::rngs::StdRng;
+use crate::util::SEED2;
 
 pub enum Msg {
     SelfNotif,
@@ -89,6 +93,7 @@ pub struct Brahms {
 
     n_received: usize,
     n_byzantine_received: usize,
+    rng: rand::rngs::StdRng,
 }
 
 pub struct Metrics {
@@ -277,20 +282,21 @@ impl App for Brahms {
 
             n_received: 0,
             n_byzantine_received: 0,
+            rng: StdRng::seed_from_u64(SEED2),
         }
     }
     
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-
+        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
-            let mut rng = thread_rng();
+            //let mut rng = thread_rng();
             self.sample_view = (0..self.params.sample_view_size)
-                .map(|_| (rng.random_range(0..std::u64::MAX), None)).collect();
+                .map(|_| (self.rng.random_range(0..std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
             self.view = view;
         }
@@ -316,7 +322,7 @@ impl App for Brahms {
                 Msg::PullRequest => {
                     //println!("message b PlRq ");
                     //println!("byzview {:?} ", sample_nocopy(&mut byzantines[..], self.params.view_size));
-                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size)));
+                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                 },
                 _ => (),
             }
@@ -343,8 +349,8 @@ impl App for Brahms {
                             }
                         };  */
 
-                        self.push_view = sample(&v_push[..], self.params.view_size / 3);
-                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3);
+                        self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
+                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
                         view.extend(self.pull_view.clone());
@@ -353,11 +359,11 @@ impl App for Brahms {
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len());
+                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len(), &mut self.rng);
                         
                         view.extend(self.sample_part.clone());
 
-                        view.extend(sample(&self.view[..], self.params.view_size - view.len()));
+                        view.extend(sample(&self.view[..], self.params.view_size - view.len(), &mut self.rng));
                         self.view = view;
 
                         self.update_samples(&v_push[..]);
@@ -368,10 +374,10 @@ impl App for Brahms {
                     /* println!("View Node{} {:?} ", self.my_id, self.view);
                     println!("sample list {:?} ",self.sample_view); */
 
-                    sample(&self.view[..], 1).iter()
+                    sample(&self.view[..], 1, &mut self.rng).iter()
                         .for_each(|p| net.send(*p, Msg::PushRequest));
 
-                    sample(&self.view[..], 1).iter()
+                    sample(&self.view[..], 1, &mut self.rng).iter()
                         .for_each(|p| net.send(*p, Msg::PullRequest));
 
                     net.send(self.my_id, Msg::SelfNotif);
