@@ -5,6 +5,9 @@
 strat="${1:-bm}"
 
 space="${2:-10}"
+
+trusty="${3:-1000}"
+
 ratio=10
 
 N=10000
@@ -17,7 +20,7 @@ mkdir analysis
 
 for space in $space #1 5 10 20 30 40
 do
-    for faulty in 2000 # 800 1200 1400 1600 1800 2200 2400 2600 2800 # 800 1200 1400 1600 1800 2200 2400 2600 2800 4000 # 1000 2000 3000 # 4000 5000
+    for faulty in 3000 2800 2400 # 800 1200 1400 1600 1800 2200 2400 2600 2800 # 800 1200 1400 1600 1800 2200 2400 2600 2800 4000 # 1000 2000 3000 # 4000 5000
     do
         if [ "$strat" == "kvs" ]; then
             cargo run -- -T $round -n $N kvs -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N > "analysis/kvs-$ratio-$faulty"
@@ -27,7 +30,7 @@ do
         fi
 
         if [ "$strat" == "merge" ]; then
-            cargo run -- -T $round -n $N bm -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space -x 1000 -p 10  > "analysis/mergebm-$ratio-$faulty-$space"
+            cargo run -- -T $round -n $N bm -G samples -f $ratio -t $faulty -v 160 -u 160 -m 100 -n $N -y $space -x $trusty -p 10  > "analysis/mergebm-$ratio-$faulty-$trusty-$space"
         fi
 
         if [ "$strat" == "basalt" ]; then
