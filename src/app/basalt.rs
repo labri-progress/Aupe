@@ -1,5 +1,5 @@
 use rand::{rng, Rng};
-use rand::rngs::ThreadRng;
+//use rand::rngs::ThreadRng;
 use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
@@ -244,7 +244,6 @@ impl App for Basalt {
         self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
-            //let mut rng = thread_rng();
             self.view = (0..self.params.view_size)
                 .map(|_| ViewEntry{
                     seed: self.rng.random_range(0..std::u64::MAX),
@@ -276,7 +275,7 @@ impl App for Basalt {
                 _ => (),
             }
         } else {
-            let mut rng = StdRng::seed_from_u64(SEED2); //thread_rng();
+            let mut rng = self.rng.clone(); //StdRng::seed_from_u64(SEED2)
             let view = self.view.iter()
                 .map(|entry| entry.peer)
                 .collect::<Vec<_>>();

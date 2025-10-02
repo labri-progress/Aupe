@@ -294,7 +294,6 @@ impl App for Brahms {
         if !self.is_byzantine {
             let view = net.sample_peers(self.params.view_size);
 
-            //let mut rng = thread_rng();
             self.sample_view = (0..self.params.sample_view_size)
                 .map(|_| (self.rng.random_range(0..std::u64::MAX), None)).collect();
             self.update_samples(&view[..]);
