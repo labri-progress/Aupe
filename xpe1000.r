@@ -1,54 +1,49 @@
 library(ggplot2)
 library(dplyr)
-library(tidyr)
 library(stringr)
 
-# Parametersy
-n <- 1000
-v <- 16
-round <- 200
+v <- 16       # view size
+round <- 200  # target round
 
-# List all result files
-files <- list.files("analysis", full.names = TRUE, recursive = FALSE)
-#files
-# Function to read one file and extract data
+# Function to read one result file
 read_result <- function(f) {
-  # read table (assuming space- or tab-delimited)
-  df <- read.table(f, header = TRUE)
+  if (file.info(f)$size == 0) return(NULL)  # skip empty files
   
-  #print(f)
-  # keep only round = 200
+  df <- tryCatch(read.table(f, header = TRUE), error = function(e) NULL)
+  if (is.null(df)) return(NULL)
+  
   df <- df %>% filter(time == round)
-  
   if (nrow(df) == 0) return(NULL)
   
-  # Extract metadata from filename
   fname <- basename(f)
   
-  # For bm: bm-FAULTY-SPACE
   if (str_detect(fname, "^bm-")) {
     parts <- str_split(fname, "-")[[1]]
     faulty <- as.numeric(parts[2])
     space <- as.numeric(parts[3])
     strat <- "bm"
-  } else if (str_detect(fname, "^mergebm-")) {
+  } 
+  else if (str_detect(fname, "^mergebm-")) {
     parts <- str_split(fname, "-")[[1]]
     faulty <- as.numeric(parts[2])
     trusty <- as.numeric(parts[3])
     space <- as.numeric(parts[4])
     strat <- paste("mergebm", trusty, sep="-")
-  } else if (str_detect(fname, "^mergekvs-")) {
+  } 
+  else if (str_detect(fname, "^mergekvs-")) {
     parts <- str_split(fname, "-")[[1]]
     faulty <- as.numeric(parts[2])
     trusty <- as.numeric(parts[3])
-    space <- 4
+    space <- NA
     strat <- paste("mergekvs", trusty, sep="-")
-  } else if (str_detect(fname, "^kvs-")) {
+  } 
+  else if (str_detect(fname, "^kvs-")) {
     parts <- str_split(fname, "-")[[1]]
     faulty <- as.numeric(parts[2])
     space <- 4
     strat <- "kvs"
-  } else if (str_detect(fname, "^bs-")) {
+  } 
+  else if (str_detect(fname, "^bs-")) {
     parts <- str_split(fname, "-")[[1]]
     faulty <- as.numeric(parts[2])
     space <- 4
@@ -62,11 +57,10 @@ read_result <- function(f) {
     return(NULL)
   }
   
-  # Add metadata and normalize
   df <- df %>%
     mutate(
       strategy = strat,
-      faulty = faulty / n,
+      faulty = faulty,
       space = space,
       avgByzN_norm = avgByzN / v
     )
@@ -74,24 +68,29 @@ read_result <- function(f) {
   return(df)
 }
 
-# Read all files and combine
-data <- do.call(rbind, lapply(files, read_result))
 
 x_breaks_faulty <- c(0.1, 0.2, 0.3)
 y_breaks <- c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)
-# Plot
-ggplot(data, aes(x = faulty, y = avgByzN_norm, color = factor(space), linetype = strategy, shape = strategy)) +
-  geom_line(linewidth = 0.5) +
-  geom_point() +
+
+# Load all files
+files <- list.files("analysis", full.names = TRUE)
+all_data <- do.call(rbind, lapply(files, read_result))
+all_data <- all_data %>% filter(!is.na(space))
+all_data$strat
+# Plot: one plot per space value
+ggplot(all_data %>% filter(!is.na(space)), 
+       aes(x = faulty, y = avgByzN_norm, color = strategy, group = strategy)) + #shape = strategy, 
+  geom_line(linewidth = 0.25) +
+  geom_point(size = 1) +
+  facet_wrap(~ space, scales = "free_y") +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray40") +  # Add y = x line
   coord_cartesian(ylim = c(0, 1)) +
   scale_x_continuous(breaks = x_breaks_faulty) +
   scale_y_continuous(breaks = y_breaks) +
+  theme_minimal(base_size = 14) +
   labs(
-    title = "Prop. of Byz. samples",
+    title = "Normalized avgByzN at round 200 per space value",
     x = "Prop. of Byz. nodes",
-    y = "avgByzN / view size",
-    color = "Space",
-    linetype = "Strategy"
-  ) +
-  theme_minimal(base_size = 14)
+    y = "Prop. of Byz. samples",
+    color = "Strategy"
+  )

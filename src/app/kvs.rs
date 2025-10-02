@@ -6,11 +6,10 @@ use std::fmt::Write; // Import the Write trait
 use std::fs;
 use std::error::Error;
 
-/* #[derive(Clone, Default, StructOpt, Debug)]
-pub struct Init {
-    #[structopt(short = "s", long = "sm", default_value = "5")]
-    pub memory_size: usize,
-}  */
+use rand::rngs::StdRng;
+use rand::SeedableRng; 
+use crate::util::SEED2;
+
 #[derive(Debug, Clone)]
 pub struct Kvs {
     params: Init,
@@ -84,7 +83,7 @@ impl Kvs {
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
         let mut outputstream = Vec::new();
 
-        let mut rng = rng();
+        let mut rng =  StdRng::seed_from_u64(SEED2); 
 
         for element in &inputstream {
             //println!("element: {}", element);

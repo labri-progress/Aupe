@@ -267,7 +267,6 @@ impl NetMetrics for Metrics {
     }
 }
 
-
 type Net<'a> = &'a mut dyn Network<Msg>;
 
 
