@@ -1,7 +1,14 @@
-space="${1:-10}"
 
-./bm.sh bm $space
 
-./bm.sh merge $space 2000
+./bm1000.sh bm 
 
-./bm.sh merge $space 3000
+./bm1000.sh merge
+
+./bm1000.sh merge 200
+
+./bm1000.sh merge 300
+
+./bm1000.sh brahms
+
+./bm1000.sh basalt
+

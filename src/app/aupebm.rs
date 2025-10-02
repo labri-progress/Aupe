@@ -347,7 +347,7 @@ impl App for AupeBM {
             sketch: BM::new().into(),
             to_conctact: Vec::new(),
             oldest: 0,
-            rng: StdRng::seed_from_u64(SEED2), //rng(),
+            rng: StdRng::seed_from_u64(SEED2),
         }
     }
     
@@ -357,7 +357,7 @@ impl App for AupeBM {
 
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
-        self.rng = StdRng::seed_from_u64(SEED2 + id as u64); //rng();
+        self.rng = StdRng::seed_from_u64(SEED2 + id as u64); ;
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
