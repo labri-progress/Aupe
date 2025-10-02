@@ -1,10 +1,14 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use rand::{rng, Rng};
+use rand::rngs::StdRng;
+use rand::SeedableRng; 
 use rayon::prelude::*;
 
 use super::net::PeerRef;
 use super::util::either_or_if_both;
+
+use crate::util::SEED2;
 
 pub struct ByzConnGraph {
     n_byzantine: Option<usize>,
@@ -91,7 +95,7 @@ impl ByzConnGraph {
 
         let n_byzantine = self.n_byzantine.unwrap();
 
-        let mut rng = rng();
+        let mut rng = StdRng::seed_from_u64(SEED2); 
         let roots = (0..32).map(|_| rng.random_range(0.. n_procs) + n_byzantine)
             .collect::<Vec<_>>();
         let avgdist = roots.par_iter().map(|root| {

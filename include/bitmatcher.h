@@ -291,10 +291,8 @@ public:
 	// Copy constructor
 	BitMatcher(const BitMatcher& other);
 
-
 	// Copy assignment
 	BitMatcher& operator=(const BitMatcher& other);
-
 
 	// Move constructor
 	BitMatcher(BitMatcher&& other) noexcept;

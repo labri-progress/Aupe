@@ -61,8 +61,6 @@ pub fn sample_nocopy<T: PartialEq + Clone, R: Rng + ?Sized>(from: &mut [T], n: u
     if n >= from.len() {
         return from.to_vec();
     }
-
-    //let mut rng = GLOBAL_RNG.lock().unwrap(); //rng();
     
     if n >= from.len() / 4 {
         //rng.shuffle(from);
