@@ -71,7 +71,7 @@ fn main() {
         WhichApp::Brahms(pp) => {
             sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp);  
         }
-
+// cargo run -- -T 2000 -n 1000 basalt -G -f 10 -t 300 -v 20 -i 20 -k 1 -r 1
         WhichApp::Basalt(pp) => {
             sim::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp);  
         }

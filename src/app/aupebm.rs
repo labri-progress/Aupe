@@ -356,7 +356,7 @@ impl App for AupeBM {
 
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
-        self.rng = StdRng::seed_from_u64(SEED2 + id as u64); ;
+        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
@@ -432,8 +432,8 @@ impl App for AupeBM {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        v_push = self.sketch.debiais_stream(v_push);
-                        v_pull = self.sketch.debiais_stream(v_pull);
+                        v_push = self.sketch.debiais_stream(v_push, &mut self.rng);
+                        v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
