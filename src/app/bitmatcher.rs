@@ -144,10 +144,8 @@ impl BM {
     }
     
 
-    pub fn debiais_stream(&mut self, inputstream: Vec<usize>) -> Vec<usize> {
-        
+    pub fn debiais_stream(&mut self, inputstream: Vec<usize>, rng: &mut StdRng) -> Vec<usize> {
         let mut outputstream = Vec::new();
-        let mut rng =  StdRng::seed_from_u64(SEED2);
         
         for element in &inputstream {
             
