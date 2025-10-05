@@ -440,8 +440,8 @@ impl App for Aupe {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        v_push = self.sketch.debiais_stream(v_push);
-                        v_pull = self.sketch.debiais_stream(v_pull);
+                        v_push = self.sketch.debiais_stream(v_push, &mut self.rng);
+                        v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
