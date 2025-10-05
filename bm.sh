@@ -21,7 +21,7 @@ mkdir analysis
 
 for space in $space #1 5 10 20 30 40
 do
-    for faulty in x 800 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 # 800 1200 1400 1600 1800 2200 2400 2600 2800 4000 # text1000 2000 3000 # 4000 5000
+    for faulty in 2400 # 800 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 # 800 1200 1400 1600 1800 2200 2400 2600 2800 4000 # text1000 2000 3000 # 4000 5000
     do
         if [ "$strat" == "kvs" ]; then
             cargo run -- -T $round -n $N kvs -G samples -f $ratio -t $faulty -v $v -u $v -m 100 -n $N > "analysis/kvs-$faulty"
