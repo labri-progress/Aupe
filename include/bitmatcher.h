@@ -273,7 +273,7 @@ public:
     bool plus(ec_bucket* b, const int finger_idx, const uint32_t type_id, const uint32_t table_idx, const uint32_t slot_idx);
     //void insert(const char *key, const int16_t key_len = 0); //rust::Str key, const uint16_t key_len = 0);
     void Insert(const std::string& key, int16_t key_len);
-    double zero();
+    double zero() const;
     //double Query(const char *key, const int16_t key_len = 0);
 	double Query(const std::string& key, int16_t key_len);
     int Mem(const char *key, const int16_t key_len = 0);

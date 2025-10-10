@@ -1,4 +1,5 @@
 use std::hash::{Hash, Hasher};
+use twox_hash::XxHash64; // deterministic hasher
 use fasthash::*;
 use rand::{rng, Rng};
 use super::net::PeerRef;
@@ -16,12 +17,20 @@ pub fn either_or_if_both<T: Clone>(a: &Option<T>, b: &Option<T>, f: fn(&T, &T) -
 }
 
 pub fn hash(seed: u64, peer: PeerRef) -> u64 {
+    // Create a deterministic hasher with a fixed seed
+    let mut hasher = XxHash64::with_seed(SEED2); // 0 or any fixed u64 seed
+    seed.hash(&mut hasher);
+    peer.hash(&mut hasher);
+    hasher.finish()
+}
+
+/* pub fn hash(seed: u64, peer: PeerRef) -> u64 {
     //return seed ^ (peer as u64);
     let mut s = XXHasher::default();
     seed.hash(&mut s);
     peer.hash(&mut s);
     s.finish()
-}
+} */
 
 pub fn sample_exclude<T, R: Rng + ?Sized>(from: Vec<usize>, to: &mut Vec<usize>, n: usize, id: usize, rng: &mut R)
         where

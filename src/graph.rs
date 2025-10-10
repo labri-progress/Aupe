@@ -88,14 +88,13 @@ impl ByzConnGraph {
         ind
     }
 
-    pub fn mean_path_length(&self, n_procs: usize) -> f64 {
+    pub fn mean_path_length<R: Rng + ?Sized>(&self, n_procs: usize, rng: &mut R) -> f64 {
         if self.graph.is_empty() {
             return 0.;
         }
-
         let n_byzantine = self.n_byzantine.unwrap();
 
-        let mut rng = StdRng::seed_from_u64(SEED2); 
+        //let mut rng = StdRng::seed_from_u64(SEED2); 
         let roots = (0..32).map(|_| rng.random_range(0.. n_procs) + n_byzantine)
             .collect::<Vec<_>>();
         let avgdist = roots.par_iter().map(|root| {
