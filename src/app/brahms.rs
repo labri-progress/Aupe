@@ -116,6 +116,7 @@ pub struct Metrics {
     n_fbi: usize,
 
     graph: ByzConnGraph,
+    graphrng: StdRng,
 }
 
 
@@ -136,6 +137,7 @@ impl NetMetrics for Metrics {
             n_fullbyz: 0,
             n_fbi: 0,
             graph: ByzConnGraph::new(),
+            graphrng: StdRng::seed_from_u64(SEED2),
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -193,8 +195,9 @@ impl NetMetrics for Metrics {
         // In-degree quartiles (for correct nodes)
         let ind = self.graph.indegree_dist(self.n_procs);
 
+        let mut myrng = self.graphrng.clone();
         // Average path length estimation
-        let mpl = self.graph.mean_path_length(self.n_procs);
+        let mpl = self.graph.mean_path_length(self.n_procs, &mut myrng);
 
         vec![
             format!("{:.2}",
@@ -474,6 +477,7 @@ impl App for Brahms {
                 n_fullbyz: if nbs == nsamp { 1 } else { 0 },
                 n_fbi: if nbn == self.view.len() && nbs == nsamp { 1 } else { 0 },
                 graph,
+                graphrng: StdRng::seed_from_u64(SEED2 + self.my_id as u64),
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;

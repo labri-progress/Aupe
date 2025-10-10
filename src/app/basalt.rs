@@ -88,6 +88,7 @@ pub struct Metrics {
     n_isolated: usize,
 
     graph: ByzConnGraph,
+    graphrng: StdRng,
 }
 
 impl NetMetrics for Metrics {
@@ -101,6 +102,7 @@ impl NetMetrics for Metrics {
             max_byzantine_neighbors: None,
             n_isolated: 0,
             graph: ByzConnGraph::new(),
+            graphrng: StdRng::seed_from_u64(SEED2),
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -143,8 +145,9 @@ impl NetMetrics for Metrics {
         // In-degree quartiles (for correct nodes)
         let ind = self.graph.indegree_dist(self.n_procs);
 
+        let mut myrng = self.graphrng.clone();
         // Average path length estimation
-        let mpl = self.graph.mean_path_length(self.n_procs);
+        let mpl = self.graph.mean_path_length(self.n_procs, &mut myrng);
 
         vec![
             format!("{:.2}",
@@ -351,6 +354,7 @@ impl App for Basalt {
                 min_byzantine_neighbors: Some(nbn as i64),
                 max_byzantine_neighbors: Some(nbn as i64),
                 graph,
+                graphrng: StdRng::seed_from_u64(SEED2 + self.my_id as u64),
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;

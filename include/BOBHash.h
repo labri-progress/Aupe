@@ -195,9 +195,9 @@ inline uint BOBHash::run(const char * str, uint len)
 	/*---------------------------------------- handle most of the key */
 	while (len >= 12)
 	{
-		a += (str[0] +((uint)str[1]<<8) +((uint)str[2]<<16) +((uint)str[3]<<24));
-		b += (str[4] +((uint)str[5]<<8) +((uint)str[6]<<16) +((uint)str[7]<<24));
-		c += (str[8] +((uint)str[9]<<8) +((uint)str[10]<<16)+((uint)str[11]<<24));
+		a += (str[0] +((uint)(unsigned char)str[1]<<8) +((uint)(unsigned char)str[2]<<16) +((uint)(unsigned char)str[3]<<24));
+		b += (str[4] +((uint)(unsigned char)str[5]<<8) +((uint)(unsigned char)str[6]<<16) +((uint)(unsigned char)str[7]<<24));
+		c += (str[8] +((uint)(unsigned char)str[9]<<8) +((uint)(unsigned char)str[10]<<16)+((uint)(unsigned char)str[11]<<24));
 		mix(a,b,c);
 		str += 12; len -= 12;
 	}
@@ -206,17 +206,17 @@ inline uint BOBHash::run(const char * str, uint len)
 	c += len;
 	switch(len)              /* all the case statements fall through */
 	{
-		case 11: c+=((uint)str[10]<<24); /* fall through */
-		case 10: c+=((uint)str[9]<<16);  /* fall through */
-		case 9 : c+=((uint)str[8]<<8);   /* fall through */
+		case 11: c+=((uint)(unsigned char)str[10]<<24); /* fall through */
+		case 10: c+=((uint)(unsigned char)str[9]<<16);  /* fall through */
+		case 9 : c+=((uint)(unsigned char)str[8]<<8);   /* fall through */
 		/* the first byte of c is reserved for the length */
-		case 8 : b+=((uint)str[7]<<24);  /* fall through */
-		case 7 : b+=((uint)str[6]<<16);  /* fall through */
-		case 6 : b+=((uint)str[5]<<8);   /* fall through */
+		case 8 : b+=((uint)(unsigned char)str[7]<<24);  /* fall through */
+		case 7 : b+=((uint)(unsigned char)str[6]<<16);  /* fall through */
+		case 6 : b+=((uint)(unsigned char)str[5]<<8);   /* fall through */
 		case 5 : b+=str[4];              /* fall through */
-		case 4 : a+=((uint)str[3]<<24);  /* fall through */
-		case 3 : a+=((uint)str[2]<<16);  /* fall through */
-		case 2 : a+=((uint)str[1]<<8);   /* fall through */
+		case 4 : a+=((uint)(unsigned char)str[3]<<24);  /* fall through */
+		case 3 : a+=((uint)(unsigned char)str[2]<<16);  /* fall through */
+		case 2 : a+=((uint)(unsigned char)str[1]<<8);   /* fall through */
 		case 1 : a+=str[0];              /* fall through */
 		// case 0: nothing left to add
 

@@ -12,6 +12,7 @@ fasthash = "0.4.0"
 structopt = "0.3.26"
 round = "0.1.0"
 cxx = "1.0"
+twox-hash = "2.1.2"
 
 [build-dependencies]
 cxx-build = "1.0"
