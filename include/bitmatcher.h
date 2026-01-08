@@ -255,7 +255,7 @@ namespace blobstore {
 class BitMatcher
 {
 private:
-    uint bucket_num, maxloop, h1, h2;
+    uint bucket_num, maxloop, h1, h2, nb_entries;
     //ec_bucket *bucket[2];
     //BOBHash * bobhash[2];
 	std::unique_ptr<BOBHash> bobhash[2];
@@ -285,6 +285,7 @@ public:
 	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx); 
 	std::unique_ptr<BitMatcher> clone() const;
 	void merge(const BitMatcher& other);
+	void decay();
 
     ~BitMatcher();
 	

@@ -27,6 +27,7 @@ pub mod ffi {
         fn Query(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16) -> f64;
         fn print_buckets(self: &BitMatcher);
         fn merge(self: Pin<&mut BitMatcher>, other: &BitMatcher);
+        fn decay(self: Pin<&mut BitMatcher>);
     }
 }
 unsafe impl Send for ffi::BitMatcher {}
