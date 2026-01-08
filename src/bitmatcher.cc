@@ -231,6 +231,14 @@ bool BitMatcher::solve_overflow_locally(ec_bucket* b, const int finger_idx, cons
 			return true;
 		}
 	}
+
+	if (type_id >= 3) {
+		// Type 3 with overflow at position 3 would transition to Type 4
+		// Block this transition to maintain 4 fingerprints
+		printf("[BLOCK TRANSITION]\n");
+		return false;
+	}
+
 	ec_bucket new_bkt; new_bkt.value = 0;
 	uint8_t least_finger; uint64_t least_count;
 	switch (type_id) {
@@ -645,9 +653,16 @@ void BitMatcher::decay(){
 			const uint64_t type_id = get_bucket_type_id(b);
 			const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 			for (uint k=0; k< fingerprint_num; k++) {
-				uint32_t count = get_bucket_count(b, k, type_id);
-				if (count != 0) {
-					const uint8_t stored_fingerprint = get_bucket_fingerprint(b, k);
+				uint32_t old_count = get_bucket_count(b, k, type_id);
+				if (old_count != 0) {
+					uint64_t new_count = old_count >> 1;
+					if (new_count == 0) {
+						set_bucket_count(b, k, 0, type_id);
+						set_bucket_fingerprint(b, k, 0ull);
+					} else {
+						set_bucket_count(b, k, new_count, type_id);
+					}
+					/* const uint8_t stored_fingerprint = get_bucket_fingerprint(b, k);
 					uint32_t new_count = 0;
 					// Use floating-point division before ceil/floor
                     double half = static_cast<double>(count) / 2.0;
@@ -656,11 +671,38 @@ void BitMatcher::decay(){
                         new_count = static_cast<uint32_t>(std::ceil(half));
                     else
                         new_count = static_cast<uint32_t>(std::floor(half));
-                    set_bucket_count(b, k, new_count, type_id);
+                    set_bucket_count(b, k, new_count, type_id); */
                 }
 			}
 		}
 	}
+}
+
+// add_metrics: OR
+double BitMatcher::compute_overflow_ratio() const {
+	uint32_t total_entries = 0;
+	uint32_t ovf_num = 0;
+
+	for (int table = 0; table < 2; table++) {
+		for (uint32_t i = 0; i < bucket_num; i++) {
+			const ec_bucket* b = bucket[table].data() + i;
+			const uint8_t type_id = get_bucket_type_id(b);
+			const uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+			for (uint8_t j = 0; j < num_items; j++) {
+				uint64_t count = get_bucket_count(b, j, type_id);
+				if (count > 0) {
+					total_entries++;
+					if (count == (1UL << COUNT_LEN[type_id][j]) - 1 ) {
+						ovf_num++;
+					}
+					
+				}
+			}
+		}
+	}
+
+	return (total_entries > 0) ? (double)ovf_num / total_entries : 0.0;
 }
 
 
