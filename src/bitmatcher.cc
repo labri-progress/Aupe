@@ -115,13 +115,14 @@ BitMatcher::BitMatcher(uint64_t _bucket) : bucket_num(_bucket) {
 
 void BitMatcher::print_buckets() const {
 	printf("occupancy of %.2f%%\n", this->zero()*100);
+	printf("number of insertions %u\n", nb_entries);
 	/* int flag = 0;
 	if (bucket_num <= 20) {
 		flag = 1;
 	}*/
 	int flag=1;
 	//printf("occupancy -%.2f",this->zero());
-	if (flag) {
+	 if (flag) {
         for (int i = 0; i < 2; i++) {
             printf("A %d:\n", i);
             for (uint j = 0; j < bucket_num; j++) {
@@ -147,7 +148,8 @@ void BitMatcher::print_buckets() const {
             }
         }
     } 
-	this->Ratio();
+	this->Ratio(); 
+
 	//else {
        /*  this->Ratio();
 		this->zero();*/
@@ -362,6 +364,8 @@ bool BitMatcher::plus(ec_bucket* b, const int finger_idx, const uint32_t type_id
 }
 
 void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str key, const uint16_t key_len) {
+	nb_entries++;
+
 	maxloop = 1;		
 	GET_HASH_VALUE_SENTENCE(key.c_str());
 	bool flag = 0;
@@ -375,7 +379,10 @@ void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str ke
 			if ( get_bucket_fingerprint(b, j) == fp ) {
 				if (plus(b, j, type_id, i, hash[i])){
 					//printf("plus");
+				}else{
+					printf("failed to plus");//reset
 				}
+
 				return;
 			} else if ( !flag && get_bucket_fingerprint(b, j) == 0) {
 				empty_bucket = b;
@@ -396,7 +403,7 @@ void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str ke
 		ec_bucket *b = bucket[i].data() + hash[i];
 		uint32_t type_id = get_bucket_type_id(b);
 		uint32_t count = get_bucket_count(b, 0, type_id);
-		if ( count == 1 && (fp & 0x2) == ((error_num & 0x1) << 1) ) {
+		if ( count == 1) {// && (fp & 0x2) == ((error_num & 0x1) << 1) ) {
 			set_bucket_fingerprint(b, 0, fp);
 			set_bucket_count(b, 0, 1, type_id);
 		} else {
@@ -499,7 +506,7 @@ void BitMatcher::InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx
 		printf("The count of the first item is %lu\n", count);
 		printf("fp & 0x2is %d\n", fp & 0x2);
 		printf("((error_num & 0x1) << 1) is %d\n", ((error_num & 0x1) << 1)); */
-		if ( count == 1 && (fp & 0x2) == ((error_num & 0x1) << 1) ) {
+		if ( count == 1) { // && (fp & 0x2) == ((error_num & 0x1) << 1) ) {
 			set_bucket_fingerprint(b, 0, fp);
 			set_bucket_count(b, 0, 1, type_id);
 		} else {
@@ -619,6 +626,7 @@ void BitMatcher::merge(const BitMatcher& other) {
 			static_cast<unsigned>(key.fp), cnt_this, cnt_other, mean);
  */
 		for (int c = 0; c < mean; ++c) {
+			result.nb_entries++;
 			result.InsertByFp(key.fp, key.bucket_idx);
 		}
 		//result.print_buckets();
@@ -629,6 +637,32 @@ void BitMatcher::merge(const BitMatcher& other) {
         bucket[i] = result.bucket[i];
 	}
 }
+
+void BitMatcher::decay(){
+	for (int i=0; i<2; i++) {
+		for (uint j=0; j<bucket_num; j++) {
+			ec_bucket* b = bucket[i].data() + j;
+			const uint64_t type_id = get_bucket_type_id(b);
+			const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+			for (uint k=0; k< fingerprint_num; k++) {
+				uint32_t count = get_bucket_count(b, k, type_id);
+				if (count != 0) {
+					const uint8_t stored_fingerprint = get_bucket_fingerprint(b, k);
+					uint32_t new_count = 0;
+					// Use floating-point division before ceil/floor
+                    double half = static_cast<double>(count) / 2.0;
+
+                    if ((stored_fingerprint & 0x1) == 1)
+                        new_count = static_cast<uint32_t>(std::ceil(half));
+                    else
+                        new_count = static_cast<uint32_t>(std::floor(half));
+                    set_bucket_count(b, k, new_count, type_id);
+                }
+			}
+		}
+	}
+}
+
 
 int BitMatcher::Mem(const char *key, const int16_t key_len) {
 	GET_HASH_VALUE_SENTENCE(key);
