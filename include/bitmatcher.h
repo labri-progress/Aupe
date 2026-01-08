@@ -285,7 +285,10 @@ public:
 	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx); 
 	std::unique_ptr<BitMatcher> clone() const;
 	void merge(const BitMatcher& other);
-	void decay();
+	
+	// Adaptive strategy methods
+    void decay();
+    double compute_overflow_ratio() const;
 
     ~BitMatcher();
 	

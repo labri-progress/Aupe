@@ -28,6 +28,7 @@ pub mod ffi {
         fn print_buckets(self: &BitMatcher);
         fn merge(self: Pin<&mut BitMatcher>, other: &BitMatcher);
         fn decay(self: Pin<&mut BitMatcher>);
+        fn compute_overflow_ratio(self: &BitMatcher) -> f64;
     }
 }
 unsafe impl Send for ffi::BitMatcher {}
@@ -119,11 +120,21 @@ impl BM {
         
     }
 
+    // Check thresholds and apply adaptive strategy
+    fn check_and_apply_strategy(&mut self) {
+        // Trigger division if needed
+        if self.matrix.as_ref().unwrap().compute_overflow_ratio() > 0.01 { //self.params.overflow_threshold {  
+            println!("[DECAY] Applying decay strategy...");   
+            self.matrix.as_mut().unwrap().decay();   
+        }
+    }
+
     pub fn update_freq(&mut self, mut items: Vec<usize>) {
 
         for item in items {
             self.insert(&item);
         }
+        self.check_and_apply_strategy();
     }
 
     pub fn getdata(&self) -> UniquePtr<BitMatcher>{
