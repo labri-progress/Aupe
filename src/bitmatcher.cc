@@ -388,7 +388,7 @@ void BitMatcher::Insert(const std::string& key, int16_t key_len){ //rust::Str ke
 				if (plus(b, j, type_id, i, hash[i])){
 					//printf("plus");
 				}else{
-					printf("failed to plus");//reset
+					//printf("failed to plus");//reset
 				}
 
 				return;
