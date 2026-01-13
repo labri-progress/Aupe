@@ -96,7 +96,12 @@ impl Kvs {
                 }
 
             }else {
-                let prob = self.min_value / occur;
+                let mut prob;
+                if occur == 0.0 {
+                    prob = 1.0;
+                } else {
+                    prob = self.min_value/ occur as f64;
+                }
                 let random_float: f64 = rng.random(); 
                 //println!("prob: {}", prob);
                 if random_float < prob && !self.omniscient_memory.contains(element) {
