@@ -235,7 +235,7 @@ bool BitMatcher::solve_overflow_locally(ec_bucket* b, const int finger_idx, cons
 	if (type_id >= 3) {
 		// Type 3 with overflow at position 3 would transition to Type 4
 		// Block this transition to maintain 4 fingerprints
-		printf("[BLOCK TRANSITION]\n");
+		//printf("[BLOCK TRANSITION]\n");
 		return false;
 	}
 
@@ -560,90 +560,129 @@ double BitMatcher::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_id
 }
 
 
-struct FingerprintKey {
-    uint32_t bucket_idx;
-    uint8_t fp;
-
-    bool operator==(const FingerprintKey& other) const {
-        return bucket_idx == other.bucket_idx && fp == other.fp;
-    }
-};
-
-// Custom hash for unordered_set
-struct FingerprintHash {
-    size_t operator()(const FingerprintKey& k) const {
-        return (static_cast<size_t>(k.bucket_idx) << 8) ^ k.fp;
-    }
-};
-
 void BitMatcher::merge(const BitMatcher& other) {
-    BitMatcher result(bucket_num);
-
-    // Preallocate near maximum expected size (bucket_num * 5 * 4)
-    std::unordered_set<FingerprintKey, FingerprintHash> all_tuples;
-    all_tuples.reserve(bucket_num * 20); // 2 BitMatchers, 2 arrays per BitMatcher, 2 buckets per array and 5 counter per buckets
-
-    auto collect = [&](const BitMatcher& bm) {
-        for (int i = 0; i < 2; i++) {
-            for (uint j = 0; j < bm.bucket_num; j++) {
-                ec_bucket* b = const_cast<ec_bucket*>(bm.bucket[i].data() + j);
- 				//const ec_bucket* b = bm.bucket[i].data() + j;
-                uint32_t type_id = get_bucket_type_id(b);
-                uint8_t slot_num = get_item_num_in_bucket_type(type_id);
-                for (uint k = 0; k < slot_num; k++) {
-                    uint8_t fp = get_bucket_fingerprint(b, k);
-                    if (fp != 0) {
-                        uint bucket_idx0 = j;
-                        if (i != 0) {
-                            bucket_idx0 = (j ^ fp) % bucket_num;
-                        }
-                        all_tuples.insert({bucket_idx0, fp});
-                    }
-                }
-            }
-        }
-    };
-
-    // Collect from both
-    collect(*this);
-    collect(other);
-
-	//printf("all_tuples %zu\n", all_tuples.size());
-
-	std::vector<FingerprintKey> sorted_tuples(all_tuples.begin(), all_tuples.end());
-    std::sort(sorted_tuples.begin(), sorted_tuples.end(), [](const FingerprintKey& a, const FingerprintKey& b) {
-        if (a.bucket_idx != b.bucket_idx) return a.bucket_idx < b.bucket_idx;
-        return a.fp < b.fp;
-    });
-    // Merge counts
-
-	for (const auto& key : sorted_tuples) {
-		double cnt_this  = this->QueryByFp(key.fp, key.bucket_idx);
-		double cnt_other = other.QueryByFp(key.fp, key.bucket_idx);
-
-		int mean = 0;
-		double avg = (cnt_this + cnt_other) / 2.0;
-		//mean = static_cast<int>(std::ceil(avg));
-		if ((key.fp & 0x1) == 1 || cnt_this * cnt_other == 0) {
-			mean = static_cast<int>(std::ceil(avg));
-		} else {
-			mean = static_cast<int>(std::floor(avg));
+	// Custom hash function for pair<uint8_t, uint32_t>
+	// Key is: (fingerprint, bucket_id) where bucket_id is always from table 0 (hash1)
+	struct PairHash {
+		std::size_t operator()(const std::pair<uint8_t, uint32_t>& p) const {
+			return std::hash<uint8_t>()(p.first) ^ (std::hash<uint32_t>()(p.second) << 1);
 		}
+	};
 
-		/* printf("Merge: bucket(%u)-fp(%u) (%.1f + %.1f)/2.0 = %d\n", static_cast<unsigned>(key.bucket_idx),
-			static_cast<unsigned>(key.fp), cnt_this, cnt_other, mean);
- */
-		for (int c = 0; c < mean; ++c) {
-			result.nb_entries++;
-			result.InsertByFp(key.fp, key.bucket_idx);
+	// Map: (fingerprint, bucket_id_table0) -> (count, in_both)
+	struct ItemData {
+		uint64_t count;
+		bool in_both;
+	};
+
+	// Pre-reserve space for the hash map (2 BitMatchers with moderate overlap: ~15 items per bucket_num)
+	std::unordered_map<std::pair<uint8_t, uint32_t>, ItemData, PairHash> items_map;
+	items_map.reserve(bucket_num * 15);
+
+	// Extract items from current BitMatcher - Table 0
+	for (uint32_t i = 0; i < bucket_num; i++) {
+		ec_bucket* b0 = bucket[0].data() + i;
+		uint8_t type_id = get_bucket_type_id(b0);
+		uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+		for (uint8_t j = 0; j < num_items; j++) {
+			uint8_t fp = get_bucket_fingerprint(b0, j);
+			if (fp == 0) continue;
+
+			uint64_t count = get_bucket_count(b0, j, type_id);
+			if (count > 0) {
+				items_map[std::make_pair(fp, i)] = {count, false};
+			}
 		}
-		//result.print_buckets();
 	}
-	// delte all_tuples
-	//all_tuples.clear();
-	for (int i = 0; i < 2; i++) {
-        bucket[i] = result.bucket[i];
+
+	// Extract items from current BitMatcher - Table 1
+	for (uint32_t i = 0; i < bucket_num; i++) {
+		ec_bucket* b1 = bucket[1].data() + i;
+		uint8_t type_id = get_bucket_type_id(b1);
+		uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+		for (uint8_t j = 0; j < num_items; j++) {
+			uint8_t fp = get_bucket_fingerprint(b1, j);
+			if (fp == 0) continue;
+
+			uint64_t count = get_bucket_count(b1, j, type_id);
+			if (count > 0) {
+				uint32_t bucket_id_table0 = (i ^ fp) % bucket_num;
+				items_map[std::make_pair(fp, bucket_id_table0)] = {count, false};
+			}
+		}
 	}
+
+	// Extract and aggregate items from other BitMatcher - Table 0
+	for (uint32_t i = 0; i < other.bucket_num; i++) {
+		const ec_bucket* other_b0 = other.bucket[0].data() + i;
+		uint8_t type_id = get_bucket_type_id(other_b0);
+		uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+		for (uint8_t j = 0; j < num_items; j++) {
+			uint8_t fp = get_bucket_fingerprint(other_b0, j);
+			if (fp == 0) continue;
+
+			uint64_t count = get_bucket_count(other_b0, j, type_id);
+			if (count > 0) {
+				auto key = std::make_pair(fp, i);
+				auto it = items_map.find(key);
+				if (it != items_map.end()) {
+					// Item exists in both - compute mean
+					it->second.count = (it->second.count + count) / 2;
+					it->second.in_both = true;
+				} else {
+					// Item only in other
+					items_map[key] = {count, false};
+				}
+			}
+		}
+	}
+
+	// Extract and aggregate items from other BitMatcher - Table 1
+	for (uint32_t i = 0; i < other.bucket_num; i++) {
+		const ec_bucket* other_b1 = other.bucket[1].data() + i;
+		uint8_t type_id = get_bucket_type_id(other_b1);
+		uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+		for (uint8_t j = 0; j < num_items; j++) {
+			uint8_t fp = get_bucket_fingerprint(other_b1, j);
+			if (fp == 0) continue;
+
+			uint64_t count = get_bucket_count(other_b1, j, type_id);
+			if (count > 0) {
+				uint32_t bucket_id_table0 = (i ^ fp) % bucket_num;
+				auto key = std::make_pair(fp, bucket_id_table0);
+				auto it = items_map.find(key);
+				if (it != items_map.end()) {
+					// Item exists in both - compute mean
+					it->second.count = (it->second.count + count) / 2;
+					it->second.in_both = true;
+				} else {
+					// Item only in other
+					items_map[key] = {count, false};
+				}
+			}
+		}
+	}
+
+	// Convert map to vector and apply mean division for items in only one sketch
+	std::vector<ItemInfo> merged_items;
+	merged_items.reserve(items_map.size());
+
+	for (const auto& entry : items_map) {
+		uint64_t count = entry.second.in_both ? entry.second.count : entry.second.count / 2;
+		if (count > 0) {
+			merged_items.push_back({entry.first.first, entry.first.second, count});
+		}
+	}
+
+	// Sort by decreasing count
+	std::sort(merged_items.begin(), merged_items.end());
+
+	// Re-insert merged items into current sketch
+	reinsert_items(merged_items);
 }
 
 void BitMatcher::decay(){
@@ -678,7 +717,153 @@ void BitMatcher::decay(){
 	}
 }
 
-// add_metrics: OR
+// Extract all items from sketch and divide their counts by 2
+std::vector<ItemInfo> BitMatcher::extract_and_divide_items() {
+	std::vector<ItemInfo> items;
+	items.reserve(bucket_num * 2 * 5); // Reserve space for efficiency
+
+	// Extract from table 0 first (no hash computation needed)
+	for (uint32_t i = 0; i < bucket_num; i++) {
+		ec_bucket* b0 = bucket[0].data() + i;
+		uint8_t type_id = get_bucket_type_id(b0);
+		uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+		for (uint8_t j = 0; j < num_items; j++) {
+			uint8_t fp = get_bucket_fingerprint(b0, j);
+			if (fp == 0) continue; // Early exit if fingerprint is 0
+
+			uint64_t old_count = get_bucket_count(b0, j, type_id);
+			if (old_count > 1) { // Only process if count > 1 (since we divide by 2)
+				items.push_back({fp, i, old_count >> 1});
+			}
+		}
+	}
+
+	// Extract from table 1 (requires hash computation)
+	for (uint32_t i = 0; i < bucket_num; i++) {
+		ec_bucket* b1 = bucket[1].data() + i;
+		uint8_t type_id = get_bucket_type_id(b1);
+		uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+		for (uint8_t j = 0; j < num_items; j++) {
+			uint8_t fp = get_bucket_fingerprint(b1, j);
+			if (fp == 0) continue; // Early exit if fingerprint is 0
+
+			uint64_t old_count = get_bucket_count(b1, j, type_id);
+			if (old_count > 1) { // Only process if count > 1 (since we divide by 2)
+				// Compute hash1 = hash2 ^ fp (avoiding modulo when possible)
+				uint32_t bucket_id_table0 = (i ^ fp) % bucket_num;
+				items.push_back({fp, bucket_id_table0, old_count >> 1});
+			}
+		}
+	}
+
+	// Sort by decreasing count values
+	std::sort(items.begin(), items.end());
+
+	return items;
+}
+
+// Re-insert items into the sketch
+void BitMatcher::reinsert_items(const std::vector<ItemInfo>& items) {
+	// Clear both tables
+	for (int i = 0; i < 2; i++) {
+		for (uint j = 0; j < bucket_num; j++) {
+			bucket[i][j].value = 0;
+		}
+	}
+
+	// Re-insert items in sorted order to maximize capacity
+	// item.bucket_id is always hash1 (table 0 bucket)
+	for (const auto& item : items) {
+		uint32_t hash1 = item.bucket_id;
+		uint32_t hash2 = (hash1 ^ item.fingerprint) % bucket_num;
+
+		bool inserted = false;
+
+		// Try table 0 first
+		ec_bucket* b0 = bucket[0].data() + hash1;
+		uint32_t type_id0 = get_bucket_type_id(b0);
+		uint8_t slot_num0 = get_item_num_in_bucket_type(type_id0);
+
+		for (uint8_t slot = 0; slot < slot_num0; slot++) {
+			if (get_bucket_fingerprint(b0, slot) == 0) {
+				uint64_t max_count = (1UL << COUNT_LEN[type_id0][slot]) - 1;
+				if (item.count <= max_count) {
+					set_bucket_fingerprint(b0, slot, item.fingerprint);
+					set_bucket_count(b0, slot, item.count, type_id0);
+					inserted = true;
+					break;
+				}
+			}
+		}
+
+		// Try table 1 if not inserted
+		if (!inserted) {
+			ec_bucket* b1 = bucket[1].data() + hash2;
+			uint32_t type_id1 = get_bucket_type_id(b1);
+			uint8_t slot_num1 = get_item_num_in_bucket_type(type_id1);
+
+			for (uint8_t slot = 0; slot < slot_num1; slot++) {
+				if (get_bucket_fingerprint(b1, slot) == 0) {
+					uint64_t max_count = (1UL << COUNT_LEN[type_id1][slot]) - 1;
+					if (item.count <= max_count) {
+						set_bucket_fingerprint(b1, slot, item.fingerprint);
+						set_bucket_count(b1, slot, item.count, type_id1);
+						inserted = true;
+						break;
+					}
+				}
+			}
+		}
+
+		// If not inserted during simple reinsertion, use normal insertion
+		if (!inserted) {
+			// Call InsertByFp for each occurrence of this item
+			for (uint64_t c = 0; c < item.count; c++) {
+				InsertByFp(item.fingerprint, hash1);
+			}
+		}
+	}
+}
+
+// Adaptive strategy: Global division to prevent counter overflow
+void BitMatcher::global_division() {
+	// Extract and divide items (inlined for efficiency)
+	std::vector<ItemInfo> items = extract_and_divide_items();
+
+	// Re-insert items into sketch (inlined for efficiency)
+	reinsert_items(items);
+
+	// Increment division counter
+	division_count++;
+}
+
+// Compute overflow count
+uint32_t BitMatcher::compute_overflow_count() const {
+	uint32_t ovf_num = 0;
+
+	for (int table = 0; table < 2; table++) {
+		for (uint32_t i = 0; i < bucket_num; i++) {
+			const ec_bucket* b = bucket[table].data() + i;
+			uint8_t type_id = get_bucket_type_id(b);
+			uint8_t num_items = get_item_num_in_bucket_type(type_id);
+
+			for (uint8_t j = 0; j < num_items; j++) {
+				uint64_t count = get_bucket_count(b, j, type_id);
+				if (count > 0) {
+					if (count == (1UL << COUNT_LEN[type_id][j]) - 1 ) {
+						ovf_num++;
+					}
+				}
+			}
+		}
+	}
+
+	return ovf_num;
+}
+
+// add_metrics: OR (legacy function for compatibility)
 double BitMatcher::compute_overflow_ratio() const {
 	uint32_t total_entries = 0;
 	uint32_t ovf_num = 0;
@@ -696,7 +881,7 @@ double BitMatcher::compute_overflow_ratio() const {
 					if (count == (1UL << COUNT_LEN[type_id][j]) - 1 ) {
 						ovf_num++;
 					}
-					
+
 				}
 			}
 		}

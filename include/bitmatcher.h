@@ -252,6 +252,19 @@ static inline __attribute__((always_inline)) void set_bucket_count(ec_bucket* bk
 namespace org {
 namespace blobstore {
 
+// Item information structure for division operations
+// bucket_id is always the hash1 (table 0 bucket index)
+struct ItemInfo {
+	uint8_t fingerprint;
+	uint32_t bucket_id;
+	uint64_t count;
+
+	// For sorting by decreasing count
+	bool operator<(const ItemInfo& other) const {
+		return count > other.count; // Descending order
+	}
+};
+
 class BitMatcher
 {
 private:
@@ -261,10 +274,12 @@ private:
 	std::unique_ptr<BOBHash> bobhash[2];
 	std::vector<ec_bucket> bucket[2];
 
+    // Adaptive strategy tracking
+    uint32_t division_count = 0;
 
 public:
     BitMatcher(uint64_t _bucket);
-	
+
     void print_buckets() const;
     void copy_items_one_by_one(ec_bucket *dst, ec_bucket *src);
     void copy_items_upflow(ec_bucket *dst, ec_bucket *src);
@@ -281,17 +296,21 @@ public:
     void dump_to_file(FILE* fp);
     void Delete(char *key, const int16_t key_len = 0);
 
-	double QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const; 
-	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx); 
+	double QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const;
+	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx);
 	std::unique_ptr<BitMatcher> clone() const;
 	void merge(const BitMatcher& other);
-	
+
 	// Adaptive strategy methods
     void decay();
     double compute_overflow_ratio() const;
+    std::vector<ItemInfo> extract_and_divide_items();
+    void reinsert_items(const std::vector<ItemInfo>& items);
+    void global_division();
+    uint32_t compute_overflow_count() const;
 
     ~BitMatcher();
-	
+
 	// Copy constructor
 	BitMatcher(const BitMatcher& other);
 

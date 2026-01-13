@@ -23,12 +23,16 @@ pub mod ffi {
         fn clone(self: &BitMatcher)-> UniquePtr<BitMatcher>;
         fn new_bitmatcher(bucket: u64) -> UniquePtr<BitMatcher>;
         fn Insert(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16); //key: &str,key_len: u16);
-        //double Query(const char *key, const int16_t key_len = 0) 
+        //double Query(const char *key, const int16_t key_len = 0)
         fn Query(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16) -> f64;
         fn print_buckets(self: &BitMatcher);
         fn merge(self: Pin<&mut BitMatcher>, other: &BitMatcher);
         fn decay(self: Pin<&mut BitMatcher>);
         fn compute_overflow_ratio(self: &BitMatcher) -> f64;
+
+        // Adaptive strategy methods
+        fn global_division(self: Pin<&mut BitMatcher>);
+        fn compute_overflow_count(self: &BitMatcher) -> u32;
     }
 }
 unsafe impl Send for ffi::BitMatcher {}
@@ -123,9 +127,8 @@ impl BM {
     // Check thresholds and apply adaptive strategy
     fn check_and_apply_strategy(&mut self) {
         // Trigger division if needed
-        if self.matrix.as_ref().unwrap().compute_overflow_ratio() > 0.01 { //self.params.overflow_threshold {  
-            println!("[DECAY] Applying decay strategy...");   
-            self.matrix.as_mut().unwrap().decay();   
+        if self.matrix.as_ref().unwrap().compute_overflow_count() > 0 {
+            self.matrix.as_mut().unwrap().global_division();
         }
     }
 
@@ -168,8 +171,12 @@ impl BM {
                     self.omniscient_memory.push(*element);
                 }
             }else {
-                
-                let prob = self.min_value/ occur as f64;
+                let mut prob;
+                if occur == 0.0 {
+                    prob = 1.0;
+                } else {
+                    prob = self.min_value/ occur as f64;
+                }
                 let random_float: f64 = rng.random(); 
                 if random_float < prob && !self.omniscient_memory.contains(element) {
                     let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
