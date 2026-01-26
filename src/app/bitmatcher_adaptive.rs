@@ -5,7 +5,7 @@ use rand::prelude::SliceRandom;
 
 use structopt::StructOpt;
 
-use super::aupebm::Init;
+use super::aupebmdecay::Init;
 
 use cxx::UniquePtr;
 use cxx::CxxString;
@@ -16,22 +16,24 @@ use crate::util::SEED2;
 #[cxx::bridge(namespace = "org::blobstore")]
 pub mod ffi {
     unsafe extern "C++" {
-        include!("aupe/include/bitmatcher.h");
+        include!("aupe/include/bitmatcher_adaptive.h");
 
-        type BitMatcher;
+        type BitMatcherAdaptive;
 
-        fn new_bitmatcher(bucket: u64) -> UniquePtr<BitMatcher>;
-        fn Insert(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16); 
-        fn Query(self: Pin<&mut BitMatcher>, key: &CxxString, key_len: i16) -> f64;
-        fn print_buckets(self: &BitMatcher);
-        fn merge(self: Pin<&mut BitMatcher>, other: &BitMatcher);
-        fn clone(self: &BitMatcher)-> UniquePtr<BitMatcher>;
-        fn get_blocked_count(self: &BitMatcher) -> u32;
-        fn get_division_count(self: &BitMatcher) -> u32;
+        fn clone(self: &BitMatcherAdaptive)-> UniquePtr<BitMatcherAdaptive>;
+        fn new_BitMatcherAdaptive(bucket: u64) -> UniquePtr<BitMatcherAdaptive>;
+        fn Insert(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16); //key: &str,key_len: u16);
+        fn Query(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> f64;
+        fn print_buckets(self: &BitMatcherAdaptive);
+        fn merge(self: Pin<&mut BitMatcherAdaptive>, other: &BitMatcherAdaptive);
+        fn get_blocked_count(self: &BitMatcherAdaptive) -> u32;
+        fn get_division_count(self: &BitMatcherAdaptive) -> u32;
+        // Adaptive strategy methods
+        fn decay(self: Pin<&mut BitMatcherAdaptive>);
     }
 }
-unsafe impl Send for ffi::BitMatcher {}
-unsafe impl Sync for ffi::BitMatcher {}
+unsafe impl Send for ffi::BitMatcherAdaptive {}
+unsafe impl Sync for ffi::BitMatcherAdaptive {}
 impl Clone for BM {
     fn clone(&self) -> Self {
         BM {
@@ -44,14 +46,14 @@ impl Clone for BM {
     }
 }
 
-use crate::app::bitmatcher::ffi::BitMatcher;
+use crate::app::bitmatcher_adaptive::ffi::BitMatcherAdaptive;
 
 
 use cxx::let_cxx_string;
 
 pub struct BM {
     pub params: Init,
-    pub matrix: UniquePtr<BitMatcher>,
+    pub matrix: UniquePtr<BitMatcherAdaptive>,
     pub key_len: usize,
     pub min_value: f64,
     pub omniscient_memory: Vec<usize>,
@@ -85,7 +87,7 @@ impl BM {
     pub fn new() -> Self {
         Self {
             params: Init::default(),
-            matrix: ffi::new_bitmatcher(0),
+            matrix: ffi::new_BitMatcherAdaptive(0),
             key_len: 4,
             min_value: f64::MAX,
             omniscient_memory: Vec::new(),
@@ -109,11 +111,7 @@ impl BM {
     
         self.getparams(init.clone());
         self.key_len = count_digits(nodes -1);
-        //println!("init {:?}", self.params);
-        /* if self.params.n_bucket == 0 {
-            self.params.n_bucket = self.params.space * 1024 / 8 / 2;
-        } */
-        self.matrix = ffi::new_bitmatcher(self.params.n_bucket);
+        self.matrix = ffi::new_BitMatcherAdaptive(self.params.n_bucket);
         
     }
 
@@ -128,15 +126,15 @@ impl BM {
         }
     }
 
-    pub fn getdata(&self) -> UniquePtr<BitMatcher>{
+    pub fn getdata(&self) -> UniquePtr<BitMatcherAdaptive>{
         return self.matrix.as_ref().unwrap().clone()
     }
 
-    pub fn copy(&mut self, other: &BitMatcher) {
+    pub fn copy(&mut self, other: &BitMatcherAdaptive) {
         self.matrix = other.clone();
     }
 
-    pub fn merge(&mut self, other: &BitMatcher) {
+    pub fn merge(&mut self, other: &BitMatcherAdaptive) {
         //self.matrix.as_mut().unwrap().merge(&other);
         self.matrix.as_mut().unwrap().merge(other);
     }

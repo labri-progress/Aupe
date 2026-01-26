@@ -35,6 +35,10 @@ pub enum WhichApp {
     AupeCF(app::aupecf::Init), */
 
     /// Aupe RPS
+    #[structopt(name = "decay")]
+    AupeDecay(app::aupebmdecay::Init),
+
+    /// Aupe RPS
     #[structopt(name = "kvs")]
     Aupe(app::aupe::Init),
 
@@ -55,6 +59,10 @@ fn main() {
         /* WhichApp::AupeCF(pp) => {
             sim::<app::aupecf::AupeCF>(opt.n_steps, opt.nodes, &pp);  
         } */ 
+
+        WhichApp::AupeDecay(pp) => {
+            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp);  
+        } 
 
         WhichApp::AupeBM(pp) => {
             sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp);  
