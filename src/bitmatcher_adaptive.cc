@@ -121,9 +121,11 @@ BitMatcherAdaptive::BitMatcherAdaptive(uint64_t _bucket) : bucket_num(_bucket) {
 
 void BitMatcherAdaptive::print_buckets() const {
 	
+	printf("Division count: %u\n", this->division_count);
+	return;
+
 	printf("occupancy of %.2f%%\n", this->zero()*100);
 	printf("Loading Rate of %.2f%%\n", this->LR()*100);
-	printf("Division count: %u\n", this->division_count);
 	int flag = 0;
 	if (bucket_num <= 20) {
 		flag = 1;
@@ -156,7 +158,7 @@ void BitMatcherAdaptive::print_buckets() const {
         }
     } else {
         this->Ratio();
-    } 
+    }
 }
 
 void BitMatcherAdaptive::copy_items_one_by_one(ec_bucket *dst, ec_bucket *src) {
@@ -757,7 +759,6 @@ void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
 		uint32_t type_id0 = get_bucket_type_id(b0);
 		uint8_t slot_num0 = get_item_num_in_bucket_type(type_id0);
 
-		//for (uint8_t slot = 0; slot < slot_num0; slot++) {
 		for (uint8_t slot = slot_num0; slot-- > 0; ) {
 			if (get_bucket_fingerprint(b0, slot) == 0) {
 				uint64_t max_count = (1UL << COUNT_LEN[type_id0][slot]) - 1;
@@ -802,7 +803,7 @@ void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
 
 // Adaptive strategy: Global division to prevent counter overflow
 void BitMatcherAdaptive::decay() {
-	printf("Global division triggered. Division count: %u\n", division_count);
+	//printf("Global division triggered. Division count: %u\n", division_count);
 	// Extract and divide items (inlined for efficiency)
 	std::vector<ItemInfo> items = extract_and_divide_items();
 
@@ -834,7 +835,6 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
 				if (count > 0) {
 					merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count); 
-					//merged_counts[{i, fp}] += count;
 				}
 			}
 		}
@@ -853,7 +853,6 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 				if (count > 0) {
 					uint32_t bucket_id_table0 = (i ^ fp) % bm.bucket_num;
 					merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
-					//merged_counts[{bucket_id_table0, fp}] += count;
 				}
 			}
 		}
@@ -863,26 +862,15 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	extract_counts(*this);
 	extract_counts(other);
 
-	//printf("Merged unique items: %zu\n", merged_counts.size());
-	//print merged_counts
 	
 	// Convert map to sorted vector (sorted by decreasing count for better insertion)
 	std::vector<ItemInfo> items;
 	items.reserve(merged_counts.size());
 	for (const auto& kv : merged_counts) {
-		/* uint64_t count = kv.second/2;
-		if (count == 0 ) {
-			count = kv.second;
-			continue;
-		}; */
 		items.push_back({kv.first.second, kv.first.first, kv.second});
 	}
 	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)
 
-	/*for (const auto& item : items) {
-		printf("Fp %d bucked_id %d Count %d ", item.fingerprint, item.bucket_id, item.count);
-	} 
-	printf("\n");*/
 	// Reinsert all items into a fresh sketch (overwrites current)
 	reinsert_items(items);
 }
