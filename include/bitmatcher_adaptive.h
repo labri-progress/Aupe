@@ -236,17 +236,12 @@ static inline __attribute__((always_inline)) void set_bucket_count(ec_bucket* bk
 namespace org {
 namespace blobstore {
 
-// Item information structure for division operations
+// Item information structure for division operationss
 // bucket_id is always the hash1 (table 0 bucket index)
 struct ItemInfo {
 	uint8_t fingerprint;
 	uint32_t bucket_id;
 	uint64_t count;
-
-	// For sorting by decreasing count
-	/* bool operator<(const ItemInfo& other) const {
-		return count > other.count; // Descending order
-	} */
 
 	// For sorting: decreasing count, then by bucket_id and fingerprint for determinism
 	bool operator<(const ItemInfo& other) const {
@@ -256,7 +251,7 @@ struct ItemInfo {
 	}
 };
 
-class BitMatcher
+class BitMatcherAdaptive
 {
 private:
     uint bucket_num, maxloop, h1, h2;
@@ -270,7 +265,7 @@ private:
     uint32_t blocked_count = 0;
 
 public:
-    BitMatcher(uint64_t _bucket);
+    BitMatcherAdaptive(uint64_t _bucket);
 
     void print_buckets() const;
     void copy_items_one_by_one(ec_bucket *dst, ec_bucket *src);
@@ -290,33 +285,36 @@ public:
 
 	double QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const;
 	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx, uint64_t count = 1);
-	void reinsert_items(const std::vector<ItemInfo>& items);
-	std::unique_ptr<BitMatcher> clone() const;
-	void merge(const BitMatcher& other);
+	std::unique_ptr<BitMatcherAdaptive> clone() const;
+	void merge(const BitMatcherAdaptive& other);
 	double LR() const;
 
-    ~BitMatcher();
-
-	// Tracking
+    // Adaptive strategy methods
+    std::vector<ItemInfo> extract_and_divide_items();
+    void reinsert_items(const std::vector<ItemInfo>& items);
+    void decay();
 	uint32_t get_division_count() const { return division_count; };
 	uint32_t get_blocked_count() const { return blocked_count; };
+    uint32_t compute_overflow_count() const;
+
+    ~BitMatcherAdaptive();
 
 	// Copy constructor
-	BitMatcher(const BitMatcher& other);
+	BitMatcherAdaptive(const BitMatcherAdaptive& other);
 
 
 	// Copy assignment
-	BitMatcher& operator=(const BitMatcher& other);
+	BitMatcherAdaptive& operator=(const BitMatcherAdaptive& other);
 
 
 	// Move constructor
-	BitMatcher(BitMatcher&& other) noexcept;
+	BitMatcherAdaptive(BitMatcherAdaptive&& other) noexcept;
 
 	// Move assignment
-	BitMatcher& operator=(BitMatcher&& other) noexcept;
+	BitMatcherAdaptive& operator=(BitMatcherAdaptive&& other) noexcept;
 
 };
-std::unique_ptr<BitMatcher> new_bitmatcher(uint64_t bucket);
+std::unique_ptr<BitMatcherAdaptive> new_BitMatcherAdaptive(uint64_t bucket);
 //std::unique_ptr<BitMatcher> BitMatcher::clone() const;
 
 };
