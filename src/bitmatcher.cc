@@ -121,9 +121,12 @@ BitMatcher::BitMatcher(uint64_t _bucket) : bucket_num(_bucket) {
 
 void BitMatcher::print_buckets() const {
 	
+	//printf("Blocked count of %d\n", this->get_blocked_count());
+
+	return;
+
 	printf("occupancy of %.2f%%\n", this->zero()*100);
 	printf("Loading Rate of %.2f%%\n", this->LR()*100);
-	
 	int flag = 0;
 	if (bucket_num <= 20) {
 		flag = 1;
@@ -360,7 +363,7 @@ bool BitMatcher::plus(ec_bucket* b, const int finger_idx, const uint32_t type_id
 	if ( 1 + original_val == max_cnt_val ) { 
 		if (type_id > 3) {
 			blocked_count++;
-			printf("blocked_count %d\n", blocked_count);
+			//printf("blocked_count %d\n", blocked_count);
 		}
 		return false;
 	}
@@ -609,8 +612,7 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
 				if (count > 0) {
-					//merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count);
-					merged_counts[{i, fp}] += count;
+					merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count);
 				}
 			}
 		}
@@ -628,8 +630,7 @@ void BitMatcher::merge(const BitMatcher& other) {
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b1), j, type_id);
 				if (count > 0) {
 					uint32_t bucket_id_table0 = (i ^ fp) % bm.bucket_num;
-					//merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
-					merged_counts[{bucket_id_table0, fp}] += count;
+					merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
 				}
 			}
 		}
@@ -651,6 +652,7 @@ void BitMatcher::merge(const BitMatcher& other) {
 	reinsert_items(items);
 }
 
+// Only for Merge: reinsert items from sorted vector
 void BitMatcher::reinsert_items(const std::vector<ItemInfo>& items) {
 	// Fast clear using memset-equivalent for vectors
 	for (int i = 0; i < 2; i++) {
@@ -673,7 +675,6 @@ void BitMatcher::reinsert_items(const std::vector<ItemInfo>& items) {
 		uint32_t type_id0 = get_bucket_type_id(b0);
 		uint8_t slot_num0 = get_item_num_in_bucket_type(type_id0);
 
-		//for (uint8_t slot = 0; slot < slot_num0; slot++) {
 		for (uint8_t slot = slot_num0; slot-- > 0; ) {
 			if (get_bucket_fingerprint(b0, slot) == 0) {
 				uint64_t max_count = (1UL << COUNT_LEN[type_id0][slot]) - 1;
