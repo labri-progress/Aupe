@@ -121,7 +121,7 @@ BitMatcherAdaptive::BitMatcherAdaptive(uint64_t _bucket) : bucket_num(_bucket) {
 
 void BitMatcherAdaptive::print_buckets() const {
 	
-	printf("Division count: %u\n", this->division_count);
+	//printf("Division count: %u\n", this->division_count);
 	return;
 
 	printf("occupancy of %.2f%%\n", this->zero()*100);
