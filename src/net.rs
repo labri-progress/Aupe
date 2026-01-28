@@ -255,13 +255,24 @@ impl<A: App + Send> Simulator<A> {
                     metrics: A::Metrics::empty(),
                     n_recv: to_handle.len(),
                 };
-                to_handle.sort_by(|a, b| a.arrival_time.cmp(&b.arrival_time));
+                // to_handle.sort_by(|a, b| a.arrival_time.cmp(&b.arrival_time));
+                // Sort deterministically: by arrival_time, then by sender ID for tie-breaking
+                to_handle.sort_by(|a, b| {
+                    a.arrival_time.cmp(&b.arrival_time)
+                        .then_with(|| a.from.cmp(&b.from))
+                });
                 
-                for message in to_handle {
+                /* for message in to_handle {
                     //println!("message {:?}", message.);
                     handler.time = message.arrival_time;
                     proc.state.handle(&mut handler, message.from, &message.msg);
+                } */
+                for message in to_handle {
+                    eprintln!("Node {} handling msg at time {}", proc.id, message.arrival_time);
+                    handler.time = message.arrival_time;
+                    proc.state.handle(&mut handler, message.from, &message.msg);
                 }
+
                 handler.metrics = proc.state.metrics(&mut handler);
                 handler
             })

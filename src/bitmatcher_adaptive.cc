@@ -122,6 +122,7 @@ BitMatcherAdaptive::BitMatcherAdaptive(uint64_t _bucket) : bucket_num(_bucket) {
 void BitMatcherAdaptive::print_buckets() const {
 	
 	//printf("Division count: %u\n", this->division_count);
+	this->Ratio();
 	return;
 
 	printf("occupancy of %.2f%%\n", this->zero()*100);
@@ -738,10 +739,12 @@ std::vector<ItemInfo> BitMatcherAdaptive::extract_and_divide_items() {
 
 // Re-insert items into the sketch
 void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
+	int64_t original_division_count = this->division_count;
 	// Fast clear using memset-equivalent for vectors
 	for (int i = 0; i < 2; i++) {
 		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
 	}
+	this->division_count = original_division_count;
 
 	// Re-insert items in sorted order to maximize capacity
 	// item.bucket_id is always hash1 (table 0 bucket)
@@ -802,7 +805,7 @@ void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
 
 
 // Adaptive strategy: Global division to prevent counter overflow
-void BitMatcherAdaptive::decay() {
+/*void BitMatcherAdaptive::decay() {
 	//printf("Global division triggered. Division count: %u\n", division_count);
 	// Extract and divide items (inlined for efficiency)
 	std::vector<ItemInfo> items = extract_and_divide_items();
@@ -812,7 +815,21 @@ void BitMatcherAdaptive::decay() {
 
 	// Increment division counter
 	division_count++;
+}*/
+
+void BitMatcherAdaptive::decay() {
+    printf("decay() triggered, division_count=%u\n", division_count);
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    std::vector<ItemInfo> items = extract_and_divide_items();
+    reinsert_items(items);
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    printf("decay() took %lld ms\n", 
+        std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count());
+    division_count++;
 }
+
 
 // Merge two BitMatchers by summing counters and reinserting
 void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {

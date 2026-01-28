@@ -6,7 +6,7 @@
 
 # Configuration
 HOSTS_FILE="/etc/ansible/hosts"
-RESULT_FILES=("mergekvs" "mergebma" "bm3600-10" "kvs")
+RESULT_FILES=("decay-2600-1000" "bm-2600-1000") #RESULT_FILES=("mergekvs" "mergebma" "bm3600-10" "kvs")
 REMOTE_DIR="~/Aupe"
 LOCAL_DIR="./fetched_results"
 TIMESTAMP=${1:-"latest"}

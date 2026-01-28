@@ -70,7 +70,7 @@ pub struct Init {
     #[structopt(short = "c", long = "n_bucket", default_value = "0")]
     pub n_bucket: u64,
 
-    #[structopt(short = "y", long = "budget", default_value = "6")]
+    #[structopt(short = "y", long = "budget", default_value = "1")]
     pub space: u64,
 }
 
@@ -479,6 +479,7 @@ impl App for AupeBM {
                             net.send(p, Msg::MergeRequest(self.sketch.getdata()));
                         }
                     }
+                    
                     if self.my_id == self.params.n_byzantine && net.time()==200 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
                         
                         self.sketch.print();

@@ -70,7 +70,7 @@ pub struct Init {
     #[structopt(short = "c", long = "n_bucket", default_value = "0")]
     pub n_bucket: u64,
 
-    #[structopt(short = "y", long = "budget", default_value = "6")]
+    #[structopt(short = "y", long = "budget", default_value = "1")]
     pub space: u64,
 }
 
@@ -424,19 +424,22 @@ impl App for AupeDecay {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    
+                    eprintln!("Node {} SelfNotif start, v_push={} v_pull={}", self.my_id, self.v_push.len(), self.v_pull.len());
                     //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        
+
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
-                        
+
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
+                        eprintln!("Node {} debiais_stream v_push start (len={})", self.my_id, v_push.len());
                         v_push = self.sketch.debiais_stream(v_push, &mut self.rng);
+                        eprintln!("Node {} debiais_stream v_pull start (len={})", self.my_id, v_pull.len());
                         v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng);
+                        eprintln!("Node {} debiais_stream done", self.my_id);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
@@ -479,6 +482,7 @@ impl App for AupeDecay {
                             net.send(p, Msg::MergeRequest(self.sketch.getdata()));
                         }
                     }
+                    
                     if self.my_id == self.params.n_byzantine && net.time()==200 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
                         
                         self.sketch.print();
@@ -496,8 +500,10 @@ impl App for AupeDecay {
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
                     self.v_pull.extend(lst);
-                    
+
+                    eprintln!("Node {} update_freq PullReply (len={})", self.my_id, lst.len());
                     self.sketch.update_freq(lst.clone());
+                    eprintln!("Node {} update_freq PullReply done", self.my_id);
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
@@ -506,10 +512,11 @@ impl App for AupeDecay {
                         self.n_byzantine_received += 1;
                     }
                     self.v_push.push(from);
-                    
-                    // create a vector containing only item from 
+
+                    // create a vector containing only item from
                     let mut lst = Vec::new();
                     lst.push(from);
+                    eprintln!("Node {} update_freq PushRequest from {}", self.my_id, from);
                     self.sketch.update_freq(lst.clone());
                 },
 
