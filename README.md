@@ -8,3 +8,9 @@ Rscript plot_byz.r 1 (for budget=1KB) or Rscript plot_byz.r 2
 
 ./run_merge_experiments.sh 
 Rscript plot_merge.r 30 10 1
+
+run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
+./run_merge_experimentsK.sh bm 10 1
+./run_merge_experimentsK.sh bm 20 1
+./run_merge_experimentsK.sh array 10 1
+./run_merge_experimentsK.sh array 20 1
