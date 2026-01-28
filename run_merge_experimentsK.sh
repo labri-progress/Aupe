@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
+
 # Experiment parameters
 ROUNDS=200
 NODES=10000
@@ -7,17 +9,17 @@ VIEW=160
 UVIEW=160
 SM=100
 FORCE=10
-NRUNS=5
+NRUNS="${3:-5}" #5
 
 # Faulty: 30% of N
 FAULTY_PCT=30
 FAULTY_COUNT=3000
 
 # Strategies (no decay for merge)
-STRATEGIES=("bm" "array")
+STRATEGIES= "${1:-"bm"}" #("bm" "array")
 
 # Budget memory in KB (only used by bm via -y)
-BUDGETS=(10 20)
+BUDGETS="${2:-20}" #(10 20)
 
 # Trusted node percentages -> number of trusted nodes
 TRUSTED_PCTS=(10 20 30)
@@ -25,7 +27,7 @@ TRUSTED_PCTS=(10 20 30)
 TRUSTED_COUNTS=(1000 2000 3000)
 
 # Number of merges per trusted node per round
-MERGES=(1 10)
+MERGES=10 # (1 10)
 
 # Output directory
 OUTDIR="results_merge"
