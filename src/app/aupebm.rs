@@ -480,7 +480,7 @@ impl App for AupeBM {
                         }
                     }
                     
-                    if self.my_id == self.params.n_byzantine && net.time()==200 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
+                    if self.my_id == self.params.n_byzantine && net.time() %200==0 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
                         
                         self.sketch.print();
                     }

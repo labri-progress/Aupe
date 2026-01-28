@@ -805,8 +805,7 @@ void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
 
 
 // Adaptive strategy: Global division to prevent counter overflow
-/*void BitMatcherAdaptive::decay() {
-	//printf("Global division triggered. Division count: %u\n", division_count);
+void BitMatcherAdaptive::decay() {
 	// Extract and divide items (inlined for efficiency)
 	std::vector<ItemInfo> items = extract_and_divide_items();
 
@@ -815,19 +814,6 @@ void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
 
 	// Increment division counter
 	division_count++;
-}*/
-
-void BitMatcherAdaptive::decay() {
-    printf("decay() triggered, division_count=%u\n", division_count);
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    std::vector<ItemInfo> items = extract_and_divide_items();
-    reinsert_items(items);
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    printf("decay() took %lld ms\n", 
-        std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count());
-    division_count++;
 }
 
 
