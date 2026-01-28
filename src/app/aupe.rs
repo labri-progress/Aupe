@@ -526,23 +526,28 @@ impl App for Aupe {
                 Msg::MergeRequest(other_sketch) => {
                     //
                     if self.is_trusted{
+                        /* 1. Receive sketch */
+                        /* 2. Send yours */
+                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
+                        /* 3. Merge */
+                        self.sketch.merge(other_sketch.to_vec()); 
 
                         /* 1. Receive sketch */
                         /* 2. Merge */
-                        self.sketch.merge(other_sketch.to_vec());
+                        //self.sketch.merge(other_sketch.to_vec());
                         /* 2. Send results */
-                        net.send(from, Msg::MergeReply(self.sketch.getdata()));
+                        //net.send(from, Msg::MergeReply(self.sketch.getdata()));
                         
                     }else {
                         println!("message MergeR ");
                     }
                 },
-                Msg::MergeReply(merged_sketch) => {
+                Msg::MergeReply(other_sketch) => {
                     //println!("message MergeR ");
                     if self.is_trusted{
-
+                        self.sketch.merge(other_sketch.to_vec());
                         /* update my sketch */
-                        self.sketch.copy(merged_sketch.to_vec());
+                        //self.sketch.copy(other_sketch.to_vec());
                         
                     }
                 },

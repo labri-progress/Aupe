@@ -122,7 +122,7 @@ BitMatcher::BitMatcher(uint64_t _bucket) : bucket_num(_bucket) {
 void BitMatcher::print_buckets() const {
 	
 	//printf("Blocked count of %d\n", this->get_blocked_count());
-
+	this->Ratio();
 	return;
 
 	printf("occupancy of %.2f%%\n", this->zero()*100);
@@ -654,11 +654,13 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 // Only for Merge: reinsert items from sorted vector
 void BitMatcher::reinsert_items(const std::vector<ItemInfo>& items) {
+	
+	int64_t original_blocked_count = this->blocked_count;
 	// Fast clear using memset-equivalent for vectors
 	for (int i = 0; i < 2; i++) {
 		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
 	}
-
+	this->blocked_count = original_blocked_count;
 	// Re-insert items in sorted order to maximize capacity
 	// item.bucket_id is always hash1 (table 0 bucket)
 	for (const auto& item : items) {

@@ -33,3 +33,9 @@ cargo run -- -T 2000 -n 10000 kvs -G samples -f 2 -t 1000 -v 160 -u 160 -m 100 \
             
 cargo run -- -T 2000 -n 10000 kvs -G samples -f 2 -t 2000 -v 160 -u 160 -m 100 \
     -n 10000 > "analysis/kvs-2-2000"
+
+cargo run -- -T 200 -n 10000 decay -G nograph -f 10 -t 2600 -v 160 -u 160 -m 100 -n 10000 -y 10 > "decay-2600" 
+cargo run -- -T 200 -n 10000 decay -G nograph -f 10 -t 2600 -v 160 -u 160 -m 100 -n 10000 -y 10 -x 1000 -p 10 > "decay-2600-1000" #2h
+
+cargo run -- -T 200 -n 10000 bm -G nograph -f 10 -t 2600 -v 160 -u 160 -m 100 -n 10000 -y 10 > "bm-2600"
+cargo run -- -T 200 -n 10000 bm -G nograph -f 10 -t 2600 -v 160 -u 160 -m 100 -n 10000 -y 10 -x 1000 -p 10 > "bm-2600-1000" #2h

@@ -96,6 +96,7 @@ impl BM {
         //println!("BM of 2 arrays, each of {:?} buckets of size 64 bits", self.params.n_bucket); 
         self.matrix.print_buckets();
         println!("\nmin_value {}", self.min_value);
+        println!("Getting stats bm: {:?}", self.get_stats());
     }
 
     pub fn getparams(&mut self, init: Init) {
@@ -117,7 +118,7 @@ impl BM {
         
     }
 
-    fn get_stats(&mut self) -> (u32, u32) {
+    pub fn get_stats(&self) -> (u32, u32) {
         (self.matrix.get_blocked_count(), self.matrix.get_division_count())
     }
 

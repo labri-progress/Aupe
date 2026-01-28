@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <iomanip>
 #include <random> 
+#include <chrono>
 
 #define ENABLE_CM_SKETCH 0
 /* the bucket type macro */
