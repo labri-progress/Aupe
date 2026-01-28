@@ -1,7 +1,7 @@
-cargo run -- -T 1000 -n 10000 bm -G samples -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 -y 10 -x 1000 -p 10 > "mergebma"
-cargo run -- -T 1000 -n 10000 bm -G samples -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 -y 10 > "bm3600-10"
-cargo run -- -T 1000 -n 10000 kvs -G samples -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 -x 1000 -p 10 > "mergekvs"
-cargo run -- -T 1000 -n 10000 kvs -G samples -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 > "kvs"
+cargo run -- -T 1000 -n 10000 bm -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 -y 10 -x 1000 -p 10 > "mergebma"
+cargo run -- -T 1000 -n 10000 bm -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 -y 10 > "bm3600-10"
+cargo run -- -T 1000 -n 10000 kvs -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 -x 1000 -p 10 > "mergekvs"
+cargo run -- -T 1000 -n 10000 kvs -f 10 -t 3600 -v 160 -u 160 -m 100 -n 10000 > "kvs"
 
 # Start a new session
 screen -S experiment

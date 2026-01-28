@@ -262,17 +262,10 @@ impl<A: App + Send> Simulator<A> {
                         .then_with(|| a.from.cmp(&b.from))
                 });
                 
-                /* for message in to_handle {
-                    //println!("message {:?}", message.);
-                    handler.time = message.arrival_time;
-                    proc.state.handle(&mut handler, message.from, &message.msg);
-                } */
                 for message in to_handle {
-                    eprintln!("Node {} handling msg at time {}", proc.id, message.arrival_time);
                     handler.time = message.arrival_time;
                     proc.state.handle(&mut handler, message.from, &message.msg);
                 }
-
                 handler.metrics = proc.state.metrics(&mut handler);
                 handler
             })
