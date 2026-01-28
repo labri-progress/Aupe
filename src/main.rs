@@ -39,7 +39,7 @@ pub enum WhichApp {
     AupeDecay(app::aupebmdecay::Init),
 
     /// Aupe RPS
-    #[structopt(name = "kvs")]
+    #[structopt(name = "array")]
     Aupe(app::aupe::Init),
 
     /// Brahms RPS
