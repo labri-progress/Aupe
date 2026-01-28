@@ -33,7 +33,7 @@ MERGES=(10) # (1 10)
 OUTDIR="results_merge"
 mkdir -p "$OUTDIR"
 
-for run in $(seq 1 $NRUNS); do
+for run in $(seq $NRUNS $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for i in "${!TRUSTED_PCTS[@]}"; do
       t_pct=${TRUSTED_PCTS[$i]}
