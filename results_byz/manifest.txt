@@ -1,0 +1,6 @@
+decay-N1000-v100-f10-y1-run1
+bm-N1000-v100-f10-y1-run1
+bm-N1000-v100-f10-y2-run1
+bm-N1000-v100-f10-y1-run2
+bm-N1000-v100-f10-y2-run2
+decay-N1000-v100-f10-y1-run1
