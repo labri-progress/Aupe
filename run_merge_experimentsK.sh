@@ -33,6 +33,19 @@ MERGES=(10) # (1 10)
 OUTDIR="results_merge"
 mkdir -p "$OUTDIR"
 
+MANIFEST="$OUTDIR/manifest.txt"
+touch "$MANIFEST"
+
+# Check if experiment is already done (listed in manifest)
+is_done() {
+    grep -qxF "$1" "$MANIFEST" 2>/dev/null
+}
+
+# Record experiment as done in manifest
+mark_done() {
+    echo "$1" >> "$MANIFEST"
+}
+
 for run in $(seq $NRUNS $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for i in "${!TRUSTED_PCTS[@]}"; do
@@ -42,19 +55,29 @@ for run in $(seq $NRUNS $NRUNS); do
       for p in "${MERGES[@]}"; do
         if [ "$strat" = "array" ]; then
           # Array has no budget param
-          outfile="$OUTDIR/${strat}-${NODES}-${VIEW}-${FAULTY_COUNT}-${t_count}-${p}-run${run}"
+          outfile="${strat}-${NODES}-${VIEW}-${FAULTY_COUNT}-${t_count}-${p}-run${run}"
+          if is_done "$outfile"; then
+            echo "Skipping (already done): $outfile"
+            continue
+          fi
           echo "Running: $strat t=${t_pct}% p=${p} run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES -x $t_count -p $p > "$outfile"
+            -n $NODES -x $t_count -p $p > "$OUTDIR/$outfile"
+          mark_done "$outfile"
         else
           # bm uses -y for budget
           for budget in "${BUDGETS[@]}"; do
-            outfile="$OUTDIR/${strat}-${NODES}-${VIEW}-${FAULTY_COUNT}-${t_count}-${p}-${budget}-run${run}"
+            outfile="${strat}-${NODES}-${VIEW}-${FAULTY_COUNT}-${t_count}-${p}-${budget}-run${run}"
+            if is_done "$outfile"; then
+              echo "Skipping (already done): $outfile"
+              continue
+            fi
             echo "Running: $strat t=${t_pct}% p=${p} budget=${budget}KB run=${run}"
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -y $budget -x $t_count -p $p > "$outfile"
+              -n $NODES -y $budget -x $t_count -p $p > "$OUTDIR/$outfile"
+            mark_done "$outfile"
           done
         fi
       done
