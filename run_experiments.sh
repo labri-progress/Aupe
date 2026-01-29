@@ -10,7 +10,7 @@ GAMMA=10
 NRUNS=5
 
 # Strategies
-STRATEGIES=("bm" "decay" "array")
+STRATEGIES=("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
 BUDGETS=(1 2)
@@ -22,9 +22,22 @@ FAULTY_PCTS=(10 20 30)
 OUTDIR="results_byz"
 mkdir -p "$OUTDIR"
 
+MANIFEST="$OUTDIR/manifest.txt"
+touch "$MANIFEST"
+
 # Compute number of faulty nodes from percentage
 faulty_count() {
     echo $(( NODES * $1 / 100 ))
+}
+
+# Check if experiment is already done (listed in manifest)
+is_done() {
+    grep -qxF "$1" "$MANIFEST" 2>/dev/null
+}
+
+# Record experiment as done in manifest
+mark_done() {
+    echo "$1" >> "$MANIFEST"
 }
 
 for run in $(seq 1 $NRUNS); do
@@ -34,19 +47,29 @@ for run in $(seq 1 $NRUNS); do
 
       if [ "$strat" = "array" ]; then
         # Array has no budget parameter — run once per (f, run)
-        outfile="$OUTDIR/${strat}-N${NODES}-v${VIEW}-f${f_pct}-run${run}"
+        outfile="${strat}-N${NODES}-v${VIEW}-f${f_pct}-run${run}"
+        if is_done "$outfile"; then
+          echo "Skipping (already done): $outfile"
+          continue
+        fi
         echo "Running: $strat f=${f_pct}% run=${run}"
         cargo run -- -T $ROUNDS -n $NODES $strat \
-          -f $f_pct -t $f_count -v $VIEW -u $UVIEW -m $SM \
-          -n $NODES > "$outfile"
+          -f 10 -t $f_count -v $VIEW -u $UVIEW -m $SM \
+          -n $NODES > "$OUTDIR/$outfile"
+        mark_done "$outfile"
       else
         # bm and decay use -y for budget
         for budget in "${BUDGETS[@]}"; do
-          outfile="$OUTDIR/${strat}-N${NODES}-v${VIEW}-f${f_pct}-y${budget}-run${run}"
+          outfile="${strat}-N${NODES}-v${VIEW}-f${f_pct}-y${budget}-run${run}"
+          if is_done "$outfile"; then
+            echo "Skipping (already done): $outfile"
+            continue
+          fi
           echo "Running: $strat f=${f_pct}% budget=${budget}KB run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $f_pct -t $f_count -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES -y $budget > "$outfile"
+            -n $NODES -y $budget > "$OUTDIR/$outfile"
+          mark_done "$outfile"
         done
       fi
     done
