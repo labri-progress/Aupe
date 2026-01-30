@@ -4,3 +4,8 @@ bm-N1000-v100-f100-y2-run1
 bm-N1000-v100-f100-y1-run2
 bm-N1000-v100-f100-y2-run2
 decay-N1000-v100-f100-y1-run1
+decay-N1000-v100-f300-y0.5-run1
+decay-N1000-v100-f300-y1-run1
+array-N1000-v100-f300-run1
+bm-N1000-v100-f300-y0.5-run1
+bm-N1000-v100-f300-y1-run1
