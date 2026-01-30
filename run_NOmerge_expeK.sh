@@ -3,7 +3,7 @@
 # run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
 
 # Experiment parameters
-ROUNDS=2 #00
+ROUNDS=200
 NODES=10000
 VIEW=160
 UVIEW=160

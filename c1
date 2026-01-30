@@ -13,3 +13,8 @@ screen -S experiment
 
 # Reconnect later
 screen -r experiment
+
+chartreuse2-1.grenoble.grid5000.fr
+chartreuse2-2.grenoble.grid5000.fr
+chartreuse2-3.grenoble.grid5000.fr
+chartreuse2-4.grenoble.grid5000.fr
