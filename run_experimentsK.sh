@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Experiment parameters
-ROUNDS=10000
+ROUNDS=100000
 NODES=1000
 VIEW=100
 UVIEW=100

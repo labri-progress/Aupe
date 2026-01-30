@@ -480,10 +480,11 @@ impl App for AupeBM {
                         }
                     }
                     
-                    /* if self.my_id == self.params.n_byzantine && net.time() %200==0 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
-                        
-                        self.sketch.print();
-                    } */
+                    if self.my_id == self.params.n_byzantine && net.time() %200==0 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
+                        let blocked_count = self.sketch.get_stats().0;
+                        println!("Node {} time {}: blocked_count={}", self.my_id, net.time(), blocked_count);
+                        //self.sketch.print();
+                    }
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
