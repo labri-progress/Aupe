@@ -17,7 +17,7 @@ nruns        <- 5
 faulty_pcts  <- c(10, 20, 30)
 strategies   <- c("bm", "decay", "array")
 strat_labels <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
-results_dir  <- "results_byz"
+results_dir  <- "output_byz"
 
 # --- Theme (inspired by metricmemory_force.r) ---
 line_size  <- 0.5

@@ -1,5 +1,12 @@
-decay-N1000-v100-f100-y1-run1
 bm-N1000-v100-f100-y1-run1
-bm-N1000-v100-f100-y2-run1
+decay-N1000-v100-f100-y1-run4
 bm-N1000-v100-f100-y1-run2
-bm-N1000-v100-f100-y2-run2
+decay-N1000-v100-f100-y2-run1
+bm-N1000-v100-f100-y2-run1
+decay-N1000-v100-f100-y2-run2
+decay-N1000-v100-f100-y1-run1
+decay-N1000-v100-f100-y2-run3
+decay-N1000-v100-f100-y1-run2
+decay-N1000-v100-f100-y2-run4
+decay-N1000-v100-f100-y1-run3
+
