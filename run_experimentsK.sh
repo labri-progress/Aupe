@@ -1,4 +1,5 @@
 #!/bin/bash
+# ./run_experimentsK.sh bm 30 1
 
 # Experiment parameters
 ROUNDS=100000
@@ -10,7 +11,7 @@ GAMMA=10
 NRUNS="${3:-5}" #5
 
 # Strategies
-STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
+STRATEGIES=("${2:-bm}") #("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
 BUDGETS=(0.5 1 2)

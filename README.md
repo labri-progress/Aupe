@@ -13,3 +13,12 @@ run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
 ./run_merge_experimentsK.sh bm 10 1
 ./run_merge_experimentsK.sh bm 20 1
 ./run_merge_experimentsK.sh array 10 1
+
+
+./run_experimentsK.sh bm 30 1
+./run_experimentsK.sh array 30 1
+./run_experimentsK.sh decay 30 1
+
+./run_experimentsK.sh bm 40 1
+./run_experimentsK.sh array 40 1
+./run_experimentsK.sh decay 40 1
