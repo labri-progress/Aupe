@@ -19,14 +19,15 @@ budget       <- as.integer(args[2])  # e.g. 10 or 20
 p_merge      <- as.integer(args[3])  # e.g. 1 or 10
 nodes        <- 10000
 view         <- 160
-nruns        <- 5
+nruns        <- 2
 force        <- 10
 faulty_count <- as.integer(nodes * faulty_pct / 100)
 strategies   <- c("bm", "array")
 strat_labels <- c("bm" = "BM", "array" = "Array")
 trusted_pcts <- c(10, 20, 30) #c(1, 5, 10)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
-results_dir  <- "results_merge"
+trusted_counts
+results_dir  <- "output_merge"
 
 # --- Theme ---
 line_size  <- 0.5
@@ -36,7 +37,7 @@ width      <- 7
 height     <- width / ratio
 
 custom_colors <- c("BM" = "#882EE6", "Array" = "#ff8833")
-custom_linetypes <- c("1" = "dotted", "5" = "dashed", "10" = "solid")
+custom_linetypes <- c("10" = "dotted", "20" = "dashed", "30" = "solid")
 
 mytheme <- theme(
   panel.grid.major   = element_blank(),
@@ -99,20 +100,26 @@ avg_data <- all_data %>%
   summarise(propByz = mean(propByz), .groups = "drop")
 
 avg_data$t_pct_f <- factor(avg_data$t_pct)
-
+unique(avg_data$t_pct_f)
+unique(avg_data$t_pct)
 # --- Plot ---
 optimal <- faulty_pct / 100
 
-avg_data$time_f <- factor(avg_data$time)
+max_time <- max(avg_data$time)
+if (max_time > 50) {
+  x_breaks <- seq(0, max_time, by = 50)
+} else {
+  x_breaks <- sort(unique(avg_data$time))
+}
 avg_data$label  <- paste0(avg_data$strategy, " t=", avg_data$t_pct, "%")
-
-p <- ggplot(avg_data, aes(x = time_f, y = propByz,
+unique(avg_data$label)
+p <- ggplot(avg_data, aes(x = time, y = propByz,
                            color = strategy,
                            linetype = t_pct_f,
                            group = interaction(strategy, t_pct_f))) +
   geom_hline(yintercept = optimal, linetype = "dashed", color = "gray50") +
   geom_line(linewidth = line_size) +
-  geom_point(size = point_size) +
+  #geom_point(size = point_size) +
   scale_color_manual(values = custom_colors) +
   scale_linetype_manual(values = custom_linetypes,
                         labels = paste0("t=", names(custom_linetypes), "%")) +
@@ -121,10 +128,11 @@ p <- ggplot(avg_data, aes(x = time_f, y = propByz,
     y = expression(bold("Proportion of Byz. samp."))
   ) +
   coord_cartesian(ylim = c(0, 1)) +
+  scale_x_continuous(breaks = x_breaks) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   mytheme +
   theme(
-    legend.position = c(0.2, 0.75),
+    legend.position = c(0.25, 0.55),
     legend.title = element_blank(),
     legend.box = "horizontal"
   ) +
