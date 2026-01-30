@@ -1,22 +1,22 @@
 #!/bin/bash
 
 # Experiment parameters
-ROUNDS=100000
+ROUNDS=2 #00000
 NODES=1000
 VIEW=100
 UVIEW=100
 SM=100
 GAMMA=10
-NRUNS="${1:-5}" #5
+NRUNS="${3:-5}" #5
 
 # Strategies
-STRATEGIES=("decay" "array" "bm")
+STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
-BUDGETS=(0.5 1)
+BUDGETS=(0.5 1 2)
 
 # Faulty percentages
-FAULTY_PCTS=(30)
+FAULTY_PCTS=("${1:-30}") #10 20 30
 
 # Output directory
 OUTDIR="results_byz"
