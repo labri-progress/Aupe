@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Experiment parameters
-ROUNDS=100000
+ROUNDS=10000
 NODES=1000
 VIEW=100
 UVIEW=100
@@ -13,10 +13,10 @@ NRUNS="${1:-5}" #5
 STRATEGIES=("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
-BUDGETS=(1 2)
+BUDGETS=(0.5 1)
 
 # Faulty percentages
-FAULTY_PCTS=(10 20 30)
+FAULTY_PCTS=(30)
 
 # Output directory
 OUTDIR="results_byz"
@@ -54,12 +54,13 @@ for run in $(seq $NRUNS $NRUNS); do
         fi
         #echo "Running: $strat f=${f_pct}% run=${run}"
         cargo run -- -T $ROUNDS -n $NODES $strat \
-          -f 10 -t $f_count -v $VIEW -u $UVIEW -m $SM \
+          -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
           -n $NODES > "$OUTDIR/$outfile"
         mark_done "$outfile"
       else
         # bm and decay use -y for budget
         for budget in "${BUDGETS[@]}"; do
+          buckets=$(echo "$budget * 1024/8/2" | bc)
           outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-y${budget}-run${run}"
           if is_done "$outfile"; then
             echo "Skipping (already done): $outfile"
@@ -67,8 +68,8 @@ for run in $(seq $NRUNS $NRUNS); do
           fi
           echo "Running: $strat f=${f_count} budget=${budget}KB run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
-            -f 10 -t $f_count -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES -y $budget > "$OUTDIR/$outfile"
+            -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
+            -n $NODES -c $buckets > "$OUTDIR/$outfile"
           mark_done "$outfile"
         done
       fi
