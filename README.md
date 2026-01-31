@@ -33,7 +33,7 @@ Rscript plot_merge.r 30 10 10
 Rscript plot_merge.r 30 20 10
 
 
-TODO
+
 BUDGET 5
 ./run_merge_experimentsK.sh bm 5 1
 
@@ -45,3 +45,21 @@ NOMERGE
 ./run_NOmerge_expeK.sh bm 20 1
 
 ./run_experimentsK.sh bm 20 1
+
+WAITING
+./run_experimentsK.sh array 20 1
+./run_experimentsK.sh decay 20 1
+
+./run_experimentsK.sh bm 10 1
+./run_experimentsK.sh array 10 1
+
+TODO
+./run_experimentsK.sh decay 10 1
+
+./run_NOmerge_expeK.sh decay 5 1
+./run_NOmerge_expeK.sh decay 10 1
+./run_NOmerge_expeK.sh decay 20 1
+
+./run_merge_experimentsK.sh decay 5 1
+./run_merge_experimentsK.sh decay 10 1
+./run_merge_experimentsK.sh decay 20 1
