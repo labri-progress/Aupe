@@ -43,3 +43,5 @@ NOMERGE
 ./run_NOmerge_expeK.sh bm 10 1
 ./run_NOmerge_expeK.sh array 10 1
 ./run_NOmerge_expeK.sh bm 20 1
+
+./run_experimentsK.sh bm 20 1
