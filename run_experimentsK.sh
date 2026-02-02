@@ -14,7 +14,7 @@ NRUNS="${3:-5}" #5
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
-BUDGETS=(0.5 1 2)
+BUDGETS=(0.2) # 1 2)
 
 # Faulty percentages
 FAULTY_PCTS=("${2:-30}") #10 20 30

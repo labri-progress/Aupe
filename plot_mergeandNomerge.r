@@ -24,7 +24,7 @@ force        <- 10
 faulty_count <- as.integer(nodes * faulty_pct / 100)
 strategies   <- c("bm", "array")
 strat_labels <- c("bm" = "BM", "array" = "Array")
-trusted_pcts <- c(0, 5, 10, 20, 30) #c(1, 5, 10)
+trusted_pcts <- c(0, 1, 5, 10, 20, 30) #c(1, 5, 10)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 trusted_counts
 results_dir  <- "output_merge"
@@ -36,7 +36,7 @@ ratio      <- 2.5
 width      <- 7
 height     <- width / ratio
 
-custom_colors <- c("0" = "#000000", "5" = "#E69F00", "10" = "#56B4E9", "20" = "#009E73", "30" = "#D55E00")
+custom_colors <- c("0" = "#000000", "1" = "#e60096", "5" = "#E69F00", "10" = "#56B4E9", "20" = "#009E73", "30" = "#D55E00")
 custom_linetypes <- c("BM" = "solid", "Array" = "dashed")
 custom_shapes <- c("BM" = 16, "Array" = 17)
 

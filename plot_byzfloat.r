@@ -10,7 +10,7 @@ library(dplyr)
 library(gridExtra)
 
 # --- Parameters ---
-budget       <- as.integer(args[1])  # 0.5 1 or 2 (KB)
+budget       <- as.double(args[1])  # 0.5 1 or 2 (KB)
 nodes        <- 1000
 view         <- 100
 nruns        <- 1
@@ -36,9 +36,9 @@ mytheme <- theme(
   panel.border       = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y   = unit(0.005, "cm"),
   text               = element_text(size = 12, color = "black"),
-  axis.title.x       = element_blank(), #element_text(size = 14, face = "bold"),
+  axis.title.x       = element_text(size = 14, face = "bold"),
   axis.title.y       = element_text(size = 12, face = "bold"),
-  axis.text.x        = element_blank(), #text(size = 14, face = "bold"),
+  axis.text.x        = element_blank(),
   axis.text.y        = element_text(size = 14, face = "bold"),
   plot.title          = element_text(size = 14, face = "bold"),
   legend.text        = element_text(size = 11, face = "bold"),
@@ -60,7 +60,7 @@ for (strat in strategies) {
                            sprintf("%s-N%d-v%d-f%d-run%d", strat, nodes, view, faulty_count, run))
       } else {
         fname <- file.path(results_dir,
-                           sprintf("%s-N%d-v%d-f%d-y%d-run%d", strat, nodes, view, faulty_count, budget, run))
+                           sprintf("%s-N%d-v%d-f%d-y%.1f-run%d", strat, nodes, view, faulty_count, budget, run))
       }
       if (!file.exists(fname)) {
         cat("Warning: file not found:", fname, "\n")
@@ -121,7 +121,7 @@ for (i in seq_along(faulty_pcts)) {
 
 # --- Save PDF ---
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/byz_proportion_budget_%dKB.pdf", budget)
+outfile <- sprintf("results/byz_proportion_budget_%.1fKB.pdf", budget)
 pdf(outfile, width = width, height = height)
 grid.arrange(grobs = plots, nrow = 1, ncol = 3)
 dev.off()
