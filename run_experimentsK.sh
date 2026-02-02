@@ -2,7 +2,7 @@
 # ./run_experimentsK.sh bm 30 1
 
 # Experiment parameters
-ROUNDS=100000
+ROUNDS=1000000
 NODES=1000
 VIEW=100
 UVIEW=100
