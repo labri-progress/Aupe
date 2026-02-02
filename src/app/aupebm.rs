@@ -149,6 +149,8 @@ pub struct Metrics {
 
     n_fbi: usize,
 
+    stat: u32,
+
     graph: ByzConnGraph,
     graphrng: StdRng,
 }
@@ -170,6 +172,7 @@ impl NetMetrics for Metrics {
             max_byzantine_samples: None,
             n_fullbyz: 0,
             n_fbi: 0,
+            stat: 0,
             graph: ByzConnGraph::new(),
             graphrng: StdRng::seed_from_u64(SEED2),
         }
@@ -200,6 +203,8 @@ impl NetMetrics for Metrics {
 
         self.n_fbi += other.n_fbi;
 
+        self.stat += other.stat;
+
         self.graph.combine(&other.graph);
     }
     fn headers() -> Vec<&'static str> {
@@ -217,6 +222,7 @@ impl NetMetrics for Metrics {
             "max",
             "n_fullbyz",
             "n_fbi",
+            "blocked_count",
             "cluscoeff",
             "MPL",
             "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
@@ -256,6 +262,7 @@ impl NetMetrics for Metrics {
             format!("{}", self.max_byzantine_samples.unwrap_or(-1)),
             format!("{}", self.n_fullbyz),
             format!("{}", self.n_fbi),
+            format!("{}", self.stat),
 
             format!("{:.4}", cluscoeff),
             format!("{:.4}", mpl),
@@ -480,11 +487,11 @@ impl App for AupeBM {
                         }
                     }
                     
-                    if self.my_id == self.params.n_byzantine && net.time() %200==0 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
+                    /*if self.my_id == self.params.n_byzantine && net.time() %200==0 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
                         let blocked_count = self.sketch.get_stats().0;
                         println!("Node {} time {}: blocked_count={}", self.my_id, net.time(), blocked_count);
                         //self.sketch.print();
-                    }
+                    }*/
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
@@ -625,6 +632,7 @@ impl App for AupeBM {
                 max_byzantine_samples: Some(nbs as i64),
                 n_fullbyz: if nbs == nsamp { 1 } else { 0 },
                 n_fbi: if nbn == self.view.len() && nbs == nsamp { 1 } else { 0 },
+                stat: self.sketch.get_stats().0,
                 graph,
                 graphrng: StdRng::seed_from_u64(SEED2 + self.my_id as u64),
             };
