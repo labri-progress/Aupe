@@ -7,7 +7,7 @@ NODES=1000
 VIEW=100
 UVIEW=100
 SM=100
-GAMMA=10
+GAMMA=20 #10
 NRUNS="${4:-1}" #5
 
 # Strategies
