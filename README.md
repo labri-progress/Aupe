@@ -3,12 +3,13 @@ TODO
 
 ./run_experimentsK.sh bm 30 0 1
 ./run_experimentsK.sh decay 30 0 1
-./run_experimentsK.sh bm 30 10 1
-./run_experimentsK.sh decay 30 10 1
 ./run_experimentsK.sh bm 20 0 1
 ./run_experimentsK.sh decay 20 0 1
-./run_experimentsK.sh bm 10 0 1 (s9)
+./run_experimentsK.sh bm 10 0 1
 ./run_experimentsK.sh decay 10 0 1
+
+./run_experimentsK.sh bm 30 10 1
+./run_experimentsK.sh decay 30 10 1
 ./run_experimentsK.sh bm 20 10 1
 ./run_experimentsK.sh decay 20 10 1
 ./run_experimentsK.sh bm 10 10 1
