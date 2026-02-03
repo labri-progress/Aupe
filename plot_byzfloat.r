@@ -20,7 +20,7 @@ strat_labels <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
 results_dir  <- "output_byz"
 
 # --- Theme (inspired by metricmemory_force.r) ---
-line_size  <- 0.5
+line_size  <- 0.1
 point_size <- 1.5
 ratio      <- 3
 width      <- 11
@@ -49,6 +49,11 @@ mytheme <- theme(
 )
 
 # --- Read and aggregate data ---
+# Common columns across all file types (Array, BM, BMDecay)
+common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv",
+                 "avgByzN", "pushByzN", "pullByzN", "sampByzN", "n_isolated",
+                 "avgByzSamp", "min", "max", "n_fullbyz", "n_fbi")
+
 all_data <- data.frame()
 
 for (strat in strategies) {
@@ -67,6 +72,8 @@ for (strat in strategies) {
         next
       }
       d <- read.table(fname, header = TRUE)
+      # Keep only common columns to allow rbind across different file types
+      d <- d[, intersect(names(d), common_cols), drop = FALSE]
       d$time     <- as.integer(d$time)
       d$strategy <- strat_labels[[strat]]
       d$f_pct    <- f_pct
