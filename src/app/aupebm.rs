@@ -8,7 +8,6 @@ use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
 use crate::util::{either_or_if_both, hash, sample, sample_nocopy}; //y, write_results};
 use crate::util::{print_samples, sample_exclude};
-use crate::graph::ByzConnGraph;
 
 use super::bitmatcher::BM;
 use crate::app::bitmatcher::ffi::BitMatcher;
@@ -54,10 +53,6 @@ pub struct Init {
     #[structopt(short = "m", long = "memory-size")]
     pub memory_size: usize,
 
-    /// Enable detailed graph statistics
-    #[structopt(short = "G", long = "graph-stats", default_value = "nograph")]
-    pub graph_stats: WhichGraphStats,
-
     /// Number of SGX nodes
     #[structopt(short = "x", long = "trusted-nodes", default_value = "0")]
     pub n_trusted: usize,
@@ -72,34 +67,6 @@ pub struct Init {
 
     #[structopt(short = "y", long = "budget", default_value = "1")]
     pub space: u64,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum WhichGraphStats {
-    NoGraph,
-    View,
-    Samples,
-    ViewSamples,
-}
-
-impl Default for WhichGraphStats {
-    fn default() -> Self {
-        Self::NoGraph
-    }
-}
-
-impl std::str::FromStr for WhichGraphStats {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "view" => Ok(Self::View),
-            "samples" => Ok(Self::Samples),
-            "view+samples" => Ok(Self::ViewSamples),
-            "nograph" => Ok(Self::NoGraph),
-            _ => Err("invalid which graph"),
-        }
-    }
 }
 
 pub struct AupeBM {
@@ -151,8 +118,6 @@ pub struct Metrics {
 
     stat: u32,
 
-    graph: ByzConnGraph,
-    graphrng: StdRng,
 }
 
 
@@ -173,8 +138,6 @@ impl NetMetrics for Metrics {
             n_fullbyz: 0,
             n_fbi: 0,
             stat: 0,
-            graph: ByzConnGraph::new(),
-            graphrng: StdRng::seed_from_u64(SEED2),
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -204,8 +167,6 @@ impl NetMetrics for Metrics {
         self.n_fbi += other.n_fbi;
 
         self.stat += other.stat;
-
-        self.graph.combine(&other.graph);
     }
     fn headers() -> Vec<&'static str> {
         vec![
@@ -223,22 +184,9 @@ impl NetMetrics for Metrics {
             "n_fullbyz",
             "n_fbi",
             "blocked_count",
-            "cluscoeff",
-            "MPL",
-            "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
         ]
     }
     fn values(&self) -> Vec<String> {
-        // Clustering coefficient
-        let cluscoeff = self.graph.clustering_coeff();
-
-        // In-degree quartiles (for correct nodes)
-        let ind = self.graph.indegree_dist(self.n_procs);
-
-        let mut myrng = self.graphrng.clone();
-        // Average path length estimation
-        let mpl = self.graph.mean_path_length(self.n_procs, &mut myrng);
-
         vec![
             format!("{:.2}",
                    (self.n_received as f32) / (self.n_procs as f32)),
@@ -263,16 +211,6 @@ impl NetMetrics for Metrics {
             format!("{}", self.n_fullbyz),
             format!("{}", self.n_fbi),
             format!("{}", self.stat),
-
-            format!("{:.4}", cluscoeff),
-            format!("{:.4}", mpl),
-            format!("{}", ind[0]),
-            format!("{}", ind[ind.len()/10]),
-            format!("{}", ind[ind.len()/4]),
-            format!("{}", ind[ind.len()/2]),
-            format!("{}", ind[3*ind.len()/4]),
-            format!("{}", ind[9*ind.len()/10]),
-            format!("{}", ind[ind.len()-1]),
         ]
     }
 }
@@ -558,16 +496,7 @@ impl App for AupeBM {
     
     fn metrics(&mut self, _net: Net) -> Self::Metrics {
         if self.is_byzantine {
-            let mut metrics = Self::Metrics::empty();
-
-            if self.params.graph_stats != WhichGraphStats::NoGraph {
-                let neighs = (0..self.params.n_byzantine).collect::<Vec<_>>();
-                metrics.graph = ByzConnGraph::peer_new(self.params.n_byzantine,
-                                                       self.my_id,
-                                                       neighs);
-            }
-
-            metrics
+            Self::Metrics::empty()
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
             let mut nbpush = 0.0;
@@ -598,26 +527,6 @@ impl App for AupeBM {
                 nbs, self.sample_view.len());
             }
 
-            let graph = match self.params.graph_stats {
-                WhichGraphStats::NoGraph => ByzConnGraph::new(),
-                WhichGraphStats::View => {
-                    let neighs = self.view.clone();
-                    ByzConnGraph::peer_new(self.params.n_byzantine, self.my_id, neighs)
-                }
-                WhichGraphStats::Samples => {
-                    let neighs = self.sample_view.iter().filter(|(_, x)| x.is_some())
-                                  .map(|(_, x)| x.unwrap())
-                                  .collect::<Vec<_>>();
-                    ByzConnGraph::peer_new(self.params.n_byzantine, self.my_id, neighs)
-                }
-                WhichGraphStats::ViewSamples => {
-                    let mut neighs = self.view.clone();
-                    neighs.extend(self.sample_view.iter().filter(|(_, x)| x.is_some())
-                                  .map(|(_, x)| x.unwrap()));
-                    ByzConnGraph::peer_new(self.params.n_byzantine, self.my_id, neighs)
-                },
-            };
-
             let ret = Self::Metrics{
                 n_procs: 1,
                 n_received: self.n_received,
@@ -633,8 +542,6 @@ impl App for AupeBM {
                 n_fullbyz: if nbs == nsamp { 1 } else { 0 },
                 n_fbi: if nbn == self.view.len() && nbs == nsamp { 1 } else { 0 },
                 stat: self.sketch.get_stats().0,
-                graph,
-                graphrng: StdRng::seed_from_u64(SEED2 + self.my_id as u64),
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;
