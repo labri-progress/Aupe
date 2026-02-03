@@ -1,6 +1,18 @@
 # Aupe
 TODO
 
+./run_experimentsK.sh bm 30 1
+
+cargo run -- -T 1000000 -n 1000 decay -f 10 -t 300 -v 100 -u 100 -m 100 -n 1000 -c 12 -x 300 -p 10 > results_merge/decay-1000-100-300-300-10-0.2-run1
+
+
+cargo run -- -T 1000000 -n 1000 decay -f 10 -t 300 -v 100 -u 100 -m 100 -n 1000 -c 12 -x 300 -p 1 > results_merge/decay-1000-100-300-300-1-0.2-run1
+
+
+oarsub -l host=4,walltime=12 -t deploy -p grappe -r '2026-02-03 02:00:02'
+
+
+
 
 
 PREVIOUS
