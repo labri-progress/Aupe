@@ -1,23 +1,27 @@
 #!/bin/bash
-# ./run_experimentsK.sh bm 30 1
+# ./run_experimentsK.sh bm 30 0 1
 
 # Experiment parameters
-ROUNDS=1000000
+ROUNDS=100000
 NODES=1000
 VIEW=100
 UVIEW=100
 SM=100
 GAMMA=10
-NRUNS="${3:-5}" #5
+NRUNS="${4:-1}" #5
 
 # Strategies
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
-BUDGETS=(0.2) # 1 2)
+BUDGETS=(0.1 0.2) # 1 2)
 
 # Faulty percentages
 FAULTY_PCTS=("${2:-30}") #10 20 30
+
+TRUSTED_PCTS=("${3:-0}") # 0 10 20 30
+# Trusted node counts (0 = no trusted nodes)
+
 
 # Output directory
 OUTDIR="results_byz"
@@ -46,34 +50,46 @@ for run in $(seq $NRUNS $NRUNS); do
     for f_pct in "${FAULTY_PCTS[@]}"; do
       f_count=$(faulty_count $f_pct)
 
-      if [ "$strat" = "array" ]; then
-        # Array has no budget parameter — run once per (f, run)
-        outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-run${run}"
-        if is_done "$outfile"; then
-          echo "Skipping (already done): $outfile"
-          continue
+      for t_pct in "${TRUSTED_PCTS[@]}"; do
+        t_count=$(( NODES * t_pct / 100 ))
+        # Build trusted flags
+        if [ "$t_count" -gt 0 ]; then
+          trusted_flags="-x $t_count -p 10"
+          trusted_tag="-x${t_count}"
+        else
+          trusted_flags=""
+          trusted_tag=""
         fi
-        #echo "Running: $strat f=${f_pct}% run=${run}"
-        cargo run -- -T $ROUNDS -n $NODES $strat \
-          -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-          -n $NODES > "$OUTDIR/$outfile"
-        mark_done "$outfile"
-      else
-        # bm and decay use -y for budget
-        for budget in "${BUDGETS[@]}"; do
-          buckets=$(echo "$budget * 1024/8/2" | bc)
-          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-y${budget}-run${run}"
+
+        if [ "$strat" = "array" ]; then
+          # Array has no budget parameter — run once per (f, run)
+          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}-run${run}"
           if is_done "$outfile"; then
             echo "Skipping (already done): $outfile"
             continue
           fi
-          echo "Running: $strat f=${f_count} budget=${budget}KB run=${run}"
+          echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES -c $buckets > "$OUTDIR/$outfile"
+            -n $NODES $trusted_flags > "$OUTDIR/$outfile"
           mark_done "$outfile"
-        done
-      fi
+        else
+          # bm and decay use -y for budget
+          for budget in "${BUDGETS[@]}"; do
+            buckets=$(echo "$budget * 1024/8/2" | bc)
+            outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-y${budget}${trusted_tag}-run${run}"
+            if is_done "$outfile"; then
+              echo "Skipping (already done): $outfile"
+              continue
+            fi
+            echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
+            cargo run -- -T $ROUNDS -n $NODES $strat \
+              -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
+              -n $NODES -c $buckets $trusted_flags > "$OUTDIR/$outfile"
+            mark_done "$outfile"
+          done
+        fi
+      done
     done
   done
 done
