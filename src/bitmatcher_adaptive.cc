@@ -872,7 +872,8 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::vector<ItemInfo> items;
 	items.reserve(merged_counts.size());
 	for (const auto& kv : merged_counts) {
-		items.push_back({kv.first.second, kv.first.first, kv.second});
+		int count = kv.second / 2; // Divide by 2 to avoid overflow
+		items.push_back({kv.first.second, kv.first.first, count});
 	}
 	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)
 
