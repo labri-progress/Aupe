@@ -7,8 +7,8 @@ NODES=1000
 VIEW=20
 UVIEW=20
 SM=30
-GAMMA=20 #10
-NRUNS="${4:-1}" #5
+GAMMA=10
+NRUNS="${5:-1}" #5
 
 # Strategies
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
