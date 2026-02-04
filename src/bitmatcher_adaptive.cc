@@ -837,7 +837,8 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
 				if (count > 0) {
-					merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count); 
+					merge_counts[{i, fp}] += count;
+					//merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count); 
 				}
 			}
 		}
@@ -855,7 +856,8 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b1), j, type_id);
 				if (count > 0) {
 					uint32_t bucket_id_table0 = (i ^ fp) % bm.bucket_num;
-					merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
+					merge_counts[{bucket_id_table0, fp}] += count;
+					//merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
 				}
 			}
 		}

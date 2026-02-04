@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./run_experimentsK.sh bm 0.5 30 0 1
+# ./run_experimentsK.sh decay 0.5 30 10 [1]
 
 # Experiment parameters
 ROUNDS=100000
@@ -7,7 +7,7 @@ NODES=1000
 VIEW=20
 UVIEW=20
 SM=30
-GAMMA=10
+GAMMA=20 #10
 NRUNS="${5:-1}" #5
 
 # Strategies

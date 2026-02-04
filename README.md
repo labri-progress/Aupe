@@ -13,8 +13,8 @@ TODO
 
 
 ./run_experimentsK.sh decay 1 30 10
-./run_experimentsK.sh decay 1 20 10
-./run_experimentsK.sh decay 1 10 10
+./run_experimentsK.sh decay 1 30 10
+./run_experimentsK.sh decay 1 30 10
 
 
 
