@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./run_experimentsK.sh bm 30 01
+# ./run_experimentsK.sh bm 0.5 30 0 1
 
 # Experiment parameters
 ROUNDS=100000
@@ -14,12 +14,12 @@ NRUNS="${4:-1}" #5
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
-BUDGETS=(1)
+BUDGETS=("${2:-0.5}")
 
 # Faulty percentages
-FAULTY_PCTS=("${2:-30}") #10 20 30
+FAULTY_PCTS=("${3:-30}") #10 20 30
 
-TRUSTED_PCTS=("${3:-0}") # 0 10 20 30
+TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
 # Trusted node counts (0 = no trusted nodes)
 
 
