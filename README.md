@@ -7,6 +7,8 @@ TODO
 ./run_experimentsK.sh decay 20 0 1
 ./run_experimentsK.sh bm 10 0 1
 ./run_experimentsK.sh decay 10 0 1
+./run_experimentsK.sh decay 40 0 1
+
 
 ./run_experimentsK.sh bm 30 10 1
 ./run_experimentsK.sh decay 30 10 1

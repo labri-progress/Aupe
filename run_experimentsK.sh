@@ -2,11 +2,11 @@
 # ./run_experimentsK.sh bm 30 01
 
 # Experiment parameters
-ROUNDS=500000
+ROUNDS=100000
 NODES=1000
 VIEW=100
 UVIEW=100
-SM=100
+SM=50
 GAMMA=20 #10
 NRUNS="${4:-1}" #5
 
