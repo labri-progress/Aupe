@@ -12,7 +12,7 @@ library(gridExtra)
 # --- Parameters ---
 budget       <- as.double(args[1])  # 0.5 1 or 2 (KB)
 nodes        <- 1000
-view         <- 100
+view         <- 20 # 100
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30)
 strategies   <- c("bm", "decay", "array")
@@ -38,11 +38,11 @@ mytheme <- theme(
   text               = element_text(size = 12, color = "black"),
   axis.title.x       = element_text(size = 14, face = "bold"),
   axis.title.y       = element_text(size = 12, face = "bold"),
-  axis.text.x        = element_blank(),
+  axis.text.x        = element_text(size = 14, face = "bold"),
   axis.text.y        = element_text(size = 14, face = "bold"),
   plot.title          = element_text(size = 14, face = "bold"),
   legend.text        = element_text(size = 11, face = "bold"),
-  legend.title       = element_blank(),
+  legend.title       = element_text(size = 11, face = "bold"),
   legend.background  = element_rect(fill = "transparent", colour = NA),
   legend.box.background = element_rect(fill = "transparent", colour = NA),
   axis.ticks         = element_line(color = "black", linewidth = 1)
@@ -100,7 +100,7 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     geom_line(linewidth = line_size) +
     #geom_point(size = point_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10(breaks = c(1, 1000, 10000, 100000)) + #, labels = c("1", "1000", "10000", "100000")) +
+    scale_x_log10(breaks = c(1, 100, 1000, 100000), labels = c("1", "100", "1000", "100000")) +
     labs(
       x = expression(bold("Time steps")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
@@ -111,7 +111,7 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     theme(
       legend.position = if (show_legend) c(0.5, 0.85) else "none"
     ) +
-    guides(color = guide_legend(ncol = 1))
+    guides(color = guide_legend(title = NULL, ncol = 1))
 
   return(p)
 }

@@ -1,6 +1,23 @@
 # Aupe
 TODO
 
+./run_experimentsK.sh bm 1 30 0
+./run_experimentsK.sh decay 1 30 0
+./run_experimentsK.sh bm 1 20 0
+./run_experimentsK.sh decay 1 20 0
+./run_experimentsK.sh bm 1 10 0
+./run_experimentsK.sh decay 1 10 0
+./run_experimentsK.sh array 1 30 0
+./run_experimentsK.sh array 1 20 0
+./run_experimentsK.sh array 1 10 0
+
+
+./run_experimentsK.sh decay 1 30 10
+./run_experimentsK.sh decay 1 20 10
+./run_experimentsK.sh decay 1 10 10
+
+
+
 ./run_experimentsK.sh bm 30 0 1
 ./run_experimentsK.sh decay 30 0 1
 ./run_experimentsK.sh bm 20 0 1
