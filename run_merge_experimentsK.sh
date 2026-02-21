@@ -4,22 +4,22 @@
 # run_merge_experimentsK.sh decay 10 0.5 1
 
 # Experiment parameters
-ROUNDS=2000
+ROUNDS=200
 NODES=1000
-VIEW=20
-UVIEW=20
-SM=30
-FORCE=20
+VIEW=16
+UVIEW=16
+SM=32
+FORCE=10
 NRUNS="${4:-1}" #5
 
 # Faulty: 30% of N
-FAULTY_PCT="${1:-26}"
+FAULTY_PCT="${3:-26}"
 FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
-STRATEGIES=("${2:-decay}") #("bm" "array")
+STRATEGIES=("${1:-decay}") #("bm" "array")
 
 # Budget memory in KB (only used by bm via -y)
-BUDGETS=("${3:-0.5}") #(5 10 20)
+BUDGETS=("${2:-0.5}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
 TRUSTED_PCTS=(0 5 10 20) #5 10 20 30)

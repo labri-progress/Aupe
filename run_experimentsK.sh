@@ -4,10 +4,10 @@
 # Experiment parameters
 ROUNDS=100000
 NODES=1000
-VIEW=20
-UVIEW=20
-SM=30
-GAMMA=20 #10
+VIEW=16 #20
+UVIEW=16 #20
+SM=32 #30
+GAMMA=10 #20
 NRUNS="${5:-1}" #5
 
 # Strategies
