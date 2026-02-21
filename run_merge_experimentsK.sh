@@ -1,29 +1,30 @@
 #!/bin/bash
 
 # run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
+# run_merge_experimentsK.sh decay 10 0.5 1
 
 # Experiment parameters
-ROUNDS=2 #100000
+ROUNDS=2000
 NODES=1000
-VIEW=100
-UVIEW=100
-SM=100
-FORCE=10
-NRUNS="${3:-5}" #5
+VIEW=20
+UVIEW=20
+SM=30
+FORCE=20
+NRUNS="${4:-1}" #5
 
 # Faulty: 30% of N
-FAULTY_PCT=30
-FAULTY_COUNT=300
+FAULTY_PCT="${1:-26}"
+FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
-STRATEGIES=("${1:-decay}") #("bm" "array")
+STRATEGIES=("${2:-decay}") #("bm" "array")
 
 # Budget memory in KB (only used by bm via -y)
-BUDGETS=("${2:-0.2}") #(5 10 20)
+BUDGETS=("${3:-0.5}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
-TRUSTED_PCTS=(10 ) #5 10 20 30)
+TRUSTED_PCTS=(0 5 10 20) #5 10 20 30)
 # Corresponding -x values: 10%=1000, 20%=2000, 30%=3000
-TRUSTED_COUNTS=(100) # 2000 3000)
+TRUSTED_COUNTS=(0 50 100 200) # 2000 3000)
 
 # Number of merges per trusted node per round
 MERGES=(10) # (1 10)
@@ -73,9 +74,10 @@ for run in $(seq $NRUNS $NRUNS); do
               continue
             fi
             echo "Running: $strat t=${t_pct}% p=${p} budget=${budget}KB run=${run}"
+            buckets=$(echo "$budget * 1024/8/2" | bc)
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -y $budget -x $t_count -p $p > "$OUTDIR/$outfile"
+              -n $NODES -c $buckets -x $t_count -p $p > "$OUTDIR/$outfile"
             mark_done "$outfile"
           done
         fi
