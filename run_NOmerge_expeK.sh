@@ -21,8 +21,10 @@ STRATEGIES=("${1:-bm}") #("bm" "array")
 # Budget memory in KB (only used by bm via -y)
 BUDGETS=("${2:-20}") #(5 10 20)
 
-TRUSTED_PCTS=(0)
-TRUSTED_COUNTS=(0)
+# Trusted node percentages -> number of trusted nodes
+TRUSTED_PCTS=(10 ) #5 10 20 30)
+# Corresponding -x values: 10%=1000, 20%=2000, 30%=3000
+TRUSTED_COUNTS=(1000) # 2000 3000)
 
 # Number of merges per trusted node per round
 MERGES=(10) # (1 10)
@@ -61,7 +63,7 @@ for run in $(seq $NRUNS $NRUNS); do
           echo "Running: $strat t=${t_pct}% p=${p} run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES > "$OUTDIR/$outfile"
+            -n $NODES -x $t_count -p $p > "$OUTDIR/$outfile"
           mark_done "$outfile"
         else
           # bm uses -y for budget
@@ -74,7 +76,7 @@ for run in $(seq $NRUNS $NRUNS); do
             echo "Running: $strat t=${t_pct}% p=${p} budget=${budget}KB run=${run}"
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -y $budget > "$OUTDIR/$outfile"
+              -n $NODES -y $budget -x $t_count -p $p > "$OUTDIR/$outfile"
             mark_done "$outfile"
           done
         fi

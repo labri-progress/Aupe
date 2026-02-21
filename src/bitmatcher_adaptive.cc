@@ -4,6 +4,8 @@
 namespace org {
 namespace blobstore {
 
+int merge_strategy = 2; // 0 for sum, 1 for moy 2 for max
+
 
 	// Copy constructor
 BitMatcherAdaptive::BitMatcherAdaptive(const BitMatcherAdaptive& other)
@@ -823,6 +825,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> merged_counts;
 	merged_counts.reserve(bucket_num * 20);
 
+
 	// Lambda to extract items from a BitMatcher and accumulate counts
 	auto extract_counts = [&](const BitMatcherAdaptive& bm) {
 		// Extract from table 0 (bucket_id is directly the index)
@@ -837,8 +840,11 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
 				if (count > 0) {
-					merged_counts[{i, fp}] += count;
-					//merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count); 
+					if (merge_strategy == 0 || merge_strategy == 1) {
+						merged_counts[{i, fp}] += count;
+					} else if (merge_strategy == 2) {
+						merged_counts[{i, fp}] = std::max(merged_counts[{i, fp}], count);
+					}
 				}
 			}
 		}
@@ -856,8 +862,11 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b1), j, type_id);
 				if (count > 0) {
 					uint32_t bucket_id_table0 = (i ^ fp) % bm.bucket_num;
-					merged_counts[{bucket_id_table0, fp}] += count;
-					//merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
+					if (merge_strategy == 0 || merge_strategy == 1) {
+						merged_counts[{bucket_id_table0, fp}] += count;
+					} else if (merge_strategy == 2) {
+						merged_counts[{bucket_id_table0, fp}] = std::max(merged_counts[{bucket_id_table0, fp}], count);
+					}
 				}
 			}
 		}
@@ -872,7 +881,10 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::vector<ItemInfo> items;
 	items.reserve(merged_counts.size());
 	for (const auto& kv : merged_counts) {
-		int count = kv.second / 2; // Divide by 2 to avoid overflow
+		int count = kv.second; 
+		if (merge_strategy == 1) { // moy strategy
+			count = (count + 1) / 2; // Average count for moy strategy
+		}
 		items.push_back({kv.first.second, kv.first.first, count});
 	}
 	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)

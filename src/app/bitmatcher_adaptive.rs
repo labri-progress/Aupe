@@ -127,7 +127,7 @@ impl BM {
         }
     }
 
-    pub fn getdata(&self) -> UniquePtr<BitMatcherAdaptive>{
+    pub fn getdata(&mut self) -> UniquePtr<BitMatcherAdaptive>{
         return self.matrix.as_ref().unwrap().clone()
     }
 
@@ -136,7 +136,7 @@ impl BM {
     }
 
     pub fn merge(&mut self, other: &BitMatcherAdaptive) {
-        //self.matrix.as_mut().unwrap().merge(&other);
+        //self.matrix.as_mut().unwrap().merge(&other); 
         self.matrix.as_mut().unwrap().merge(other);
     }
     
