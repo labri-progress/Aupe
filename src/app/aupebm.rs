@@ -91,6 +91,8 @@ pub struct AupeBM {
     n_received: usize,
     n_byzantine_received: usize,
 
+    occurence: Vec<f64>,
+
     sketch: BM,
     to_conctact: Vec<PeerRef>,
     oldest: PeerRef,
@@ -118,6 +120,19 @@ pub struct Metrics {
 
     stat: u32,
 
+    // ---- métriques par groupe : nœuds honnêtes ----
+    n_procs_honest: usize,
+    n_byz_neighbors_honest: usize,
+    dkl_honest: f64,
+    f1_honest: f64,
+    bias_factor_err_honest: f64,
+
+    // ---- métriques par groupe : nœuds de confiance ----
+    n_procs_trusted: usize,
+    n_byz_neighbors_trusted: usize,
+    dkl_trusted: f64,
+    f1_trusted: f64,
+    bias_factor_err_trusted: f64,
 }
 
 
@@ -138,6 +153,16 @@ impl NetMetrics for Metrics {
             n_fullbyz: 0,
             n_fbi: 0,
             stat: 0,
+            n_procs_honest: 0,
+            n_byz_neighbors_honest: 0,
+            dkl_honest: 0.0,
+            f1_honest: 0.0,
+            bias_factor_err_honest: 0.0,
+            n_procs_trusted: 0,
+            n_byz_neighbors_trusted: 0,
+            dkl_trusted: 0.0,
+            f1_trusted: 0.0,
+            bias_factor_err_trusted: 0.0,
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -163,10 +188,22 @@ impl NetMetrics for Metrics {
             &other.min_byzantine_samples,
             |a, b| std::cmp::min(*a, *b));
         self.n_fullbyz += other.n_fullbyz;
-
         self.n_fbi += other.n_fbi;
-
         self.stat += other.stat;
+
+        // groupe honest
+        self.n_procs_honest += other.n_procs_honest;
+        self.n_byz_neighbors_honest += other.n_byz_neighbors_honest;
+        self.dkl_honest += other.dkl_honest;
+        self.f1_honest += other.f1_honest;
+        self.bias_factor_err_honest += other.bias_factor_err_honest;
+
+        // groupe trusted
+        self.n_procs_trusted += other.n_procs_trusted;
+        self.n_byz_neighbors_trusted += other.n_byz_neighbors_trusted;
+        self.dkl_trusted += other.dkl_trusted;
+        self.f1_trusted += other.f1_trusted;
+        self.bias_factor_err_trusted += other.bias_factor_err_trusted;
     }
     fn headers() -> Vec<&'static str> {
         vec![
@@ -184,38 +221,136 @@ impl NetMetrics for Metrics {
             "n_fullbyz",
             "n_fbi",
             "blocked_count",
+            // groupe honest
+            "h_avgByzN",
+            "h_dkl",
+            "h_f1",
+            "h_biasErr",
+            // groupe trusted
+            "t_avgByzN",
+            "t_dkl",
+            "t_f1",
+            "t_biasErr",
         ]
     }
     fn values(&self) -> Vec<String> {
+        let g = |n: usize, d: f64| if n > 0 { d / n as f64 } else { 0.0 };
+        let gi = |n: usize, i: usize| if n > 0 { i as f64 / n as f64 } else { 0.0 };
         vec![
-            format!("{:.2}",
-                   (self.n_received as f32) / (self.n_procs as f32)),
-            format!("{:.2}",
-                   (self.n_byzantine_received as f32) / (self.n_procs as f32)),
-            format!("{:.4}",
-                   (self.n_byzantine_received as f32) / (self.n_received as f32)),
-            format!("{:.2}",
-                   (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}",
-                   (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}",
-                   (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}",
-                   (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
-
+            format!("{:.2}", (self.n_received as f32) / (self.n_procs as f32)),
+            format!("{:.2}", (self.n_byzantine_received as f32) / (self.n_procs as f32)),
+            format!("{:.4}", (self.n_byzantine_received as f32) / (self.n_received as f32)),
+            format!("{:.2}", (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}", (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}", (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}", (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{}", self.n_isolated),
-            format!("{:.2}",
-                (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
+            format!("{:.2}", (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
             format!("{}", self.min_byzantine_samples.unwrap_or(-1)),
             format!("{}", self.max_byzantine_samples.unwrap_or(-1)),
             format!("{}", self.n_fullbyz),
             format!("{}", self.n_fbi),
             format!("{}", self.stat),
+            // groupe honest
+            format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
+            format!("{:.2}", g(self.n_procs_honest, self.dkl_honest)),
+            format!("{:.2}", g(self.n_procs_honest, self.f1_honest)),
+            format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
+            // groupe trusted
+            format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
+            format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
+            format!("{:.2}", g(self.n_procs_trusted, self.f1_trusted)),
+            format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
         ]
     }
 }
 
 type Net<'a> = &'a mut dyn Network<Msg>;
+
+fn kmeans_classify(values: &[f64], max_iters: usize) -> Vec<usize> {
+    let n = values.len();
+    if n < 2 {
+        return vec![0; n];
+    }
+    let mut rng = StdRng::seed_from_u64(SEED2);
+    let i1 = rng.random_range(0..n);
+    let mut i2;
+    loop {
+        i2 = rng.random_range(0..n);
+        if i2 != i1 { break; }
+    }
+    let mut c0 = values[i1];
+    let mut c1 = values[i2];
+    let mut assignments = vec![0usize; n];
+
+    for _ in 0..max_iters {
+        let mut sum0 = 0.0f64; let mut cnt0 = 0usize;
+        let mut sum1 = 0.0f64; let mut cnt1 = 0usize;
+        for (i, &v) in values.iter().enumerate() {
+            if (v - c0).abs() <= (v - c1).abs() {
+                assignments[i] = 0; sum0 += v; cnt0 += 1;
+            } else {
+                assignments[i] = 1; sum1 += v; cnt1 += 1;
+            }
+        }
+        c0 = if cnt0 > 0 { sum0 / cnt0 as f64 } else { c0 };
+        c1 = if cnt1 > 0 { sum1 / cnt1 as f64 } else { c1 };
+    }
+    // class 1 = over-represented (higher frequency cluster)
+    if c0 > c1 {
+        assignments.iter_mut().for_each(|a| *a = 1 - *a);
+    }
+    assignments
+}
+
+fn compute_sketch_metrics(
+    sketch: &mut BM,
+    occurence: &[f64],
+    n_byzantine: usize,
+    n_nodes: usize,
+) -> (f64, f64, f64) {
+    let total_recv: f64 = occurence.iter().sum();
+    if total_recv == 0.0 {
+        return (0.0, 0.0, 0.0);
+    }
+    let oracle: Vec<f64> = occurence.iter().map(|x| x / total_recv).collect();
+
+    let estimates: Vec<f64> = (0..n_nodes).map(|id| sketch.estimate(&id)).collect();
+    let total_est: f64 = estimates.iter().sum();
+    let probabilities: Vec<f64> = if total_est > 0.0 {
+        estimates.iter().map(|x| x / total_est).collect()
+    } else {
+        vec![1.0 / n_nodes as f64; n_nodes]
+    };
+
+    let dkl: f64 = probabilities.iter().zip(oracle.iter())
+        .map(|(p, q)| if *p > 0.0 && *q > 0.0 { p * (p / q).ln() } else { 0.0 })
+        .sum();
+
+    let classes = kmeans_classify(&probabilities, 20);
+    let tp  = (0..n_byzantine).filter(|&i| classes[i] == 1).count();
+    let fp  = (n_byzantine..n_nodes).filter(|&i| classes[i] == 1).count();
+    let fn_ = (0..n_byzantine).filter(|&i| classes[i] == 0).count();
+    let precision = if tp + fp > 0 { tp as f64 / (tp + fp) as f64 } else { 0.0 };
+    let recall    = if tp + fn_ > 0 { tp as f64 / (tp + fn_) as f64 } else { 0.0 };
+    let f1 = if precision + recall > 0.0 {
+        2.0 * precision * recall / (precision + recall)
+    } else { 0.0 };
+
+    let n_hon = n_nodes - n_byzantine;
+    let bias_of = |v: &[f64]| {
+        let sb: f64 = v[..n_byzantine].iter().sum();
+        let sh: f64 = v[n_byzantine..].iter().sum();
+        if sh > 0.0 && n_hon > 0 { (sb / sh) / (n_byzantine as f64 / n_hon as f64) } else { 0.0 }
+    };
+    let bias_factor_err = if bias_of(&oracle) > 0.0 {
+        (bias_of(&probabilities) - bias_of(&oracle)) / bias_of(&oracle)
+    } else {
+        0.0
+    };
+
+    (dkl, f1, bias_factor_err)
+}
 
 
 impl AupeBM {
@@ -290,6 +425,7 @@ impl App for AupeBM {
 
             n_received: 0,
             n_byzantine_received: 0,
+            occurence: Vec::new(),
 
             sketch: BM::new().into(),
             to_conctact: Vec::new(),
@@ -297,7 +433,7 @@ impl App for AupeBM {
             rng: StdRng::seed_from_u64(SEED2),
         }
     }
-    
+
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
@@ -305,6 +441,7 @@ impl App for AupeBM {
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
         self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
+        self.occurence = vec![0.0; init.nodes];
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
@@ -319,6 +456,7 @@ impl App for AupeBM {
 
             self.sketch.update_freq(self.view.clone());
             //self.sketch.debiais_stream(self.view.clone());
+            for id in self.view.iter() { self.occurence[*id] += 1.0; }
         }
 
         if self.is_trusted && self.params.nb_merge != 0{
@@ -442,8 +580,8 @@ impl App for AupeBM {
                     self.n_byzantine_received += lst.iter()
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
+                    for id in lst.iter() { self.occurence[*id] += 1.0; }
                     self.v_pull.extend(lst);
-                    
                     self.sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
@@ -452,9 +590,9 @@ impl App for AupeBM {
                     if from < self.params.n_byzantine {
                         self.n_byzantine_received += 1;
                     }
+                    self.occurence[from] += 1.0;
                     self.v_push.push(from);
-                    
-                    // create a vector containing only item from 
+
                     let mut lst = Vec::new();
                     lst.push(from);
                     self.sketch.update_freq(lst.clone());
@@ -527,7 +665,14 @@ impl App for AupeBM {
                 nbs, self.sample_view.len());
             }
 
-            let ret = Self::Metrics{
+            let (dkl, f1, bias_factor_err) = compute_sketch_metrics(
+                &mut self.sketch,
+                &self.occurence,
+                self.params.n_byzantine,
+                self.params.nodes,
+            );
+
+            let mut ret = Self::Metrics {
                 n_procs: 1,
                 n_received: self.n_received,
                 n_byzantine_received: self.n_byzantine_received,
@@ -542,10 +687,35 @@ impl App for AupeBM {
                 n_fullbyz: if nbs == nsamp { 1 } else { 0 },
                 n_fbi: if nbn == self.view.len() && nbs == nsamp { 1 } else { 0 },
                 stat: self.sketch.get_stats().0,
+                n_procs_honest: 0,
+                n_byz_neighbors_honest: 0,
+                dkl_honest: 0.0,
+                f1_honest: 0.0,
+                bias_factor_err_honest: 0.0,
+                n_procs_trusted: 0,
+                n_byz_neighbors_trusted: 0,
+                dkl_trusted: 0.0,
+                f1_trusted: 0.0,
+                bias_factor_err_trusted: 0.0,
             };
+
+            if self.is_trusted {
+                ret.n_procs_trusted = 1;
+                ret.n_byz_neighbors_trusted = nbn;
+                ret.dkl_trusted = dkl;
+                ret.f1_trusted = f1;
+                ret.bias_factor_err_trusted = bias_factor_err;
+            } else {
+                ret.n_procs_honest = 1;
+                ret.n_byz_neighbors_honest = nbn;
+                ret.dkl_honest = dkl;
+                ret.f1_honest = f1;
+                ret.bias_factor_err_honest = bias_factor_err;
+            }
+
             self.n_received = 0;
             self.n_byzantine_received = 0;
-          
+
             ret
         }
     }
