@@ -9,11 +9,11 @@ VIEW=160
 UVIEW=160
 SM=100
 FORCE=10
-NRUNS="${3:-5}" #5
+NRUNS="${4:-5}" #5
 
 # Faulty: 30% of N
-FAULTY_PCT=30
-FAULTY_COUNT=3000
+FAULTY_PCT="${3:-26}"
+FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
 # Strategies (no decay for merge)
 STRATEGIES=("${1:-bm}") #("bm" "array")
@@ -22,9 +22,9 @@ STRATEGIES=("${1:-bm}") #("bm" "array")
 BUDGETS=("${2:-20}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
-TRUSTED_PCTS=(10 ) #5 10 20 30)
+TRUSTED_PCTS=(0 5 10 20 30)
 # Corresponding -x values: 10%=1000, 20%=2000, 30%=3000
-TRUSTED_COUNTS=(1000) # 2000 3000)
+TRUSTED_COUNTS=(0 500 1000 2000 3000) # 2000 3000)
 
 # Number of merges per trusted node per round
 MERGES=(10) # (1 10)
