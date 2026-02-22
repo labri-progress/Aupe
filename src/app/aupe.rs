@@ -3,7 +3,7 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy}; //y, write_results};
+use crate::util::{hash, sample, sample_nocopy}; //y, write_results};
 use crate::util::{print_samples, sample_exclude};
 
 use super::kvs::Kvs;
@@ -103,14 +103,7 @@ pub struct Metrics {
     n_pushed_byzantine_neighbors: f64,
     n_pulled_byzantine_neighbors: f64,
     n_sampled_byzantine_neighbors: f64,
-    n_isolated: usize,
-
     n_byzantine_samples: usize,
-    min_byzantine_samples: Option<i64>,
-    max_byzantine_samples: Option<i64>,
-    n_fullbyz: usize,
-
-    n_fbi: usize,
 
     // ---- métriques par groupe : nœuds honnêtes ----
     n_procs_honest: usize,
@@ -138,12 +131,7 @@ impl NetMetrics for Metrics {
             n_pushed_byzantine_neighbors: 0.0,
             n_pulled_byzantine_neighbors: 0.0,
             n_sampled_byzantine_neighbors: 0.0,
-            n_isolated: 0,
             n_byzantine_samples: 0,
-            min_byzantine_samples: None,
-            max_byzantine_samples: None,
-            n_fullbyz: 0,
-            n_fbi: 0,
             n_procs_honest: 0,
             n_byz_neighbors_honest: 0,
             dkl_honest: 0.0,
@@ -167,19 +155,7 @@ impl NetMetrics for Metrics {
         self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
         self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
 
-        self.n_isolated += other.n_isolated;
-
         self.n_byzantine_samples += other.n_byzantine_samples;
-        self.max_byzantine_samples = either_or_if_both(
-            &self.max_byzantine_samples,
-            &other.max_byzantine_samples,
-            |a, b| std::cmp::max(*a, *b));
-        self.min_byzantine_samples = either_or_if_both(
-            &self.min_byzantine_samples,
-            &other.min_byzantine_samples,
-            |a, b| std::cmp::min(*a, *b));
-        self.n_fullbyz += other.n_fullbyz;
-        self.n_fbi += other.n_fbi;
 
         // groupe honest
         self.n_procs_honest += other.n_procs_honest;
@@ -204,12 +180,7 @@ impl NetMetrics for Metrics {
             "pushByzN",
             "pullByzN",
             "sampByzN",
-            "n_isolated",
             "avgByzSamp",
-            "min",
-            "max",
-            "n_fullbyz",
-            "n_fbi",
             // groupe honest
             "h_avgByzN",
             "h_dkl",
@@ -233,12 +204,7 @@ impl NetMetrics for Metrics {
             format!("{:.2}", (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{:.2}", (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{:.2}", (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{}", self.n_isolated),
             format!("{:.2}", (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
-            format!("{}", self.min_byzantine_samples.unwrap_or(-1)),
-            format!("{}", self.max_byzantine_samples.unwrap_or(-1)),
-            format!("{}", self.n_fullbyz),
-            format!("{}", self.n_fbi),
             // groupe honest
             format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.dkl_honest)),
@@ -670,10 +636,10 @@ impl App for Aupe {
                 nbsamp = nbsamp / (self.sample_part.len() as f64);
             }
             
-            let samp = self.sample_view.iter()
-                .filter(|(_, x)| x.is_some());
-            let nsamp = samp.clone().count();
-            let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
+            let nbs = self.sample_view.iter()
+                .filter(|(_, x)| x.is_some())
+                .filter(|(_, x)| x.unwrap() < self.params.n_byzantine)
+                .count();
 
             if self.my_id == self.params.nodes-1 && DEBUG{
                 eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbs={}/{}",
@@ -704,12 +670,7 @@ impl App for Aupe {
                 n_pushed_byzantine_neighbors: nbpush,
                 n_pulled_byzantine_neighbors: nbpull,
                 n_sampled_byzantine_neighbors: nbsamp,
-                n_isolated: if nbn == self.view.len() { 1 } else { 0 },
                 n_byzantine_samples: nbs,
-                min_byzantine_samples: Some(nbs as i64),
-                max_byzantine_samples: Some(nbs as i64),
-                n_fullbyz: if nbs == nsamp { 1 } else { 0 },
-                n_fbi: if nbn == self.view.len() && nbs == nsamp { 1 } else { 0 },
                 n_procs_honest: 0,
                 n_byz_neighbors_honest: 0,
                 dkl_honest: 0.0,
