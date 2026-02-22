@@ -76,7 +76,8 @@ mytheme <- theme(
 
 # ── Read data ─────────────────────────────────────────────────────────────────
 group_cols <- c("h_avgByzN", "h_dkl", "h_f1", "h_biasErr",
-                "t_avgByzN", "t_dkl", "t_f1", "t_biasErr")
+                "t_avgByzN", "t_dkl", "t_f1", "t_biasErr",
+                "avgByzSamp")
 
 all_data <- data.frame()
 
@@ -103,22 +104,24 @@ if (nrow(all_data) == 0) {
 }
 
 # Compute proportions
-all_data$cratio   <- all_data$avgByzN   / view
-all_data$h_cratio <- all_data$h_avgByzN / view
-all_data$t_cratio <- all_data$t_avgByzN / view
+all_data$res   <- all_data$avgByzSamp / view
+all_data$h_res <- all_data$h_avgByzN  / view
+all_data$t_res <- all_data$t_avgByzN  / view
 
 # Average over runs
 avg <- all_data %>%
   group_by(time) %>%
   summarise(
-    cratio   = mean(cratio,   na.rm = TRUE),
-    h_cratio = mean(h_cratio, na.rm = TRUE),
-    t_cratio = mean(t_cratio, na.rm = TRUE),
-    h_dkl    = mean(h_dkl,    na.rm = TRUE),
-    t_dkl    = mean(t_dkl,    na.rm = TRUE),
-    h_f1     = mean(h_f1,     na.rm = TRUE),
-    t_f1     = mean(t_f1,     na.rm = TRUE),
-    .groups  = "drop"
+    res    = mean(res,    na.rm = TRUE),
+    h_res  = mean(h_res,  na.rm = TRUE),
+    t_res  = mean(t_res,  na.rm = TRUE),
+    h_dkl     = mean(h_dkl,     na.rm = TRUE),
+    t_dkl     = mean(t_dkl,     na.rm = TRUE),
+    h_f1      = mean(h_f1,      na.rm = TRUE),
+    t_f1      = mean(t_f1,      na.rm = TRUE),
+    h_biasErr = mean(h_biasErr, na.rm = TRUE),
+    t_biasErr = mean(t_biasErr, na.rm = TRUE),
+    .groups   = "drop"
   )
 
 optimal <- faulty_pct / 100
@@ -139,7 +142,7 @@ p_cr <- ggplot(long_cr, aes(x = time, y = value, color = group, linetype = group
   coord_cartesian(ylim = c(0, 1)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   labs(x = expression(bold("Time steps")),
-       y = expression(bold("Cont. ratio"))) +
+       y = expression(bold("Prop. of Byz. samples"))) +
   mytheme +
   theme(legend.position = c(0.72, 0.85))
 
@@ -178,10 +181,27 @@ p_f1 <- ggplot(long_f1, aes(x = time, y = value, color = group, linetype = group
   mytheme +
   theme(legend.position = c(0.72, 0.20))
 
+# ── Panel 4: Bias factor error (Honest and Trusted) ───────────────────────────
+long_bias <- rbind(
+  data.frame(time = avg$time, value = avg$h_biasErr, group = "Honest"),
+  data.frame(time = avg$time, value = avg$t_biasErr, group = "Trusted")
+)
+
+p_bias <- ggplot(long_bias, aes(x = time, y = value, color = group, linetype = group)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_line(linewidth = line_size) +
+  scale_color_manual(values = ht_colors) +
+  scale_linetype_manual(values = ht_linetypes) +
+  #x_scale +
+  labs(x = expression(bold("Time steps")),
+       y = expression(bold("Bias factor err."))) +
+  mytheme +
+  theme(legend.position = "none")
+
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/metrics_evolution_f%d_t%d_b%d.pdf", faulty_pct, t_pct, budget)
-pdf(outfile, width = width, height = height)
-grid.arrange(p_cr, p_dkl, p_f1, nrow = 1, ncol = 3)
+pdf(outfile, width = width * 4/3, height = height)
+grid.arrange(p_cr, p_dkl, p_f1, p_bias, nrow = 1, ncol = 4)
 dev.off()
 cat("Saved to:", outfile, "\n")

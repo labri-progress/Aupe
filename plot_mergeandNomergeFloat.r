@@ -64,8 +64,7 @@ mytheme <- theme(
 
 # --- Read and aggregate data ---
 common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv",
-                 "avgByzN", "pushByzN", "pullByzN", "sampByzN", "n_isolated",
-                 "avgByzSamp", "min", "max", "n_fullbyz", "n_fbi")
+                 "avgByzN", "pushByzN", "pullByzN", "sampByzN", "avgByzSamp")
 
 all_data <- data.frame()
 
@@ -102,7 +101,7 @@ for (strat in strategies) {
 }
 
 # Compute proportion of Byzantine
-all_data$propByz <- all_data$avgByzN / view
+all_data$propByz <- all_data$avgByzSamp / view
 
 # Average over runs
 avg_data <- all_data %>%

@@ -35,5 +35,5 @@
     git:
       repo: 'https://github.com/labri-progress/Aupe.git'
       dest: ~/Aupe
-      version: counting
+      version: trusted
   

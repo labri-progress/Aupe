@@ -6,9 +6,9 @@
 # Experiment parameters
 ROUNDS=200
 NODES=1000
-VIEW=16
-UVIEW=16
-SM=32
+VIEW=20 #16
+UVIEW=20 #16
+SM=30 #32
 FORCE=10
 NRUNS="${4:-1}" #5
 

@@ -12,7 +12,7 @@ library(gridExtra)
 # --- Parameters ---
 budget       <- as.integer(args[1])  # 0.5 1 or 2 (KB)
 nodes        <- 1000
-view         <- 20 # 100
+view         <- 16 #20 # 100
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30)
 strategies   <- c("bm", "decay", "array")
