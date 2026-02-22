@@ -12,7 +12,7 @@ library(gridExtra)
 # --- Parameters ---
 budget       <- as.integer(args[1])  # 0.5 1 or 2 (KB)
 nodes        <- 1000
-view         <- 100
+view         <- 20 # 100
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30)
 strategies   <- c("bm", "decay", "array")
@@ -49,6 +49,12 @@ mytheme <- theme(
 )
 
 # --- Read and aggregate data ---
+# Common columns across all file types (Array, BM, BMDecay)
+common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv",
+                 "avgByzN", "pushByzN", "pullByzN", "sampByzN", "n_isolated",
+                 "avgByzSamp", "min", "max", "n_fullbyz", "n_fbi")
+
+# --- Read and aggregate data ---
 all_data <- data.frame()
 
 for (strat in strategies) {
@@ -67,6 +73,8 @@ for (strat in strategies) {
         next
       }
       d <- read.table(fname, header = TRUE)
+      # Keep only common columns to allow rbind across different file types
+      d <- d[, intersect(names(d), common_cols), drop = FALSE]
       d$time     <- as.integer(d$time)
       d$strategy <- strat_labels[[strat]]
       d$f_pct    <- f_pct

@@ -13,6 +13,10 @@ use super::bitmatcher::BM;
 use crate::app::bitmatcher::ffi::BitMatcher;
 
 use crate::util::SEED2;
+use std::sync::{OnceLock, Mutex};
+
+static GLOBAL_OCCURENCE: OnceLock<Mutex<Vec<f64>>> = OnceLock::new();
+
 const DEBUG: bool = false;
 pub enum Msg {
     SelfNotif,
@@ -90,8 +94,6 @@ pub struct AupeBM {
 
     n_received: usize,
     n_byzantine_received: usize,
-
-    occurence: Vec<f64>,
 
     sketch: BM,
     to_conctact: Vec<PeerRef>,
@@ -425,7 +427,6 @@ impl App for AupeBM {
 
             n_received: 0,
             n_byzantine_received: 0,
-            occurence: Vec::new(),
 
             sketch: BM::new().into(),
             to_conctact: Vec::new(),
@@ -441,7 +442,7 @@ impl App for AupeBM {
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
         self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
-        self.occurence = vec![0.0; init.nodes];
+        GLOBAL_OCCURENCE.get_or_init(|| Mutex::new(vec![0.0f64; init.nodes]));
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
@@ -456,7 +457,10 @@ impl App for AupeBM {
 
             self.sketch.update_freq(self.view.clone());
             //self.sketch.debiais_stream(self.view.clone());
-            for id in self.view.iter() { self.occurence[*id] += 1.0; }
+            if let Some(occ) = GLOBAL_OCCURENCE.get() {
+                let mut occ = occ.lock().unwrap();
+                for id in self.view.iter() { occ[*id] += 1.0; }
+            }
         }
 
         if self.is_trusted && self.params.nb_merge != 0{
@@ -580,7 +584,10 @@ impl App for AupeBM {
                     self.n_byzantine_received += lst.iter()
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
-                    for id in lst.iter() { self.occurence[*id] += 1.0; }
+                    if let Some(occ) = GLOBAL_OCCURENCE.get() {
+                        let mut occ = occ.lock().unwrap();
+                        for id in lst.iter() { occ[*id] += 1.0; }
+                    }
                     self.v_pull.extend(lst);
                     self.sketch.update_freq(lst.clone());
                 },
@@ -590,7 +597,9 @@ impl App for AupeBM {
                     if from < self.params.n_byzantine {
                         self.n_byzantine_received += 1;
                     }
-                    self.occurence[from] += 1.0;
+                    if let Some(occ) = GLOBAL_OCCURENCE.get() {
+                        occ.lock().unwrap()[from] += 1.0;
+                    }
                     self.v_push.push(from);
 
                     let mut lst = Vec::new();
@@ -665,12 +674,17 @@ impl App for AupeBM {
                 nbs, self.sample_view.len());
             }
 
-            let (dkl, f1, bias_factor_err) = compute_sketch_metrics(
-                &mut self.sketch,
-                &self.occurence,
-                self.params.n_byzantine,
-                self.params.nodes,
-            );
+            let (dkl, f1, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
+                let occ = occ.lock().unwrap();
+                compute_sketch_metrics(
+                    &mut self.sketch,
+                    &occ,
+                    self.params.n_byzantine,
+                    self.params.nodes,
+                )
+            } else {
+                (0.0, 0.0, 0.0)
+            };
 
             let mut ret = Self::Metrics {
                 n_procs: 1,
