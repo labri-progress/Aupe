@@ -25,6 +25,7 @@ exit 0
 ./run_NOmerge_expeK.sh decay 10 26
 ./run_NOmerge_expeK.sh decay 10 28
 
+***
 ./run_merge_experimentsK.sh bm 1 30
 ./run_merge_experimentsK.sh decay 1 30
 ./run_merge_experimentsK.sh bm 1 20

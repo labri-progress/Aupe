@@ -26,8 +26,8 @@ t_pct        <- if (length(args) >= 3) as.integer(args[3]) else 0 # % trusted, e
 p_merge      <- if (length(args) >= 4) as.integer(args[4]) else 10
 
 nodes        <- 1000
-view         <- 16
-nruns        <- 1
+view         <- 20 #16
+nruns        <- 2
 faulty_count <- as.integer(nodes * faulty_pct / 100)
 t_count      <- as.integer(nodes * t_pct / 100)
 strategy     <- "decay"
@@ -77,7 +77,7 @@ mytheme <- theme(
 # ── Read data ─────────────────────────────────────────────────────────────────
 group_cols <- c("h_avgByzN", "h_dkl", "h_f1", "h_biasErr",
                 "t_avgByzN", "t_dkl", "t_f1", "t_biasErr",
-                "avgByzSamp")
+                "avgByzN")
 
 all_data <- data.frame()
 
@@ -104,7 +104,7 @@ if (nrow(all_data) == 0) {
 }
 
 # Compute proportions
-all_data$res   <- all_data$avgByzSamp / view
+all_data$res   <- all_data$avgByzN / view
 all_data$h_res <- all_data$h_avgByzN  / view
 all_data$t_res <- all_data$t_avgByzN  / view
 
@@ -128,9 +128,9 @@ optimal <- faulty_pct / 100
 
 # ── Panel 1: contamination ratio (Global, Honest, Trusted) ────────────────────
 long_cr <- rbind(
-  data.frame(time = avg$time, value = avg$cratio,   group = "Global"),
-  data.frame(time = avg$time, value = avg$h_cratio, group = "Honest"),
-  data.frame(time = avg$time, value = avg$t_cratio, group = "Trusted")
+  data.frame(time = avg$time, value = avg$res,   group = "Global"),
+  data.frame(time = avg$time, value = avg$h_res, group = "Honest"),
+  data.frame(time = avg$time, value = avg$t_res, group = "Trusted")
 )
 
 p_cr <- ggplot(long_cr, aes(x = time, y = value, color = group, linetype = group)) +

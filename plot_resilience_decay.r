@@ -19,13 +19,13 @@ args <- commandArgs(trailingOnly = TRUE)
 
 library(ggplot2)
 library(dplyr)
-
+# Rscript plot_resilience_decay.r 1 10
 # ── Parameters ────────────────────────────────────────────────────────────────
 budget       <- as.integer(args[1]) #as.integer(args[1])   # e.g. 1
 p_merge      <- as.integer(args[2])   # e.g. 10
 
 nodes        <- 1000
-view         <- 16
+view         <- 20 # 216
 nruns        <- 2
 strategy     <- "decay"
 results_dir  <- "results_merge"
@@ -140,7 +140,7 @@ p <- ggplot(avg_ss, aes(x = byz_prop, y = res,
 
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/resilience_curve_n%d_p%d.pdf", nodes, p_merge)
+outfile <- sprintf("results/resilience_curve_n%d_v%d_p%d_b%d.pdf", nodes, view, p_merge, budget)
 pdf(outfile, width = width, height = height)
 print(p)
 dev.off()
