@@ -63,13 +63,13 @@ fn main() {
         WhichApp::AupeDecay(pp) => {
             let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
-            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f);
+            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.n_trusted);
         }
 
         WhichApp::AupeBM(pp) => {
             let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
-            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f);
+            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f, pp.n_trusted);
         }
 
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
@@ -79,39 +79,39 @@ fn main() {
         WhichApp::Aupe(pp) => {
             let f = format!("{}/nodes-array-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge);
-            sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, &f);
+            sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, &f, pp.n_trusted);
         }
 // cargo run -- -T 200 -n 1000 brahms -G samples -f 10 -t 300 -v 20 -u 20 -k 0 -r 1
         WhichApp::Brahms(pp) => {
             let f = format!("{}/nodes-brahms-{}-{}-{}.csv",
                 folder, opt.nodes, pp.view_size, pp.n_byzantine);
-            sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp, &f);
+            sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp, &f, 0);
         }
 // cargo run -- -T 2000 -n 1000 basalt -G -f 10 -t 300 -v 20 -i 20 -k 1 -r 1
         WhichApp::Basalt(pp) => {
             let f = format!("{}/nodes-basalt-{}-{}-{}.csv",
                 folder, opt.nodes, pp.view_size, pp.n_byzantine);
-            sim::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp, &f);
+            sim::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp, &f, 0);
         }
     }
 }
 
-fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &str) {
+fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &str, n_trusted: usize) {
 
     let mut net = Simulator::<A>::new(nproc, init);
     net.print_header();
-    net.write_node_header(node_file);
+    if n_trusted > 0 {
+        net.write_node_header(node_file);
+    }
     net.print_metrics();
-    net.write_node_metrics(node_file);
-    /* println!("--------------------------------");
-    println!(" END OF ROUND");
-    println!("--------------------------------"); */
+    if n_trusted > 0 {
+        net.write_node_metrics(node_file);
+    }
     for _step in 0..nsteps {
         net.step();
         net.print_metrics();
-        net.write_node_metrics(node_file);
-        /* println!("--------------------------------");
-		println!(" END OF ROUND {}", _step+1);
-		println!("--------------------------------"); */
+        if n_trusted > 0 {
+            net.write_node_metrics(node_file);
+        }
     }
 }
