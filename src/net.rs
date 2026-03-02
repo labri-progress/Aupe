@@ -248,6 +248,9 @@ impl<A: App + Send> Simulator<A> {
     }
 
     pub fn write_node_header(&self, path: &str) {
+        if let Some(parent) = std::path::Path::new(path).parent() {
+            std::fs::create_dir_all(parent).expect("Failed to create metrics directory");
+        }
         let mut file = OpenOptions::new()
             .write(true).create(true).truncate(true)
             .open(path)
