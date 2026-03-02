@@ -100,9 +100,6 @@ pub struct Metrics {
     n_received: usize,
     
     n_byzantine_neighbors: usize,
-    n_pushed_byzantine_neighbors: f64,
-    n_pulled_byzantine_neighbors: f64,
-    n_sampled_byzantine_neighbors: f64,
     n_byzantine_samples: usize,
 
     // ---- métriques par groupe : nœuds honnêtes ----
@@ -128,9 +125,6 @@ impl NetMetrics for Metrics {
             n_byzantine_received: 0,
             n_received: 0,
             n_byzantine_neighbors: 0,
-            n_pushed_byzantine_neighbors: 0.0,
-            n_pulled_byzantine_neighbors: 0.0,
-            n_sampled_byzantine_neighbors: 0.0,
             n_byzantine_samples: 0,
             n_procs_honest: 0,
             n_byz_neighbors_honest: 0,
@@ -151,10 +145,6 @@ impl NetMetrics for Metrics {
         self.n_received += other.n_received;
 
         self.n_byzantine_neighbors += other.n_byzantine_neighbors;
-        self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
-        self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
-        self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
-
         self.n_byzantine_samples += other.n_byzantine_samples;
 
         // groupe honest
@@ -177,9 +167,6 @@ impl NetMetrics for Metrics {
             "avgByzRecv",
             "pByzRecv",
             "avgByzN",
-            "pushByzN",
-            "pullByzN",
-            "sampByzN",
             "avgByzSamp",
             // groupe honest
             "h_avgByzN",
@@ -202,9 +189,6 @@ impl NetMetrics for Metrics {
             format!("{:.2}", (self.n_byzantine_received as f32) / (self.n_procs as f32)),
             format!("{:.4}", (self.n_byzantine_received as f32) / (self.n_received as f32)),
             format!("{:.2}", (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}", (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}", (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}", (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{:.2}", (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
             // groupe honest
             format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
@@ -621,33 +605,10 @@ impl App for Aupe {
             Self::Metrics::empty()
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let mut nbpush = 0.0;
-            let mut nbpull = 0.0;
-            let mut nbsamp = 0.0;
-            if self.push_view.len() !=0 {
-                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
-                nbpush = nbpush / (self.push_view.len() as f64);
-            }
-            if self.pull_view.len() !=0 {
-                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
-                nbpull = nbpull / (self.pull_view.len() as f64);
-            }
-            if self.sample_part.len() !=0 {
-                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
-                nbsamp = nbsamp / (self.sample_part.len() as f64);
-            }
-            
             let nbs = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some())
                 .filter(|(_, x)| x.unwrap() < self.params.n_byzantine)
                 .count();
-
-            if self.my_id == self.params.nodes-1 && DEBUG{
-                eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbs={}/{}",
-                nbn, self.view.len(),
-                nbpush, nbpull, nbsamp, 
-                nbs, self.sample_view.len());
-            }
 
             // Kvs : estimées = omn_array directement via getdata()
             let estimates = self.sketch.getdata();
@@ -668,9 +629,6 @@ impl App for Aupe {
                 n_received: self.n_received,
                 n_byzantine_received: self.n_byzantine_received,
                 n_byzantine_neighbors: nbn,
-                n_pushed_byzantine_neighbors: nbpush,
-                n_pulled_byzantine_neighbors: nbpull,
-                n_sampled_byzantine_neighbors: nbsamp,
                 n_byzantine_samples: nbs,
                 n_procs_honest: 0,
                 n_byz_neighbors_honest: 0,

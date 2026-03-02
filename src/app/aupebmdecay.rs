@@ -110,12 +110,7 @@ pub struct Metrics {
     n_received: usize,
 
     n_byzantine_neighbors: usize,
-    n_pushed_byzantine_neighbors: f64,
-    n_pulled_byzantine_neighbors: f64,
-    n_sampled_byzantine_neighbors: f64,
     n_byzantine_samples: usize,
-
-    stat: u32,
 
     // ---- métriques par groupe : nœuds honnêtes ----
     n_procs_honest: usize,
@@ -127,6 +122,7 @@ pub struct Metrics {
     f1_honest: f64,
     /// |bias_sketch - bias_oracle| avec bias = (sumbyz/sumhon) / (n_byz/n_hon)
     bias_factor_err_honest: f64,
+    stat_honest: u32,
 
     // ---- métriques par groupe : nœuds de confiance ----
     n_procs_trusted: usize,
@@ -134,6 +130,7 @@ pub struct Metrics {
     dkl_trusted: f64,
     f1_trusted: f64,
     bias_factor_err_trusted: f64,
+    stat_trusted: u32,
 }
 
 
@@ -144,21 +141,19 @@ impl NetMetrics for Metrics {
             n_byzantine_received: 0,
             n_received: 0,
             n_byzantine_neighbors: 0,
-            n_pushed_byzantine_neighbors: 0.0,
-            n_pulled_byzantine_neighbors: 0.0,
-            n_sampled_byzantine_neighbors: 0.0,
             n_byzantine_samples: 0,
-            stat: 0,
             n_procs_honest: 0,
             n_byz_neighbors_honest: 0,
             dkl_honest: 0.0,
             f1_honest: 0.0,
             bias_factor_err_honest: 0.0,
+            stat_honest: 0,
             n_procs_trusted: 0,
             n_byz_neighbors_trusted: 0,
             dkl_trusted: 0.0,
             f1_trusted: 0.0,
             bias_factor_err_trusted: 0.0,
+            stat_trusted: 0,
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -168,12 +163,7 @@ impl NetMetrics for Metrics {
         self.n_received += other.n_received;
 
         self.n_byzantine_neighbors += other.n_byzantine_neighbors;
-        self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
-        self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
-        self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
-
         self.n_byzantine_samples += other.n_byzantine_samples;
-        self.stat += other.stat;
 
         // groupe honest
         self.n_procs_honest += other.n_procs_honest;
@@ -181,6 +171,7 @@ impl NetMetrics for Metrics {
         self.dkl_honest += other.dkl_honest;
         self.f1_honest += other.f1_honest;
         self.bias_factor_err_honest += other.bias_factor_err_honest;
+        self.stat_honest += other.stat_honest;
 
         // groupe trusted
         self.n_procs_trusted += other.n_procs_trusted;
@@ -188,6 +179,7 @@ impl NetMetrics for Metrics {
         self.dkl_trusted += other.dkl_trusted;
         self.f1_trusted += other.f1_trusted;
         self.bias_factor_err_trusted += other.bias_factor_err_trusted;
+        self.stat_trusted += other.stat_trusted;
     }
     fn headers() -> Vec<&'static str> {
         vec![
@@ -195,21 +187,19 @@ impl NetMetrics for Metrics {
             "avgByzRecv",
             "pByzRecv",
             "avgByzN",
-            "pushByzN",
-            "pullByzN",
-            "sampByzN",
             "avgByzSamp",
-            "division_count",
             // groupe honest
             "h_avgByzN",
             "h_dkl",
             "h_f1",
             "h_biasErr",
+            "h_division",
             // groupe trusted
             "t_avgByzN",
             "t_dkl",
             "t_f1",
             "t_biasErr",
+            "t_division",
         ]
     }
     fn is_empty(&self) -> bool { self.n_procs == 0 }
@@ -221,21 +211,19 @@ impl NetMetrics for Metrics {
             format!("{:.2}", (self.n_byzantine_received as f32) / (self.n_procs as f32)),
             format!("{:.4}", (self.n_byzantine_received as f32) / (self.n_received as f32)),
             format!("{:.2}", (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}", (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}", (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{:.2}", (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
             format!("{:.2}", (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
-            format!("{}", self.stat),
             // groupe honest
             format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.dkl_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.f1_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
+            format!("{}", self.stat_honest),
             // groupe trusted
             format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.f1_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
+            format!("{}", self.stat_trusted),
         ]
     }
 }
@@ -626,33 +614,10 @@ impl App for AupeDecay {
             Self::Metrics::empty()
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
-            let mut nbpush = 0.0;
-            let mut nbpull = 0.0;
-            let mut nbsamp = 0.0;
-            if self.push_view.len() !=0 {
-                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
-                nbpush = nbpush / (self.push_view.len() as f64);
-            }
-            if self.pull_view.len() !=0 {
-                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
-                nbpull = nbpull / (self.pull_view.len() as f64);
-            }
-            if self.sample_part.len() !=0 {
-                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
-                nbsamp = nbsamp / (self.sample_part.len() as f64);
-            }
-
             let nbs = self.sample_view.iter()
                 .filter(|(_, x)| x.is_some())
                 .filter(|(_, x)| x.unwrap() < self.params.n_byzantine)
                 .count();
-
-            if self.my_id == self.params.nodes-1 && DEBUG{
-                eprintln!("nbn={}/{} nbpush={} nbpull={} nbsamp={} nbs={}/{}",
-                nbn, self.view.len(),
-                nbpush, nbpull, nbsamp,
-                nbs, self.sample_view.len());
-            }
 
             // Métriques sketch vs oracle global (stream agrégé de tous les nœuds corrects+confiance)
             let (dkl, f1, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
@@ -672,22 +637,20 @@ impl App for AupeDecay {
                 n_received: self.n_received,
                 n_byzantine_received: self.n_byzantine_received,
                 n_byzantine_neighbors: nbn,
-                n_pushed_byzantine_neighbors: nbpush,
-                n_pulled_byzantine_neighbors: nbpull,
-                n_sampled_byzantine_neighbors: nbsamp,
                 n_byzantine_samples: nbs,
-                stat: self.sketch.get_stats().1,
                 // champs par groupe : remplis selon le type du nœud
                 n_procs_honest: 0,
                 n_byz_neighbors_honest: 0,
                 dkl_honest: 0.0,
                 f1_honest: 0.0,
                 bias_factor_err_honest: 0.0,
+                stat_honest: 0,
                 n_procs_trusted: 0,
                 n_byz_neighbors_trusted: 0,
                 dkl_trusted: 0.0,
                 f1_trusted: 0.0,
                 bias_factor_err_trusted: 0.0,
+                stat_trusted: 0,
             };
 
             if self.is_trusted {
@@ -696,12 +659,14 @@ impl App for AupeDecay {
                 ret.dkl_trusted = dkl;
                 ret.f1_trusted = f1;
                 ret.bias_factor_err_trusted = bias_factor_err;
+                ret.stat_trusted = self.sketch.get_stats().1;
             } else {
                 ret.n_procs_honest = 1;
                 ret.n_byz_neighbors_honest = nbn;
                 ret.dkl_honest = dkl;
                 ret.f1_honest = f1;
                 ret.bias_factor_err_honest = bias_factor_err;
+                ret.stat_honest = self.sketch.get_stats().1;
             }
 
             self.n_received = 0;
