@@ -212,6 +212,7 @@ impl NetMetrics for Metrics {
             "t_biasErr",
         ]
     }
+    fn is_empty(&self) -> bool { self.n_procs == 0 }
     fn values(&self) -> Vec<String> {
         let g = |n: usize, d: f64| if n > 0 { d / n as f64 } else { 0.0 };
         let gi = |n: usize, i: usize| if n > 0 { i as f64 / n as f64 } else { 0.0 };
@@ -539,7 +540,7 @@ impl App for AupeDecay {
                             self.update_contact(*p); // if trusted
                         });
 
-                    if self.is_trusted{
+                    if self.is_trusted { //} && net.time()<=100{
                         let contactlist: Vec<PeerRef> = self.to_conctact.iter()
                             .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                             .copied() //.map(|x| x)

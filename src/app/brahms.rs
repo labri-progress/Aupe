@@ -188,6 +188,7 @@ impl NetMetrics for Metrics {
             "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
         ]
     }
+    fn is_empty(&self) -> bool { self.n_procs == 0 }
     fn values(&self) -> Vec<String> {
         // Clustering coefficient
         let cluscoeff = self.graph.clustering_coeff();

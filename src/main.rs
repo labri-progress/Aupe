@@ -7,6 +7,7 @@ mod app;
 use structopt::StructOpt;
 use net::{Simulator, App};
 
+const folder: &str = "results_merge";
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "bignetrs")]
@@ -59,44 +60,56 @@ fn main() {
         /* WhichApp::AupeCF(pp) => {
             sim::<app::aupecf::AupeCF>(opt.n_steps, opt.nodes, &pp);  
         } */ 
-
         WhichApp::AupeDecay(pp) => {
-            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp);  
-        } 
+            let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f);
+        }
 
         WhichApp::AupeBM(pp) => {
-            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp);  
-        } 
+            let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f);
+        }
 
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
 
-// cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -v 20 -u 20 -m 10 -n 1000 
+// cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -v 20 -u 20 -m 10 -n 1000
 // cargo run -- -T 200 -n 1000 aupe -G samples -f 10 -t 300 -v 20 -u 20 -m 10 -n 1000 -x 100 -p 5
         WhichApp::Aupe(pp) => {
-            sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp);  
+            let f = format!("{}/nodes-array-{}-{}-{}-{}-{}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge);
+            sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, &f);
         }
 // cargo run -- -T 200 -n 1000 brahms -G samples -f 10 -t 300 -v 20 -u 20 -k 0 -r 1
         WhichApp::Brahms(pp) => {
-            sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp);  
+            let f = format!("{}/nodes-brahms-{}-{}-{}.csv",
+                folder, opt.nodes, pp.view_size, pp.n_byzantine);
+            sim::<app::brahms::Brahms>(opt.n_steps, opt.nodes, &pp, &f);
         }
 // cargo run -- -T 2000 -n 1000 basalt -G -f 10 -t 300 -v 20 -i 20 -k 1 -r 1
         WhichApp::Basalt(pp) => {
-            sim::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp);  
+            let f = format!("{}/nodes-basalt-{}-{}-{}.csv",
+                folder, opt.nodes, pp.view_size, pp.n_byzantine);
+            sim::<app::basalt::Basalt>(opt.n_steps, opt.nodes, &pp, &f);
         }
     }
 }
 
-fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init) {
+fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &str) {
 
     let mut net = Simulator::<A>::new(nproc, init);
     net.print_header();
+    net.write_node_header(node_file);
     net.print_metrics();
+    net.write_node_metrics(node_file);
     /* println!("--------------------------------");
     println!(" END OF ROUND");
     println!("--------------------------------"); */
     for _step in 0..nsteps {
         net.step();
         net.print_metrics();
+        net.write_node_metrics(node_file);
         /* println!("--------------------------------");
 		println!(" END OF ROUND {}", _step+1);
 		println!("--------------------------------"); */

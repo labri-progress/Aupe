@@ -3,6 +3,8 @@ use rand::{rng, Rng, SeedableRng};
 use rand::rngs::StdRng;
 use rand::prelude::SliceRandom;
 //use super::metrics::Metric;
+use std::fs::OpenOptions;
+use std::io::Write;
 
 const DEBUG: bool = false;
 const STEP_LENGTH: u64 = 1;
@@ -14,6 +16,7 @@ pub trait Metrics {
     fn net_combine(&mut self, other: &Self);
     fn headers() -> Vec<&'static str>;
     fn values(&self) -> Vec<String>;
+    fn is_empty(&self) -> bool { false }
 }
 
 pub trait Network<Msg> {
@@ -106,6 +109,7 @@ pub struct Simulator<A> where A: App + Send {
     pub processes: Vec<Proc<A>>,
 
     metrics: A::Metrics,
+    node_metrics: Vec<(PeerRef, A::Metrics)>,
     n_sent: usize,
     n_recv: usize,
 }
@@ -118,6 +122,7 @@ impl<A: App + Send> Simulator<A> {
             time: 0,
             processes: Vec::new(),
             metrics: A::Metrics::empty(),
+            node_metrics: Vec::new(),
             n_sent: 0,
             n_recv: 0,
         };
@@ -152,10 +157,17 @@ impl<A: App + Send> Simulator<A> {
             eprintln!("Begin metric collection...");
         }
 
-        self.metrics = out.par_iter_mut()
-            .map(|x| std::mem::replace(&mut x.metrics, A::Metrics::empty()))
-            .reduce(|| A::Metrics::empty(),
-                    |mut a, b| { a.net_combine(&b); a });
+        // Collect per-node metrics before aggregating
+        let all_node_metrics: Vec<(PeerRef, A::Metrics)> = out.iter_mut()
+            .map(|x| (x.id, std::mem::replace(&mut x.metrics, A::Metrics::empty())))
+            .collect();
+
+        let mut combined = A::Metrics::empty();
+        for (_, m) in &all_node_metrics {
+            combined.net_combine(m);
+        }
+        self.metrics = combined;
+        self.node_metrics = all_node_metrics;
 
         self.n_recv = out.par_iter_mut()
             .map(|x| x.n_recv)
@@ -233,6 +245,33 @@ impl<A: App + Send> Simulator<A> {
             print!(" {:10}", v);
         }
         println!("");
+    }
+
+    pub fn write_node_header(&self, path: &str) {
+        let mut file = OpenOptions::new()
+            .write(true).create(true).truncate(true)
+            .open(path)
+            .expect("Failed to create node metrics file");
+        write!(file, "{:10} {:10}", "time", "node_id").unwrap();
+        for h in A::Metrics::headers() {
+            write!(file, " {:10}", h).unwrap();
+        }
+        writeln!(file).unwrap();
+    }
+
+    pub fn write_node_metrics(&self, path: &str) {
+        let mut file = OpenOptions::new()
+            .append(true).create(true)
+            .open(path)
+            .expect("Failed to open node metrics file");
+        for (id, metrics) in &self.node_metrics {
+            if metrics.is_empty() { continue; }
+            write!(file, "{:<10} {:<10}", self.time, id).unwrap();
+            for v in metrics.values() {
+                write!(file, " {:10}", v).unwrap();
+            }
+            writeln!(file).unwrap();
+        }
     }
 
     pub fn step(&mut self) {

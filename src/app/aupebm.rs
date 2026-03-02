@@ -206,6 +206,7 @@ impl NetMetrics for Metrics {
             "t_biasErr",
         ]
     }
+    fn is_empty(&self) -> bool { self.n_procs == 0 }
     fn values(&self) -> Vec<String> {
         let g = |n: usize, d: f64| if n > 0 { d / n as f64 } else { 0.0 };
         let gi = |n: usize, i: usize| if n > 0 { i as f64 / n as f64 } else { 0.0 };
