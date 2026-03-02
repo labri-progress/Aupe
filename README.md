@@ -1,8 +1,8 @@
 # Aupe
 TODO
-./run_10000K.sh bm 10 [30,20] 0
-./run_10000K.sh decay 10 [30,20] 0
-./run_10000K.sh array 10 [30] 0
+./run_experimentsK.sh bm 1 [30,20] 0
+./run_experimentsK.sh decay 1 [30,20] 0
+./run_experimentsK.sh array 1 [30] 0
 
 
 
