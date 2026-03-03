@@ -22,9 +22,9 @@ STRATEGIES=("${1:-decay}") #("bm" "array")
 BUDGETS=("${2:-0.5}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
-TRUSTED_PCTS=(5 ) #10 20) #5 10 20 30)
+TRUSTED_PCTS=(0 5 10 20) #5 10 20 30)
 # Corresponding -x values: 10%=1000, 20%=2000, 30%=3000
-TRUSTED_COUNTS=(50 ) # 100 200) # 100 200) # 2000 3000)
+TRUSTED_COUNTS=(0 50 100 200) # 100 200) # 100 200) # 2000 3000)
 
 # Number of merges per trusted node per round
 MERGES=(10) # (1 10)
