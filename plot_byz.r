@@ -12,7 +12,7 @@ library(gridExtra)
 # --- Parameters ---
 budget       <- as.integer(args[1])  # 0.5 1 or 2 (KB)
 nodes        <- 1000
-view         <- 16 #20 # 100
+view         <- 20 # 100
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30)
 strategies   <- c("bm", "decay", "array")
@@ -36,9 +36,9 @@ mytheme <- theme(
   panel.border       = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y   = unit(0.005, "cm"),
   text               = element_text(size = 12, color = "black"),
-  axis.title.x       = element_blank(), #element_text(size = 14, face = "bold"),
+  axis.title.x       = element_text(size = 14, face = "bold"),
   axis.title.y       = element_text(size = 12, face = "bold"),
-  axis.text.x        = element_blank(), #text(size = 14, face = "bold"),
+  axis.text.x        = element_text(size = 14, face = "bold"),
   axis.text.y        = element_text(size = 14, face = "bold"),
   plot.title          = element_text(size = 14, face = "bold"),
   legend.text        = element_text(size = 11, face = "bold"),
@@ -51,8 +51,7 @@ mytheme <- theme(
 # --- Read and aggregate data ---
 # Common columns across all file types (Array, BM, BMDecay)
 common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv",
-                 "avgByzN", "pushByzN", "pullByzN", "sampByzN", "n_isolated",
-                 "avgByzSamp", "min", "max", "n_fullbyz", "n_fbi")
+                 "avgByzN")
 
 # --- Read and aggregate data ---
 all_data <- data.frame()
@@ -101,7 +100,7 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     geom_line(linewidth = line_size) +
     #geom_point(size = point_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10(breaks = c(1, 1000, 10000, 100000), labels = c("10^0", "10^3", "10^4", "10^5")) +
+    scale_x_log10() + #breaks = c(1, 1000, 10000, 100000), labels = c("10^0", "10^3", "10^4", "10^5")) +
     labs(
       x = expression(bold("Time steps")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL

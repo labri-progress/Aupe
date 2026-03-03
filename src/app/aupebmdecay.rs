@@ -621,10 +621,10 @@ impl App for AupeDecay {
 
             // Métriques sketch vs oracle global (stream agrégé de tous les nœuds corrects+confiance)
             let (dkl, f1, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
-                let occ = occ.lock().unwrap();
+                let occ_snapshot = occ.lock().unwrap().clone();
                 compute_sketch_metrics(
                     &mut self.sketch,
-                    &occ,
+                    &occ_snapshot,
                     self.params.n_byzantine,
                     self.params.nodes,
                 )

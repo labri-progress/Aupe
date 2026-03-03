@@ -613,10 +613,10 @@ impl App for Aupe {
             // Kvs : estimées = omn_array directement via getdata()
             let estimates = self.sketch.getdata();
             let (dkl, f1, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
-                let occ = occ.lock().unwrap();
+                let occ_snapshot = occ.lock().unwrap().clone();
                 compute_sketch_metrics(
                     &estimates,
-                    &occ,
+                    &occ_snapshot,
                     self.params.n_byzantine,
                     self.params.nodes,
                 )

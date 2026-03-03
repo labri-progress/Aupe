@@ -9,15 +9,6 @@ TODO
 
 
 
-
-
-
-
-
-
-
-
-
 ./run_experimentsK.sh bm 1 30 0
 ./run_experimentsK.sh decay 1 30 0
 ./run_experimentsK.sh bm 1 20 0
