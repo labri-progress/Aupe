@@ -4,7 +4,7 @@
 # run_merge_experimentsK.sh decay 10 0.5 1
 
 # Experiment parameters
-ROUNDS=10000 #200
+ROUNDS=1000 #200
 NODES=1000
 VIEW=20 #16
 UVIEW=20 #16

@@ -63,13 +63,13 @@ fn main() {
         WhichApp::AupeDecay(pp) => {
             let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
-            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.n_trusted);
+            sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::AupeBM(pp) => {
             let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
-            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f, pp.n_trusted);
+            sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9
@@ -79,7 +79,7 @@ fn main() {
         WhichApp::Aupe(pp) => {
             let f = format!("{}/nodes-array-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge);
-            sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, &f, pp.n_trusted);
+            sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 // cargo run -- -T 200 -n 1000 brahms -G samples -f 10 -t 300 -v 20 -u 20 -k 0 -r 1
         WhichApp::Brahms(pp) => {
@@ -96,21 +96,21 @@ fn main() {
     }
 }
 
-fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &str, n_trusted: usize) {
+fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &str, nb_merge: usize) {
 
     let mut net = Simulator::<A>::new(nproc, init);
     net.print_header();
-    if n_trusted > 0 {
+    if nb_merge > 0 {
         net.write_node_header(node_file);
     }
     net.print_metrics();
-    if n_trusted > 0 {
+    if nb_merge > 0 {
         net.write_node_metrics(node_file);
     }
     for _step in 0..nsteps {
         net.step();
         net.print_metrics();
-        if n_trusted > 0 {
+        if nb_merge > 0 {
             net.write_node_metrics(node_file);
         }
     }
