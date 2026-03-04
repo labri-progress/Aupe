@@ -71,7 +71,7 @@ for run in $(seq $NRUNS $NRUNS); do
           echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES $trusted_flags > "$OUTDIR/$outfile"
+            -n $NODES $trusted_flags > "$OUTDIR/$outfile" &
           mark_done "$outfile"
         else
           # bm and decay use -y for budget
@@ -85,7 +85,7 @@ for run in $(seq $NRUNS $NRUNS); do
             echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -c $buckets $trusted_flags > "$OUTDIR/$outfile"
+              -n $NODES -c $buckets $trusted_flags > "$OUTDIR/$outfile" &
             mark_done "$outfile"
           done
         fi
