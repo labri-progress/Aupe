@@ -1,14 +1,20 @@
 # Aupe
 TODO
-./run_experimentsK.sh bm 1 [30,20] 0
-./run_experimentsK.sh decay 1 [30,20] 0
-./run_experimentsK.sh array 1 [30] 0
+./run_experimentsK.sh bm 0.5 [30,20] 0
+./run_experimentsK.sh decay 0.5 [30,20] 0
+./run_experimentsK.sh array 0.5 [30] 0
 
+
+./run_merge_experimentsK.sh decay 1 40
 ./run_merge_experimentsK.sh decay 1 30
 ./run_merge_experimentsK.sh decay 1 20
+./run_merge_experimentsK.sh decay 1 [22,24,26,28]
+./run_merge_experimentsK.sh decay 1 [12,14,16,18]
 ./run_merge_experimentsK.sh decay 1 10
 
-
+Rscript plot_resilience_decay.r 1 10
+Rscript plot_metrics_evolution.r 1 30
+Rscript plot_mergeandNomerge.r 30 1 10
 
 
 ./run_experimentsK.sh bm 1 30 0

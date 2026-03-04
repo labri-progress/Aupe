@@ -17,17 +17,17 @@ library(scales)
 faulty_pct   <- as.integer(args[1])  # e.g. 30
 budget       <- as.integer(args[2])  # e.g. 10 or 20
 p_merge      <- as.integer(args[3])  # e.g. 1 or 10
-nodes        <- 10000
-view         <- 160
-nruns        <- 2
+nodes        <- 1000 # 10000
+view         <- 20 # 160
+nruns        <- 1 #2
 force        <- 10
 faulty_count <- as.integer(nodes * faulty_pct / 100)
-strategies   <- c("bm", "array")
-strat_labels <- c("bm" = "BM", "array" = "Array")
-trusted_pcts <- c(0, 1, 5, 10, 20, 30) #c(1, 5, 10)
+strategies   <- c("decay") #"bm", "array", "decay")
+strat_labels <- c("bm" = "BM", "array" = "Array", "decay" = "Decay")
+trusted_pcts <- c(5, 10, 20) #c(1, 5, 10)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 trusted_counts
-results_dir  <- "output_merge"
+results_dir  <- "results_merge"
 
 # --- Theme ---
 line_size  <- 0.5
@@ -37,8 +37,8 @@ width      <- 7
 height     <- width / ratio
 
 custom_colors <- c("0" = "#000000", "1" = "#e60096", "5" = "#E69F00", "10" = "#56B4E9", "20" = "#009E73", "30" = "#D55E00")
-custom_linetypes <- c("BM" = "solid", "Array" = "dashed")
-custom_shapes <- c("BM" = 16, "Array" = 17)
+custom_linetypes <- c("Decay" = "solid", "Array" = "dashed", "BM" = "dotted")
+custom_shapes <- c("BM" = 16, "Array" = 17, "Decay" = 18)
 
 mytheme <- theme(
   panel.grid.major   = element_blank(),
@@ -140,7 +140,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   mytheme +
   theme(
-    legend.position = c(0.25, 0.2), #c(0.25, 0.55),
+    legend.position = c(0.65, 0.82), #c(0.25, 0.55),
     legend.title = element_blank(),
     legend.box = "horizontal"
   ) +

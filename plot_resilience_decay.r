@@ -26,7 +26,7 @@ p_merge      <- as.integer(args[2])   # e.g. 10
 
 nodes        <- 1000
 view         <- 20 # 216
-nruns        <- 2
+nruns        <- 1
 strategy     <- "decay"
 results_dir  <- "results_merge"
 

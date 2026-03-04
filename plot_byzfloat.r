@@ -20,7 +20,7 @@ strat_labels <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
 results_dir  <- "output_byz"
 
 # --- Theme (inspired by metricmemory_force.r) ---
-line_size  <- 0.1
+line_size  <- 0.4
 point_size <- 1.5
 ratio      <- 3
 width      <- 11
@@ -99,7 +99,7 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     geom_line(linewidth = line_size) +
     #geom_point(size = point_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10(breaks = c(1, 100, 1000, 100000), labels = c("1", "100", "1000", "100000")) +
+    scale_x_log10(breaks = c(1, 100, 1000, 100000), labels = c("1000", "10000", "100000", "500000")) +
     labs(
       x = expression(bold("Time steps")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
