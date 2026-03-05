@@ -101,7 +101,7 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     scale_color_manual(values = custom_colors) +
     scale_x_log10(breaks = c(1, 100, 1000, 100000), labels = c("1000", "10000", "100000", "500000")) +
     labs(
-      x = expression(bold("Time steps")),
+      x = expression(bold("Rounds")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
     ) +
     coord_cartesian(ylim = c(0, 1)) +

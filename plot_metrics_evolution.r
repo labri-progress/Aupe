@@ -89,7 +89,7 @@ d$dkl       <- ifelse(d$group == "Honest", d$h_dkl,     d$t_dkl)
 d$f1        <- ifelse(d$group == "Honest", d$h_f1,      d$t_f1)
 d$biasErr   <- ifelse(d$group == "Honest", d$h_biasErr, d$t_biasErr)
 
-# Subsample time steps to ~20 boxes for readability
+# Subsample Rounds to ~20 boxes for readability
 n_boxes       <- 20
 max_time      <- max(d$time)
 step_interval <- max(1, floor(max_time / n_boxes))
@@ -117,7 +117,7 @@ p_cr <- ggplot(pd, aes(x = time_f, y = res, color = group, fill = group)) +
   scale_fill_manual(values  = ht_colors) +
   coord_cartesian(ylim = c(0, 1)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
-  labs(x = expression(bold("Time steps")),
+  labs(x = expression(bold("Rounds")),
        y = expression(bold("Prop. of Byz. samples"))) +
   mytheme +
   theme(legend.position = c(0.72, 0.85))
@@ -130,7 +130,7 @@ p_dkl <- ggplot(pd, aes(x = time_f, y = dkl, color = group, fill = group)) +
                position = position_dodge(0.9)) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
-  labs(x = expression(bold("Time steps")),
+  labs(x = expression(bold("Rounds")),
        y = expression(bold("DKL"))) +
   mytheme +
   theme(legend.position = "none")
@@ -144,7 +144,7 @@ p_f1 <- ggplot(pd, aes(x = time_f, y = f1, color = group, fill = group)) +
   scale_fill_manual(values  = ht_colors) +
   coord_cartesian(ylim = c(0, 1)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
-  labs(x = expression(bold("Time steps")),
+  labs(x = expression(bold("Rounds")),
        y = expression(bold("F1"))) +
   mytheme +
   theme(legend.position = c(0.72, 0.20))
@@ -157,7 +157,7 @@ p_bias <- ggplot(pd, aes(x = time_f, y = biasErr, color = group, fill = group)) 
                position = position_dodge(0.9)) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
-  labs(x = expression(bold("Time steps")),
+  labs(x = expression(bold("Rounds")),
        y = expression(bold("Bias factor err."))) +
   mytheme +
   theme(legend.position = "none")

@@ -139,7 +139,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   #geom_point(data = subset(avg_data, time %% 25 == 0), size = point_size) +
   scale_color_manual(values = label_colors) +
   labs(
-    x = expression(bold("Time steps")),
+    x = expression(bold("Rounds")),
     y = expression(bold("Proportion of Byz. samp."))
   ) +
   coord_cartesian(ylim = c(0, 1)) +

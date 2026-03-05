@@ -20,7 +20,7 @@ cat("Force:", force, "\n")
 
 #pdf_title <- paste("Different strategies, space", space, "KB, ", total, "elements in total")
 faulty_plot <- function(data, y_col = "dKL", faulty, show_legend = TRUE, show_y_title = TRUE){
-  x_name <- "Time steps"
+  x_name <- "Rounds"
   
   y_info <- y_axis_settings[[y_col]]
   y_title <- if (show_y_title) y_info$title else NULL 

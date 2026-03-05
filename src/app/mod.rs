@@ -1,8 +1,10 @@
 pub mod aupe;
 pub mod aupebm;
 pub mod aupebmdecay;
+pub mod aupebmaging;
 pub mod kvs;
 pub mod brahms;
 pub mod basalt;
 pub mod bitmatcher;
 pub mod bitmatcher_adaptive;
+pub mod bitmatcher_aging;

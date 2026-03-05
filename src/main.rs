@@ -39,6 +39,10 @@ pub enum WhichApp {
     #[structopt(name = "decay")]
     AupeDecay(app::aupebmdecay::Init),
 
+    /// Aupe RPS with aging (decay triggered on type-0 shrink to type-1/2)
+    #[structopt(name = "aging")]
+    AupeAging(app::aupebmaging::Init),
+
     /// Aupe RPS
     #[structopt(name = "array")]
     Aupe(app::aupe::Init),
@@ -64,6 +68,12 @@ fn main() {
             let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
+        WhichApp::AupeAging(pp) => {
+            let f = format!("{}/nodes-aging-{}-{}-{}-{}-{}-{}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::aupebmaging::AupeAging>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::AupeBM(pp) => {

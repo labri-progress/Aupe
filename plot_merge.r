@@ -124,7 +124,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   scale_linetype_manual(values = custom_linetypes,
                         labels = paste0("t=", names(custom_linetypes), "%")) +
   labs(
-    x = expression(bold("Time steps")),
+    x = expression(bold("Rounds")),
     y = expression(bold("Proportion of Byz. samp."))
   ) +
   coord_cartesian(ylim = c(0, 1)) +
