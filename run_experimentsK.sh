@@ -2,14 +2,14 @@
 # ./run_experimentsK.sh decay 0.5 30 10 [1]
 
 # Experiment parameters
-ROUNDS=100000 # 600000
+ROUNDS=20000 # 600000
 NODES=1000
 VIEW=20
 UVIEW=20
 SM=30
 GAMMA=20 #20
 NRUNS="${5:-1}" #5
-
+ATTACK_START=10000
 # Strategies
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
 
@@ -71,7 +71,7 @@ for run in $(seq $NRUNS $NRUNS); do
           echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES $trusted_flags > "$OUTDIR/$outfile" &
+            -n $NODES $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
           mark_done "$outfile"
         else
           # bm and decay use -y for budget
@@ -85,7 +85,7 @@ for run in $(seq $NRUNS $NRUNS); do
             echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -c $buckets $trusted_flags > "$OUTDIR/$outfile" &
+              -n $NODES -c $buckets $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
             mark_done "$outfile"
           done
         fi

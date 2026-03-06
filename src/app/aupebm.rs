@@ -402,7 +402,7 @@ impl App for AupeBM {
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
 
-        if !self.is_byzantine {
+        if !self.is_byzantine || (self.params.attack_start_time > 0) {
             let view = net.sample_peers(self.params.view_size);
 
             self.sample_view = (0..self.params.sample_view_size)
@@ -447,7 +447,7 @@ impl App for AupeBM {
     
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
         //println!("**********************Node {}**********************", self.my_id);
-        if self.is_byzantine {
+        if self.is_byzantine && net.time() >= self.params.attack_start_time {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
@@ -597,7 +597,7 @@ impl App for AupeBM {
 
     
     fn metrics(&mut self, _net: Net) -> Self::Metrics {
-        if self.is_byzantine {
+        if self.is_byzantine && _net.time() >= self.params.attack_start_time {
             Self::Metrics::empty()
         } else {
             let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();

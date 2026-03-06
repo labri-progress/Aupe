@@ -60,7 +60,7 @@ oarsub -l host=4,walltime=12 -t deploy -p grappe -r '2026-02-03 02:00:02'
 PREVIOUS
 
 Run in release mode (much faster):
-cargo run --release -- -T 1000 -n 1000 decay -f 10 -t 300 -v 100 -u 100 -m 10 -n 1000 -y 1
+cargo run --release -- -T 1000 -n 1000 decay -f 10 -t 300 -v 100 -u 100 -m 100 -n 1000 -y 1
 
 ./run_experiments.sh
 Rscript plot_byz.r 1 (for budget=1KB) or Rscript plot_byz.r 2
