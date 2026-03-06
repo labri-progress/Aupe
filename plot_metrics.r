@@ -115,8 +115,8 @@ metric_plot <- function(data, y_col, show_legend = TRUE, show_y_title = TRUE) {
   p <- ggplot(data, aes(x = time, y = .data[[y_col]], color = strategy, group = strategy)) +
     geom_line(linewidth = line_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10(breaks = c(1e3, 5e3, 50e3, 100e3, 500e3),
-                  labels = c("1K", "5K", "50K", "100K", "500K")) +
+    #scale_x_log10(breaks = c(1e3, 5e3, 50e3, 100e3, 500e3),
+      #            labels = c("1K", "5K", "50K", "100K", "500K")) +
     labs(
       x = expression(bold("Rounds")),
       y = y_title
@@ -168,8 +168,8 @@ count_panel <- function(panel_data, y_col, y_lim, panel_title,
   ggplot(panel_data, aes(x = time, y = .data[[y_col]], color = strategy, group = strategy)) +
     geom_line(linewidth = line_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10(breaks = c(1e3, 5e3, 50e3, 500e3),
-                  labels = c("1K", "5K", "50K", "500K")) +
+    #scale_x_log10(breaks = c(1e3, 5e3, 50e3, 500e3),
+                #  labels = c("1K", "5K", "50K", "500K")) +
     scale_y_continuous(
       trans   = linear_log_trans,
       limits  = y_lim,

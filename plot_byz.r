@@ -100,8 +100,8 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     geom_line(linewidth = line_size) +
     #geom_point(size = point_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10(breaks = c(1e3, 5e3, 50e3, 500e3),
-                  labels = c("1K", "5K", "50K", "500K")) +
+    #scale_x_log2(breaks = c(1e3, 5e3, 50e3, 500e3),
+     #             labels = c("1K", "5K", "50K", "500K")) +
     labs(
       x = expression(bold("Rounds")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
