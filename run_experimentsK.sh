@@ -2,12 +2,12 @@
 # ./run_experimentsK.sh decay 0.5 30 10 [1]
 
 # Experiment parameters
-ROUNDS=20000 # 600000
+ROUNDS=1 # 600000
 NODES=1000
 VIEW=20
 UVIEW=20
 SM=30
-GAMMA=20 #20
+GAMMA=10 #20
 NRUNS="${5:-1}" #5
 ATTACK_START=10000
 # Strategies
