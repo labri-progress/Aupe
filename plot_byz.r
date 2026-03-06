@@ -10,7 +10,7 @@ library(dplyr)
 library(gridExtra)
 
 # --- Parameters ---
-budget       <- as.integer(args[1])  # 0.5 1 or 2 (KB)
+budget       <- as.numeric(args[1])  # 0.5 1 or 2 (KB)
 nodes        <- 1000
 view         <- 20 # 100
 nruns        <- 1
@@ -65,7 +65,7 @@ for (strat in strategies) {
                            sprintf("%s-N%d-v%d-f%d-run%d", strat, nodes, view, faulty_count, run))
       } else {
         fname <- file.path(results_dir,
-                           sprintf("%s-N%d-v%d-f%d-y%d-run%d", strat, nodes, view, faulty_count, budget, run))
+                           sprintf("%s-N%d-v%d-f%d-y%g-run%d", strat, nodes, view, faulty_count, budget, run))
       }
       if (!file.exists(fname)) {
         cat("Warning: file not found:", fname, "\n")
@@ -100,7 +100,8 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
     geom_line(linewidth = line_size) +
     #geom_point(size = point_size) +
     scale_color_manual(values = custom_colors) +
-    scale_x_log10() + #breaks = c(1, 1000, 10000, 100000), labels = c("10^0", "10^3", "10^4", "10^5")) +
+    scale_x_log10(breaks = c(1e3, 5e3, 50e3, 500e3),
+                  labels = c("1K", "5K", "50K", "500K")) +
     labs(
       x = expression(bold("Rounds")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
@@ -128,7 +129,7 @@ for (i in seq_along(faulty_pcts)) {
 
 # --- Save PDF ---
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/byz_proportion_budget_%dKB.pdf", budget)
+outfile <- sprintf("results/byz_proportion_budget_%gKB.pdf", budget)
 pdf(outfile, width = width, height = height)
 grid.arrange(grobs = plots, nrow = 1, ncol = 3)
 dev.off()

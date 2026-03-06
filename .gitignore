@@ -41,3 +41,7 @@ paper_bm_decay_merge.md
 *.tex
 *.pdf
 array*
+aupebmaging.rs
+bitmatcher_aging.cc
+bitmatcher_aging.rs
+bitmatcher_aging.h
