@@ -2,7 +2,7 @@
 # ./run_experimentsK.sh decay 0.5 30 10 [1]
 
 # Experiment parameters
-ROUNDS=1 # 600000
+ROUNDS=50000 # 600000
 NODES=1000
 VIEW=20
 UVIEW=20
