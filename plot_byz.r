@@ -107,6 +107,7 @@ byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
     ) +
     coord_cartesian(ylim = c(0, 1)) +
+    scale_x_continuous(breaks = c(0, 5000, 10000, 15000, 20000), labels = c("0", "5K", "10K", "15K", "20K")) +
     scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
     mytheme +
     theme(
