@@ -16,7 +16,7 @@ NRUNS="${4:-1}" #5
 FAULTY_PCT="${3:-26}"
 FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
-STRATEGIES=("${1:-decay}") #("bm" "array")
+STRATEGIES= ("bm" "decay") #("${1:-decay}")
 
 # Budget memory in KB (only used by bm via -y)
 BUDGETS=("${2:-0.5}") #(5 10 20)
