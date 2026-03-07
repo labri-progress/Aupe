@@ -16,7 +16,7 @@ echo "Running merge experiments with strategy=${1:-decay}, budget=${2:-0.5}KB, r
 FAULTY_PCT="${3:-26}"
 FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
-STRATEGIES= ("bm" "decay") 
+STRATEGIES=("bm" "decay")
 
 # Budget memory in KB (only used by # ("${1:-decay}")bm via -y)
 BUDGETS=("${2:-0.5}") #(5 10 20)
