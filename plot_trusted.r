@@ -17,19 +17,19 @@ library(scales)
 
 # --- Parameters ---
 faulty_pct   <- as.integer(args[1])  # e.g. 30
-budget       <- as.double(args[2])  # e.g. 0.5, 1 or 2 (KB)
-p_merge      <- as.integer(args[3])  # e.g. 1 or 10
+budget       <- as.numeric(args[2])  # e.g. 0.5, 1 or 2 (KB)
+strategies      <- args[3]
+p_merge <- 10 # e.g. 1 or 10
 nodes        <- 1000
 view         <- 20
 nruns        <- 1
 force        <- 20
 faulty_count <- as.integer(nodes * faulty_pct / 100)
-strategies   <- c("decay")
-strat_labels <- c("decay" = "BMDecay", "array" = "Array")
+strat_labels <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
 trusted_pcts <- c(0, 5, 10, 20) #1, 5, 10, 20, 30) #c(1, 5, 10)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 trusted_counts
-results_dir  <- "output_merge"
+results_dir  <- "results_merge"
 
 # --- Theme ---
 line_size  <- 0.5
@@ -80,7 +80,7 @@ for (strat in strategies) {
                                    strat, nodes, view, faulty_count, t_count, p_merge, run))
       } else {
         fname <- file.path(results_dir,
-                           sprintf("%s-%d-%d-%d-%d-%d-%.1f-run%d",
+                           sprintf("%s-%d-%d-%d-%d-%d-%.1g-run%d",
                                    strat, nodes, view, faulty_count, t_count, p_merge, budget, run))
       }
       if (!file.exists(fname)) {
@@ -155,7 +155,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
 
 # --- Save PDF ---
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/merge_byz_f%d_b%.1f_p%d.pdf", faulty_pct, budget, p_merge)
+outfile <- sprintf("results/merge_byz_f%d_b%.1g_p%d_strat%s.pdf", faulty_pct, budget, p_merge, strategies[1])
 pdf(outfile, width = width, height = height)
 print(p)
 dev.off()

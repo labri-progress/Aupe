@@ -30,7 +30,7 @@ nruns        <- 1
 strategy     <- "decay"
 results_dir  <- "results_merge"
 
-faulty_pcts    <- seq(10, 40, by = 2) #c(10, 20, 30)
+faulty_pcts    <- c(10, 20, 26, 30)#seq(10, 40, by = 2) #c(10, 20, 30)
 trusted_pcts   <- c(0, 5, 10, 20) #, 30)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 

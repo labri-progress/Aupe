@@ -36,8 +36,8 @@ exit 0
 exit 0
 Rscript plot_byz.r 1
 
-Rscript plot_resilience_decay.r 30 1 10   # f=30%, budget=1, p_merge=10
-
+Rscript plot_resilience_decay.r 1 10   # budget=1, p_merge=10
+Rscript plot_trusted.r 30 1 10   # budget=1, p_merge=10
 Rscript plot_metrics_evolution.r 1 30           # t=0%, p=10 (defaults)
 Rscript plot_metrics_evolution.r 1 30 10 10     # t=10%, p=10
 
