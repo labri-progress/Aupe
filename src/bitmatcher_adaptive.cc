@@ -4,10 +4,10 @@
 namespace org {
 namespace blobstore {
 
-int merge_strategy = 2; // 0 for sum, 1 for moy 2 for max
+int merge_strategy = 1; // 0 for sum, 1 for moy 2 for max
 
 
-	// Copy constructor
+// Copy constructor
 BitMatcherAdaptive::BitMatcherAdaptive(const BitMatcherAdaptive& other)
     : bucket_num(other.bucket_num),
       maxloop(other.maxloop),

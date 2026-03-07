@@ -1,7 +1,7 @@
 # Aupe
 TODO
-./run_experimentsK.sh bm 1 30 0
-
+./run_merge_experimentsK.sh decay 1 [10,20,26,30]
+./run_merge_experimentsK.sh bm 1 [10,20,30]
 
 ./run_experimentsK.sh bm 0.5 [30,20] 0
 ./run_experimentsK.sh decay 0.5 [30,20] 0

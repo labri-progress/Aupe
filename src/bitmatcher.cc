@@ -4,8 +4,9 @@
 namespace org {
 namespace blobstore {
 
+int merge_strategy = 1; // 0 for sum, 1 for moy 2 for max
 
-	// Copy constructor
+// Copy constructor
 BitMatcher::BitMatcher(const BitMatcher& other)
     : bucket_num(other.bucket_num),
       maxloop(other.maxloop),
@@ -612,7 +613,11 @@ void BitMatcher::merge(const BitMatcher& other) {
 
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
 				if (count > 0) {
-					merged_counts[{i, fp}] = max(merged_counts[{i, fp}], count);
+					if (merge_strategy == 0 || merge_strategy == 1) {
+						merged_counts[{i, fp}] += count;
+					} else if (merge_strategy == 2) {
+						merged_counts[{i, fp}] = std::max(merged_counts[{i, fp}], count);
+					}
 				}
 			}
 		}
@@ -630,7 +635,11 @@ void BitMatcher::merge(const BitMatcher& other) {
 				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b1), j, type_id);
 				if (count > 0) {
 					uint32_t bucket_id_table0 = (i ^ fp) % bm.bucket_num;
-					merged_counts[{bucket_id_table0, fp}] = max(merged_counts[{bucket_id_table0, fp}], count);
+					if (merge_strategy == 0 || merge_strategy == 1) {
+						merged_counts[{bucket_id_table0, fp}] += count;
+					} else if (merge_strategy == 2) {
+						merged_counts[{bucket_id_table0, fp}] = std::max(merged_counts[{bucket_id_table0, fp}], count);
+					}
 				}
 			}
 		}
@@ -644,7 +653,11 @@ void BitMatcher::merge(const BitMatcher& other) {
 	std::vector<ItemInfo> items;
 	items.reserve(merged_counts.size());
 	for (const auto& kv : merged_counts) {
-		items.push_back({kv.first.second, kv.first.first, kv.second});
+		int count = kv.second; 
+		if (merge_strategy == 1) { // moy strategy
+			count = (count + 1) / 2; // Average count for moy strategy
+		}
+		items.push_back({kv.first.second, kv.first.first, count});
 	}
 	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)
 
