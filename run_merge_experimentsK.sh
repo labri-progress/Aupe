@@ -10,16 +10,16 @@ VIEW=20 #16
 UVIEW=20 #16
 SM=15 #30
 FORCE=10
-NRUNS="${4:-1}" #5
-echo "Running merge experiments with strategy=${1:-decay}, budget=${2:-0.5}KB, runs=${NRUNS}"
+NRUNS="${3:-1}" #5
+echo "Running merge experiments with strategy=bm, budget=${1:-0.5}KB, runs=${NRUNS}"
 # Faulty: 30% of N
-FAULTY_PCT="${3:-26}"
+FAULTY_PCT="${2:-26}"
 FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
 STRATEGIES=("bm") #"decay")
 
 # Budget memory in KB (only used by # ("${1:-decay}")bm via -y)
-BUDGETS=("${2:-0.5}") #(5 10 20)
+BUDGETS=("${1:-0.5}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
 TRUSTED_PCTS=(0 5 10 20) #5 10 20 30)
