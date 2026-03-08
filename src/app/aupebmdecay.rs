@@ -123,7 +123,7 @@ pub struct Metrics {
     /// |bias_sketch - bias_oracle| avec bias = (sumbyz/sumhon) / (n_byz/n_hon)
     bias_factor_err_honest: f64,
     stat_honest: u32,
-    occ_honest: usize,
+    occ_honest: f64,
 
     // ---- métriques par groupe : nœuds de confiance ----
     n_procs_trusted: usize,
@@ -132,7 +132,7 @@ pub struct Metrics {
     f1_trusted: f64,
     bias_factor_err_trusted: f64,
     stat_trusted: u32,
-    occ_trusted: usize,
+    occ_trusted: f64,
 }
 
 
@@ -150,14 +150,14 @@ impl NetMetrics for Metrics {
             f1_honest: 0.0,
             bias_factor_err_honest: 0.0,
             stat_honest: 0,
-            occ_honest: 0,
+            occ_honest: 0.0,
             n_procs_trusted: 0,
             n_byz_neighbors_trusted: 0,
             dkl_trusted: 0.0,
             f1_trusted: 0.0,
             bias_factor_err_trusted: 0.0,
             stat_trusted: 0,
-            occ_trusted: 0,
+            occ_trusted: 0.0,
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -226,14 +226,14 @@ impl NetMetrics for Metrics {
             format!("{:.2}", g(self.n_procs_honest, self.f1_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
             format!("{}", self.stat_honest),
-            format!("{:.2}", gi(self.n_procs_honest, self.occ_honest)),
+            format!("{:.4}", g(self.n_procs_honest, self.occ_honest)),
             // groupe trusted
             format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.f1_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
             format!("{}", self.stat_trusted),
-            format!("{:.2}", gi(self.n_procs_trusted, self.occ_trusted)),
+            format!("{:.4}", g(self.n_procs_trusted, self.occ_trusted)),
         ]
     }
 }
@@ -644,7 +644,7 @@ impl App for AupeDecay {
 
             let occ = (0..self.params.nodes)
                 .filter(|id| self.sketch.estimate(id) > 0.0)
-                .count();
+                .count() as f64 / self.params.nodes as f64;
 
             let mut ret = Self::Metrics {
                 n_procs: 1,
@@ -659,14 +659,14 @@ impl App for AupeDecay {
                 f1_honest: 0.0,
                 bias_factor_err_honest: 0.0,
                 stat_honest: 0,
-                occ_honest: 0,
+                occ_honest: 0.0,
                 n_procs_trusted: 0,
                 n_byz_neighbors_trusted: 0,
                 dkl_trusted: 0.0,
                 f1_trusted: 0.0,
                 bias_factor_err_trusted: 0.0,
                 stat_trusted: 0,
-                occ_trusted: 0,
+                occ_trusted: 0.0,
             };
 
             if self.is_trusted {

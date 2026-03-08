@@ -63,7 +63,7 @@ for run in $(seq $NRUNS $NRUNS); do
           echo "Running: $strat t=${t_pct}% p=${p} run=${run}"
           cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-            -n $NODES -x $t_count -p $p > "$OUTDIR/$outfile"
+            -n $NODES -x $t_count -p $p > "$OUTDIR/$outfile" &
           mark_done "$outfile"
         else
           # bm uses -y for budget
@@ -77,7 +77,7 @@ for run in $(seq $NRUNS $NRUNS); do
             buckets=$(echo "$budget * 1024/8/2" | bc)
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -c $buckets -x $t_count -p $p > "$OUTDIR/$outfile"
+              -n $NODES -c $buckets -x $t_count -p $p > "$OUTDIR/$outfile" &
             mark_done "$outfile"
           done
         fi
