@@ -24,13 +24,14 @@ library(gridExtra)
 budget       <- as.integer(args[1])                               # e.g. 1
 faulty_pct   <- as.integer(args[2])                               # e.g. 10, 20, 30
 t_pct        <- if (length(args) >= 3) as.integer(args[3]) else 0 # % trusted
-p_merge      <- if (length(args) >= 4) as.integer(args[4]) else 10
+strategy     <- if (length(args) >= 4) as.character(args[4]) else "decay"
+round_to_stop <- if (length(args) >= 5) as.integer(args[5]) else 200
 
 nodes        <- 1000
 view         <- 20
 faulty_count <- as.integer(nodes * faulty_pct / 100)
 t_count      <- as.integer(nodes * t_pct / 100)
-strategy     <- if (length(args) >= 5) as.character(args[5]) else "decay"
+p_merge      <- if (length(args) >= 6) as.integer(args[6]) else 10
 results_dir  <- "results_merge"
 
 if (strategy == "array") {
@@ -77,6 +78,9 @@ mytheme <- theme(
 # ── Read and prepare data ──────────────────────────────────────────────────────
 d <- read.table(fname, header = TRUE)
 d$time    <- as.integer(d$time)
+# cut after round_to_stop
+d <- d[d$time <= round_to_stop, ]
+
 d$node_id <- as.integer(d$node_id)
 
 # Classify nodes by ID (byzantine nodes are already filtered out of the file)
@@ -88,6 +92,7 @@ d$res <- d$avgByzN / view
 d$dkl       <- ifelse(d$group == "Honest", d$h_dkl,     d$t_dkl)
 d$f1        <- ifelse(d$group == "Honest", d$h_f1,      d$t_f1)
 d$biasErr   <- ifelse(d$group == "Honest", d$h_biasErr, d$t_biasErr)
+d$occ       <- ifelse(d$group == "Honest", d$h_occ,     d$t_occ)
 
 # Subsample Rounds to ~20 boxes for readability
 n_boxes       <- 20
@@ -97,12 +102,15 @@ plot_times    <- seq(0, max_time, by = step_interval)
 pd            <- d[d$time %in% plot_times, ]
 pd$time_f     <- factor(pd$time)
 
-# Global mean of avgByzN/view across all nodes (Honest + Trusted) per time step
-pd_all_mean <- pd %>%
-  group_by(time_f) %>%
-  summarise(mean_res = mean(res), .groups = "drop")
-
 optimal <- faulty_pct / 100
+max_time <- max(d$time)
+if (max_time > 200) {
+  x_breaks <- seq(0, max_time, by = 200)
+} else if (max_time > 50) {
+  x_breaks <- seq(0, max_time, by = 50)
+} else {
+  x_breaks <- sort(unique(avg_data$time))
+}
 
 # ── Panel 1: contamination ratio ──────────────────────────────────────────────
 p_cr <- ggplot(pd, aes(x = time_f, y = res, color = group, fill = group)) +
@@ -110,12 +118,11 @@ p_cr <- ggplot(pd, aes(x = time_f, y = res, color = group, fill = group)) +
   geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
                position = position_dodge(0.9)) +
-  geom_line(data = pd_all_mean, aes(x = time_f, y = mean_res, group = 1),
-            color = "black", linewidth = 0.8, inherit.aes = FALSE,
-            show.legend = FALSE) +
+  stat_summary(fun = mean, geom = "line", aes(group = group), linewidth = 0.8) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
   coord_cartesian(ylim = c(0, 1)) +
+  scale_x_discrete(breaks = as.character(x_breaks)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   labs(x = expression(bold("Rounds")),
        y = expression(bold("Prop. of Byz. samples"))) +
@@ -128,8 +135,10 @@ p_dkl <- ggplot(pd, aes(x = time_f, y = dkl, color = group, fill = group)) +
   geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
                position = position_dodge(0.9)) +
+  stat_summary(fun = mean, geom = "line", aes(group = group), linewidth = 0.8) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
+  scale_x_discrete(breaks = as.character(x_breaks)) +
   labs(x = expression(bold("Rounds")),
        y = expression(bold("DKL"))) +
   mytheme +
@@ -140,10 +149,12 @@ p_f1 <- ggplot(pd, aes(x = time_f, y = f1, color = group, fill = group)) +
   geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
                position = position_dodge(0.9)) +
+  stat_summary(fun = mean, geom = "line", aes(group = group), linewidth = 0.8) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
   coord_cartesian(ylim = c(0, 1)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
+  scale_x_discrete(breaks = as.character(x_breaks)) +
   labs(x = expression(bold("Rounds")),
        y = expression(bold("F1"))) +
   mytheme +
@@ -155,6 +166,7 @@ p_bias <- ggplot(pd, aes(x = time_f, y = biasErr, color = group, fill = group)) 
   geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
                position = position_dodge(0.9)) +
+  stat_summary(fun = mean, geom = "line", aes(group = group), linewidth = 0.8) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
   labs(x = expression(bold("Rounds")),
@@ -162,10 +174,24 @@ p_bias <- ggplot(pd, aes(x = time_f, y = biasErr, color = group, fill = group)) 
   mytheme +
   theme(legend.position = "none")
 
+# ── Panel 5: Occupancy ────────────────────────────────────────────────────────
+p_occ <- ggplot(pd, aes(x = time_f, y = occ, color = group, fill = group)) +
+  geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
+               position = position_dodge(0.9)) +
+  stat_summary(fun = mean, geom = "line", aes(group = group), linewidth = 0.8) +
+  scale_color_manual(values = ht_colors) +
+  scale_fill_manual(values  = ht_colors) +
+  scale_x_discrete(breaks = as.character(x_breaks)) +
+  labs(x = expression(bold("Rounds")),
+       y = expression(bold("Occupancy"))) +
+  mytheme +
+  theme(legend.position = "none")
+
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/metrics_boxplot_strat%sf%d_t%d_b%d.pdf", strategy, faulty_pct, t_pct, budget)
-pdf(outfile, width = width * 4/3, height = height)
-grid.arrange(p_cr, p_dkl, p_f1, p_bias, nrow = 1, ncol = 4)
+pdf(outfile, width = width * 5/3, height = height)
+grid.arrange(p_cr, p_dkl, p_f1, p_bias, p_occ, nrow = 1, ncol = 5)
 dev.off()
 cat("Saved to:", outfile, "\n")

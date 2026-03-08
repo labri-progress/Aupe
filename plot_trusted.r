@@ -18,7 +18,7 @@ library(scales)
 # --- Parameters ---
 faulty_pct   <- as.integer(args[1])  # e.g. 30
 budget       <- as.numeric(args[2])  # e.g. 0.5, 1 or 2 (KB)
-strategies      <- args[3]
+strategy     <- args[3]
 p_merge <- 10 # e.g. 1 or 10
 nodes        <- 1000
 view         <- 20
@@ -34,13 +34,13 @@ results_dir  <- "results_merge"
 # --- Theme ---
 line_size  <- 0.5
 point_size <- 1.5
-ratio      <- 2.5
+ratio      <- 2
 width      <- 7
 height     <- width / ratio
 
 custom_colors <- c("0" = "#000000", "1" = "#e60096", "5" = "#E69F00", "10" = "#56B4E9", "20" = "#009E73", "30" = "#D55E00")
-custom_linetypes <- c("BM" = "solid", "Array" = "dashed")
-custom_shapes <- c("BM" = 16, "Array" = 17)
+custom_linetypes <- c("BM" = "solid", "BMDecay" = "solid", "Array" = "dashed")
+custom_shapes <- c("BM" = 16, "BMDecay" = 16,"Array" = 17)
 
 mytheme <- theme(
   panel.grid.major   = element_blank(),
@@ -68,37 +68,36 @@ common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv"
 
 all_data <- data.frame()
 
-for (strat in strategies) {
-  for (ti in seq_along(trusted_pcts)) {
-    t_pct   <- trusted_pcts[ti]
-    t_count <- trusted_counts[ti]
+for (ti in seq_along(trusted_pcts)) {
+  t_pct   <- trusted_pcts[ti]
+  t_count <- trusted_counts[ti]
 
-    for (run in 1:nruns) {
-      if (strat == "array") {
-        fname <- file.path(results_dir,
-                           sprintf("%s-%d-%d-%d-%d-%d-run%d",
-                                   strat, nodes, view, faulty_count, t_count, p_merge, run))
-      } else {
-        fname <- file.path(results_dir,
-                           sprintf("%s-%d-%d-%d-%d-%d-%.1g-run%d",
-                                   strat, nodes, view, faulty_count, t_count, p_merge, budget, run))
-      }
-      if (!file.exists(fname)) {
-        cat("Warning: file not found:", fname, "\n")
-        next
-      }
-      d <- read.table(fname, header = TRUE)
-      # Keep only common columns to allow rbind across different file types
-      d <- d[, intersect(names(d), common_cols), drop = FALSE]
-      
-      d$time      <- as.integer(d$time)
-      d$strategy  <- strat_labels[[strat]]
-      d$t_pct     <- t_pct
-      d$run       <- run
-      all_data    <- rbind(all_data, d)
+  for (run in 1:nruns) {
+    if (strategy == "array") {
+      fname <- file.path(results_dir,
+                          sprintf("%s-%d-%d-%d-%d-%d-run%d",
+                                  strategy, nodes, view, faulty_count, t_count, p_merge, run))
+    } else {
+      fname <- file.path(results_dir,
+                          sprintf("%s-%d-%d-%d-%d-%d-%.1g-run%d",
+                                  strategy, nodes, view, faulty_count, t_count, p_merge, budget, run))
     }
+    if (!file.exists(fname)) {
+      cat("Warning: file not found:", fname, "\n")
+      next
+    }
+    d <- read.table(fname, header = TRUE)
+    # Keep only common columns to allow rbind across different file types
+    d <- d[, intersect(names(d), common_cols), drop = FALSE]
+    
+    d$time      <- as.integer(d$time)
+    d$strategy  <- strat_labels[[strategy]]
+    d$t_pct     <- t_pct
+    d$run       <- run
+    all_data    <- rbind(all_data, d)
   }
 }
+
 
 # Compute proportion of Byzantine
 all_data$propByz <- all_data$avgByzSamp / view
@@ -116,13 +115,17 @@ optimal <- faulty_pct / 100
 
 max_time <- max(avg_data$time)
 if (max_time > 200) {
-  x_breaks <- seq(0, max_time, by = 250)
+  x_breaks <- seq(0, max_time, by = 200)
 } else if (max_time > 50) {
   x_breaks <- seq(0, max_time, by = 50)
 } else {
   x_breaks <- sort(unique(avg_data$time))
 }
-avg_data$label <- ifelse(avg_data$t_pct == 0, "BMDecay", paste0("BMDecay(t=", avg_data$t_pct, "%)"))
+if (strategy == "bm") {
+  avg_data$label <- ifelse(avg_data$t_pct == 0, "BM noMerge", paste0("BM t=", avg_data$t_pct, "%"))
+} else if (strategy == "decay") {
+  avg_data$label <- ifelse(avg_data$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_data$t_pct, "%"))
+}
 avg_data$label_f <- factor(avg_data$label, levels = unique(avg_data$label))
 
 # Build color mapping: reuse custom_colors keyed by t_pct
@@ -147,7 +150,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   mytheme +
   theme(
-    legend.position = c(0.55, 0.4),
+    legend.position = c(0.75, 0.55),
     legend.title = element_blank(),
     legend.box = "horizontal"
   ) +
@@ -155,7 +158,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
 
 # --- Save PDF ---
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/merge_byz_f%d_b%.1g_p%d_strat%s.pdf", faulty_pct, budget, p_merge, strategies[1])
+outfile <- sprintf("results/merge_byz_f%d_b%.1g_p%d_strat%s.pdf", faulty_pct, budget, p_merge, strategy)
 pdf(outfile, width = width, height = height)
 print(p)
 dev.off()

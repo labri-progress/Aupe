@@ -1,43 +1,14 @@
-./run_experimentsK.sh bm 1 30 0
-./run_experimentsK.sh decay 1 30 0
-./run_experimentsK.sh bm 1 20 0
-./run_experimentsK.sh decay 1 20 0
-./run_experimentsK.sh bm 1 10 0
-./run_experimentsK.sh decay 1 10 0
-./run_experimentsK.sh array 1 30 0
-./run_experimentsK.sh array 1 20 0
-./run_experimentsK.sh array 1 10 0
 
-exit 0
-
-./run_NOmerge_expeK.sh decay 5 10
-./run_NOmerge_expeK.sh decay 5 30
-./run_NOmerge_expeK.sh decay 5 20
-./run_NOmerge_expeK.sh decay 20 10
-./run_NOmerge_expeK.sh decay 20 30
-./run_NOmerge_expeK.sh decay 20 20
-
-./run_NOmerge_expeK.sh decay 10 10
-./run_NOmerge_expeK.sh decay 10 30
-./run_NOmerge_expeK.sh decay 10 20
-./run_NOmerge_expeK.sh decay 10 22
-./run_NOmerge_expeK.sh decay 10 24
-./run_NOmerge_expeK.sh decay 10 26
-./run_NOmerge_expeK.sh decay 10 28
-
-***
-./run_merge_experimentsK.sh bm 1 30
-./run_merge_experimentsK.sh decay 1 30
-./run_merge_experimentsK.sh bm 1 20
-./run_merge_experimentsK.sh decay 1 20
-./run_merge_experimentsK.sh bm 1 10
-./run_merge_experimentsK.sh decay 1 10
-
-exit 0
+# evolution de la résilience
 Rscript plot_byz.r 1
+#evolution des metriques internes des sketch de snoeuds
+Rscript plot_metrics.r 1
 
-Rscript plot_resilience_decay.r 1 10   # budget=1, p_merge=10
-Rscript plot_trusted.r 30 1 10   # budget=1, p_merge=10
-Rscript plot_metrics_evolution.r 1 30           # t=0%, p=10 (defaults)
-Rscript plot_metrics_evolution.r 1 30 10 10     # t=10%, p=10
-
+# resilience en fonction de f
+Rscript plot_resilience_decay.r 1 bm 200 # budget=1 strategy=bm round p_merge=10
+# boxplot des metriques honest vs trusted - evolution par rounds
+Rscript plot_metrics_evolution.r 1 26 10 bm 200 # f=26% t=10% strategy=bm round p=10 
+# evolution de la resilience par rounds
+Rscript plot_trusted.r 26 1 bm   # f=26%, budget=1, strategy=bm
+# boxplot des metriques honest pour # prop de trusted node - evolution par rounds
+Rscript plot_metrics_evol_bytrust.r 1 26 bm 200 # budget=1 f=26% strategy=bm, round p_merge=10

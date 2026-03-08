@@ -21,16 +21,18 @@ library(ggplot2)
 library(dplyr)
 # Rscript plot_resilience_decay.r 1 10
 # ── Parameters ────────────────────────────────────────────────────────────────
-budget       <- as.integer(args[1]) #as.integer(args[1])   # e.g. 1
-p_merge      <- as.integer(args[2])   # e.g. 10
+budget       <- as.integer(args[1]) #as.integer(args[1])   # e.g. 1   # e.g. 10
+strategy     <- args[2] # "decay" or "bm"
+round_to_stop <- if (length(args) >= 3) as.integer(args[3]) else 200
+p_merge      <- if (length(args) >= 4) as.integer(args[4]) else 10
 
 nodes        <- 1000
 view         <- 20 # 216
 nruns        <- 1
-strategy     <- "decay"
-results_dir  <- "results_merge"
 
-faulty_pcts    <- c(10, 20, 26, 30)#seq(10, 40, by = 2) #c(10, 20, 30)
+results_dir  <- "results_merge"
+# faulty_pcts    <- c(10, 20, 26, 30)
+faulty_pcts    <- seq(10, 40, by = 2) #c(10, 20, 30)
 trusted_pcts   <- c(0, 5, 10, 20) #, 30)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 
@@ -41,7 +43,7 @@ ss_frac <- 0.2
 line_size  <- 0.7
 point_size <- 2.5
 width      <- 7
-height     <- 3.5
+height     <- 4
 
 custom_colors <- c("0"  = "#000000",
                    "5"  = "#E69F00",
@@ -90,7 +92,12 @@ for (f_pct in faulty_pcts) {
       }
       d <- read.table(fname, header = TRUE)
       d$time <- as.integer(d$time)
-
+      # cut after round_to_stop
+      d <- d[d$time <= round_to_stop, ]
+      if (nrow(d) == 0) {
+        cat("Warning: no data after filtering by time in file:", fname, "\n")
+        next
+      }
       # Steady-state: average over last ss_frac of timesteps
       n_ss   <- max(1, floor(nrow(d) * ss_frac))
       d_ss   <- tail(d, n_ss)
@@ -117,30 +124,41 @@ avg_ss <- summary_data %>%
 avg_ss$byz_prop <- avg_ss$f_pct / 100
 avg_ss$t_pct_f  <- factor(avg_ss$t_pct)
 
+if (strategy == "bm") {
+  avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BM noMerge", paste0("BM t=", avg_ss$t_pct, "%"))
+} else if (strategy == "decay") {
+  avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_ss$t_pct, "%"))
+}
+avg_ss$label_f <- factor(avg_ss$label, levels = unique(avg_ss$label))
+
+label_color_map <- avg_ss %>%
+  distinct(label_f, t_pct) %>%
+  mutate(color = custom_colors[as.character(t_pct)])
+label_colors <- setNames(label_color_map$color, label_color_map$label_f)
+
 # ── Plot ──────────────────────────────────────────────────────────────────────
 faulty_pcts2    <- seq(10, 40, by = 10) #c(10, 20, 30)
 p <- ggplot(avg_ss, aes(x = byz_prop, y = res,
-                        color = t_pct_f, group = t_pct_f)) +
+                        color = label_f, group = label_f)) +
   # Reference line: y = x (no debiasing)
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
   geom_line(linewidth = line_size) +
   geom_point(size = point_size) +
-  scale_color_manual(values = custom_colors,
-                     labels = ifelse(names(custom_colors) == "0",
-                                     "t=0%", paste0("t=", names(custom_colors), "%"))) +
+  scale_color_manual(values = label_colors) +
   scale_x_continuous(breaks = faulty_pcts2 / 100) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2), limits = c(0, 1)) +
   labs(
     x     = expression(bold("Prop. of Byz. in system")),
     y     = expression(bold("Prop. of Byz. samples")),
-    color = "Trusted %"
+    #color = "Trusted %"
   ) +
   mytheme +
-  theme(legend.position = c(0.25, 0.72))
+  theme(legend.position = c(0.25, 0.72),
+  legend.title = element_blank())
 
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/resilience_curve_n%d_v%d_p%d_b%d.pdf", nodes, view, p_merge, budget)
+outfile <- sprintf("results/resilience_curve_n%d_v%d_p%d_b%d_strat%s.pdf", nodes, view, p_merge, budget, strategy)
 pdf(outfile, width = width, height = height)
 print(p)
 dev.off()
