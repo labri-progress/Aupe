@@ -16,7 +16,7 @@ echo "Running merge experiments with strategy=${1:-decay}, budget=${2:-0.5}KB, r
 FAULTY_PCT="${3:-26}"
 FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
-STRATEGIES=("bm" "decay")
+STRATEGIES=("bm") #"decay")
 
 # Budget memory in KB (only used by # ("${1:-decay}")bm via -y)
 BUDGETS=("${2:-0.5}") #(5 10 20)
@@ -74,10 +74,10 @@ for run in $(seq $NRUNS $NRUNS); do
               continue
             fi
             echo "Running: $strat t=${t_pct}% p=${p} budget=${budget}KB run=${run}"
-            buckets=$(echo "$budget * 1024/8/2" | bc)
+
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -c $buckets -x $t_count -p $p > "$OUTDIR/$outfile" &
+              -n $NODES -y $budget -y $budget -x $t_count -p $p > "$OUTDIR/$outfile" &
             mark_done "$outfile"
           done
         fi

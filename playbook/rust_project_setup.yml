@@ -20,18 +20,18 @@
       force: 'yes'
     tags:
       - rust
-  - name: III- Install a snap package
+  - name: III- Update apt repositories
     ansible.builtin.command:
       cmd: sudo apt update
-  - name: Install a snap package
+  - name: IV- Install a snap package
     ansible.builtin.command:
       cmd: snap install rustup --classic
-  - name: Install a snap package
+  - name: V- Set default Rust toolchain
     ansible.builtin.command:
       cmd: rustup default stable
   - name: Install build-essential
     action: apt pkg=build-essential
-  - name: IV-Clone the GitHub repository
+  - name: VI-Clone the GitHub repository
     git:
       repo: 'https://github.com/labri-progress/Aupe.git'
       dest: ~/Aupe

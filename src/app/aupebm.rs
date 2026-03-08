@@ -70,7 +70,7 @@ pub struct Init {
     pub n_bucket: u64,
 
     #[structopt(short = "y", long = "budget", default_value = "6")]
-    pub space: u64,
+    pub space: f64,
 }
 
 pub struct AupeBM {

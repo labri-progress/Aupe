@@ -104,7 +104,7 @@ impl BM {
     pub fn getparams(&mut self, init: Init) {
         self.params = init;
         if self.params.n_bucket == 0 {
-            self.params.n_bucket = self.params.space as u64 * 1024 / 8 / 2;
+            self.params.n_bucket = (self.params.space * 1024.0 / 8.0 / 2.0) as u64;
         }
     }
 

@@ -61,14 +61,14 @@ fn main() {
             sim::<app::aupecf::AupeCF>(opt.n_steps, opt.nodes, &pp);  
         } */ 
         WhichApp::AupeDecay(pp) => {
-            let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{}.csv",
+            let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
 
         WhichApp::AupeBM(pp) => {
-            let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{}.csv",
+            let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
