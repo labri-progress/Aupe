@@ -69,7 +69,7 @@ pub struct Init {
     #[structopt(short = "c", long = "n_bucket", default_value = "0")]
     pub n_bucket: u64,
 
-    #[structopt(short = "y", long = "budget", default_value = "1")]
+    #[structopt(short = "y", long = "budget", default_value = "6")]
     pub space: u64,
 }
 

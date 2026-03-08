@@ -15,7 +15,7 @@ library(scales)
 
 # --- Parameters ---
 faulty_pct   <- as.integer(args[1])  # e.g. 30
-budget       <- as.integer(args[2])  # e.g. 10 or 20
+budget       <- as.numeric(args[2])  # e.g. 10 or 20
 p_merge      <- as.integer(args[3])  # e.g. 1 or 10
 nodes        <- 1000 # 10000
 view         <- 20 # 160
