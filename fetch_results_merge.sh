@@ -47,39 +47,55 @@ fi
 echo -e "Found ${GREEN}${#NODES[@]}${NC} nodes to process"
 echo ""
 
-# Counter for statistics
-total_files=0
-success_files=0
-failed_files=0
-
-# Fetch files from each node
-for node in "${NODES[@]}"; do
-    echo -e "${GREEN}Processing node: ${node}${NC}"
-
-    # Create node-specific directory
-    node_dir="${FETCH_DIR}/${node}"
+# Fetch one node in background; writes status to a tmp file
+fetch_node() {
+    local node="$1"
+    local node_dir="$2"
     mkdir -p "$node_dir"
-
-    # Fetch all files from results_merge directory
-    echo -n "  Fetching results_merge/... "
-
-    # Use scp to fetch the entire directory contents
     if scp -q -r "root@${node}:${REMOTE_DIR}/"* "$node_dir/" 2>/dev/null; then
-        # Count fetched files
         count=$(ls -1 "$node_dir" 2>/dev/null | wc -l)
         size=$(du -sh "$node_dir" | cut -f1)
-        echo -e "${GREEN}✓${NC} (${count} files, ${size})"
+        echo -e "${GREEN}✓${NC} ${node}: ${count} files, ${size}"
+        echo "ok $count"
+    else
+        echo -e "${RED}✗${NC} ${node}: directory not found or connection failed"
+        echo "fail 0"
+    fi
+}
+
+# Launch all fetches in parallel
+declare -A pids
+declare -A tmp_files
+for node in "${NODES[@]}"; do
+    node_dir="${FETCH_DIR}/${node}"
+    tmp=$(mktemp)
+    tmp_files[$node]="$tmp"
+    fetch_node "$node" "$node_dir" > "$tmp" &
+    pids[$node]=$!
+done
+
+# Wait for all and collect results
+success_files=0
+failed_files=0
+total_files=0
+for node in "${NODES[@]}"; do
+    wait "${pids[$node]}"
+    tmp="${tmp_files[$node]}"
+    # print the human-readable lines (all but last)
+    head -n -1 "$tmp"
+    # read the status line
+    read -r status count < <(tail -n 1 "$tmp")
+    rm -f "$tmp"
+    if [ "$status" = "ok" ]; then
         success_files=$((success_files + count))
         total_files=$((total_files + count))
     else
-        echo -e "${RED}✗ (directory not found or connection failed)${NC}"
         failed_files=$((failed_files + 1))
         total_files=$((total_files + 1))
     fi
-
-    echo ""
 done
 
+echo ""
 # Summary
 echo -e "${GREEN}=== Summary ===${NC}"
 echo -e "Total files fetched:   ${GREEN}${success_files}${NC}"
