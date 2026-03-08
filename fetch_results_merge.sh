@@ -48,11 +48,14 @@ echo -e "Found ${GREEN}${#NODES[@]}${NC} nodes to process"
 echo ""
 
 # Fetch one node in background; writes status to a tmp file
+# Strategy: tar+gzip on the remote, pipe over SSH, extract locally
 fetch_node() {
     local node="$1"
     local node_dir="$2"
     mkdir -p "$node_dir"
-    if scp -q -r "root@${node}:${REMOTE_DIR}/"* "$node_dir/" 2>/dev/null; then
+    if ssh -q "root@${node}" \
+           "tar -czf - -C ${REMOTE_DIR} . 2>/dev/null" \
+       | tar -xzf - -C "$node_dir" 2>/dev/null; then
         count=$(ls -1 "$node_dir" 2>/dev/null | wc -l)
         size=$(du -sh "$node_dir" | cut -f1)
         echo -e "${GREEN}✓${NC} ${node}: ${count} files, ${size}"
