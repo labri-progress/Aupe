@@ -294,6 +294,7 @@ public:
     // Adaptive strategy methods
     std::vector<ItemInfo> extract_and_divide_items();
     void reinsert_items(const std::vector<ItemInfo>& items);
+	void reinsert_items_direct(const std::vector<ItemInfo>& items);
     void decay();
 	uint32_t get_division_count() const { return division_count; };
 	uint32_t get_blocked_count() const { return blocked_count; };

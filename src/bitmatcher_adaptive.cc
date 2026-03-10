@@ -998,7 +998,8 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)
 
 	// Reinsert all items into a fresh sketch (overwrites current)
-	reinsert_items(items);
+	//reinsert_items(items);
+	reinsert_items_direct(items);
 }
 
 // Compute overflow count
