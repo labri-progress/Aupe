@@ -83,7 +83,7 @@ for (strat in strategies) {
 }
 
 # Compute proportion of Byzantine
-all_data$propByz <- all_data$avgByzSamp / view
+all_data$propByz <- all_data$avgByzN / view
 
 # Average over runs
 avg_data <- all_data %>%

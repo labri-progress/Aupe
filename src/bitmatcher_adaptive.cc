@@ -412,7 +412,6 @@ void BitMatcherAdaptive::Insert(const std::string& key, int16_t key_len){ //rust
 		set_bucket_count(empty_bucket, empty_jj, 1, empty_type_id);
 		return;
 	} else {
-		static int error_num = 0;
 		error_num++;
 		int i = fp & 0x1;
 		ec_bucket *b = bucket[i].data() + hash[i];

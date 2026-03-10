@@ -6,6 +6,18 @@ TODO
 ./run_merge_experimentsK.sh 3 [10,20,26,30]
 ./run_merge_experimentsK.sh 3 [10,20,30]
 
+./run_experimentsK.sh decay 0.5 30 5
+./run_experimentsK.sh decay 0.5 30 10
+./run_experimentsK.sh decay 0.5 30 20
+
+./run_experimentsK.sh decay 0.5 20 5
+./run_experimentsK.sh decay 0.5 20 10
+./run_experimentsK.sh decay 0.5 20 20
+
+./run_experimentsK.sh decay 0.5 10 5
+./run_experimentsK.sh decay 0.5 10 10
+./run_experimentsK.sh decay 0.5 10 20
+
 ./run_experimentsK.sh bm 0.5 [30,20] 0
 ./run_experimentsK.sh decay 0.5 [30,20] 0
 ./run_experimentsK.sh array 0.5 [30] 0

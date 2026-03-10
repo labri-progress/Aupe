@@ -6,7 +6,7 @@
 # as a function of the Byzantine proportion in the system.
 #
 # X axis : Byzantine proportion in the system (faulty_pct / 100)
-# Y axis : steady-state avgByzSamp / view
+# Y axis : steady-state avgByzN / view
 # Lines  : different trusted node percentages (t_pct = 0, 5, 10, 20, 30)
 # Ref    : y = x  (no debiasing / optimal case)
 #
@@ -106,7 +106,7 @@ for (f_pct in faulty_pcts) {
         f_pct  = f_pct,
         t_pct  = t_pct,
         run    = run,
-        res = mean(d_ss$avgByzSamp / view, na.rm = TRUE)
+        res = mean(d_ss$avgByzN / view, na.rm = TRUE)
       ))
     }
   }

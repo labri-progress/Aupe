@@ -100,7 +100,7 @@ for (ti in seq_along(trusted_pcts)) {
 
 
 # Compute proportion of Byzantine
-all_data$propByz <- all_data$avgByzSamp / view
+all_data$propByz <- all_data$avgByzN / view
 
 # Average over runs
 avg_data <- all_data %>%
@@ -150,7 +150,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   mytheme +
   theme(
-    legend.position = c(0.75, 0.55),
+    legend.position = c(0.35, 0.85),
     legend.title = element_blank(),
     legend.box = "horizontal"
   ) +

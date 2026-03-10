@@ -264,7 +264,7 @@ private:
     //BOBHash * bobhash[2];
 	std::unique_ptr<BOBHash> bobhash[2];
 	std::vector<ec_bucket> bucket[2];
-
+	int error_num = 0;
     // Tracking
     uint32_t division_count = 0;
     uint32_t blocked_count = 0;

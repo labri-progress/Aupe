@@ -1,8 +1,8 @@
 
 # evolution de la résilience
-Rscript plot_byz.r 1
+Rscript plot_byz.r 0.5
 #evolution des metriques internes des sketch de snoeuds
-Rscript plot_metrics.r 1
+Rscript plot_metrics.r 0.5
 
 # resilience en fonction de f
 Rscript plot_resilience_decay.r 1 bm 200 # budget=1 strategy=bm round p_merge=10
