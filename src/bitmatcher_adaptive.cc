@@ -542,7 +542,7 @@ static int find_compatible_type_a(const std::vector<uint64_t>& existing_counts, 
 	all_counts.push_back(new_count);
 	std::sort(all_counts.begin(), all_counts.end(), [](uint64_t a, uint64_t b){ return a > b; });
 
-	for (int t = 0; t < BUCKET_TYPE_NUM; t++) {
+	for (int t = 0; t < 3; t++) { //BUCKET_TYPE_NUM
 		int num_slots = get_item_num_in_bucket_type(t);
 		if (num_slots < (int)all_counts.size()) continue;
 
