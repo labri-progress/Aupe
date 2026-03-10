@@ -537,6 +537,114 @@ void BitMatcherAdaptive::InsertByFp(uint8_t fingerprint_value, uint first_hash_t
 	}
 }
 
+static int find_compatible_type_a(const std::vector<uint64_t>& existing_counts, uint64_t new_count) {
+	std::vector<uint64_t> all_counts = existing_counts;
+	all_counts.push_back(new_count);
+	std::sort(all_counts.begin(), all_counts.end(), [](uint64_t a, uint64_t b){ return a > b; });
+
+	for (int t = 0; t < BUCKET_TYPE_NUM; t++) {
+		int num_slots = get_item_num_in_bucket_type(t);
+		if (num_slots < (int)all_counts.size()) continue;
+
+		std::vector<uint64_t> caps;
+		caps.reserve(num_slots);
+		for (int s = 0; s < num_slots; s++)
+			caps.push_back((1ULL << COUNT_LEN[t][s]) - 1);
+		std::sort(caps.begin(), caps.end(), [](uint64_t a, uint64_t b){ return a > b; });
+
+		bool fits = true;
+		for (int i = 0; i < (int)all_counts.size(); i++) {
+			if (all_counts[i] > caps[i]) { fits = false; break; }
+		}
+		if (fits) return t;
+	}
+	return -1;
+}
+
+
+void BitMatcherAdaptive::reinsert_items_direct(const std::vector<ItemInfo>& items) {
+	for (int i = 0; i < 2; i++)
+		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
+
+	for (const auto& item : items) {
+		uint32_t hash1 = item.bucket_id;
+		uint32_t hash2 = (hash1 ^ item.fingerprint) % bucket_num;
+		uint32_t hashes[2] = {hash1, hash2};
+		bool inserted = false;
+
+		for (int t = 0; t < 2 && !inserted; t++) {
+			ec_bucket* b = &bucket[t][hashes[t]];
+			uint32_t type_id = get_bucket_type_id(b);
+			uint8_t num_slots = get_item_num_in_bucket_type(type_id);
+
+			// --- 1. Simple insertion ---
+			for (int slot = (int)num_slots - 1; slot >= 0 && !inserted; slot--) {
+				if (get_bucket_fingerprint(b, slot) == 0) {
+					uint64_t max_cap = (1ULL << COUNT_LEN[type_id][slot]) - 1;
+					if (item.count <= max_cap) {
+						set_bucket_fingerprint(b, slot, item.fingerprint);
+						set_bucket_count(b, slot, item.count, type_id);
+						inserted = true;
+					}
+				}
+			}
+			if (inserted) break;
+
+			// --- 2. Direct type upgrade ---
+			bool has_empty = false;
+			for (int slot = 0; slot < num_slots; slot++) {
+				if (get_bucket_fingerprint(b, slot) == 0) { has_empty = true; break; }
+			}
+
+			if (has_empty) {
+				std::vector<std::pair<uint8_t, uint64_t>> existing;
+				std::vector<uint64_t> existing_counts;
+				for (int slot = 0; slot < num_slots; slot++) {
+					uint8_t fp = get_bucket_fingerprint(b, slot);
+					if (fp != 0) {
+						uint64_t cnt = get_bucket_count(b, slot, type_id);
+						existing.push_back({fp, cnt});
+						existing_counts.push_back(cnt);
+					}
+				}
+
+				int new_type = find_compatible_type_a(existing_counts, item.count);
+				if (new_type >= 0) {
+					std::vector<std::pair<uint8_t, uint64_t>> all_items = existing;
+					all_items.push_back({item.fingerprint, item.count});
+					std::sort(all_items.begin(), all_items.end(),
+						[](const std::pair<uint8_t,uint64_t>& a, const std::pair<uint8_t,uint64_t>& b_) {
+							return a.second > b_.second;
+						});
+
+					int new_num_slots = get_item_num_in_bucket_type(new_type);
+					std::vector<int> slot_order;
+					slot_order.reserve(new_num_slots);
+					for (int s = 0; s < new_num_slots; s++) slot_order.push_back(s);
+					std::sort(slot_order.begin(), slot_order.end(),
+						[&](int a, int b_) {
+							return COUNT_LEN[new_type][a] > COUNT_LEN[new_type][b_];
+						});
+
+					b->value = 0;
+					set_bucket_type_id(b, (uint64_t)new_type);
+					for (int i = 0; i < (int)all_items.size(); i++) {
+						int slot = slot_order[i];
+						set_bucket_fingerprint(b, slot, all_items[i].first);
+						set_bucket_count(b, slot, all_items[i].second, (uint32_t)new_type);
+					}
+					inserted = true;
+				}
+			}
+		}
+
+		// --- 3. Last resort ---
+		if (!inserted) {
+			InsertByFp(item.fingerprint, hash1, item.count);
+		}
+	}
+}
+
 double BitMatcherAdaptive::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const{ //const char *key, const int16_t key_len) {
 	
 	uint8_t fp = fingerprint_value;
@@ -811,7 +919,8 @@ void BitMatcherAdaptive::decay() {
 	std::vector<ItemInfo> items = extract_and_divide_items();
 
 	// Re-insert items into sketch (inlined for efficiency)
-	reinsert_items(items);
+	//reinsert_items(items);
+	reinsert_items_direct(items);
 
 	// Increment division counter
 	division_count++;
