@@ -77,7 +77,7 @@ for run in $(seq $NRUNS $NRUNS); do
 
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES -y $budget -x $t_count -p $p > "$OUTDIR/$outfile" &
+              -n $NODES -y $budget -x $t_count -p $p > "$OUTDIR/$outfile"
             mark_done "$outfile"
           done
         fi
