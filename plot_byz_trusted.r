@@ -138,8 +138,8 @@ all_data <- rbind(base_data, trusted_data)
 all_data$propByz <- all_data$avgByzN / view
 
 # filter time between 100 and round_to_stop
-round_to_stop <- 12000
-all_data <- all_data[all_data$time >= 9999 & all_data$time <= round_to_stop, ]
+#round_to_stop <- 12000
+#all_data <- all_data[all_data$time >= 9999 & all_data$time <= round_to_stop, ]
 
 # Average over runs
 avg_data <- all_data %>%
