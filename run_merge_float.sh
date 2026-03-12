@@ -4,7 +4,7 @@
 # run_merge_experimentsK.sh decay 10 0.5 1
 
 # Experiment parameters
-ROUNDS=1 # 000 # 200
+ROUNDS=1000 # 200
 NODES=1000
 VIEW=20 #16
 UVIEW=20 #16
@@ -74,7 +74,7 @@ for run in $(seq $NRUNS $NRUNS); do
               continue
             fi
             echo "Running: $strat t=${t_pct}% p=${p} budget=${budget}KB run=${run}"
-            buckets=$(echo "$budget * 1024 / 8" | bc) # Convert KB to number of 8-byte buckets
+            buckets=$(echo "$budget * 1024 / 8 / 2" | bc) # Convert KB to number of 8-byte buckets
             cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $FORCE -t $FAULTY_COUNT -v $VIEW -u $UVIEW -m $SM \
               -n $NODES -c $buckets -x $t_count -p $p > "$OUTDIR/$outfile"
