@@ -3,7 +3,7 @@ TODO
 
 ./run_merge_attack.sh decay 1 10
 
-run_merge_float.sh 0.5 10
+./run_merge_float.sh 0.5 10
 
 ./run_merge_experimentsK.sh 3 [10,20,26,30]
 ./run_merge_experimentsK.sh 3 [10,20,30]

@@ -46,10 +46,10 @@ custom_colors <- c("0"  = "#000000",
                    "30" = "#D55E00")
 
 mytheme <- theme(
-  panel.grid.major      = element_blank(),
-  panel.grid.minor      = element_blank(),
-  panel.background      = element_rect(fill = "white"),
-  plot.background       = element_rect(fill = "white"),
+  panel.grid.major = element_line(color = "gray90", linewidth=0.5),
+  panel.grid.minor = element_line(color = "gray95", linewidth=0.25),
+  panel.background = element_rect(fill = "white"),
+  plot.background = element_rect(fill = "white"),
   panel.border          = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y      = unit(0.005, "cm"),
   text                  = element_text(size = 12, color = "black"),
@@ -201,6 +201,7 @@ p_occ <- ggplot(avg_data, aes(x = time, y = occ, color = label_f, group = label_
   geom_line(linewidth = 0.8) +
   scale_color_manual(values = label_colors) +
   scale_x_continuous(breaks = x_breaks) +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   labs(x = expression(bold("Rounds")),
        y = expression(bold("Occupancy"))) +
   mytheme +
@@ -210,6 +211,6 @@ p_occ <- ggplot(avg_data, aes(x = time, y = occ, color = label_f, group = label_
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/metrics_evo_trust_strat%s_f%d_b%s.pdf", strategy, faulty_pct, budget)
 pdf(outfile, width = width * 5/4, height = height)
-grid.arrange(p_cr, p_dkl, p_f1, p_bias, p_occ, nrow = 1, ncol = 5)
+grid.arrange(p_cr, p_f1, p_bias, p_occ, nrow = 1, ncol = 4)#p_f1,p_dkl
 dev.off()
 cat("Saved to:", outfile, "\n")

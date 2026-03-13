@@ -43,10 +43,10 @@ custom_linetypes <- c("BM" = "solid", "BMDecay" = "solid", "Array" = "dashed")
 custom_shapes <- c("BM" = 16, "BMDecay" = 16,"Array" = 17)
 
 mytheme <- theme(
-  panel.grid.major   = element_blank(),
-  panel.grid.minor   = element_blank(),
-  panel.background   = element_rect(fill = "white"),
-  plot.background    = element_rect(fill = "white"),
+  panel.grid.major = element_line(color = "gray90", linewidth=0.5),
+  panel.grid.minor = element_line(color = "gray95", linewidth=0.25),
+  panel.background = element_rect(fill = "white"),
+  plot.background = element_rect(fill = "white"),
   panel.border       = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y   = unit(0.005, "cm"),
   text               = element_text(size = 12, color = "black"),
@@ -150,7 +150,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   mytheme +
   theme(
-    legend.position = c(0.35, 0.85),
+    legend.position = c(0.65, 0.85),
     legend.title = element_blank(),
     legend.box = "horizontal"
   ) +

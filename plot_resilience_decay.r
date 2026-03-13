@@ -21,7 +21,7 @@ library(ggplot2)
 library(dplyr)
 # Rscript plot_resilience_decay.r 1 10
 # ── Parameters ────────────────────────────────────────────────────────────────
-budget       <- as.integer(args[1]) #as.integer(args[1])   # e.g. 1   # e.g. 10
+budget       <- as.numeric(args[1]) #as.integer(args[1])   # e.g. 1   # e.g. 10
 strategy     <- args[2] # "decay" or "bm"
 round_to_stop <- if (length(args) >= 3) as.integer(args[3]) else 200
 p_merge      <- if (length(args) >= 4) as.integer(args[4]) else 10
@@ -52,10 +52,10 @@ custom_colors <- c("0"  = "#000000",
                    "30" = "#D55E00")
 
 mytheme <- theme(
-  panel.grid.major      = element_blank(),
-  panel.grid.minor      = element_blank(),
-  panel.background      = element_rect(fill = "white"),
-  plot.background       = element_rect(fill = "white"),
+  panel.grid.major = element_line(color = "gray90", linewidth=0.5),
+  panel.grid.minor = element_line(color = "gray95", linewidth=0.25),
+  panel.background = element_rect(fill = "white"),
+  plot.background = element_rect(fill = "white"),
   panel.border          = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y      = unit(0.005, "cm"),
   text                  = element_text(size = 12, color = "black"),
@@ -84,7 +84,7 @@ for (f_pct in faulty_pcts) {
 
     for (run in 1:nruns) {
       fname <- file.path(results_dir,
-                         sprintf("%s-%d-%d-%d-%d-%d-%d-run%d",
+                         sprintf("%s-%d-%d-%d-%d-%d-%g-run%d",
                                  strategy, nodes, view, f_count,
                                  t_count, p_merge, budget, run))
       if (!file.exists(fname)) {
@@ -158,7 +158,7 @@ p <- ggplot(avg_ss, aes(x = byz_prop, y = res,
 
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/resilience_curve_n%d_v%d_p%d_b%d_strat%s.pdf", nodes, view, p_merge, budget, strategy)
+outfile <- sprintf("results/resilience_curve_n%d_v%d_p%d_b%g_strat%s.pdf", nodes, view, p_merge, budget, strategy)
 pdf(outfile, width = width, height = height)
 print(p)
 dev.off()
