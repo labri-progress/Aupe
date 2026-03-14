@@ -115,6 +115,7 @@ pub struct Metrics {
     n_byz_neighbors_honest: usize,
     dkl_honest: f64,
     f1_honest: f64,
+    tp_honest: usize,
     bias_factor_err_honest: f64,
     stat_honest: u32,
     occ_honest: f64,
@@ -124,6 +125,7 @@ pub struct Metrics {
     n_byz_neighbors_trusted: usize,
     dkl_trusted: f64,
     f1_trusted: f64,
+    tp_trusted: usize,
     bias_factor_err_trusted: f64,
     stat_trusted: u32,
     occ_trusted: f64,
@@ -142,6 +144,7 @@ impl NetMetrics for Metrics {
             n_byz_neighbors_honest: 0,
             dkl_honest: 0.0,
             f1_honest: 0.0,
+            tp_honest: 0,
             bias_factor_err_honest: 0.0,
             stat_honest: 0,
             occ_honest: 0.0,
@@ -149,6 +152,7 @@ impl NetMetrics for Metrics {
             n_byz_neighbors_trusted: 0,
             dkl_trusted: 0.0,
             f1_trusted: 0.0,
+            tp_trusted: 0,
             bias_factor_err_trusted: 0.0,
             stat_trusted: 0,
             occ_trusted: 0.0,
@@ -168,6 +172,7 @@ impl NetMetrics for Metrics {
         self.n_byz_neighbors_honest += other.n_byz_neighbors_honest;
         self.dkl_honest += other.dkl_honest;
         self.f1_honest += other.f1_honest;
+        self.tp_honest += other.tp_honest;
         self.bias_factor_err_honest += other.bias_factor_err_honest;
         self.stat_honest += other.stat_honest;
         self.occ_honest += other.occ_honest;
@@ -177,6 +182,7 @@ impl NetMetrics for Metrics {
         self.n_byz_neighbors_trusted += other.n_byz_neighbors_trusted;
         self.dkl_trusted += other.dkl_trusted;
         self.f1_trusted += other.f1_trusted;
+        self.tp_trusted += other.tp_trusted;
         self.bias_factor_err_trusted += other.bias_factor_err_trusted;
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
@@ -192,6 +198,7 @@ impl NetMetrics for Metrics {
             "h_avgByzN",
             "h_dkl",
             "h_f1",
+            "h_tp",
             "h_biasErr",
             "h_blocked",
             "h_occ",
@@ -199,6 +206,7 @@ impl NetMetrics for Metrics {
             "t_avgByzN",
             "t_dkl",
             "t_f1",
+            "t_tp",
             "t_biasErr",
             "t_blocked",
             "t_occ",
@@ -218,6 +226,7 @@ impl NetMetrics for Metrics {
             format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.dkl_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.f1_honest)),
+            format!("{}", gi(self.n_procs_honest, self.tp_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
             format!("{}", self.stat_honest),
             format!("{:.4}", g(self.n_procs_honest, self.occ_honest)),
@@ -225,6 +234,7 @@ impl NetMetrics for Metrics {
             format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.f1_trusted)),
+            format!("{}", gi(self.n_procs_trusted, self.tp_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
             format!("{}", self.stat_trusted),
             format!("{:.4}", g(self.n_procs_trusted, self.occ_trusted)),
@@ -275,10 +285,10 @@ fn compute_sketch_metrics(
     occurence: &[f64],
     n_byzantine: usize,
     n_nodes: usize,
-) -> (f64, f64, f64) {
+) -> (f64, f64, usize, f64) {
     let total_recv: f64 = occurence.iter().sum();
     if total_recv == 0.0 {
-        return (0.0, 0.0, 0.0);
+        return (0.0, 0.0, 0, 0.0);
     }
     let oracle: Vec<f64> = occurence.iter().map(|x| x / total_recv).collect();
 
@@ -316,7 +326,7 @@ fn compute_sketch_metrics(
         0.0
     };
 
-    (dkl, f1, bias_factor_err)
+    (dkl, f1, tp, bias_factor_err)
 }
 
 
@@ -616,7 +626,7 @@ impl App for AupeBM {
                 .filter(|(_, x)| x.unwrap() < self.params.n_byzantine)
                 .count();
 
-            let (dkl, f1, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
+            let (dkl, f1, tp, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
                 let occ_snapshot = occ.lock().unwrap().clone();
                 compute_sketch_metrics(
                     &mut self.sketch,
@@ -625,7 +635,7 @@ impl App for AupeBM {
                     self.params.nodes,
                 )
             } else {
-                (0.0, 0.0, 0.0)
+                (0.0, 0.0, 0, 0.0)
             };
 
             let occ = (0..self.params.nodes)
@@ -642,6 +652,7 @@ impl App for AupeBM {
                 n_byz_neighbors_honest: 0,
                 dkl_honest: 0.0,
                 f1_honest: 0.0,
+                tp_honest: 0,
                 bias_factor_err_honest: 0.0,
                 stat_honest: 0,
                 occ_honest: 0.0,
@@ -649,6 +660,7 @@ impl App for AupeBM {
                 n_byz_neighbors_trusted: 0,
                 dkl_trusted: 0.0,
                 f1_trusted: 0.0,
+                tp_trusted: 0,
                 bias_factor_err_trusted: 0.0,
                 stat_trusted: 0,
                 occ_trusted: 0.0,
@@ -659,6 +671,7 @@ impl App for AupeBM {
                 ret.n_byz_neighbors_trusted = nbn;
                 ret.dkl_trusted = dkl;
                 ret.f1_trusted = f1;
+                ret.tp_trusted = tp;
                 ret.bias_factor_err_trusted = bias_factor_err;
                 ret.stat_trusted = self.sketch.get_stats().0;
                 ret.occ_trusted = occ;
@@ -667,6 +680,7 @@ impl App for AupeBM {
                 ret.n_byz_neighbors_honest = nbn;
                 ret.dkl_honest = dkl;
                 ret.f1_honest = f1;
+                ret.tp_honest = tp;
                 ret.bias_factor_err_honest = bias_factor_err;
                 ret.stat_honest = self.sketch.get_stats().0;
                 ret.occ_honest = occ;

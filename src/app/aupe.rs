@@ -107,6 +107,7 @@ pub struct Metrics {
     n_byz_neighbors_honest: usize,
     dkl_honest: f64,
     f1_honest: f64,
+    tp_honest: usize,
     bias_factor_err_honest: f64,
 
     // ---- métriques par groupe : nœuds de confiance ----
@@ -114,6 +115,7 @@ pub struct Metrics {
     n_byz_neighbors_trusted: usize,
     dkl_trusted: f64,
     f1_trusted: f64,
+    tp_trusted: usize,
     bias_factor_err_trusted: f64,
 }
 
@@ -130,11 +132,13 @@ impl NetMetrics for Metrics {
             n_byz_neighbors_honest: 0,
             dkl_honest: 0.0,
             f1_honest: 0.0,
+            tp_honest: 0,
             bias_factor_err_honest: 0.0,
             n_procs_trusted: 0,
             n_byz_neighbors_trusted: 0,
             dkl_trusted: 0.0,
             f1_trusted: 0.0,
+            tp_trusted: 0,
             bias_factor_err_trusted: 0.0,
         }
     }
@@ -152,6 +156,7 @@ impl NetMetrics for Metrics {
         self.n_byz_neighbors_honest += other.n_byz_neighbors_honest;
         self.dkl_honest += other.dkl_honest;
         self.f1_honest += other.f1_honest;
+        self.tp_honest += other.tp_honest;
         self.bias_factor_err_honest += other.bias_factor_err_honest;
 
         // groupe trusted
@@ -159,6 +164,7 @@ impl NetMetrics for Metrics {
         self.n_byz_neighbors_trusted += other.n_byz_neighbors_trusted;
         self.dkl_trusted += other.dkl_trusted;
         self.f1_trusted += other.f1_trusted;
+        self.tp_trusted += other.tp_trusted;
         self.bias_factor_err_trusted += other.bias_factor_err_trusted;
     }
     fn headers() -> Vec<&'static str> {
@@ -172,11 +178,13 @@ impl NetMetrics for Metrics {
             "h_avgByzN",
             "h_dkl",
             "h_f1",
+            "h_tp",
             "h_biasErr",
             // groupe trusted
             "t_avgByzN",
             "t_dkl",
             "t_f1",
+            "t_tp",
             "t_biasErr",
         ]
     }
@@ -194,11 +202,13 @@ impl NetMetrics for Metrics {
             format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.dkl_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.f1_honest)),
+            format!("{}", gi(self.n_procs_honest, self.tp_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
             // groupe trusted
             format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.f1_trusted)),
+            format!("{}", gi(self.n_procs_trusted, self.tp_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
         ]
     }
@@ -248,7 +258,7 @@ fn compute_sketch_metrics(
     occurence: &[f64],
     n_byzantine: usize,
     n_nodes: usize,
-) -> (f64, f64, f64) {
+) -> (f64, f64, usize, f64) {
     let total_recv: f64 = occurence.iter().sum();
     /*let nnulls = occurence.iter().filter(
         |&x| *x > 0.0
@@ -259,7 +269,7 @@ fn compute_sketch_metrics(
     println!("items {}-{}", nnulls, nnulls2);*/
 
     if total_recv == 0.0 {
-        return (0.0, 0.0, 0.0);
+        return (0.0, 0.0, 0, 0.0);
     }
     let oracle: Vec<f64> = occurence.iter().map(|x| x / total_recv).collect();
 
@@ -296,7 +306,7 @@ fn compute_sketch_metrics(
     } else {
         0.0
     };
-    (dkl, f1, bias_factor_err)
+    (dkl, f1, tp, bias_factor_err)
 }
 
 
@@ -612,7 +622,7 @@ impl App for Aupe {
 
             // Kvs : estimées = omn_array directement via getdata()
             let estimates = self.sketch.getdata();
-            let (dkl, f1, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
+            let (dkl, f1, tp, bias_factor_err) = if let Some(occ) = GLOBAL_OCCURENCE.get() {
                 let occ_snapshot = occ.lock().unwrap().clone();
                 compute_sketch_metrics(
                     &estimates,
@@ -621,7 +631,7 @@ impl App for Aupe {
                     self.params.nodes,
                 )
             } else {
-                (0.0, 0.0, 0.0)
+                (0.0, 0.0, 0, 0.0)
             };
 
             let mut ret = Self::Metrics {
@@ -634,11 +644,13 @@ impl App for Aupe {
                 n_byz_neighbors_honest: 0,
                 dkl_honest: 0.0,
                 f1_honest: 0.0,
+                tp_honest: 0,
                 bias_factor_err_honest: 0.0,
                 n_procs_trusted: 0,
                 n_byz_neighbors_trusted: 0,
                 dkl_trusted: 0.0,
                 f1_trusted: 0.0,
+                tp_trusted: 0,
                 bias_factor_err_trusted: 0.0,
             };
 
@@ -647,12 +659,14 @@ impl App for Aupe {
                 ret.n_byz_neighbors_trusted = nbn;
                 ret.dkl_trusted = dkl;
                 ret.f1_trusted = f1;
+                ret.tp_trusted = tp;
                 ret.bias_factor_err_trusted = bias_factor_err;
             } else {
                 ret.n_procs_honest = 1;
                 ret.n_byz_neighbors_honest = nbn;
                 ret.dkl_honest = dkl;
                 ret.f1_honest = f1;
+                ret.tp_honest = tp;
                 ret.bias_factor_err_honest = bias_factor_err;
             }
 
