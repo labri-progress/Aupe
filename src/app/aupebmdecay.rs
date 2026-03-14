@@ -232,18 +232,18 @@ impl NetMetrics for Metrics {
             format!("{:.2}", gi(self.n_procs_honest, self.n_byz_neighbors_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.dkl_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.f1_honest)),
-            format!("{}", gi(self.n_procs_honest, self.tp_honest)),
+            format!("{:.2}", gi(self.n_procs_honest, self.tp_honest)),
             format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
             format!("{}", self.stat_honest),
-            format!("{:.4}", g(self.n_procs_honest, self.occ_honest)),
+            format!("{:.2}", g(self.n_procs_honest, self.occ_honest)),
             // groupe trusted
             format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.f1_trusted)),
-            format!("{}", gi(self.n_procs_trusted, self.tp_trusted)),
+            format!("{:.2}", gi(self.n_procs_trusted, self.tp_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
             format!("{}", self.stat_trusted),
-            format!("{:.4}", g(self.n_procs_trusted, self.occ_trusted)),
+            format!("{:.2}", g(self.n_procs_trusted, self.occ_trusted)),
         ]
     }
 }
