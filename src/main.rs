@@ -47,6 +47,10 @@ pub enum WhichApp {
     #[structopt(name = "xdec")]
     XDecay(app::xdecay::Init),
 
+    /// X BM RPS
+    #[structopt(name = "xbm")]
+    XBM(app::xbm::Init),
+
     /// X Array RPS
     #[structopt(name = "xarray")]
     XArray(app::xarray::Init),
@@ -95,6 +99,12 @@ fn main() {
             let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
+        WhichApp::XBM(pp) => {
+            let f = format!("{}/nodes-xbm-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::xbm::XBM>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
 // cargo run -- -T 200 -n 1000 aupe -O -G samples -f 10 -t 240 -x 0 -v 20 -u 20 -m 100 -n 1000 -p 9

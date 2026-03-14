@@ -1,6 +1,21 @@
 # Aupe
 TODO
 
+
+./run_experimentsK.sh bm 1 30 0
+./run_experimentsK.sh decay 1 30 0
+./run_experimentsK.sh bm 1 20 0
+./run_experimentsK.sh decay 1 20 0
+./run_experimentsK.sh bm 1 10 0
+./run_experimentsK.sh decay 1 10 0
+./run_experimentsK.sh xarray 1 30 0
+./run_experimentsK.sh xarray 1 20 0
+./run_experimentsK.sh xarray 1 10 0
+
+
+
+
+
 ./run_merge_attack.sh decay 1 10
 
 ./run_merge_float.sh 0.5 10

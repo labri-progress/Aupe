@@ -21,7 +21,7 @@ library(dplyr)
 library(gridExtra)
 
 # ── Parameters ────────────────────────────────────────────────────────────────
-budget       <- as.integer(args[1])                               # e.g. 1
+budget       <- as.numeric(args[1])                               # e.g. 1
 faulty_pct   <- as.integer(args[2])                               # e.g. 10, 20, 30
 t_pct        <- if (length(args) >= 3) as.integer(args[3]) else 0 # % trusted
 strategy     <- if (length(args) >= 4) as.character(args[4]) else "decay"
@@ -40,7 +40,7 @@ if (strategy == "array") {
                            strategy, nodes, view, faulty_count, t_count, p_merge))
 } else {
   fname <- file.path(results_dir,
-                   sprintf("nodes-%s-%d-%d-%d-%d-%d-%d.csv",
+                   sprintf("nodes-%s-%d-%d-%d-%d-%d-%g.csv",
                            strategy, nodes, view, faulty_count, t_count, p_merge, budget))
 }
 
@@ -193,7 +193,7 @@ p_occ <- ggplot(pd, aes(x = time_f, y = occ, color = group, fill = group)) +
 
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
-outfile <- sprintf("results/metrics_boxplot_strat%sf%d_t%d_b%d.pdf", strategy, faulty_pct, t_pct, budget)
+outfile <- sprintf("results/metrics_boxplot_strat%sf%d_t%d_b%g.pdf", strategy, faulty_pct, t_pct, budget)
 pdf(outfile, width = width * 4/3, height = height*2)
 grid.arrange(p_cr,  p_occ, nrow = 1, ncol = 2) #p_f1 p_bias, p_dkl
 dev.off()
