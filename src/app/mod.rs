@@ -6,3 +6,5 @@ pub mod brahms;
 pub mod basalt;
 pub mod bitmatcher;
 pub mod bitmatcher_adaptive;
+pub mod evictiondecay;
+pub mod xdecay;

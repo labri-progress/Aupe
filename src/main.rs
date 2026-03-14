@@ -39,6 +39,14 @@ pub enum WhichApp {
     #[structopt(name = "decay")]
     AupeDecay(app::aupebmdecay::Init),
 
+    /// Eviction Decay RPS
+    #[structopt(name = "evict")]
+    EvictionDecay(app::evictiondecay::Init),
+
+    /// X Decay RPS
+    #[structopt(name = "xdec")]
+    XDecay(app::xdecay::Init),
+
     /// Aupe RPS
     #[structopt(name = "array")]
     Aupe(app::aupe::Init),
@@ -66,7 +74,17 @@ fn main() {
             sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
+        WhichApp::EvictionDecay(pp) => {
+            let f = format!("{}/nodes-evict-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::evictiondecay::EvictionDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
 
+        WhichApp::XDecay(pp) => {
+            let f = format!("{}/nodes-xdec-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::xdecay::XDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
         WhichApp::AupeBM(pp) => {
             let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
