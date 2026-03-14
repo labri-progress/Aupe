@@ -47,6 +47,10 @@ pub enum WhichApp {
     #[structopt(name = "xdec")]
     XDecay(app::xdecay::Init),
 
+    /// X Array RPS
+    #[structopt(name = "xarray")]
+    XArray(app::xarray::Init),
+
     /// Aupe RPS
     #[structopt(name = "array")]
     Aupe(app::aupe::Init),
@@ -85,6 +89,8 @@ fn main() {
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::xdecay::XDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
+
+        
         WhichApp::AupeBM(pp) => {
             let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
@@ -100,6 +106,13 @@ fn main() {
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge);
             sim::<app::aupe::Aupe>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
+
+        WhichApp::XArray(pp) => {
+            let f = format!("{}/nodes-xarray-{}-{}-{}-{}-{}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge);
+            sim::<app::xarray::XArray>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
 // cargo run -- -T 200 -n 1000 brahms -G samples -f 10 -t 300 -v 20 -u 20 -k 0 -r 1
         WhichApp::Brahms(pp) => {
             let f = format!("{}/nodes-brahms-{}-{}-{}.csv",

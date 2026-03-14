@@ -61,7 +61,7 @@ for run in $(seq $NRUNS $NRUNS); do
           trusted_tag=""
         fi
 
-        if [ "$strat" = "array" ]; then
+        if [ "$strat" = "array" || "$strat" = "xarray" ]; then
           # Array has no budget parameter — run once per (f, run)
           outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}-run${run}"
           if is_done "$outfile"; then

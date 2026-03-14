@@ -80,6 +80,11 @@ impl Kvs {
         self.min();
     }
 
+    pub fn estimate(&mut self, item: &usize) -> f64 {
+
+        self.omn_array[*item]
+    }
+
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>, rng: &mut StdRng) -> Vec<usize> {
         let mut outputstream = Vec::new();
 
