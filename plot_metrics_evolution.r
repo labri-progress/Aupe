@@ -185,6 +185,7 @@ p_occ <- ggplot(pd, aes(x = time_f, y = occ, color = group, fill = group)) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
   scale_x_discrete(breaks = as.character(x_breaks)) +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   labs(x = expression(bold("Rounds")),
        y = expression(bold("Fraction of distinct IDs"))) +
   mytheme +

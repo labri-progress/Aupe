@@ -658,76 +658,99 @@ void BitMatcher::merge(const BitMatcher& other) {
 		}
 		items.push_back({kv.first.second, kv.first.first, count});
 	}
-	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)
-
 	// Reinsert all items into this BitMatcher
 	reinsert_items(items);
 }
 
-// Only for Merge: reinsert items from sorted vector
-void BitMatcher::reinsert_items(const std::vector<ItemInfo>& items) {
-	
-	int64_t original_blocked_count = this->blocked_count;
-	// Fast clear using memset-equivalent for vectors
-	for (int i = 0; i < 2; i++) {
-		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
+static int find_compatible_type_a(std::vector<uint64_t>& desc_counts) {
+	// Adaptive version: restrict to types 0-3 since solve_overflow_locally
+	// only handles those (higher types trigger global_division instead).
+	for (int t = 0; t <= 3; t++) {
+		int num_slots = get_item_num_in_bucket_type(t);
+		if (num_slots < (int)desc_counts.size()) continue;
+
+		bool fits = true;
+		for (int i = 0; i < (int)desc_counts.size(); i++) {
+			// i-th largest count vs i-th widest slot (num_slots-1-i)
+			if (desc_counts[i] > (1ULL << COUNT_LEN[t][num_slots-1-i]) - 1) { fits = false; break; }
+		}
+		if (fits) return t;
 	}
-	this->blocked_count = original_blocked_count;
-	// Re-insert items in sorted order to maximize capacity
-	// item.bucket_id is always hash1 (table 0 bucket)
-	for (const auto& item : items) {
+	return -1;
+}
+
+// Only for Merge: reinsert items from sorted vector
+void BitMatcher::reinsert_items(std::vector<ItemInfo>& items) {
+	for (int i = 0; i < 2; i++)
+		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
+
+		// Sort by decreasing count values
+	std::sort(items.begin(), items.end());
+
+	for (auto& item : items) {
 		uint32_t hash1 = item.bucket_id;
-		
-		//InsertByFp(item.fingerprint, hash1, item.count);
-
 		uint32_t hash2 = (hash1 ^ item.fingerprint) % bucket_num;
-
+		uint32_t hashes[2] = {hash1, hash2};
 		bool inserted = false;
 
-		// Try table 0 first
-		ec_bucket* b0 = &bucket[0][hash1];
-		uint32_t type_id0 = get_bucket_type_id(b0);
-		uint8_t slot_num0 = get_item_num_in_bucket_type(type_id0);
+		for (int t = 0; t < 2 && !inserted; t++) {
+			ec_bucket* b = &bucket[t][hashes[t]];
+			uint32_t type_id = get_bucket_type_id(b);
+			uint8_t num_slots = get_item_num_in_bucket_type(type_id);
 
-		for (uint8_t slot = slot_num0; slot-- > 0; ) {
-			if (get_bucket_fingerprint(b0, slot) == 0) {
-				uint64_t max_count = (1UL << COUNT_LEN[type_id0][slot]) - 1;
-				if (item.count <= max_count) {
-					set_bucket_fingerprint(b0, slot, item.fingerprint);
-					set_bucket_count(b0, slot, item.count, type_id0);
-					inserted = true;
-					break;
-				}
-			}
-		}
-
-		// Try table 1 if not inserted
-		if (!inserted) {
-			ec_bucket* b1 = &bucket[1][hash2];
-			uint32_t type_id1 = get_bucket_type_id(b1);
-			uint8_t slot_num1 = get_item_num_in_bucket_type(type_id1);
-
-			// Iterate in decreasing order to insert into biggest available slots
-			for (uint8_t slot = slot_num1; slot-- > 0; ) {
-				if (get_bucket_fingerprint(b1, slot) == 0) {
-					uint64_t max_count = (1UL << COUNT_LEN[type_id1][slot]) - 1;
-					if (item.count <= max_count) {
-						set_bucket_fingerprint(b1, slot, item.fingerprint);
-						set_bucket_count(b1, slot, item.count, type_id1);
+			// --- 1. Simple insertion ---
+			for (int slot = (int)num_slots - 1; slot >= 0 && !inserted; slot--) {
+				if (get_bucket_fingerprint(b, slot) == 0) {
+					uint64_t max_cap = (1ULL << COUNT_LEN[type_id][slot]) - 1;
+					if (item.count <= max_cap) {
+						set_bucket_fingerprint(b, slot, item.fingerprint);
+						set_bucket_count(b, slot, item.count, type_id);
 						inserted = true;
-						break;
 					}
 				}
 			}
-		}
+			if (inserted) break;
 
-		// If not inserted during simple reinsertion, use normal insertion 
-		// It activated for bucket transition for high count items
-		if (!inserted) {
-			InsertByFp(item.fingerprint, hash1, item.count);
+			// --- 2. Direct type upgrade ---
+			bool has_empty = false;
+			for (int slot = 0; slot < num_slots; slot++) {
+				if (get_bucket_fingerprint(b, slot) == 0) { has_empty = true; break; }
+			}
+
+			if (has_empty) {
+				// Collect existing items from widest slot down: already in decreasing count order.
+				// New item is appended last (always smallest, since items are globally sorted desc).
+				std::vector<std::pair<uint8_t, uint64_t>> all_items;
+				std::vector<uint64_t> desc_counts;
+				for (int slot = num_slots - 1; slot >= 0; slot--) {
+					uint8_t fp = get_bucket_fingerprint(b, slot);
+					if (fp != 0) {
+						uint64_t cnt = get_bucket_count(b, slot, type_id);
+						all_items.push_back({fp, cnt});
+						desc_counts.push_back(cnt);
+					}
+				}
+				all_items.push_back({item.fingerprint, item.count});
+				desc_counts.push_back(item.count);
+
+				int new_type = find_compatible_type_a(desc_counts);
+				if (new_type >= 0) {
+					int new_num_slots = get_item_num_in_bucket_type(new_type);
+					b->value = 0;
+					set_bucket_type_id(b, (uint64_t)new_type);
+					// i-th largest item → slot (new_num_slots-1-i), the i-th widest slot
+					for (int i = 0; i < (int)all_items.size(); i++) {
+						int slot = new_num_slots - 1 - i;
+						set_bucket_fingerprint(b, slot, all_items[i].first);
+						set_bucket_count(b, slot, all_items[i].second, (uint32_t)new_type);
+					}
+					inserted = true;
+				}
+			}
 		}
 	}
 }
+
 
 
 int BitMatcher::Mem(const char *key, const int16_t key_len) {

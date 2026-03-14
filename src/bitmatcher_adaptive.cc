@@ -537,24 +537,17 @@ void BitMatcherAdaptive::InsertByFp(uint8_t fingerprint_value, uint first_hash_t
 	}
 }
 
-static int find_compatible_type_a(const std::vector<uint64_t>& existing_counts, uint64_t new_count) {
-	std::vector<uint64_t> all_counts = existing_counts;
-	all_counts.push_back(new_count);
-	std::sort(all_counts.begin(), all_counts.end(), [](uint64_t a, uint64_t b){ return a > b; });
-
-	for (int t = 0; t < 3; t++) { //BUCKET_TYPE_NUM
+static int find_compatible_type_a(std::vector<uint64_t>& desc_counts) {
+	// Adaptive version: restrict to types 0-3 since solve_overflow_locally
+	// only handles those (higher types trigger global_division instead).
+	for (int t = 0; t <= 3; t++) {
 		int num_slots = get_item_num_in_bucket_type(t);
-		if (num_slots < (int)all_counts.size()) continue;
-
-		std::vector<uint64_t> caps;
-		caps.reserve(num_slots);
-		for (int s = 0; s < num_slots; s++)
-			caps.push_back((1ULL << COUNT_LEN[t][s]) - 1);
-		std::sort(caps.begin(), caps.end(), [](uint64_t a, uint64_t b){ return a > b; });
+		if (num_slots < (int)desc_counts.size()) continue;
 
 		bool fits = true;
-		for (int i = 0; i < (int)all_counts.size(); i++) {
-			if (all_counts[i] > caps[i]) { fits = false; break; }
+		for (int i = 0; i < (int)desc_counts.size(); i++) {
+			// i-th largest count vs i-th widest slot (num_slots-1-i)
+			if (desc_counts[i] > (1ULL << COUNT_LEN[t][num_slots-1-i]) - 1) { fits = false; break; }
 		}
 		if (fits) return t;
 	}
@@ -562,11 +555,14 @@ static int find_compatible_type_a(const std::vector<uint64_t>& existing_counts, 
 }
 
 
-void BitMatcherAdaptive::reinsert_items_direct(const std::vector<ItemInfo>& items) {
+void BitMatcherAdaptive::reinsert_items(std::vector<ItemInfo>& items) {
 	for (int i = 0; i < 2; i++)
 		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
 
-	for (const auto& item : items) {
+		// Sort by decreasing count values
+	std::sort(items.begin(), items.end());
+
+	for (auto& item : items) {
 		uint32_t hash1 = item.bucket_id;
 		uint32_t hash2 = (hash1 ^ item.fingerprint) % bucket_num;
 		uint32_t hashes[2] = {hash1, hash2};
@@ -597,39 +593,29 @@ void BitMatcherAdaptive::reinsert_items_direct(const std::vector<ItemInfo>& item
 			}
 
 			if (has_empty) {
-				std::vector<std::pair<uint8_t, uint64_t>> existing;
-				std::vector<uint64_t> existing_counts;
-				for (int slot = 0; slot < num_slots; slot++) {
+				// Collect existing items from widest slot down: already in decreasing count order.
+				// New item is appended last (always smallest, since items are globally sorted desc).
+				std::vector<std::pair<uint8_t, uint64_t>> all_items;
+				std::vector<uint64_t> desc_counts;
+				for (int slot = num_slots - 1; slot >= 0; slot--) {
 					uint8_t fp = get_bucket_fingerprint(b, slot);
 					if (fp != 0) {
 						uint64_t cnt = get_bucket_count(b, slot, type_id);
-						existing.push_back({fp, cnt});
-						existing_counts.push_back(cnt);
+						all_items.push_back({fp, cnt});
+						desc_counts.push_back(cnt);
 					}
 				}
+				all_items.push_back({item.fingerprint, item.count});
+				desc_counts.push_back(item.count);
 
-				int new_type = find_compatible_type_a(existing_counts, item.count);
+				int new_type = find_compatible_type_a(desc_counts);
 				if (new_type >= 0) {
-					std::vector<std::pair<uint8_t, uint64_t>> all_items = existing;
-					all_items.push_back({item.fingerprint, item.count});
-					std::sort(all_items.begin(), all_items.end(),
-						[](const std::pair<uint8_t,uint64_t>& a, const std::pair<uint8_t,uint64_t>& b_) {
-							return a.second > b_.second;
-						});
-
 					int new_num_slots = get_item_num_in_bucket_type(new_type);
-					std::vector<int> slot_order;
-					slot_order.reserve(new_num_slots);
-					for (int s = 0; s < new_num_slots; s++) slot_order.push_back(s);
-					std::sort(slot_order.begin(), slot_order.end(),
-						[&](int a, int b_) {
-							return COUNT_LEN[new_type][a] > COUNT_LEN[new_type][b_];
-						});
-
 					b->value = 0;
 					set_bucket_type_id(b, (uint64_t)new_type);
+					// i-th largest item → slot (new_num_slots-1-i), the i-th widest slot
 					for (int i = 0; i < (int)all_items.size(); i++) {
-						int slot = slot_order[i];
+						int slot = new_num_slots - 1 - i;
 						set_bucket_fingerprint(b, slot, all_items[i].first);
 						set_bucket_count(b, slot, all_items[i].second, (uint32_t)new_type);
 					}
@@ -637,13 +623,10 @@ void BitMatcherAdaptive::reinsert_items_direct(const std::vector<ItemInfo>& item
 				}
 			}
 		}
-
-		// --- 3. Last resort ---
-		if (!inserted) {
-			InsertByFp(item.fingerprint, hash1, item.count);
-		}
 	}
 }
+
+
 
 double BitMatcherAdaptive::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const{ //const char *key, const int16_t key_len) {
 	
@@ -839,79 +822,9 @@ std::vector<ItemInfo> BitMatcherAdaptive::extract_and_divide_items() {
 			}
 		}
 	}
-	
-	// Sort by decreasing count values
-	std::sort(items.begin(), items.end());
 
 	return items;
 }
-
-// Re-insert items into the sketch
-void BitMatcherAdaptive::reinsert_items(const std::vector<ItemInfo>& items) {
-	int64_t original_division_count = this->division_count;
-	// Fast clear using memset-equivalent for vectors
-	for (int i = 0; i < 2; i++) {
-		std::fill(bucket[i].begin(), bucket[i].end(), ec_bucket{0});
-	}
-	this->division_count = original_division_count;
-
-	// Re-insert items in sorted order to maximize capacity
-	// item.bucket_id is always hash1 (table 0 bucket)
-	for (const auto& item : items) {
-		uint32_t hash1 = item.bucket_id;
-		
-		//InsertByFp(item.fingerprint, hash1, item.count);
-
-		uint32_t hash2 = (hash1 ^ item.fingerprint) % bucket_num;
-
-		bool inserted = false;
-
-		// Try table 0 first
-		ec_bucket* b0 = &bucket[0][hash1];
-		uint32_t type_id0 = get_bucket_type_id(b0);
-		uint8_t slot_num0 = get_item_num_in_bucket_type(type_id0);
-
-		for (uint8_t slot = slot_num0; slot-- > 0; ) {
-			if (get_bucket_fingerprint(b0, slot) == 0) {
-				uint64_t max_count = (1UL << COUNT_LEN[type_id0][slot]) - 1;
-				if (item.count <= max_count) {
-					set_bucket_fingerprint(b0, slot, item.fingerprint);
-					set_bucket_count(b0, slot, item.count, type_id0);
-					inserted = true;
-					break;
-				}
-			}
-		}
-
-		// Try table 1 if not inserted
-		if (!inserted) {
-			ec_bucket* b1 = &bucket[1][hash2];
-			uint32_t type_id1 = get_bucket_type_id(b1);
-			uint8_t slot_num1 = get_item_num_in_bucket_type(type_id1);
-
-			// Iterate in decreasing order to insert into biggest available slots
-			for (uint8_t slot = slot_num1; slot-- > 0; ) {
-				if (get_bucket_fingerprint(b1, slot) == 0) {
-					uint64_t max_count = (1UL << COUNT_LEN[type_id1][slot]) - 1;
-					if (item.count <= max_count) {
-						set_bucket_fingerprint(b1, slot, item.fingerprint);
-						set_bucket_count(b1, slot, item.count, type_id1);
-						inserted = true;
-						break;
-					}
-				}
-			}
-		}
-
-		// If not inserted during simple reinsertion, use normal insertion 
-		// It activated for bucket transition for high count items
-		if (!inserted) {
-			InsertByFp(item.fingerprint, hash1, item.count);
-		}
-
-	}
-}
-
 
 // Adaptive strategy: Global division to prevent counter overflow
 void BitMatcherAdaptive::decay() {
@@ -919,8 +832,7 @@ void BitMatcherAdaptive::decay() {
 	std::vector<ItemInfo> items = extract_and_divide_items();
 
 	// Re-insert items into sketch (inlined for efficiency)
-	//reinsert_items(items);
-	reinsert_items_direct(items);
+	reinsert_items(items);
 
 	// Increment division counter
 	division_count++;
@@ -995,11 +907,9 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 		}
 		items.push_back({kv.first.second, kv.first.first, count});
 	}
-	std::sort(items.begin(), items.end()); // Uses ItemInfo::operator< (decreasing count)
-
+	
 	// Reinsert all items into a fresh sketch (overwrites current)
-	//reinsert_items(items);
-	reinsert_items_direct(items);
+	reinsert_items(items);
 }
 
 // Compute overflow count

@@ -290,8 +290,7 @@ public:
 
 	double QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const;
 	void InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx, uint64_t count = 1);
-	//void reinsert_items_direct(const std::vector<ItemInfo>& items);
-	void reinsert_items(const std::vector<ItemInfo>& items);
+	void reinsert_items(std::vector<ItemInfo>& items);
 	std::unique_ptr<BitMatcher> clone() const;
 	void merge(const BitMatcher& other);
 	double LR() const;
