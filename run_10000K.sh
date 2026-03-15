@@ -19,7 +19,7 @@ BUDGETS=("${2:-5}")
 # Faulty percentages
 FAULTY_PCTS=("${3:-30}") #10 20 30
 
-TRUSTED_PCTS=(0 10 20)
+TRUSTED_PCTS=(0 5 10 20)
 # Trusted node counts (0 = no trusted nodes)
 
 
