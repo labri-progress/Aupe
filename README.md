@@ -1,16 +1,26 @@
 # Aupe
 TODO
 
+./run_experimentsK.sh evict 0.5 30 0 ; ./run_experimentsK.sh evict 0.5 30 5
+./run_experimentsK.sh evict 0.5 20 0 ; ./run_experimentsK.sh evict 0.5 20 5
+./run_experimentsK.sh evict 0.5 10 0 ; ./run_experimentsK.sh evict 0.5 10 5
 
-./run_experimentsK.sh bm 1 30 0
-./run_experimentsK.sh decay 1 30 0
-./run_experimentsK.sh bm 1 20 0
-./run_experimentsK.sh decay 1 20 0
-./run_experimentsK.sh bm 1 10 0
-./run_experimentsK.sh decay 1 10 0
-./run_experimentsK.sh xarray 1 30 0
-./run_experimentsK.sh xarray 1 20 0
-./run_experimentsK.sh xarray 1 10 0
+./run_experimentsK.sh evict 0.5 30 10 ; ./run_experimentsK.sh evict 0.5 30 20
+./run_experimentsK.sh evict 0.5 20 10 ; ./run_experimentsK.sh evict 0.5 20 20
+./run_experimentsK.sh evict 0.5 10 10 ; ./run_experimentsK.sh evict 0.5 10 20
+
+
+./run_experimentsK.sh xdec 0.5 30 0 ; ./run_experimentsK.sh xdec 0.5 30 5
+./run_experimentsK.sh xdec 0.5 20 0 ; ./run_experimentsK.sh xdec 0.5 20 5
+./run_experimentsK.sh xdec 0.5 10 0 ; ./run_experimentsK.sh xdec 0.5 10 5
+
+./run_experimentsK.sh xdec 0.5 30 10 ; ./run_experimentsK.sh xdec 0.5 30 20
+./run_experimentsK.sh xdec 0.5 20 10 ; ./run_experimentsK.sh xdec 0.5 20 20
+./run_experimentsK.sh xdec 0.5 10 10 ; ./run_experimentsK.sh xdec 0.5 10 20
+
+./run_experimentsK.sh xbm 0.5 30 0 ; ./run_experimentsK.sh xbm 0.5 20 0 ; ./run_experimentsK.sh xbm 0.5 10 0
+
+./run_experimentsK.sh xarray 0.5 30 0 ; ./run_experimentsK.sh xarray 0.5 20 0 ; ./run_experimentsK.sh xarray 0.5 10 0
 
 
 

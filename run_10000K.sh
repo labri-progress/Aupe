@@ -2,7 +2,7 @@
 # ./run_experimentsK.sh decay 0.5 30 10 [1]
 
 # Experiment parameters
-ROUNDS=600000
+ROUNDS=1000
 NODES=10000
 VIEW=160 #20
 UVIEW=160 #20
@@ -14,7 +14,7 @@ NRUNS="${5:-1}" #5
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
 
 # Budget values (KB) — used as -y for bm and decay; array has no budget param
-BUDGETS=("${2:-0.5}")
+BUDGETS=("${2:-5}")
 
 # Faulty percentages
 FAULTY_PCTS=("${3:-30}") #10 20 30
@@ -24,7 +24,7 @@ TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
 
 
 # Output directory
-OUTDIR="results_byz"
+OUTDIR="results_merge"
 mkdir -p "$OUTDIR"
 
 MANIFEST="$OUTDIR/manifest.txt"

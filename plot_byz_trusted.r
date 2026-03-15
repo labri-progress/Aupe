@@ -68,8 +68,8 @@ mytheme <- theme(
 common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv", "avgByzN")
 
 # --- Part 1: Read BM / BMDecay / Array from output_byz (no trusted nodes) ---
-strategies_base  <- c("bm", "decay", "array")
-strat_labels_base <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
+strategies_base  <- c("xbm", "dec", "array")
+strat_labels_base <- c("xbm" = "BM", "dec" = "BMDecay", "array" = "Array")
 
 base_data <- data.frame()
 
@@ -102,7 +102,7 @@ for (strat in strategies_base) {
 trusted_data <- data.frame()
 
 #for (strat in strategies_base) {
-strat <- "decay" # only BMDecay has trusted node variants
+strat <- "array" # only BMDecay has trusted node variants
 for (t_pct in trusted_pcts) {
   t_count <- as.integer(nodes * t_pct / 100)
   for (f_pct in faulty_pcts) {
