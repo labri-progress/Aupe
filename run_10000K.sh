@@ -8,7 +8,7 @@ VIEW=160 #20
 UVIEW=160 #20
 SM=100 #30
 GAMMA=10 #20
-NRUNS="${5:-1}" #5
+NRUNS="${4:-1}" #5
 
 # Strategies
 STRATEGIES=("${1:-bm}") #("decay" "array" "bm")
@@ -19,7 +19,7 @@ BUDGETS=("${2:-5}")
 # Faulty percentages
 FAULTY_PCTS=("${3:-30}") #10 20 30
 
-TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
+TRUSTED_PCTS=(0 10 20)
 # Trusted node counts (0 = no trusted nodes)
 
 
