@@ -1,5 +1,10 @@
 # Aupe
 TODO
+./run_10000K.sh decay 10 30 0
+
+./run_merge_experimentsK.sh 1 [10,20,26,30]
+./run_merge_experimentsK.sh 1 [10,20,30]
+
 
 ./run_experimentsK.sh evict 0.5 30 0 ; ./run_experimentsK.sh evict 0.5 30 5
 ./run_experimentsK.sh evict 0.5 20 0 ; ./run_experimentsK.sh evict 0.5 20 5

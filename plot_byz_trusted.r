@@ -35,7 +35,7 @@ height     <- width / ratio
 custom_colors <- c(
   "BM"             = "#882EE6",
   "BMDecay"        = "#000000",
-  "Array"          = "#ff8833",
+  "Array"          = "#ff3333",
   "BMDecay t=5%"   = "#E69F00",
   "BMDecay t=10%"  = "#56B4E9",
   "BMDecay t=20%"  = "#009E73", 
@@ -68,8 +68,8 @@ mytheme <- theme(
 common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv", "avgByzN")
 
 # --- Part 1: Read BM / BMDecay / Array from output_byz (no trusted nodes) ---
-strategies_base  <- c("xbm", "dec", "array")
-strat_labels_base <- c("xbm" = "BM", "dec" = "BMDecay", "array" = "Array")
+strategies_base  <- c("xbm", "xdec", "xarray")
+strat_labels_base <- c("xbm" = "BM", "xdec" = "BMDecay", "xarray" = "Array")
 
 base_data <- data.frame()
 
@@ -77,7 +77,7 @@ for (strat in strategies_base) {
   for (f_pct in faulty_pcts) {
     faulty_count <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
-      if (strat == "array") {
+      if (strat == "xarray") {
         fname <- file.path(results_dir,
                            sprintf("%s-N%d-v%d-f%d-run%d", strat, nodes, view, faulty_count, run))
       } else {
@@ -102,13 +102,13 @@ for (strat in strategies_base) {
 trusted_data <- data.frame()
 
 #for (strat in strategies_base) {
-strat <- "array" # only BMDecay has trusted node variants
+strat <- "xdec" # only BMDecay has trusted node variants
 for (t_pct in trusted_pcts) {
   t_count <- as.integer(nodes * t_pct / 100)
   for (f_pct in faulty_pcts) {
     faulty_count <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
-      if (strat == "array") {
+      if (strat == "xarray") {
         fname <- file.path(results_dir,
                            sprintf("%s-N%d-v%d-f%d-x%d-run%d",
                                  strat, nodes, view, faulty_count, t_count, run))
