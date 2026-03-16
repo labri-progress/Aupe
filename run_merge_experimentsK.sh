@@ -16,15 +16,15 @@ echo "Running merge experiments with strategy=bm, budget=${1:-0.5}KB, runs=${NRU
 FAULTY_PCT="${2:-26}"
 FAULTY_COUNT=$(echo "$NODES * $FAULTY_PCT / 100" | bc)
 
-STRATEGIES=("${3:-xdec}") #"decay")
+STRATEGIES=("${3:-decay}") #"xdec")
 
 # Budget memory in KB (only used by # ("${1:-decay}")bm via -y)
 BUDGETS=("${1:-0.5}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
-TRUSTED_PCTS=(0 5 10 20) #5 10 20 30)
+TRUSTED_PCTS=(0 5 10 20 30) #5 10 20 30)
 # Corresponding -x values: 10%=1000, 20%=2000, 30%=3000
-TRUSTED_COUNTS=(0 50 100 200) # 100 200) # 100 200) # 2000 3000)
+TRUSTED_COUNTS=(0 50 100 200 300) # 100 200) # 100 200) # 2000 3000)
 
 # Number of merges per trusted node per round
 MERGES=(10) # (1 10)

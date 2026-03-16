@@ -187,9 +187,25 @@ p_occ <- ggplot(pd, aes(x = time_f, y = occ, color = group, fill = group)) +
   scale_x_discrete(breaks = as.character(x_breaks)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   labs(x = expression(bold("Rounds")),
-       y = expression(bold("Fraction of distinct IDs"))) +
+       y = expression(bold("Fraction of known IDs"))) +
   mytheme +
   theme(legend.position = "none")
+
+# ── Panel t: true positive ────────────────────────────────────────────────────────
+p_occ <- ggplot(pd, aes(x = time_f, y = tp, color = group, fill = group)) +
+  geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
+               position = position_dodge(0.9)) +
+  stat_summary(fun = mean, geom = "line", aes(group = group), linewidth = 0.8) +
+  scale_color_manual(values = ht_colors) +
+  scale_fill_manual(values  = ht_colors) +
+  scale_x_discrete(breaks = as.character(x_breaks)) +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
+  labs(x = expression(bold("Rounds")),
+       y = expression(bold("Fraction of estim. overrepresented IDs"))) +
+  mytheme +
+  theme(legend.position = "none")
+
 
 # ── Save PDF ──────────────────────────────────────────────────────────────────
 dir.create("results", showWarnings = FALSE)
