@@ -126,7 +126,7 @@ avg_ss$t_pct_f  <- factor(avg_ss$t_pct)
 
 if (strategy == "bm") {
   avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BM noMerge", paste0("BM t=", avg_ss$t_pct, "%"))
-} else if (strategy == "decay") {
+} else { #if (strategy == "decay") {
   avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_ss$t_pct, "%"))
 }
 avg_ss$label_f <- factor(avg_ss$label, levels = unique(avg_ss$label))

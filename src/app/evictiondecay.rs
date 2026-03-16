@@ -500,13 +500,22 @@ impl App for EvictionDecay {
 
                     }
                     
-                    sample(&self.view[..], 1, &mut self.rng).iter()
+                    let mut view_snapshot = self.view.clone();
+                    
+                    sample(&view_snapshot[..], 1, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             self.update_contact(*p); // if trusted
                         });
 
-                    sample(&self.view[..], 1, &mut self.rng).iter()
+                    if self.is_trusted && net.time() >= self.params.attack_start_time {
+                        // contact only non trusted nodes
+                        view_snapshot = view_snapshot.into_iter()
+                                .filter(|x| *x < self.params.n_byzantine 
+                                    && *x >= self.params.n_byzantine + self.params.n_trusted) 
+                                .collect::<Vec<_>>();
+                    }
+                    sample(&view_snapshot[..], 1, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             self.update_contact(*p); // if trusted
