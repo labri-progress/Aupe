@@ -840,7 +840,7 @@ void BitMatcherAdaptive::decay() {
 
 
 // Merge two BitMatchers by summing counters and reinserting
-/* void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
+/*void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Map to accumulate counts: key = (bucket_id_table0, fingerprint), value = summed count
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> merged_counts;
 	merged_counts.reserve(bucket_num * 20);
@@ -907,11 +907,11 @@ void BitMatcherAdaptive::decay() {
 		}
 		items.push_back({kv.first.second, kv.first.first, count});
 	}
-	
+	printf("Merged unique items: %zu\n", items.size());
 	// Reinsert all items into a fresh sketch (overwrites current)
 	reinsert_items(items);
-}
- */
+}*/
+ 
 
 
 void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
@@ -966,9 +966,8 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 			if (avg > 0) items.push_back({kv.first.second, kv.first.first, avg});
 		}
 	}
-	//printf("Merged unique items: %zu\n", items.size());
-	std::sort(items.begin(), items.end());
-	reinsert_items_direct(items);
+	printf("Merged unique items: %zu\n", items.size());
+	reinsert_items(items);
 }
 
 
