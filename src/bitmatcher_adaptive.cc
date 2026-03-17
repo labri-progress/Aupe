@@ -840,7 +840,7 @@ void BitMatcherAdaptive::decay() {
 
 
 // Merge two BitMatchers by summing counters and reinserting
-void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
+/* void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Map to accumulate counts: key = (bucket_id_table0, fingerprint), value = summed count
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> merged_counts;
 	merged_counts.reserve(bucket_num * 20);
@@ -911,6 +911,66 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Reinsert all items into a fresh sketch (overwrites current)
 	reinsert_items(items);
 }
+ */
+
+
+void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
+	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> self_counts, other_counts;
+	self_counts.reserve(bucket_num * 20);
+	other_counts.reserve(bucket_num * 20);
+
+	auto extract = [&](const BitMatcherAdaptive& bm, std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash>& out) {
+		for (uint32_t i = 0; i < bm.bucket_num; i++) {
+			const ec_bucket* b0 = &bm.bucket[0][i];
+			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b0));
+			uint8_t num_items = get_item_num_in_bucket_type(type_id);
+			for (uint8_t j = 0; j < num_items; j++) {
+				uint8_t fp = get_bucket_fingerprint(const_cast<ec_bucket*>(b0), j);
+				if (fp == 0) continue;
+				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
+				if (count > 0) out[{i, fp}] = max(out[{i, fp}], count);
+			}
+		}
+		for (uint32_t i = 0; i < bm.bucket_num; i++) {
+			const ec_bucket* b1 = &bm.bucket[1][i];
+			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b1));
+			uint8_t num_items = get_item_num_in_bucket_type(type_id);
+			for (uint8_t j = 0; j < num_items; j++) {
+				uint8_t fp = get_bucket_fingerprint(const_cast<ec_bucket*>(b1), j);
+				if (fp == 0) continue;
+				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b1), j, type_id);
+				if (count > 0) {
+					uint32_t b0_id = (i ^ fp) % bm.bucket_num;
+					out[{b0_id, fp}] = max(out[{b0_id, fp}], count);
+				}
+			}
+		}
+	};
+
+	extract(*this, self_counts);
+	extract(other, other_counts);
+
+	std::vector<ItemInfo> items;
+	items.reserve(self_counts.size() + other_counts.size());
+	
+	for (const auto& kv : self_counts) {
+		uint64_t other_count = 0;
+		auto it = other_counts.find(kv.first);
+		if (it != other_counts.end()) other_count = it->second;
+		uint64_t avg = (kv.second + other_count + 1) / 2;
+		if (avg > 0) items.push_back({kv.first.second, kv.first.first, avg});
+	}
+	for (const auto& kv : other_counts) {
+		if (self_counts.find(kv.first) == self_counts.end()) {
+			uint64_t avg = (kv.second +1)/ 2;
+			if (avg > 0) items.push_back({kv.first.second, kv.first.first, avg});
+		}
+	}
+	//printf("Merged unique items: %zu\n", items.size());
+	std::sort(items.begin(), items.end());
+	reinsert_items_direct(items);
+}
+
 
 // Compute overflow count
 uint32_t BitMatcherAdaptive::compute_overflow_count() const {
