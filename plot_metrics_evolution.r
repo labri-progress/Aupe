@@ -93,6 +93,7 @@ d$dkl       <- ifelse(d$group == "Honest", d$h_dkl,     d$t_dkl)
 d$f1        <- ifelse(d$group == "Honest", d$h_f1,      d$t_f1)
 d$biasErr   <- ifelse(d$group == "Honest", d$h_biasErr, d$t_biasErr)
 d$occ       <- ifelse(d$group == "Honest", d$h_occ,     d$t_occ)
+d$tp        <- ifelse(d$group == "Honest", d$h_tp,      d$t_tp)
 
 # Subsample Rounds to ~20 boxes for readability
 n_boxes       <- 10
@@ -192,7 +193,7 @@ p_occ <- ggplot(pd, aes(x = time_f, y = occ, color = group, fill = group)) +
   theme(legend.position = "none")
 
 # ── Panel t: true positive ────────────────────────────────────────────────────────
-p_occ <- ggplot(pd, aes(x = time_f, y = tp, color = group, fill = group)) +
+p_tp <- ggplot(pd, aes(x = time_f, y = tp, color = group, fill = group)) +
   geom_boxplot(alpha = 0.3, outlier.size = 0.5, linewidth = 0.5, position = "dodge") +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
                position = position_dodge(0.9)) +
@@ -200,9 +201,9 @@ p_occ <- ggplot(pd, aes(x = time_f, y = tp, color = group, fill = group)) +
   scale_color_manual(values = ht_colors) +
   scale_fill_manual(values  = ht_colors) +
   scale_x_discrete(breaks = as.character(x_breaks)) +
-  scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
+  scale_y_continuous(breaks = seq(0, 300, by = 50)) +
   labs(x = expression(bold("Rounds")),
-       y = expression(bold("Fraction of estim. overrepresented IDs"))) +
+       y = expression(bold("Number of estim. overrepr. IDs"))) +
   mytheme +
   theme(legend.position = "none")
 
@@ -211,6 +212,6 @@ p_occ <- ggplot(pd, aes(x = time_f, y = tp, color = group, fill = group)) +
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/metrics_boxplot_strat%sf%d_t%d_b%g.pdf", strategy, faulty_pct, t_pct, budget)
 pdf(outfile, width = width * 4/3, height = height*2)
-grid.arrange(p_cr,  p_occ, nrow = 1, ncol = 2) #p_f1 p_bias, p_dkl
+grid.arrange(p_cr,  p_occ, p_tp, nrow = 1, ncol = 3) #p_f1 p_bias, p_dkl
 dev.off()
 cat("Saved to:", outfile, "\n")

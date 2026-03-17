@@ -11,7 +11,7 @@ Rscript plot_resilience_decay.r 1 decay 200 # budget=1 strategy=decay round p_me
 Rscript plot_metrics_evolution.r 1 26 10 decay 200 # f=26% t=10% strategy=decay round p=10 
 # evolution de la resilience par rounds
 Rscript plot_trusted.r 26 1 decay   # f=26%, budget=1, strategy=decay
-# boxplot des metriques honest pour # prop de trusted node - evolution par rounds
+# plot des metriques honest pour # prop de trusted node - evolution par rounds
 Rscript plot_metrics_evol_bytrust.r 1 26 decay 200 # budget=1 f=26% strategy=decay, round p_merge=10
 
 

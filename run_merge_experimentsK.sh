@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
-# run_merge_experimentsK.sh decay 10 0.5 1
+# run_merge_experimentsK.sh 1 10 decay 4
 
 # Experiment parameters
 ROUNDS=1000 # 200
@@ -46,7 +46,7 @@ mark_done() {
     echo "$1" >> "$MANIFEST"
 }
 
-for run in $(seq $NRUNS $NRUNS); do
+for run in $(seq 1 $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for i in "${!TRUSTED_PCTS[@]}"; do
       t_pct=${TRUSTED_PCTS[$i]}

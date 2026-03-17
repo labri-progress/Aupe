@@ -121,11 +121,12 @@ if (max_time > 200) {
 } else {
   x_breaks <- sort(unique(avg_data$time))
 }
-if (strategy == "bm") {
-  avg_data$label <- ifelse(avg_data$t_pct == 0, "BM noMerge", paste0("BM t=", avg_data$t_pct, "%"))
-} else if (strategy == "decay") {
-  avg_data$label <- ifelse(avg_data$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_data$t_pct, "%"))
-}
+#if (strategy == "bm") {
+#  avg_data$label <- ifelse(avg_data$t_pct == 0, "BM noMerge", paste0("BM t=", avg_data$t_pct, "%"))
+#} else if (strategy == "decay") {
+#  avg_data$label <- ifelse(avg_data$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_data$t_pct, "%"))
+#}
+avg_data$label <- ifelse(avg_data$t_pct == 0, "BM noMerge", paste0("BMMerge(t=", avg_data$t_pct, "%)"))
 avg_data$label_f <- factor(avg_data$label, levels = unique(avg_data$label))
 
 # Build color mapping: reuse custom_colors keyed by t_pct

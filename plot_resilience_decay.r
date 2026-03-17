@@ -28,12 +28,12 @@ p_merge      <- if (length(args) >= 4) as.integer(args[4]) else 10
 
 nodes        <- 1000
 view         <- 20 # 216
-nruns        <- 1
+nruns        <- 2
 
 results_dir  <- "results_merge"
 # faulty_pcts    <- c(10, 20, 26, 30)
 faulty_pcts    <- seq(10, 40, by = 2) #c(10, 20, 30)
-trusted_pcts   <- c(0, 5, 10, 20) #, 30)
+trusted_pcts   <- c(0, 5, 10, 20, 30)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 
 # Fraction of final timesteps used to estimate steady state
@@ -124,11 +124,12 @@ avg_ss <- summary_data %>%
 avg_ss$byz_prop <- avg_ss$f_pct / 100
 avg_ss$t_pct_f  <- factor(avg_ss$t_pct)
 
-if (strategy == "bm") {
-  avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BM noMerge", paste0("BM t=", avg_ss$t_pct, "%"))
-} else { #if (strategy == "decay") {
-  avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_ss$t_pct, "%"))
-}
+#if (strategy == "bm") {
+#  avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BM noMerge", paste0("BM t=", avg_ss$t_pct, "%"))
+#} else { #if (strategy == "decay") {
+  #avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BMDecay noMerge", paste0("BMDecay t=", avg_ss$t_pct, "%"))
+#}
+avg_ss$label <- ifelse(avg_ss$t_pct == 0, "BM noMerge", paste0("BMMerge(t=", avg_ss$t_pct, "%)"))
 avg_ss$label_f <- factor(avg_ss$label, levels = unique(avg_ss$label))
 
 label_color_map <- avg_ss %>%
