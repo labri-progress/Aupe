@@ -28,7 +28,7 @@ p_merge      <- if (length(args) >= 4) as.integer(args[4]) else 10
 
 nodes        <- 1000
 view         <- 20 # 216
-nruns        <- 2
+nruns        <- 1
 
 results_dir  <- "results_merge"
 # faulty_pcts    <- c(10, 20, 26, 30)

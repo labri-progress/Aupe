@@ -966,7 +966,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 			if (avg > 0) items.push_back({kv.first.second, kv.first.first, avg});
 		}
 	}
-	printf("Merged unique items: %zu\n", items.size());
+	//printf("Merged unique items: %zu\n", items.size());
 	reinsert_items(items);
 }
 
