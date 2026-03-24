@@ -212,6 +212,7 @@ p_tp <- ggplot(pd, aes(x = time_f, y = tp, color = group, fill = group)) +
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/metrics_boxplot_strat%sf%d_t%d_b%g.pdf", strategy, faulty_pct, t_pct, budget)
 pdf(outfile, width = width * 4/3, height = height*2)
-grid.arrange(p_cr,  p_occ, p_tp, nrow = 1, ncol = 3) #p_f1 p_bias, p_dkl
+#grid.arrange(p_cr,  p_occ, p_tp, nrow = 1, ncol = 3) #p_f1 p_bias, p_dkl
+grid.arrange(p_cr,  p_occ, nrow = 1, ncol = 2)
 dev.off()
 cat("Saved to:", outfile, "\n")

@@ -31,7 +31,7 @@ p_merge      <- if (length(args) >= 5) as.integer(args[5]) else 10
 nodes        <- 1000
 view         <- 20
 faulty_count <- as.integer(nodes * faulty_pct / 100)
-trusted_pcts   <- c(0, 5, 10, 20)
+trusted_pcts   <- c(0, 10, 20)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 results_dir  <- "results_merge"
 

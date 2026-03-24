@@ -26,7 +26,7 @@ nruns        <- 1
 force        <- 20
 faulty_count <- as.integer(nodes * faulty_pct / 100)
 strat_labels <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
-trusted_pcts <- c(0, 5, 10, 20) #1, 5, 10, 20, 30) #c(1, 5, 10)
+trusted_pcts <- c(0, 10, 20) #, 30) #1, 5, 10, 20, 30) #c(1, 5, 10)
 trusted_counts <- as.integer(nodes * trusted_pcts / 100)
 trusted_counts
 results_dir  <- "results_merge"
@@ -151,7 +151,7 @@ p <- ggplot(avg_data, aes(x = time, y = propByz,
   scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
   mytheme +
   theme(
-    legend.position = c(0.65, 0.85),
+    legend.position = c(0.55, 0.85),
     legend.title = element_blank(),
     legend.box = "horizontal"
   ) +
