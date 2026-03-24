@@ -1,4 +1,11 @@
 # Aupe
+
+./run_experimentsK.sh xdec 0.5 30 0 ; ./run_experimentsK.sh xdec 0.5 30 20
+
+./run_experimentsK.sh xbm 0.5 30 0 ; ./run_experimentsK.sh xbm 0.5 30 20
+
+./run_experimentsK.sh xarray 0.5 30 0 ; ./run_experimentsK.sh xarray 0.5 30 20
+
 TODO
 ./run_10000K.sh decay 10 30 0
 
