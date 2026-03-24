@@ -518,20 +518,20 @@ impl App for XBM {
 
                     }
                     
-                    let view = self.view.clone();
-                    self.sample_k(&view, 1).iter()
-                        .for_each(|p| {
-                            net.send(*p, Msg::PushRequest);
-                            self.update_contact(*p); // if trusted
-                        });
-
-                    self.sample_k(&view, 1).iter()
-                        .for_each(|p| {
-                            net.send(*p, Msg::PullRequest);
-                            self.update_contact(*p); // if trusted
-                        });
-
                     if self.is_trusted { //} && net.time()<=100{
+                        let view = self.view.clone();
+                        self.sample_k(&view, 1).iter()
+                            .for_each(|p| {
+                                net.send(*p, Msg::PushRequest);
+                                self.update_contact(*p); // if trusted
+                            });
+
+                        self.sample_k(&view, 1).iter()
+                            .for_each(|p| {
+                                net.send(*p, Msg::PullRequest);
+                                self.update_contact(*p); // if trusted
+                            });
+
                         let contactlist: Vec<PeerRef> = self.to_conctact.iter()
                             .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                             .copied() //.map(|x| x)
@@ -540,13 +540,14 @@ impl App for XBM {
                         for p in contactlist {
                             net.send(p, Msg::MergeRequest(self.sketch.getdata()));
                         }
-                    }
+                    }else {
+                        sample(&self.view[..], 1, &mut self.rng).iter()
+                            .for_each(|p| { net.send(*p, Msg::PushRequest); });
 
-                    /*if self.my_id == self.params.n_byzantine && net.time()%200==0 { //} && (net.time()==1 || net.time()==200) {//+ self.params.n_trusted -1{
-                        let division_count = self.sketch.get_stats().1;
-                        println!("Node {} time {}: division_count={}", self.my_id, net.time(), division_count);
-                        //self.sketch.print();
-                    }*/
+                        sample(&self.view[..], 1, &mut self.rng).iter()
+                            .for_each(|p| { net.send(*p, Msg::PullRequest);});
+                    }
+                    
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {

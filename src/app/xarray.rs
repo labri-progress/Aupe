@@ -487,23 +487,20 @@ impl App for XArray {
                         //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
                     
-                    let view = self.view.clone();
-                    self.sample_k(&view[..], 1).iter()
-                        .for_each(|p| {
-                            net.send(*p, Msg::PushRequest);
-                            self.update_contact(*p); // if trusted
-                        });
+                    if self.is_trusted { //} && net.time()<=100{
+                        let view = self.view.clone();
+                        self.sample_k(&view, 1).iter()
+                            .for_each(|p| {
+                                net.send(*p, Msg::PushRequest);
+                                self.update_contact(*p); // if trusted
+                            });
 
-                    self.sample_k(&view[..], 1).iter()
-                        .for_each(|p| {
-                            net.send(*p, Msg::PullRequest);
-                            self.update_contact(*p); // if trusted
-                        });
+                        self.sample_k(&view, 1).iter()
+                            .for_each(|p| {
+                                net.send(*p, Msg::PullRequest);
+                                self.update_contact(*p); // if trusted
+                            });
 
-                    if self.is_trusted{
-                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1  && DEBUG{
-                            self.sketch.print();
-                        }
                         let contactlist: Vec<PeerRef> = self.to_conctact.iter()
                             .filter(|x| **x!=self.my_id) // contact only not contacted nodes
                             .copied() //.map(|x| x)
@@ -512,7 +509,14 @@ impl App for XArray {
                         for p in contactlist {
                             net.send(p, Msg::MergeRequest(self.sketch.getdata()));
                         }
+                    }else {
+                        sample(&self.view[..], 1, &mut self.rng).iter()
+                            .for_each(|p| { net.send(*p, Msg::PushRequest); });
+
+                        sample(&self.view[..], 1, &mut self.rng).iter()
+                            .for_each(|p| { net.send(*p, Msg::PullRequest);});
                     }
+                            
                     net.send(self.my_id, Msg::SelfNotif);
                 },
                 Msg::PullRequest => {
