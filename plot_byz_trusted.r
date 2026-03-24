@@ -183,8 +183,8 @@ for (i in seq_along(faulty_pcts)) {
   f   <- faulty_pcts[i]
   sub <- avg_data %>% filter(f_pct == f)
   plots[[i]] <- byz_plot(sub, f,
-                         show_legend  = (i == 1),
-                         show_y_title = (i == 1))
+                         show_legend  = (i == 3),
+                         show_y_title = (i == 3))
 }
 
 # --- Save PDF ---
