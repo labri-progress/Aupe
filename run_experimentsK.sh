@@ -26,9 +26,9 @@ merge="max"
 launch="launch${1:-bm}-${2:-0.5}-${3:-30}-${4:-0}"
 
 if [ "$merge" = "moy" ]; then
-  cp aupemoy-samplemintrust-evictall launch
+  cp aupemoy-samplemintrust-evictall $launch
 else 
-  cp aupemax-samplemintrust-evictall launch
+  cp aupemax-samplemintrust-evictall $launch
 fi
 
 # Output directory
