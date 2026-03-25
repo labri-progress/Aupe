@@ -26,8 +26,8 @@ results_dir  <- "output_byz"
 merge_dir    <- "output_byz" #file.path("results_merge", merge_subdir)
 
 # --- Theme ---
-line_size  <- 0.5
-point_size <- 1.5
+line_size  <- 0.1 #0.5
+point_size <- 1 #1.5
 ratio      <- 3
 width      <- 11
 height     <- width / ratio
@@ -68,8 +68,11 @@ mytheme <- theme(
 common_cols <- c("time", "n_sent", "n_recv", "avgRecv", "avgByzRecv", "pByzRecv", "avgByzN")
 
 # --- Part 1: Read BM / BMDecay / Array from output_byz (no trusted nodes) ---
-strategies_base  <- c("xbm", "xdec", "xarray")
-strat_labels_base <- c("xbm" = "BM", "xdec" = "BMDecay", "xarray" = "Array")
+#strategies_base  <- c("xbm", "xdec", "xarray")
+#strat_labels_base <- c("xbm" = "BM", "xdec" = "BMDecay", "xarray" = "Array")
+
+strategies_base  <- c("bm", "decay", "array")
+strat_labels_base <- c("bm" = "BM", "decay" = "BMDecay", "array" = "Array")
 
 base_data <- data.frame()
 
@@ -77,7 +80,7 @@ for (strat in strategies_base) {
   for (f_pct in faulty_pcts) {
     faulty_count <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
-      if (strat == "xarray") {
+      if (strat == "array") { #"xarray") {
         fname <- file.path(results_dir,
                            sprintf("%s-N%d-v%d-f%d-run%d", strat, nodes, view, faulty_count, run))
       } else {
@@ -102,13 +105,14 @@ for (strat in strategies_base) {
 trusted_data <- data.frame()
 
 #for (strat in strategies_base) {
-strat <- "xdec" # only BMDecay has trusted node variants
+#strat <- "xdec" # only BMDecay has trusted node variants
+strat <- "decay"
 for (t_pct in trusted_pcts) {
   t_count <- as.integer(nodes * t_pct / 100)
   for (f_pct in faulty_pcts) {
     faulty_count <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
-      if (strat == "xarray") {
+      if (strat == "array") { #"xarray") {
         fname <- file.path(results_dir,
                            sprintf("%s-N%d-v%d-f%d-x%d-run%d",
                                  strat, nodes, view, faulty_count, t_count, run))
@@ -145,6 +149,10 @@ all_data$propByz <- all_data$avgByzN / view
 avg_data <- all_data %>%
   group_by(strategy, f_pct, time) %>%
   summarise(propByz = mean(propByz), .groups = "drop")
+
+# Keep one point every `step` rounds
+step <- 100
+avg_data <- avg_data %>% filter(time %% step == 0)
 
 strat_order <- c("BM", "BMDecay", "Array", #paste0("Array t=", trusted_pcts, "%"),
                  paste0("BMDecay t=", trusted_pcts, "%"))

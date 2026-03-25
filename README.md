@@ -1,5 +1,16 @@
 # Aupe
 
+./run_experimentsK.sh decay 0.5 30 0 ; ./run_experimentsK.sh decay 0.5 30 5
+./run_experimentsK.sh decay 0.5 20 0 ; ./run_experimentsK.sh decay 0.5 20 5
+./run_experimentsK.sh decay 0.5 10 0 ; ./run_experimentsK.sh decay 0.5 10 5
+
+./run_experimentsK.sh decay 0.5 30 10 ; ./run_experimentsK.sh decay 0.5 30 20
+./run_experimentsK.sh decay 0.5 20 10 ; ./run_experimentsK.sh decay 0.5 20 20
+./run_experimentsK.sh decay 0.5 10 10 ; ./run_experimentsK.sh decay 0.5 10 20
+
+
+
+
 ./run_experimentsK.sh xdec 0.5 30 0 ; ./run_experimentsK.sh xdec 0.5 30 20
 
 ./run_experimentsK.sh xbm 0.5 30 0 ; ./run_experimentsK.sh xbm 0.5 30 20
