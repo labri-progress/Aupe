@@ -462,14 +462,19 @@ impl App for XArray {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        v_push = self.sketch.debiais_stream(v_push, &mut self.rng);
+                        /* v_push = self.sketch.debiais_stream(v_push, &mut self.rng);
                         v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng);
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
-                        view.extend(self.pull_view.clone());
+                        view.extend(self.pull_view.clone()); */
+                        
+                        let mut stream = v_push.clone();
+                        stream.extend(v_pull.clone());
+                        stream = self.sketch.debiais_stream(stream, &mut self.rng);
+                        let mut view = sample(&stream[..], 2 * self.params.view_size / 3, &mut self.rng);
 
                         let samples_peer = self.sample_view.iter()
                             .filter(|(_, x)| x.is_some())
