@@ -22,15 +22,6 @@ FAULTY_PCTS=("${3:-30}") #10 20 30
 TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
 # Trusted node counts (0 = no trusted nodes)
 
-merge="max"
-launch="launch${1:-bm}-${2:-0.5}-${3:-30}-${4:-0}"
-
-if [ "$merge" = "moy" ]; then
-  cp aupemoy-samplemintrust-evictall $launch
-else 
-  cp aupemax-samplemintrust-evictall $launch
-fi
-
 # Output directory
 OUTDIR="results_byz"
 mkdir -p "$OUTDIR"
@@ -77,7 +68,7 @@ for run in $(seq $NRUNS $NRUNS); do
             continue
           fi
           echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
-          ./$launch -T $ROUNDS -n $NODES $strat \
+          cargo run -- -T $ROUNDS -n $NODES $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
             -n $NODES $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
           mark_done "$outfile"
@@ -91,7 +82,7 @@ for run in $(seq $NRUNS $NRUNS); do
               continue
             fi
             echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
-            ./$launch -T $ROUNDS -n $NODES $strat \
+            cargo run -- -T $ROUNDS -n $NODES $strat \
               -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
               -n $NODES -c $buckets $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
             mark_done "$outfile"

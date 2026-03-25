@@ -4,7 +4,7 @@
 namespace org {
 namespace blobstore {
 
-int merge_strategy = 2; // 0 for sum, 1 for moy 2 for max
+int merge_strategy = 1; // 0 for sum, 1 for moy 2 for max
 
 // Copy constructor
 BitMatcher::BitMatcher(const BitMatcher& other)
