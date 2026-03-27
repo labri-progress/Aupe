@@ -496,19 +496,19 @@ impl App for XBM {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        /* v_push = self.sketch.debiais_stream(v_push, &mut self.rng);
-                        v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng);
+                        v_push = self.sketch.debiais_stream(v_push, &mut self.rng, "push");
+                        v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng, "pull");
                         
                         self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
                         self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
-                        view.extend(self.pull_view.clone()); */
+                        view.extend(self.pull_view.clone()); 
                         
-                        let mut stream = v_push.clone();
+                        /*let mut stream = v_push.clone();
                         stream.extend(v_pull.clone());
                         stream = self.sketch.debiais_stream(stream, &mut self.rng);
-                        let mut view = sample(&stream[..], 2 * self.params.view_size / 3, &mut self.rng);
+                        let mut view = sample(&stream[..], 2 * self.params.view_size / 3, &mut self.rng);*/
 
                         let samples_peer = self.sample_view.iter()
                             .filter(|(_, x)| x.is_some())
@@ -522,16 +522,17 @@ impl App for XBM {
                         self.view = view;
 
                     }
-                    
+                    let alphav= (self.params.view_size / 3) as usize;
+
                     if self.is_trusted { //} && net.time()<=100{
                         let view = self.view.clone();
-                        self.sample_k(&view, 1).iter()
+                        self.sample_k(&view, alphav).iter()
                             .for_each(|p| {
                                 net.send(*p, Msg::PushRequest);
                                 self.update_contact(*p); // if trusted
                             });
 
-                        self.sample_k(&view, 1).iter()
+                        self.sample_k(&view, alphav).iter()
                             .for_each(|p| {
                                 net.send(*p, Msg::PullRequest);
                                 self.update_contact(*p); // if trusted
@@ -546,10 +547,10 @@ impl App for XBM {
                             net.send(p, Msg::MergeRequest(self.sketch.getdata()));
                         }
                     }else {
-                        sample(&self.view[..], 1, &mut self.rng).iter()
+                        sample(&self.view[..], alphav, &mut self.rng).iter()
                             .for_each(|p| { net.send(*p, Msg::PushRequest); });
 
-                        sample(&self.view[..], 1, &mut self.rng).iter()
+                        sample(&self.view[..], alphav, &mut self.rng).iter()
                             .for_each(|p| { net.send(*p, Msg::PullRequest);});
                     }
                     

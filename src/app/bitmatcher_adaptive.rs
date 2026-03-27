@@ -41,7 +41,8 @@ impl Clone for BM {
             matrix: self.matrix.as_ref().unwrap().clone(), 
             key_len: self.key_len,
             min_value: self.min_value,
-            omniscient_memory: self.omniscient_memory.clone(),
+            omniscient_memory_push: self.omniscient_memory_push.clone(),
+            omniscient_memory_pull: self.omniscient_memory_pull.clone(),
         }
     }
 }
@@ -56,7 +57,8 @@ pub struct BM {
     pub matrix: UniquePtr<BitMatcherAdaptive>,
     pub key_len: usize,
     pub min_value: f64,
-    pub omniscient_memory: Vec<usize>,
+    pub omniscient_memory_push: Vec<usize>,
+    pub omniscient_memory_pull: Vec<usize>,
 }
 
 fn count_digits(n: usize) -> usize {
@@ -90,7 +92,8 @@ impl BM {
             matrix: ffi::new_BitMatcherAdaptive(0),
             key_len: 4,
             min_value: f64::MAX,
-            omniscient_memory: Vec::new(),
+            omniscient_memory_push: Vec::new(),
+            omniscient_memory_pull: Vec::new(),
         }
     }
     
@@ -141,34 +144,64 @@ impl BM {
     }
     
 
-    pub fn debiais_stream(&mut self, inputstream: Vec<usize>, rng: &mut StdRng) -> Vec<usize> {
+    pub fn debiais_stream(&mut self, inputstream: Vec<usize>, rng: &mut StdRng, from: &str) -> Vec<usize> {
         let mut outputstream = Vec::new();
         
-        for element in &inputstream {
-            
-            let occur = self.estimate(element);
-            
-            if self.omniscient_memory.len() < self.params.memory_size {
-                if !self.omniscient_memory.contains(element) {
-                    self.omniscient_memory.push(*element);
+        if from == "push" {
+            for element in &inputstream {
+                
+                let occur = self.estimate(element);
+                
+                if self.omniscient_memory_push.len() < self.params.memory_size {
+                    if !self.omniscient_memory_push.contains(element) {
+                        self.omniscient_memory_push.push(*element);
+                    }
+                }else {
+                    let mut prob;
+                    if occur == 0.0 {
+                        prob = 1.0;
+                    } else {
+                        prob = self.min_value/ occur as f64;
+                    }
+                    let random_float: f64 = rng.random(); 
+                    if random_float < prob && !self.omniscient_memory_push.contains(element) {
+                        let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
+                        
+                        self.omniscient_memory_push[i] = *element;
+                    }
                 }
-            }else {
-                let mut prob;
-                if occur == 0.0 {
-                    prob = 1.0;
-                } else {
-                    prob = self.min_value/ occur as f64;
-                }
-                let random_float: f64 = rng.random(); 
-                if random_float < prob && !self.omniscient_memory.contains(element) {
-                    let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
-                    
-                    self.omniscient_memory[i] = *element;
-                }
+                let i = rng.random_range(0..self.omniscient_memory_push.len());
+                outputstream.push(self.omniscient_memory_push[i].clone());
             }
-            let i = rng.random_range(0..self.omniscient_memory.len());
-            outputstream.push(self.omniscient_memory[i].clone());
+        } else if from == "pull" {
+            for element in &inputstream {
+            
+                let occur = self.estimate(element);
+                
+                if self.omniscient_memory_pull.len() < self.params.memory_size {
+                    if !self.omniscient_memory_pull.contains(element) {
+                        self.omniscient_memory_pull.push(*element);
+                    }
+                }else {
+                    let mut prob;
+                    if occur == 0.0 {
+                        prob = 1.0;
+                    } else {
+                        prob = self.min_value/ occur as f64;
+                    }
+                    let random_float: f64 = rng.random(); 
+                    if random_float < prob && !self.omniscient_memory_pull.contains(element) {
+                        let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
+                        
+                        self.omniscient_memory_pull[i] = *element;
+                    }
+                }
+                let i = rng.random_range(0..self.omniscient_memory_pull.len());
+                outputstream.push(self.omniscient_memory_pull[i].clone());
+            }
         }
+
+        
      
         outputstream
     }
