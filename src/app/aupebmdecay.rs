@@ -507,6 +507,11 @@ impl App for AupeDecay {
         } else {
             match msg {
                 Msg::SelfNotif => {
+
+                    let alphav = 1 as usize;
+                    let gammav = (self.params.view_size / 3) as usize;
+                    let betav = self.params.view_size - alphav - gammav;
+
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
@@ -517,8 +522,8 @@ impl App for AupeDecay {
                         v_push = self.sketch.debiais_stream(v_push, &mut self.rng, "push");
                         v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng, "pull");
                         
-                        self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
-                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
+                        self.push_view = sample(&v_push[..], alphav, &mut self.rng);
+                        self.pull_view = sample(&v_pull[..], betav, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
                         view.extend(self.pull_view.clone()); 
@@ -532,7 +537,7 @@ impl App for AupeDecay {
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len(), &mut self.rng);
+                        self.sample_part = sample(&samples_peer[..], gammav, &mut self.rng);
                         
                         view.extend(self.sample_part.clone());
 
@@ -540,15 +545,13 @@ impl App for AupeDecay {
                         self.view = view;
 
                     }
-                    let alphav= (self.params.view_size / 3) as usize;
-
                     sample(&self.view[..], alphav, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             self.update_contact(*p); // if trusted
                         });
 
-                    sample(&self.view[..], alphav, &mut self.rng).iter()
+                    sample(&self.view[..], betav, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             self.update_contact(*p); // if trusted

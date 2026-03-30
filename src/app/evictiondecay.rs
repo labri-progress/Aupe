@@ -462,6 +462,10 @@ impl App for EvictionDecay {
         } else {
             match msg {
                 Msg::SelfNotif => {
+                    let alphav = 1 as usize;
+                    let gammav = (self.params.view_size / 3) as usize;
+                    let betav = self.params.view_size - alphav - gammav;
+
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine && DEBUG{
                             println!("Node {} time {}: v_push={:?} v_pull={:?}", self.my_id, net.time(), self.v_push, self.v_pull);
@@ -482,8 +486,8 @@ impl App for EvictionDecay {
                         v_push = self.sketch.debiais_stream(v_push, &mut self.rng, "push");
                         v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng, "pull");
                         
-                        self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
-                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
+                        self.push_view = sample(&v_push[..], alphav, &mut self.rng);
+                        self.pull_view = sample(&v_pull[..], betav, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
                         view.extend(self.pull_view.clone()); 
@@ -497,7 +501,7 @@ impl App for EvictionDecay {
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len(), &mut self.rng);
+                        self.sample_part = sample(&samples_peer[..], gammav, &mut self.rng);
                         
                         view.extend(self.sample_part.clone());
 
@@ -505,8 +509,7 @@ impl App for EvictionDecay {
                         self.view = view;
 
                     }
-                    let alphav= (self.params.view_size / 3) as usize;
-
+                    
                     let mut view_snapshot = self.view.clone();
                     
                     sample(&view_snapshot[..], alphav, &mut self.rng).iter()
@@ -522,7 +525,7 @@ impl App for EvictionDecay {
                                     && *x >= self.params.n_byzantine + self.params.n_trusted) 
                                 .collect::<Vec<_>>();
                     }
-                    sample(&view_snapshot[..], alphav, &mut self.rng).iter()
+                    sample(&view_snapshot[..], betav, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
                             self.update_contact(*p); // if trusted

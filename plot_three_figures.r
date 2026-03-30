@@ -1,9 +1,11 @@
 #!/usr/bin/env Rscript
 # Usage: Rscript plot_three_figures.r <budget> [<merge_subdir>]
-# Produces 3 PDFs:
+# Produces 5 PDFs:
 #   fig1: BM, BMDecay (t=0%), Evict
 #   fig2: BM, BMDecay (t=0%), BMDecay t=5%/10%/20%
 #   fig3: BMDecay t=5%/10%/20% vs Evict t=5%/10%/20%
+#   fig4: BMDecay vs BMDecay t=5%/10%/20% (gain of merging for BMDecay)
+#   fig5: Evict vs Evict t=5%/10%/20% (gain of merging for Evict)
 
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -19,7 +21,7 @@ nodes        <- 1000
 view         <- 20
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30)
-trusted_pcts <- c(5, 10, 20)
+trusted_pcts <- c(5, 20)
 
 results_dir  <- "output_byz"
 merge_dir    <- "output_byz"
@@ -266,3 +268,91 @@ fig3_ltys   <- custom_lty[fig3_order]
 
 make_grid(fig3_data, fig3_colors, fig3_ltys,
           sprintf("results/fig3_bmdecay_merge_vs_evict_merge_%gKB_%s.pdf", budget, merge_subdir))
+
+# --- Gain helpers ---
+# Compute relative gain: (propByz_baseline - propByz_trusted) / propByz_baseline
+prepare_gain <- function(base_avg, trusted_avg, trusted_labels) {
+  gain_df <- data.frame()
+  for (lbl in trusted_labels) {
+    t_sub  <- trusted_avg %>% filter(strategy == lbl)
+    merged <- inner_join(
+      base_avg %>% select(f_pct, time, propByz_base = propByz),
+      t_sub    %>% select(f_pct, time, strategy, propByz),
+      by = c("f_pct", "time")
+    )
+    merged$gain <- (merged$propByz_base - merged$propByz) / merged$propByz_base
+    gain_df <- rbind(gain_df, merged %>% select(f_pct, time, strategy, gain))
+  }
+  gain_df$strategy <- factor(gain_df$strategy, levels = trusted_labels)
+  gain_df
+}
+
+gain_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = TRUE) {
+  ggplot(data, aes(x = time, y = gain, color = strategy,
+                   linetype = strategy, group = strategy)) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+    geom_line(linewidth = line_size) +
+    scale_color_manual(values = colors, drop = FALSE) +
+    scale_linetype_manual(values = ltys, drop = FALSE) +
+    labs(
+      x = expression(bold("Rounds")),
+      y = if (show_y_title) expression(bold("Relative gain")) else NULL
+    ) +
+    coord_cartesian(ylim = c(-0.5, 0.5)) +
+    scale_x_continuous(breaks = c(0, 5000, 10000, 15000, 20000),
+                       labels = c("0", "5K", "10K", "15K", "20K"),
+                       sec.axis = dup_axis(labels = NULL, name = NULL)) +
+    scale_y_continuous(breaks = seq(-1, 1, by = 0.2),
+                       minor_breaks = seq(-1, 1, by = 0.1),
+                       sec.axis = dup_axis(labels = NULL, name = NULL)) +
+    mytheme +
+    theme(legend.position = if (show_legend) c(0.5, 0.75) else "none") +
+    guides(color    = guide_legend(ncol = 1),
+           linetype = guide_legend(ncol = 1))
+}
+
+make_gain_grid <- function(gain_data, colors, ltys, outfile) {
+  plots <- list()
+  for (i in seq_along(faulty_pcts)) {
+    f   <- faulty_pcts[i]
+    sub <- gain_data %>% filter(f_pct == f)
+    plots[[i]] <- gain_plot(sub, f, colors, ltys,
+                            show_legend  = (i == 1),
+                            show_y_title = (i == 1))
+  }
+  dir.create("results", showWarnings = FALSE)
+  pdf(outfile, width = width, height = height)
+  grid.arrange(grobs = plots, nrow = 1, ncol = 3)
+  dev.off()
+  cat("Saved to:", outfile, "\n")
+}
+
+# ============================================================
+# Figure 4: gain of merging for BMDecay
+# ============================================================
+bmdecay_base_avg    <- prepare(base_df[base_df$strategy == "BMDecay", ], "BMDecay")
+bmdecay_trusted_avg <- prepare(bmdecay_trusted_df, paste0("BMDecay t=", trusted_pcts, "%"))
+
+fig4_labels <- paste0("BMDecay t=", trusted_pcts, "%")
+fig4_gain   <- prepare_gain(bmdecay_base_avg, bmdecay_trusted_avg, fig4_labels)
+
+fig4_colors <- custom_colors[fig4_labels]
+fig4_ltys   <- custom_lty[fig4_labels]
+
+make_gain_grid(fig4_gain, fig4_colors, fig4_ltys,
+               sprintf("results/fig4_bmdecay_merge_gain_%gKB_%s.pdf", budget, merge_subdir))
+
+# ============================================================
+# Figure 5: gain of merging for Evict
+# ============================================================
+evict_base_avg    <- prepare(base_df[base_df$strategy == "Evict", ], "Evict")
+evict_trusted_avg <- prepare(evict_trusted_df, paste0("Evict t=", trusted_pcts, "%"))
+
+fig5_labels <- paste0("Evict t=", trusted_pcts, "%")
+fig5_gain   <- prepare_gain(evict_base_avg, evict_trusted_avg, fig5_labels)
+
+fig5_colors <- custom_colors[fig5_labels]
+fig5_ltys   <- custom_lty[fig5_labels]
+
+make_gain_grid(fig5_gain, fig5_colors, fig5_ltys,
+               sprintf("results/fig5_evict_merge_gain_%gKB_%s.pdf", budget, merge_subdir))
