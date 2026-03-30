@@ -20,7 +20,7 @@ merge_subdir <- if (length(args) >= 2) args[2] else "attack"
 nodes        <- 1000
 view         <- 20
 nruns        <- 1
-faulty_pcts  <- c(10, 20, 30)
+faulty_pcts  <- c(10, 20, 30, 40)
 trusted_pcts <- c(5, 20)
 
 results_dir  <- "output_byz"
@@ -86,9 +86,9 @@ custom_lty <- c(
   "BMDecay t=5%"    = "solid",
   "BMDecay t=10%"   = "solid",
   "BMDecay t=20%"   = "solid",
-  "Evict t=5%"      = "dashed",
-  "Evict t=10%"     = "dashed",
-  "Evict t=20%"     = "dashed"
+  "Evict t=5%"      = "solid",
+  "Evict t=10%"     = "solid",
+  "Evict t=20%"     = "solid"
 )
 
 # --- Common columns ---
@@ -201,7 +201,7 @@ byz_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = T
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
     mytheme +
     theme(legend.position = if (show_legend) c(0.5, 0.75) else "none") +
-    guides(color    = guide_legend(ncol = 2),
+    guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 2))
 }
 
@@ -216,7 +216,7 @@ make_grid <- function(avg_data, colors, ltys, outfile) {
   }
   dir.create("results", showWarnings = FALSE)
   pdf(outfile, width = width, height = height)
-  grid.arrange(grobs = plots, nrow = 1, ncol = 3)
+  grid.arrange(grobs = plots, nrow = 1, ncol = 4)
   dev.off()
   cat("Saved to:", outfile, "\n")
 }
@@ -269,6 +269,8 @@ fig3_ltys   <- custom_lty[fig3_order]
 make_grid(fig3_data, fig3_colors, fig3_ltys,
           sprintf("results/fig3_bmdecay_merge_vs_evict_merge_%gKB_%s.pdf", budget, merge_subdir))
 
+quit()
+
 # --- Gain helpers ---
 # Compute relative gain: (propByz_baseline - propByz_trusted) / propByz_baseline
 prepare_gain <- function(base_avg, trusted_avg, trusted_labels) {
@@ -311,6 +313,8 @@ gain_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = 
            linetype = guide_legend(ncol = 1))
 }
 
+
+
 make_gain_grid <- function(gain_data, colors, ltys, outfile) {
   plots <- list()
   for (i in seq_along(faulty_pcts)) {
@@ -322,7 +326,7 @@ make_gain_grid <- function(gain_data, colors, ltys, outfile) {
   }
   dir.create("results", showWarnings = FALSE)
   pdf(outfile, width = width, height = height)
-  grid.arrange(grobs = plots, nrow = 1, ncol = 3)
+  grid.arrange(grobs = plots, nrow = 1, ncol = 4)
   dev.off()
   cat("Saved to:", outfile, "\n")
 }
