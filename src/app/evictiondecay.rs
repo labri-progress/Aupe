@@ -475,7 +475,7 @@ impl App for EvictionDecay {
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
                         if self.is_trusted {
-                            let eviction_rate = 0.5;
+                            let eviction_rate = 0.8;
                             let n_evict = (v_pull.len() as f64 * (1.0-eviction_rate)).ceil() as usize;
                             v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
                         }
