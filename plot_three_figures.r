@@ -258,9 +258,8 @@ make_grid(fig2_data, fig2_colors, fig2_ltys,
 
 evict_trusted_df <- load_trusted("evict", "Evict", has_budget = TRUE)
 fig3_base <- base_df[base_df$strategy %in% c("BMDecay", "Evict"), ]
-fig3_order <- c("BMDecay", "Evict",
-                paste0("BMDecay t=", trusted_pcts, "%"),
-                paste0("Evict t=",   trusted_pcts, "%"))
+fig3_order <- c("BMDecay", paste0("BMDecay t=", trusted_pcts, "%"),
+               "Evict", paste0("Evict t=",   trusted_pcts, "%"))
 fig3_data  <- prepare(rbind(fig3_base, bmdecay_trusted_df, evict_trusted_df), fig3_order)
 
 fig3_colors <- custom_colors[fig3_order]
