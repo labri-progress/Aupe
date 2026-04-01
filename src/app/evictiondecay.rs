@@ -468,7 +468,7 @@ impl App for EvictionDecay {
                     let betav = self.params.view_size - alphav - gammav;
 
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        if self.my_id == self.params.n_trusted + self.params.n_byzantine {
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine && DEBUG {
                             println!("Node {} time {}: v_push={} v_pull={}", self.my_id, net.time(), self.v_push.len(), self.v_pull.len());
                         }
 
@@ -482,7 +482,7 @@ impl App for EvictionDecay {
                             //shuffle and truncate v_pull
                             v_pull.shuffle(&mut self.rng);
                             v_pull.truncate(n_evict);
-                            println!("{}", v_pull.len());
+                            //println!("{}", v_pull.len());
                         }
 
                         self.update_samples(&v_push);
