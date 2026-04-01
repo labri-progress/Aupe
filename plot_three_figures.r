@@ -105,8 +105,14 @@ read_file <- function(fname, strategy_label, f_pct, run) {
   d$strategy <- strategy_label
   d$f_pct    <- f_pct
   d$run      <- run
+
+  #filter time between 9500 and 10500
+  d$time <- as.integer(d$time)
+  d <- d %>% filter(time >= 9500 & time <= 11500)
+
   d
 }
+
 
 # --- Load base strategies: BM, BMDecay, Evict (no trusted) ---
 load_base <- function() {

@@ -142,18 +142,18 @@ fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &s
 
     let mut net = Simulator::<A>::new(nproc, init);
     net.print_header();
-    if nb_merge > 0 {
+    /* if nb_merge > 0 {
         net.write_node_header(node_file);
     }
     net.print_metrics();
     if nb_merge > 0 {
         net.write_node_metrics(node_file);
-    }
+    } */
     for _step in 0..nsteps {
         net.step();
         net.print_metrics();
-        if nb_merge > 0 {
+        /* if nb_merge > 0 {
             net.write_node_metrics(node_file);
-        }
+        } */
     }
 }
