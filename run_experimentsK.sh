@@ -22,7 +22,7 @@ FAULTY_PCTS=("${3:-30}") #10 20 30
 TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
 
 # Eviction rates for trusted nodes (0.0 = no eviction)
-EVICTION_RATES=("0.5 0.8") # 0.0 0.5 0.8
+EVICTION_RATES=(0.5 0.8) # 0.0 0.5 0.8
 # Trusted node counts (0 = no trusted nodes)
 
 # Output directory
