@@ -1,11 +1,10 @@
 #!/usr/bin/env Rscript
 # Usage: Rscript plot_three_figures.r <budget> [<merge_subdir>]
-# Produces 5 PDFs:
+# Produces PDFs:
 #   fig1: BM, BMDecay (t=0%), Evict
 #   fig2: BM, BMDecay (t=0%), BMDecay t=5%/10%/20%
-#   fig3: BMDecay t=5%/10%/20% vs Evict t=5%/10%/20%
-#   fig4: BMDecay vs BMDecay t=5%/10%/20% (gain of merging for BMDecay)
-#   fig5: Evict vs Evict t=5%/10%/20% (gain of merging for Evict)
+#   fig3: BMDecay + BMDecay t=% vs Evict + Evict t=%
+#   fig4: BM, BMDecay, Evict t=5%/20%
 
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -267,6 +266,19 @@ fig3_ltys   <- custom_lty[fig3_order]
 
 make_grid(fig3_data, fig3_colors, fig3_ltys,
           sprintf("results/fig3_bmdecay_merge_vs_evict_merge_%gKB_%s.pdf", budget, merge_subdir))
+
+# ============================================================
+# Figure 4: BM + BMDecay + Evict t=%
+# ============================================================
+fig4_order <- c("BM", "BMDecay", paste0("Evict t=", trusted_pcts, "%"))
+fig4_data  <- prepare(rbind(base_df[base_df$strategy %in% c("BM","BMDecay"), ], evict_trusted_df),
+                      fig4_order)
+
+fig4_colors <- custom_colors[fig4_order]
+fig4_ltys   <- custom_lty[fig4_order]
+
+make_grid(fig4_data, fig4_colors, fig4_ltys,
+          sprintf("results/fig4_bm_bmdecay_evict_merge_%gKB_%s.pdf", budget, merge_subdir))
 
 quit()
 

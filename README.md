@@ -1,11 +1,11 @@
 # Aupe
-./run_experimentsK.sh evict 0.5 30 0 ; ./run_experimentsK.sh evict 0.5 30 5 ./run_experimentsK.sh evict 0.5 30 20 ;
+./run_experimentsK.sh evict 0.5 30 0 ; ./run_experimentsK.sh evict 0.5 30 5 ; ./run_experimentsK.sh evict 0.5 30 20 ;
 
-./run_experimentsK.sh evict 0.5 10 0 ; ./run_experimentsK.sh evict 0.5 10 5 ./run_experimentsK.sh evict 0.5 10 20
+./run_experimentsK.sh evict 0.5 10 0 ; ./run_experimentsK.sh evict 0.5 10 5 ; ./run_experimentsK.sh evict 0.5 10 20 ;
 
-./run_experimentsK.sh evict 0.5 20 0 ; ./run_experimentsK.sh evict 0.5 20 5 ./run_experimentsK.sh evict 0.5 20 20 ; 
+./run_experimentsK.sh evict 0.5 20 0 ; ./run_experimentsK.sh evict 0.5 20 5 ; ./run_experimentsK.sh evict 0.5 20 20 ; 
 
-./run_experimentsK.sh evict 0.5 40 0 ; ./run_experimentsK.sh evict 0.5 40 5 ./run_experimentsK.sh evict 0.5 40 20 ; 
+./run_experimentsK.sh evict 0.5 40 0 ; ./run_experimentsK.sh evict 0.5 40 5 ; ./run_experimentsK.sh evict 0.5 40 20 ; 
 
 ./run_experimentsK.sh bm 0.5 30 0 ; ./run_experimentsK.sh bm 0.5 20 0 ; ./run_experimentsK.sh bm 0.5 10 0 ; 
 
