@@ -13,8 +13,9 @@ library(dplyr)
 library(gridExtra)
 
 # --- Parameters ---
-budget       <- as.numeric(args[1])
-merge_subdir <- if (length(args) >= 2) args[2] else "attack"
+budget         <- as.numeric(args[1])
+merge_subdir   <- if (length(args) >= 2) args[2] else "attack"
+eviction_rate  <- if (length(args) >= 3) as.numeric(args[3]) else 0.0
 
 nodes        <- 1000
 view         <- 20
@@ -147,7 +148,8 @@ load_base <- function() {
 # strat_key: "decay" or "evict"
 # label_prefix: "BMDecay" or "Evict"
 # has_budget: TRUE 
-load_trusted <- function(strat_key, label_prefix, has_budget) {
+load_trusted <- function(strat_key, label_prefix, has_budget, eviction_rate = 0.0) {
+  eviction_tag <- if (eviction_rate != 0.0) sprintf("-e%g", eviction_rate) else ""
   df <- data.frame()
   for (t_pct in trusted_pcts) {
     t_count <- as.integer(nodes * t_pct / 100)
@@ -156,12 +158,12 @@ load_trusted <- function(strat_key, label_prefix, has_budget) {
       for (run in 1:nruns) {
         fname <- if (has_budget) {
           file.path(merge_dir,
-                    sprintf("%s-N%d-v%d-f%d-y%.1g-x%d-run%d",
-                            strat_key, nodes, view, faulty_count, budget, t_count, run))
+                    sprintf("%s-N%d-v%d-f%d-y%.1g-x%d%s-run%d",
+                            strat_key, nodes, view, faulty_count, budget, t_count, eviction_tag, run))
         } else {
           file.path(results_dir,
-                    sprintf("%s-N%d-v%d-f%d-x%d-run%d",
-                            strat_key, nodes, view, faulty_count, t_count, run))
+                    sprintf("%s-N%d-v%d-f%d-x%d%s-run%d",
+                            strat_key, nodes, view, faulty_count, t_count, eviction_tag, run))
         }
         label <- paste0(label_prefix, " t=", t_pct, "%")
         d <- read_file(fname, label, f_pct, run)
@@ -256,12 +258,12 @@ make_grid(fig2_data, fig2_colors, fig2_ltys,
 # ============================================================
 # Figure 3: BMDecay t=% vs Evict t=%
 # ============================================================
-#evict_trusted_df <- load_trusted("evict", "Evict", has_budget = TRUE)
+#evict_trusted_df <- load_trusted("evict", "Evict", has_budget = TRUE, eviction_rate = eviction_rate)
 #fig3_order <- c(paste0("BMDecay t=", trusted_pcts, "%"),
  #               paste0("Evict t=",   trusted_pcts, "%"))
 #fig3_data  <- prepare(rbind(bmdecay_trusted_df, evict_trusted_df), fig3_order)
 
-evict_trusted_df <- load_trusted("evict", "Evict", has_budget = TRUE)
+evict_trusted_df <- load_trusted("evict", "Evict", has_budget = TRUE, eviction_rate = eviction_rate)
 fig3_base <- base_df[base_df$strategy %in% c("BMDecay", "Evict"), ]
 fig3_order <- c("BMDecay", paste0("BMDecay t=", trusted_pcts, "%"),
                "Evict", paste0("Evict t=",   trusted_pcts, "%"))

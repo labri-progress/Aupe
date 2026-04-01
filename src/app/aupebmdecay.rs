@@ -73,6 +73,10 @@ pub struct Init {
 
     #[structopt(short = "y", long = "budget", default_value = "6")]
     pub space: f64,
+
+    /// Fraction of v_pull to evict for trusted nodes (0.0 = no eviction, 0.8 = keep 20%)
+    #[structopt(short = "e", long = "eviction-rate", default_value = "0.0")]
+    pub eviction_rate: f64,
 }
 
 pub struct AupeDecay {

@@ -475,7 +475,7 @@ impl App for EvictionDecay {
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
                         if self.is_trusted {
-                            let eviction_rate = 0.7;
+                            let eviction_rate = self.params.eviction_rate;
                             let n_evict = (v_pull.len() as f64 * (1.0-eviction_rate)).ceil() as usize;
                             v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
                         }
@@ -518,13 +518,13 @@ impl App for EvictionDecay {
                             self.update_contact(*p); // if trusted
                         });
 
-                    if self.is_trusted && net.time() >= self.params.attack_start_time {
+                    /*if self.is_trusted && net.time() >= self.params.attack_start_time {
                         // contact only non trusted nodes
                         view_snapshot = view_snapshot.into_iter()
                                 .filter(|x| *x < self.params.n_byzantine 
                                     && *x >= self.params.n_byzantine + self.params.n_trusted) 
                                 .collect::<Vec<_>>();
-                    }
+                    }*/
                     sample(&view_snapshot[..], betav, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PullRequest);
