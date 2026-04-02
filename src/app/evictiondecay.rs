@@ -478,10 +478,10 @@ impl App for EvictionDecay {
                         if self.is_trusted {
                             let eviction_rate = self.params.eviction_rate;
                             let n_evict = (v_pull.len() as f64 * (1.0-eviction_rate)).ceil() as usize;
-                            //v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
+                            v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
                             //shuffle and truncate v_pull
-                            v_pull.shuffle(&mut self.rng);
-                            v_pull.truncate(n_evict);
+                            //v_pull.shuffle(&mut self.rng);
+                            //v_pull.truncate(n_evict);
                             //println!("{}", v_pull.len());
                         }
 
