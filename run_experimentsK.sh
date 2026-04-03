@@ -47,7 +47,7 @@ mark_done() {
     echo "$1" >> "$MANIFEST"
 }
 
-for run in $(seq $NRUNS $NRUNS); do
+for run in $(seq 1 $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for f_pct in "${FAULTY_PCTS[@]}"; do
       f_count=$(faulty_count $f_pct)
@@ -65,7 +65,7 @@ for run in $(seq $NRUNS $NRUNS); do
 
         if [ "$strat" = "array" ] || [ "$strat" = "xarray" ]; then
           # Array has no budget parameter — run once per (f, run)
-          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}${eviction_tag}-run${run}"
+          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}-run${run}"
           if is_done "$outfile"; then
             echo "Skipping (already done): $outfile"
             continue
@@ -76,7 +76,7 @@ for run in $(seq $NRUNS $NRUNS); do
             -n $NODES $trusted_flags -s $ATTACK_START  > "$OUTDIR/$outfile" &
           mark_done "$outfile"
           
-        else if [ "$strat" = "bm" ] || [ "$strat" = "decay" ]; then
+        elif [ "$strat" = "bm" ] || [ "$strat" = "decay" ]; then
           # Array has no budget parameter — run once per (f, run)
           outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}-run${run}"
           if is_done "$outfile"; then
