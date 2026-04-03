@@ -65,20 +65,31 @@ for run in $(seq $NRUNS $NRUNS); do
 
         if [ "$strat" = "array" ] || [ "$strat" = "xarray" ]; then
           # Array has no budget parameter — run once per (f, run)
-          for eviction_rate in "${EVICTION_RATES[@]}"; do
-            eviction_tag=$([ "$eviction_rate" != "0.0" ] && echo "-e${eviction_rate}" || echo "")
-            outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}${eviction_tag}-run${run}"
-            if is_done "$outfile"; then
-              echo "Skipping (already done): $outfile"
-              continue
-            fi
-            echo "Running: $strat f=${f_pct}% t=${t_count} eviction=${eviction_rate} run=${run}"
-            cargo run -- -T $ROUNDS -n $NODES $strat \
-              -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-              -n $NODES $trusted_flags -s $ATTACK_START -e $eviction_rate > "$OUTDIR/$outfile" &
-            mark_done "$outfile"
-          done
-        else
+          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}${eviction_tag}-run${run}"
+          if is_done "$outfile"; then
+            echo "Skipping (already done): $outfile"
+            continue
+          fi
+          echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
+          cargo run -- -T $ROUNDS -n $NODES $strat \
+            -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
+            -n $NODES $trusted_flags -s $ATTACK_START  > "$OUTDIR/$outfile" &
+          mark_done "$outfile"
+          
+        else if [ "$strat" = "bm" ] || [ "$strat" = "decay" ]; then
+          # Array has no budget parameter — run once per (f, run)
+          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}-run${run}"
+          if is_done "$outfile"; then
+            echo "Skipping (already done): $outfile"
+            continue
+          fi
+          echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
+          cargo run -- -T $ROUNDS -n $NODES $strat \
+            -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
+            -n $NODES $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
+          mark_done "$outfile"
+          
+          else
           # bm and decay use -y for budget
           for budget in "${BUDGETS[@]}"; do
             buckets=$(echo "$budget * 1024/8/2" | bc)
