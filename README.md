@@ -10,13 +10,13 @@
 
 ./run_experimentsK.sh decay 0.5 30 0 ; ./run_experimentsK.sh decay 0.5 20 0 ; ./run_experimentsK.sh decay 0.5 10 0 ; 
 
-
 ./run_experimentsK.sh decay 0.5 40 0 ; 
+
 
 ./run_experimentsK.sh bm 0.5 30 0 ; ./run_experimentsK.sh bm 0.5 20 0 ; ./run_experimentsK.sh bm 0.5 10 0 ; 
 ./run_experimentsK.sh bm 0.5 40 0 ;
 
-./run_experimentsK.sh array 0.5 30 0 ; ./run_experimentsK.sh array 0.5 20 0 ; ./run_experimentsK.sh array 0.5 10 0 
+./run_experimentsK.sh array 0.5 30 0 ; ./run_experimentsK.sh array 0.5 20 0 ; ./run_experimentsK.sh array 0.5 10 0 ; ./run_experimentsK.sh array 0.5 40 0
 
 
 
