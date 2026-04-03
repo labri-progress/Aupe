@@ -5,7 +5,7 @@ use cxx::UniquePtr;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{hash, sample, sample_nocopy}; //y, write_results};
+use crate::util::{hash, sample}; //, sample_nocopy}; //y, write_results};
 use crate::util::{print_samples, sample_exclude};
 
 use super::bitmatcher::BM;
@@ -482,7 +482,7 @@ impl App for XBM {
                     }
                 },
                 Msg::PullRequest => {
-                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                 },
                 _ => (),
             }

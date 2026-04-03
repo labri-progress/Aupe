@@ -6,7 +6,7 @@ use rand::prelude::SliceRandom;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{hash, sample, sample_nocopy}; //y, write_results};
+use crate::util::{hash, sample}; //, sample_nocopy}; //y, write_results};
 use crate::util::{print_samples, sample_exclude};
 
 use super::bitmatcher_adaptive::BM;
@@ -456,7 +456,7 @@ impl App for EvictionDecay {
                     }
                 },
                 Msg::PullRequest => {
-                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                 },
                 _ => (),
             }
@@ -468,8 +468,9 @@ impl App for EvictionDecay {
                     let betav = self.params.view_size - alphav - gammav;
 
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
-                        if self.my_id == self.params.n_trusted + self.params.n_byzantine && DEBUG {
-                            println!("Node {} time {}: v_push={} v_pull={}", self.my_id, net.time(), self.v_push.len(), self.v_pull.len());
+                        if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                            println!("Node {} time {}: v_push={} v_pull({})={:?}", self.my_id, net.time(), self.v_push.len(), 
+                            self.v_pull.len(), self.v_pull);
                         }
 
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
@@ -477,12 +478,16 @@ impl App for EvictionDecay {
 
                         if self.is_trusted {
                             let eviction_rate = self.params.eviction_rate;
+                            let n = v_pull.len();
                             let n_evict = (v_pull.len() as f64 * (1.0-eviction_rate)).ceil() as usize;
                             v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
                             //shuffle and truncate v_pull
                             //v_pull.shuffle(&mut self.rng);
                             //v_pull.truncate(n_evict);
-                            //println!("{}", v_pull.len());
+                            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG {
+                                println!("ER={}: Evicting {} out of {} result {:?}", self.params.eviction_rate, n_evict, n, v_pull);
+                            }
+                           
                         }
 
                         self.update_samples(&v_push);

@@ -3,7 +3,7 @@ use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample, sample_nocopy};
+use crate::util::{either_or_if_both, hash, sample} ; //, sample_nocopy};
 //use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
 
@@ -325,7 +325,7 @@ impl App for Brahms {
                 Msg::PullRequest => {
                     //println!("message b PlRq ");
                     //println!("byzview {:?} ", sample_nocopy(&mut byzantines[..], self.params.view_size));
-                    net.send(from, Msg::PullReply(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                 },
                 _ => (),
             }

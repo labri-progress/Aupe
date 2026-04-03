@@ -24,8 +24,8 @@ ATTACK_START <- 10000
 STEADY_LAST  <- 500          # rows from end for steady-state average
 
 F_FRACS  <- c(10, 20, 30, 40)   # Byzantine fraction in system (%)
-T_FRACS  <- c(5, 10, 20)        # Trusted node fraction (%)
-ER_VALS  <- c(0.2, 0.5, 0.8)    # Eviction rates (decimal, as passed to -e)
+T_FRACS  <- c(5, 20)        # Trusted node fraction (%)
+ER_VALS  <- c(0.5, 0.8)    # Eviction rates (decimal, as passed to -e)
 
 C1_F <- 30    # reference Byzantine fraction for Courbe 1
 C1_T <- 10    # reference trusted fraction for Courbe 1

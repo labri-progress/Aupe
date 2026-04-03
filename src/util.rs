@@ -51,24 +51,21 @@ pub fn sample<T: PartialEq + Clone, R: Rng + ?Sized>(from: &[T], n: usize, rng: 
     if n >= from.len() {
         return from.to_vec();
     }
-    // Partial Fisher-Yates: only n swaps instead of m, O(n) random draws.
-    // Guarantees termination even when `from` contains duplicate values.
-    let mut indices: Vec<usize> = (0..from.len()).collect();
-    for i in 0..n {
-        let j = rng.random_range(i..from.len());
-        indices.swap(i, j);
-    }
-    // Collect unique-valued elements from the shuffled index order.
-    // If `from` has fewer than n unique values, returns what is available.
-    let mut ret = Vec::with_capacity(n);
-    for &idx in &indices {
-        if ret.len() == n { break; }
-        let elem = &from[idx];
-        if !ret.contains(elem) {
-            ret.push(elem.clone());
+    
+    let mut ret = vec![];
+    let mut input: Vec<T> = from.to_vec();
+    input.shuffle(rng);
+    input.iter().for_each(|item| {
+        if ret.len() < n && !ret.contains(item) {
+            ret.push(item.clone());
         }
+    });
+    while ret.len() < n {
+        let i = rng.random_range(0..from.len());
+        ret.push(input[i].clone());  
     }
     ret
+
 }
 
 pub fn sample_nocopy<T: PartialEq + Clone, R: Rng + ?Sized>(from: &mut [T], n: usize, rng: &mut R) -> Vec<T> {
