@@ -29,8 +29,8 @@ height     <- width / ratio
 custom_colors <- c("BM" = "#882EE6", "BMDecay" = "#000000", "Array" = "#ff8833")
 
 mytheme <- theme(
-  panel.grid.major   = element_blank(),
-  panel.grid.minor   = element_blank(),
+  panel.grid.major = element_line(color = "gray90", linewidth=0.5),
+  panel.grid.minor = element_line(color = "gray95", linewidth=0.25),
   panel.background   = element_rect(fill = "white"),
   plot.background    = element_rect(fill = "white"),
   panel.border       = element_rect(colour = "black", linewidth = 1, fill = NA),
@@ -67,6 +67,7 @@ for (strat in strategies) {
         fname <- file.path(results_dir,
                            sprintf("%s-N%d-v%d-f%d-y%g-run%d", strat, nodes, view, faulty_count, budget, run))
       }
+      #print(paste("Reading:", fname))
       if (!file.exists(fname)) {
         cat("Warning: file not found:", fname, "\n")
         next
@@ -89,7 +90,9 @@ all_data$propByz <- all_data$avgByzN / view
 # Average over runs
 avg_data <- all_data %>%
   group_by(strategy, f_pct, time) %>%
-  summarise(propByz = mean(propByz), .groups = "drop")
+  summarise(propByz = mean(propByz), .groups = "drop") %>%
+  filter(time %% 10 == 0)
+
 
 # --- Plotting function ---
 byz_plot <- function(data, f, show_legend = TRUE, show_y_title = TRUE) {

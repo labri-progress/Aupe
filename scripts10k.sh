@@ -24,3 +24,4 @@ Rscript plot_trusted.r 26 1 bm   # f=26%, budget=1, strategy=bm
 # boxplot des metriques honest pour # prop de trusted node - evolution par rounds
 Rscript plot_metrics_evol_bytrust.r 1 26 bm 200 # budget=1 f=26% strategy=bm, round p_merge=10
 
+Rscript plot_three_figures.r 0.5 0.5

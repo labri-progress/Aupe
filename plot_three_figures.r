@@ -14,8 +14,8 @@ library(gridExtra)
 
 # --- Parameters ---
 budget         <- as.numeric(args[1])
-merge_subdir   <- if (length(args) >= 2) args[2] else "attack"
-eviction_rate  <- if (length(args) >= 3) as.numeric(args[3]) else 0.0
+merge_subdir   <- "attack"
+eviction_rate  <- if (length(args) >= 2) as.numeric(args[2]) else 0.0
 
 nodes        <- 1000
 view         <- 20
@@ -108,8 +108,7 @@ read_file <- function(fname, strategy_label, f_pct, run) {
   d$run      <- run
 
   #filter time between 9500 and 10500
-  d$time <- as.integer(d$time)
-  d <- d %>% filter(time >= 9500 & time <= 11500)
+  #d <- d %>% filter(time >= 9500 & time <= 11500)
 
   d
 }
@@ -117,6 +116,7 @@ read_file <- function(fname, strategy_label, f_pct, run) {
 
 # --- Load base strategies: BM, BMDecay, Evict (no trusted) ---
 load_base <- function() {
+  print("Loading base strategies...")
   strats <- list(
     bm    = list(key = "bm",    label = "BM",     has_budget = TRUE),
     decay = list(key = "decay", label = "BMDecay", has_budget = TRUE),
@@ -136,6 +136,7 @@ load_base <- function() {
                     sprintf("%s-N%d-v%d-f%d-run%d",
                             s$key, nodes, view, faulty_count, run))
         }
+        #print(paste("Reading:", fname))
         d <- read_file(fname, s$label, f_pct, run)
         if (!is.null(d)) df <- rbind(df, d)
       }
@@ -149,6 +150,7 @@ load_base <- function() {
 # label_prefix: "BMDecay" or "Evict"
 # has_budget: TRUE 
 load_trusted <- function(strat_key, label_prefix, has_budget, eviction_rate = 0.0) {
+  print("Loading trusted")
   eviction_tag <- if (eviction_rate != 0.0) sprintf("-e%g", eviction_rate) else ""
   df <- data.frame()
   for (t_pct in trusted_pcts) {
@@ -180,7 +182,7 @@ prepare <- function(df, level_order) {
   avg <- df %>%
     group_by(strategy, f_pct, time) %>%
     summarise(propByz = mean(propByz), .groups = "drop") %>%
-    filter(time %% 100 == 0)
+    filter(time %% 10 == 0)
   present <- intersect(level_order, unique(avg$strategy))
   avg$strategy <- factor(avg$strategy, levels = present)
   avg
