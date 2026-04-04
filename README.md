@@ -20,7 +20,7 @@
 
 
 
-
+./max_expe.sh decay 0.5 30 5; ./max_expe.sh decay 0.5 30 10
 
 ./run_experimentsK.sh decay 0.5 30 0 ; ./run_experimentsK.sh decay 0.5 30 5
 ./run_experimentsK.sh decay 0.5 20 0 ; ./run_experimentsK.sh decay 0.5 20 5
