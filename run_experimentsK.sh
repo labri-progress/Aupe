@@ -26,7 +26,7 @@ EVICTION_RATES=(0.8) # 0.0 0.5 0.8
 # Trusted node counts (0 = no trusted nodes)
 
 # Output directory
-OUTDIR="results_byz"
+OUTDIR="max_byz"
 mkdir -p "$OUTDIR"
 
 MANIFEST="$OUTDIR/manifest.txt"
@@ -47,6 +47,7 @@ mark_done() {
     echo "$1" >> "$MANIFEST"
 }
 
+binary="aupe1push13pullmoy"
 for run in $(seq 1 $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for f_pct in "${FAULTY_PCTS[@]}"; do
@@ -71,7 +72,7 @@ for run in $(seq 1 $NRUNS); do
             continue
           fi
           echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
-          cargo run -- -T $ROUNDS -n $NODES $strat \
+          ./$binary -T $ROUNDS -n $NODES $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
             -n $NODES $trusted_flags -s $ATTACK_START  > "$OUTDIR/$outfile" &
           mark_done "$outfile"
@@ -87,7 +88,7 @@ for run in $(seq 1 $NRUNS); do
                 continue
               fi
               echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
-              cargo run -- -T $ROUNDS -n $NODES $strat \
+              ./$binary -T $ROUNDS -n $NODES $strat \
                 -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
                 -n $NODES -c $buckets $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
               mark_done "$outfile"
@@ -106,7 +107,7 @@ for run in $(seq 1 $NRUNS); do
                 continue
               fi
               echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} eviction=${eviction_rate} run=${run}"
-              cargo run -- -T $ROUNDS -n $NODES $strat \
+              ./$binary -T $ROUNDS -n $NODES $strat \
                 -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
                 -n $NODES -c $buckets $trusted_flags -s $ATTACK_START -e $eviction_rate > "$OUTDIR/$outfile" &
               mark_done "$outfile"

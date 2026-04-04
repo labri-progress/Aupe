@@ -840,7 +840,7 @@ void BitMatcherAdaptive::decay() {
 
 
 // Merge two BitMatchers by summing counters and reinserting
-/*void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
+void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Map to accumulate counts: key = (bucket_id_table0, fingerprint), value = summed count
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> merged_counts;
 	merged_counts.reserve(bucket_num * 20);
@@ -907,14 +907,14 @@ void BitMatcherAdaptive::decay() {
 		}
 		items.push_back({kv.first.second, kv.first.first, count});
 	}
-	printf("Merged unique items: %zu\n", items.size());
+	//printf("Merged unique items: %zu\n", items.size());
 	// Reinsert all items into a fresh sketch (overwrites current)
 	reinsert_items(items);
-}*/
+}
  
 
 
-void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
+/*void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> self_counts, other_counts;
 	self_counts.reserve(bucket_num * 20);
 	other_counts.reserve(bucket_num * 20);
@@ -968,7 +968,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	}
 	//printf("Merged unique items: %zu\n", items.size());
 	reinsert_items(items);
-}
+}*/
 
 
 // Compute overflow count
