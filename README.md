@@ -17,6 +17,14 @@
 
 
 
+chartreuse3-1.grenoble.grid5000.fr
+chartreuse3-3.grenoble.grid5000.fr
+chartreuse3-4.grenoble.grid5000.fr
+chartreuse4-1.grenoble.grid5000.fr
+chartreuse4-2.grenoble.grid5000.fr
+chartreuse4-3.grenoble.grid5000.fr
+chartreuse4-4.grenoble.grid5000.fr
+
 
 
 
