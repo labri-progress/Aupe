@@ -1,2 +1,0 @@
-decay-N1000-v20-f100-y0.5-x50-run1
-decay-N1000-v20-f100-y0.5-x100-run1
