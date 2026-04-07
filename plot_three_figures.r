@@ -27,8 +27,8 @@ results_dir  <- "output_byz"
 merge_dir    <- "output_byz"
 
 # --- Theme ---
-line_size  <- 0.5
-point_size <- 1
+line_size  <- 0.1
+point_size <- 0.1
 ratio      <- 3.5
 width      <- 12
 height     <- width / ratio
