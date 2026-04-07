@@ -21,7 +21,7 @@ nodes        <- 1000
 view         <- 20
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30, 40)
-trusted_pcts <- c(5, 20)
+trusted_pcts <- c(5, 10, 20)
 
 results_dir  <- "output_byz"
 merge_dir    <- "output_byz"

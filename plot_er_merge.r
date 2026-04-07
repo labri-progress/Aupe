@@ -293,6 +293,7 @@ plot_courbe2 <- function() {
                 size = 3, fontface = "bold") +
       geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
       scale_fill_manual(values = t_fill_colors) +
+      scale_y_continuous(breaks = seq(-50, 50, by = 20), limits = c(-50, 50)) +
       labs(
         title = er_lbl,
         x     = expression(bold("Byzantine fraction")),
@@ -302,7 +303,7 @@ plot_courbe2 <- function() {
       ) +
       mytheme +
       theme(
-        legend.position = if (i == 1) c(0.25, 0.85) else "none",
+        legend.position = if (i == 1) c(0.85, 0.85) else "none",
         axis.text.x     = element_text(size = 12, face = "bold")
       ) +
       guides(fill = guide_legend(ncol = 1))
@@ -377,13 +378,14 @@ plot_courbe3 <- function() {
         sec.axis = dup_axis(labels = NULL, name = NULL)
       ) +
       scale_y_continuous(
-        breaks        = seq(0, 50, by = 10),
-        minor_breaks  = seq(0, 50, by = 5),
+        breaks        = seq(0, 100, by = 20),
+        minor_breaks  = seq(0, 100, by = 10),
         sec.axis      = dup_axis(labels = NULL, name = NULL)
       ) +
       coord_cartesian(xlim = c(7, 43), ylim = c(0, NA)) +
+      coord_cartesian(ylim = c(0, 100)) +
       mytheme +
-      theme(legend.position = if (i == 1) c(0.30, 0.75) else "none") +
+      theme(legend.position = c(0.23, 0.85)) + #if (i == 1) c(0.30, 0.75) else "none") +
       guides(color    = guide_legend(ncol = 1),
              linetype = guide_legend(ncol = 1),
              shape    = guide_legend(ncol = 1))
