@@ -47,3 +47,4 @@ bitmatcher_aging.rs
 bitmatcher_aging.h
 launch*
 max_byz
+src/app/mergedecay.rs

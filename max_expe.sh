@@ -80,19 +80,17 @@ for run in $(seq 1 $NRUNS); do
         elif [ "$strat" = "bm" ] || [ "$strat" = "decay" ]; then
           for budget in "${BUDGETS[@]}"; do
             buckets=$(echo "$budget * 1024/8/2" | bc)
-            for eviction_rate in "${EVICTION_RATES[@]}"; do
-              eviction_tag=$([ "$eviction_rate" != "0.0" ] || echo "")
-              outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-y${budget}${trusted_tag}-run${run}"
-              if is_done "$outfile"; then
-                echo "Skipping (already done): $outfile"
-                continue
-              fi
-              echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
-              ./$binary -T $ROUNDS -n $NODES $strat \
-                -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
-                -n $NODES -c $buckets $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
-              mark_done "$outfile"
-            done
+            outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-y${budget}${trusted_tag}-run${run}"
+            if is_done "$outfile"; then
+              echo "Skipping (already done): $outfile"
+              continue
+            fi
+            echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
+            ./$binary -T $ROUNDS -n $NODES $strat \
+              -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
+              -n $NODES -c $buckets $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
+            mark_done "$outfile"
+            
           done
           
           else

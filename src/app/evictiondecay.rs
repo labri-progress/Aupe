@@ -350,6 +350,37 @@ impl EvictionDecay {
     fn is_trusted(&self, id:PeerRef) -> bool {
         return id >= self.params.n_byzantine && id < self.params.n_byzantine + self.params.n_trusted;
     }
+        
+    fn sample_k(&mut self, from: &[PeerRef], n: usize) -> Vec<PeerRef> {
+        /*let unique: Vec<PeerRef> = from.iter()
+            .copied()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();*/
+        let mut unique: Vec<PeerRef> = from.to_vec();
+        unique.sort();
+        unique.dedup();
+
+        if n >= unique.len() {
+            return unique;
+        }
+        // Phase 1: collect occurrences (mutable borrow of self.sketch only)
+        let occurs: Vec<f64> = unique.iter()
+            .map(|peer| self.sketch.estimate(peer).max(1.0))
+            .collect();
+
+        // Phase 2: assign keys and sort (mutable borrow of self.rng only)
+        let mut keyed: Vec<(f64, PeerRef)> = unique.iter().copied()
+            .zip(occurs.into_iter())
+            .map(|(peer, occur)| {
+                let key = self.rng.random::<f64>().powf(occur);
+                (key, peer)
+            })
+            .collect();
+
+        keyed.sort_unstable_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+        keyed.into_iter().take(n).map(|(_, p)| p).collect()
+    }
 }
 
 impl App for EvictionDecay {
@@ -480,7 +511,8 @@ impl App for EvictionDecay {
                             let eviction_rate = self.params.eviction_rate;
                             let n = v_pull.len();
                             let n_evict = (v_pull.len() as f64 * (1.0-eviction_rate)).ceil() as usize;
-                            v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
+                            v_pull = self.sample_k(&v_pull[..], n_evict); 
+                            //v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
                             //shuffle and truncate v_pull
                             //v_pull.shuffle(&mut self.rng);
                             //v_pull.truncate(n_evict);
@@ -522,12 +554,12 @@ impl App for EvictionDecay {
                     
                     let mut view_snapshot = self.view.clone();
                     
-                    sample(&view_snapshot[..], alphav, &mut self.rng).iter()
+                    /*sample(&view_snapshot[..], alphav, &mut self.rng).iter()
                         .for_each(|p| {
                             net.send(*p, Msg::PushRequest);
                             self.update_contact(*p); // if trusted
                         });
-
+                    */
                     if self.is_trusted && net.time() >= self.params.attack_start_time {
                         // contact only non trusted nodes
                         view_snapshot = view_snapshot.into_iter()
