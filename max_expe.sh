@@ -47,7 +47,7 @@ mark_done() {
     echo "$1" >> "$MANIFEST"
 }
 
-binary="aupe1push13pullmax"
+binary="eviction" #"aupe1push13pullmax"
 for run in $(seq 1 $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for f_pct in "${FAULTY_PCTS[@]}"; do
