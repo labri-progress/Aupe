@@ -148,7 +148,7 @@ impl NetMetrics for Metrics {
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> { //'
         vec![
             "avgRecv",
             "avgByzRecv",
@@ -355,7 +355,7 @@ impl XDecay {
     ///   key_i = U_i ^ occur_i
     /// Higher occurrence → larger exponent → key compressed toward 0 → less likely selected.
     /// Elements with zero estimated occurrence get exponent 1.0 (uniform fallback).
-    fn sample_k(&mut self, from: &[PeerRef], n: usize) -> Vec<PeerRef> {
+    /*fn sample_k(&mut self, from: &[PeerRef], n: usize) -> Vec<PeerRef> {
         if n >= from.len() {
             return from.to_vec();
         }
@@ -375,6 +375,35 @@ impl XDecay {
 
         keyed.sort_unstable_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
         keyed.into_iter().take(n).map(|(_, p)| p).collect()
+    }*/
+
+    fn sample_k(&mut self, from: &[PeerRef], n: usize) -> Vec<PeerRef> {
+        if n == 0 {
+            return Vec::new();
+        }
+
+        // Deduplicate
+        let mut unique: Vec<PeerRef> = from.to_vec();
+        unique.sort();
+        unique.dedup();
+
+        if n >= unique.len() {
+            return unique;
+        }
+
+        // Pair each peer with its estimated occurrence (single pass, no intermediate vec)
+        let mut keyed: Vec<(f64, PeerRef)> = unique
+            .into_iter()
+            .map(|peer| (self.sketch.estimate(&peer).max(1.0), peer))
+            .collect();
+
+        // Partial sort: find the n peers with smallest occurrence in O(m) average
+        // `select_nth_unstable_by` places the nth element in its sorted position,
+        // with everything smaller before it — which is exactly what we want.
+        keyed.select_nth_unstable_by(n - 1, |a, b| a.0.total_cmp(&b.0));
+        keyed.truncate(n);
+
+        keyed.into_iter().map(|(_, p)| p).collect()
     }
 }
 

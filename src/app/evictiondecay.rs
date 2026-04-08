@@ -149,7 +149,7 @@ impl NetMetrics for Metrics {
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> {  //'
         vec![
             "avgRecv",
             "avgByzRecv",
@@ -174,6 +174,7 @@ impl NetMetrics for Metrics {
             "t_occ",
         ]
     }
+       
     fn is_empty(&self) -> bool { self.n_procs == 0 }
     fn values(&self) -> Vec<String> {
         let g = |n: usize, d: f64| if n > 0 { d / n as f64 } else { 0.0 };
@@ -352,11 +353,11 @@ impl EvictionDecay {
     }
         
     fn sample_k(&mut self, from: &[PeerRef], n: usize) -> Vec<PeerRef> {
-        /*let unique: Vec<PeerRef> = from.iter()
-            .copied()
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();*/
+        if n == 0 {
+            return Vec::new();
+        }
+
+        // Deduplicate
         let mut unique: Vec<PeerRef> = from.to_vec();
         unique.sort();
         unique.dedup();
@@ -364,13 +365,15 @@ impl EvictionDecay {
         if n >= unique.len() {
             return unique;
         }
+
         // Phase 1: collect occurrences (mutable borrow of self.sketch only)
         let occurs: Vec<f64> = unique.iter()
             .map(|peer| self.sketch.estimate(peer).max(1.0))
             .collect();
 
         // Phase 2: assign keys and sort (mutable borrow of self.rng only)
-        let mut keyed: Vec<(f64, PeerRef)> = unique.iter().copied()
+        let mut keyed: Vec<(f64, PeerRef)> = unique
+            .into_iter()
             .zip(occurs.into_iter())
             .map(|(peer, occur)| {
                 let key = self.rng.random::<f64>().powf(occur);
@@ -380,6 +383,48 @@ impl EvictionDecay {
 
         keyed.sort_unstable_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
         keyed.into_iter().take(n).map(|(_, p)| p).collect()
+
+        // Pair each peer with its estimated occurrence (single pass, no intermediate vec)
+        /*let mut keyed: Vec<(f64, PeerRef)> = unique
+            .into_iter()
+            .map(|peer| (self.sketch.estimate(&peer).max(1.0), peer))
+            .collect();
+
+        // Partial sort: find the n peers with smallest occurrence in O(m) average
+        // `select_nth_unstable_by` places the nth element in its sorted position,
+        // with everything smaller before it — which is exactly what we want.
+        keyed.select_nth_unstable_by(n - 1, |a, b| a.0.total_cmp(&b.0));
+        keyed.truncate(n);
+
+        keyed.into_iter().map(|(_, p)| p).collect()*/
+    }
+    fn sample_k2(&mut self, from: &[PeerRef], n: usize) -> Vec<PeerRef> {
+        if n == 0 {
+            return Vec::new();
+        }
+
+        // Deduplicate
+        let mut unique: Vec<PeerRef> = from.to_vec();
+        unique.sort();
+        unique.dedup();
+
+        if n >= unique.len() {
+            return unique;
+        }
+
+        // Pair each peer with its estimated occurrence (single pass, no intermediate vec)
+        let mut keyed: Vec<(f64, PeerRef)> = unique
+            .into_iter()
+            .map(|peer| (self.sketch.estimate(&peer).max(1.0), peer))
+            .collect();
+
+        // Partial sort: find the n peers with smallest occurrence in O(m) average
+        // `select_nth_unstable_by` places the nth element in its sorted position,
+        // with everything smaller before it — which is exactly what we want.
+        keyed.select_nth_unstable_by(n - 1, |a, b| a.0.total_cmp(&b.0));
+        keyed.truncate(n);
+
+        keyed.into_iter().map(|(_, p)| p).collect()
     }
 }
 
@@ -516,8 +561,10 @@ impl App for EvictionDecay {
                             //shuffle and truncate v_pull
                             //v_pull.shuffle(&mut self.rng);
                             //v_pull.truncate(n_evict);
-                            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG {
-                                println!("ER={}: Evicting {} out of {} result {:?}", self.params.eviction_rate, n_evict, n, v_pull);
+                            if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
+                                //println!("ER={}: Evicting {} out of {} result {:?}", self.params.eviction_rate, n_evict, n, v_pull);
+                                let pourcentage_of_byz = v_pull.iter().filter(|x| **x < self.params.n_byzantine).count() as f64 / v_pull.len() as f64;
+                                println!("Node {} time {}: eviction_rate={} evicting {} out of {} pull results, with {:.2}% byzantine", self.my_id, net.time(), eviction_rate, n_evict, n, pourcentage_of_byz*100.0);
                             }
                            
                         }

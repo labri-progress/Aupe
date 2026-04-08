@@ -6,7 +6,7 @@
 
 # Configuration
 HOSTS_FILE="/etc/ansible/hosts"
-REMOTE_DIR= "~/Aupe/results_byz"
+REMOTE_DIR="~/Aupe/result_byz"
 LOCAL_DIR="./fetched_results_byz"
 TIMESTAMP=${1:-"latest"}
 
