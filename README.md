@@ -1,5 +1,7 @@
 # Aupe
 
+- remove conditionnal pull requests of trusted nodes
+- test without eviction rate and samplek of push and pull bags
 ./max_expe.sh evict 0.5 30 0 ; ./max_expe.sh evict 0.5 30 5 ; ./max_expe.sh evict 0.5 30 20 ;
 
 ./max_expe.sh evict 0.5 10 0 ; ./max_expe.sh evict 0.5 10 5 ; ./max_expe.sh evict 0.5 10 20 ;
