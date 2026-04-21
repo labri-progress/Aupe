@@ -60,7 +60,7 @@ impl Default for WhichGraphStats {
 }
 
 impl std::str::FromStr for WhichGraphStats {
-    type Err = &'static str;
+    type Err = &'static str; //'
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -168,7 +168,7 @@ impl NetMetrics for Metrics {
 
         self.graph.combine(&other.graph);
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> { //'
         vec![
             "avgRecv",
             "avgByzRecv",
@@ -332,18 +332,25 @@ impl App for Brahms {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    
+                    let alphav = 1 as usize;
+                    let gammav = (self.params.view_size / 3) as usize;
+                    let betav = self.params.view_size - alphav - gammav;
+
                     //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         
                         let v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
-                        // Log real trace
+                        
+
+                        self.update_samples(&v_push[..]);
+                        self.update_samples(&v_pull[..]);
+
+                        /* // Log real trace
                         let mut bags = v_push.clone();
                         bags.extend(v_pull.clone());
-
-                        /* let file_path = String::from("brahms")+&self.params.n_byzantine.to_string() +"/node"
+                        let file_path = String::from("brahms")+&self.params.n_byzantine.to_string() +"/node"
                             +&self.my_id.to_string() + ".txt";
                         match write_results(bags, &file_path) {
                             Ok(()) => {}
@@ -352,8 +359,8 @@ impl App for Brahms {
                             }
                         };  */
 
-                        self.push_view = sample(&v_push[..], self.params.view_size / 3, &mut self.rng);
-                        self.pull_view = sample(&v_pull[..], self.params.view_size / 3, &mut self.rng);
+                        self.push_view = sample(&v_push[..], alphav, &mut self.rng);
+                        self.pull_view = sample(&v_pull[..], betav, &mut self.rng);
                         
                         let mut view = self.push_view.clone();
                         view.extend(self.pull_view.clone());
@@ -362,25 +369,24 @@ impl App for Brahms {
                             .filter(|(_, x)| x.is_some())
                             .map(|(_, x)| x.unwrap())
                             .collect::<Vec<_>>();
-                        self.sample_part = sample(&samples_peer[..], self.params.view_size - view.len(), &mut self.rng);
+                        self.sample_part = sample(&samples_peer[..], gammav, &mut self.rng);
                         
                         view.extend(self.sample_part.clone());
 
                         view.extend(sample(&self.view[..], self.params.view_size - view.len(), &mut self.rng));
                         self.view = view;
 
-                        self.update_samples(&v_push[..]);
-                        self.update_samples(&v_pull[..]);
+                        
                         //println!("View Node{} {:?} ", self.my_id, self.view);
                     }
                     //
                     /* println!("View Node{} {:?} ", self.my_id, self.view);
                     println!("sample list {:?} ",self.sample_view); */
 
-                    sample(&self.view[..], 1, &mut self.rng).iter()
+                    sample(&self.view[..], alphav, &mut self.rng).iter()
                         .for_each(|p| net.send(*p, Msg::PushRequest));
 
-                    sample(&self.view[..], 1, &mut self.rng).iter()
+                    sample(&self.view[..], betav, &mut self.rng).iter()
                         .for_each(|p| net.send(*p, Msg::PullRequest));
 
                     net.send(self.my_id, Msg::SelfNotif);

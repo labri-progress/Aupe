@@ -108,7 +108,7 @@ read_file <- function(fname, strategy_label, f_pct, run) {
   d$run      <- run
 
   #filter time between 9500 and 10500
-  #d <- d %>% filter(time >= 9500 & time <= 11500)
+  d <- d %>% filter(time >= 9900 & time <= 11000)
 
   d
 }
@@ -181,8 +181,8 @@ prepare <- function(df, level_order) {
   df$propByz <- df$avgByzN / view
   avg <- df %>%
     group_by(strategy, f_pct, time) %>%
-    summarise(propByz = mean(propByz), .groups = "drop") %>%
-    filter(time %% 10 == 0)
+    summarise(propByz = mean(propByz), .groups = "drop") #%>%
+    #filter(time %% 10 == 0)
   present <- intersect(level_order, unique(avg$strategy))
   avg$strategy <- factor(avg$strategy, levels = present)
   avg

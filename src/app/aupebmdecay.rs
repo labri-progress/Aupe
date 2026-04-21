@@ -197,7 +197,7 @@ impl NetMetrics for Metrics {
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> { //'
         vec![
             "avgRecv",
             "avgByzRecv",
@@ -520,6 +520,9 @@ impl App for AupeDecay {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
+                        self.sketch.update_freq(v_push.clone());    
+                        self.sketch.update_freq(v_pull.clone());
+
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
@@ -593,7 +596,7 @@ impl App for AupeDecay {
                         for id in lst.iter() { occ[*id] += 1.0; }
                     }
                     self.v_pull.extend(lst);
-                    self.sketch.update_freq(lst.clone());
+                    //self.sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     self.n_received += 1;
@@ -605,7 +608,7 @@ impl App for AupeDecay {
                     }
                     self.v_push.push(from);
                     let lst = vec![from];
-                    self.sketch.update_freq(lst);
+                    //self.sketch.update_freq(lst);
                 },
 
                 Msg::MergeRequest(other_sketch) => {

@@ -187,7 +187,7 @@ impl NetMetrics for Metrics {
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> { //'
         vec![
             "avgRecv",
             "avgByzRecv",
@@ -495,7 +495,9 @@ impl App for AupeBM {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
-                        
+                        self.sketch.update_freq(v_push.clone());    
+                        self.sketch.update_freq(v_pull.clone());
+
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
@@ -571,7 +573,7 @@ impl App for AupeBM {
                         for id in lst.iter() { occ[*id] += 1.0; }
                     }
                     self.v_pull.extend(lst);
-                    self.sketch.update_freq(lst.clone());
+                    //self.sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     //println!("message PushR ");
@@ -586,7 +588,7 @@ impl App for AupeBM {
 
                     let mut lst = Vec::new();
                     lst.push(from);
-                    self.sketch.update_freq(lst.clone());
+                    //self.sketch.update_freq(lst.clone());
                 },
 
                 Msg::MergeRequest(other_sketch) => {

@@ -543,6 +543,9 @@ impl App for EvictionDecay {
                     let gammav = (self.params.view_size / 3) as usize;
                     let betav = self.params.view_size - alphav - gammav;
 
+                    /* self.sketch.update_freq(self.v_push.clone());    
+                    self.sketch.update_freq(self.v_pull.clone()); */
+
                     if !self.v_push.is_empty() && !self.v_pull.is_empty() {
                         if self.my_id == self.params.n_trusted + self.params.n_byzantine -1 && DEBUG{
                             println!("Node {} time {}: v_push={} v_pull({})={:?}", self.my_id, net.time(), self.v_push.len(), 
@@ -552,12 +555,13 @@ impl App for EvictionDecay {
                         let mut v_push = std::mem::replace(&mut self.v_push, Vec::new());
                         let mut v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
 
+
                         if self.is_trusted {
                             let eviction_rate = self.params.eviction_rate;
                             let n = v_pull.len();
                             let n_evict = (v_pull.len() as f64 * (1.0-eviction_rate)).ceil() as usize;
-                            v_pull = self.sample_k(&v_pull[..], n_evict); 
-                            //v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
+                            //v_pull = self.sample_k(&v_pull[..], n_evict); 
+                            v_pull = sample(&v_pull[..], n_evict, &mut self.rng);
                             //shuffle and truncate v_pull
                             //v_pull.shuffle(&mut self.rng);
                             //v_pull.truncate(n_evict);
@@ -568,7 +572,9 @@ impl App for EvictionDecay {
                             }
                            
                         }
-
+                        self.sketch.update_freq(v_push.clone());    
+                        self.sketch.update_freq(v_pull.clone());
+                        
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
@@ -652,7 +658,7 @@ impl App for EvictionDecay {
                         for id in lst.iter() { occ[*id] += 1.0; }
                     }
                     self.v_pull.extend(lst);
-                    self.sketch.update_freq(lst.clone());
+                    //self.sketch.update_freq(lst.clone());
                 },
                 Msg::PushRequest => {
                     self.n_received += 1;
@@ -664,7 +670,7 @@ impl App for EvictionDecay {
                     }
                     self.v_push.push(from);
                     let lst = vec![from];
-                    self.sketch.update_freq(lst);
+                    //self.sketch.update_freq(lst);
                 },
 
                 Msg::MergeRequest(other_sketch) => {
