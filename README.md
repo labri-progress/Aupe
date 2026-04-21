@@ -9,14 +9,13 @@
 ./max_expe.sh evict 0.5 20 0 ; ./max_expe.sh evict 0.5 20 5 ; ./max_expe.sh evict 0.5 20 20 ; 
 
 
-./max_expe.sh evict 0.5 40 0 ; ./max_expe.sh evict 0.5 40 5 ; ./max_expe.sh evict 0.5 40 20 ; 
-
-
-
 ./max_expe.sh decay 0.5 30 0 ; ./max_expe.sh decay 0.5 20 0 ; ./max_expe.sh decay 0.5 10 0 ; 
 
 ./max_expe.sh decay 0.5 40 0 ; ./max_expe.sh bm 0.5 40 0 ; ./max_expe.sh bm 0.5 30 0 ;
 
+./run_experimentsK.sh array 0.5 30 0 ; ./run_experimentsK.sh array 0.5 20 0 ; ./run_experimentsK.sh array 0.5 10 0 ;
+
+./run_experimentsK.sh brahms 0.5 30 0 ; ./run_experimentsK.sh brahms 0.5 20 0 ; ./run_experimentsK.sh brahms 0.5 10 0 ;
 
 
 chartreuse3-1.grenoble.grid5000.fr
