@@ -323,9 +323,9 @@ impl App for Brahms {
                     }
                 },
                 Msg::PullRequest => {
-                    //println!("message b PlRq ");
-                    //println!("byzview {:?} ", sample_nocopy(&mut byzantines[..], self.params.view_size));
-                    net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    if net.time() >= self.params.attack_start_time {
+                        net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    }
                 },
                 _ => (),
             }
