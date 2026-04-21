@@ -13,9 +13,14 @@
 
 ./max_expe.sh decay 0.5 40 0 ; ./max_expe.sh bm 0.5 40 0 ; ./max_expe.sh bm 0.5 30 0 ;
 
-./run_experimentsK.sh array 0.5 30 0 ; ./run_experimentsK.sh array 0.5 20 0 ; ./run_experimentsK.sh array 0.5 10 0 ;
+./max_expe.sh array 0.5 30 0 ; ./max_expe.sh array 0.5 20 0 ; ./run_experimentmax_expesK.sh array 0.5 10 0 ;
 
-./run_experimentsK.sh brahms 0.5 30 0 ; ./run_experimentsK.sh brahms 0.5 20 0 ; ./run_experimentsK.sh brahms 0.5 10 0 ;
+./max_expe.sh brahms 0.5 30 0 ; ./max_expe.sh brahms 0.5 20 0 ; ./max_expe.sh brahms 0.5 10 0 ;
+
+
+./max_expe.sh decay 0.5 30 5 ; ./max_expe.sh decay 0.5 30 20 ; ./max_expe.sh decay 0.5 10 5 ; 
+
+ ./max_expe.sh decay 0.5 20 5 ; ./max_expe.sh decay 0.5 20 20 ; ./max_expe.sh decay 0.5 10 20 ;
 
 
 chartreuse3-1.grenoble.grid5000.fr
