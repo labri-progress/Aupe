@@ -57,7 +57,7 @@ for run in $(seq 1 $NRUNS); do
         t_count=$(( NODES * t_pct / 100 ))
         # Build trusted flags
         if [ "$t_count" -gt 0 ]; then
-          trusted_flags="-x $t_count -p 10"
+          trusted_flags="-x $t_count -p 1" # -p 1 means One merge per round for trusted nodes
           trusted_tag="-x${t_count}"
         else
           trusted_flags=""

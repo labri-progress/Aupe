@@ -8,15 +8,12 @@
 
 ./max_expe.sh evict 0.5 20 0 ; ./max_expe.sh evict 0.5 20 5 ; ./max_expe.sh evict 0.5 20 20 ; 
 
-
-./max_expe.sh decay 0.5 30 0 ; ./max_expe.sh decay 0.5 20 0 ; ./max_expe.sh decay 0.5 10 0 ; 
-
-./max_expe.sh decay 0.5 40 0 ; ./max_expe.sh bm 0.5 40 0 ; ./max_expe.sh bm 0.5 30 0 ;
-
-./max_expe.sh array 0.5 30 0 ; ./max_expe.sh array 0.5 20 0 ; ./run_experimentmax_expesK.sh array 0.5 10 0 ;
+./max_expe.sh array 0.5 30 0 ; ./max_expe.sh array 0.5 20 0 ; ./max_expe.sh array 0.5 10 0 ;
 
 ./max_expe.sh brahms 0.5 30 0 ; ./max_expe.sh brahms 0.5 20 0 ; ./max_expe.sh brahms 0.5 10 0 ;
 
+
+./max_expe.sh bm 0.5 10 0 ; ./max_expe.sh bm 0.5 20 0 ; ./max_expe.sh bm 0.5 30 0 ;
 
 ./max_expe.sh decay 0.5 30 5 ; ./max_expe.sh decay 0.5 30 20 ; ./max_expe.sh decay 0.5 10 5 ; 
 
@@ -30,7 +27,7 @@ chartreuse4-1.grenoble.grid5000.fr
 chartreuse4-2.grenoble.grid5000.fr
 chartreuse4-3.grenoble.grid5000.fr
 chartreuse4-4.grenoble.grid5000.fr
-
+./max_expe.sh decay 0.5 30 0 ; ./max_expe.sh decay 0.5 20 0 ; ./max_expe.sh decay 0.5 10 0 ; 
 
 
 
