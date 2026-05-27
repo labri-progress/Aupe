@@ -1,5 +1,7 @@
 # Aupe
 
+./run_merge_experimentsK.sh 0.5 30
+
 ./run_experimentsK.sh decay 0.5 30 0
 
 ./run_experimentsK.sh decay 0.5 30 5

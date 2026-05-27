@@ -4,7 +4,7 @@
 # run_merge_experimentsK.sh 1 10 decay 4
 
 # Experiment parameters
-ROUNDS=200 # 200
+ROUNDS=500 # 200
 NODES=1000
 VIEW=20 #16
 UVIEW=20 #16
@@ -22,12 +22,12 @@ STRATEGIES=("${3:-decay}") #"xdec")
 BUDGETS=("${1:-0.5}") #(5 10 20)
 
 # Trusted node percentages -> number of trusted nodes
-TRUSTED_PCTS=(0 5 10 20 30) #5 10 20 30)
+TRUSTED_PCTS=(0 5 20) #5 10 20 30)
 # Corresponding -x values: 10%=1000, 20%=2000, 30%=3000
-TRUSTED_COUNTS=(0 50 100 200 300) # 100 200) # 100 200) # 2000 3000)
+TRUSTED_COUNTS=(0 50 200) # 100 200) # 100 200) # 2000 3000)
 
 # Number of merges per trusted node per round
-MERGES=(10) # (1 10)
+MERGES=(1) # (1 10)
 
 # Output directory
 OUTDIR="results_merge"
