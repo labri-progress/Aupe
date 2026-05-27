@@ -2,7 +2,7 @@
 # ./run_experimentsK.sh decay 0.5 30 10 [1] [eviction_rate]
 
 # Experiment parameters
-ROUNDS=10 # 000 # 600000
+ROUNDS=20000 # 600000
 NODES=1000
 VIEW=20
 UVIEW=20
