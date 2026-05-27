@@ -148,7 +148,7 @@ impl NetMetrics for Metrics {
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> { //'
         vec![
             "avgRecv",
             "avgByzRecv",
@@ -479,10 +479,19 @@ impl App for XBM {
                         net.sample_peers(self.params.byzantine_flood_factor)
                             .iter()
                             .for_each(|p| net.send(*p, Msg::PushRequest));
+                    }else{
+                        net.sample_peers(1)
+                            .iter()
+                            .for_each(|p| net.send(*p, Msg::PushRequest));
                     }
                 },
                 Msg::PullRequest => {
-                    net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    if net.time() >= self.params.attack_start_time {
+                        net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    }else{
+                        let view = net.sample_peers(self.params.view_size);
+                        net.send(from, Msg::PullReply(view));
+                    }
                 },
                 _ => (),
             }

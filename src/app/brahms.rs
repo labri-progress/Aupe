@@ -313,11 +313,13 @@ impl App for Brahms {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
-                    //println!("message b SN ");
-                    //println!("indexes {:?} ", net.sample_peers(self.params.byzantine_flood_factor));
                     net.send(self.my_id, Msg::SelfNotif);
                     if net.time() >= self.params.attack_start_time {
                         net.sample_peers(self.params.byzantine_flood_factor)
+                            .iter()
+                            .for_each(|p| net.send(*p, Msg::PushRequest));
+                    }else{
+                        net.sample_peers(1)
                             .iter()
                             .for_each(|p| net.send(*p, Msg::PushRequest));
                     }
@@ -325,6 +327,9 @@ impl App for Brahms {
                 Msg::PullRequest => {
                     if net.time() >= self.params.attack_start_time {
                         net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    }else{
+                        let view = net.sample_peers(self.params.view_size);
+                        net.send(from, Msg::PullReply(view));
                     }
                 },
                 _ => (),
