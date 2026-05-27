@@ -2,7 +2,7 @@
 # ./run_experimentsK.sh decay 0.5 30 10 [1] [eviction_rate]
 
 # Experiment parameters
-ROUNDS=20000 # 600000
+ROUNDS=10 # 000 # 600000
 NODES=1000
 VIEW=20
 UVIEW=20
@@ -26,7 +26,7 @@ EVICTION_RATES=("${5:-0.5}") # 0.0 0.5 0.8
 # Trusted node counts (0 = no trusted nodes)
 
 # Output directory
-OUTDIR="result_byz"
+OUTDIR="results_merge"
 mkdir -p "$OUTDIR"
 
 MANIFEST="$OUTDIR/manifest.txt"

@@ -1,0 +1,2 @@
+decay-N1000-v20-f300-y0.5-x50-run1
+evict-N1000-v20-f300-y0.5-x50-e0.5-run1
