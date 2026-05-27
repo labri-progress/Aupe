@@ -8,6 +8,6 @@ pub mod bitmatcher;
 pub mod bitmatcher_adaptive;
 pub mod evictiondecay;
 pub mod xdecay;
-pub mod mergedecay;
+//pub mod mergedecay;
 pub mod xarray;
 pub mod xbm;

@@ -47,9 +47,6 @@ pub enum WhichApp {
     #[structopt(name = "xdec")]
     XDecay(app::xdecay::Init),
 
-    /// Merge Decay RPS
-    #[structopt(name = "mdec")]
-    MergeDecay(app::mergedecay::Init),
 
     /// X BM RPS
     #[structopt(name = "xbm")]
@@ -98,11 +95,11 @@ fn main() {
             sim::<app::xdecay::XDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
-        WhichApp::MergeDecay(pp) => {
+        /*WhichApp::MergeDecay(pp) => {
             let f = format!("{}/nodes-mdec-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::mergedecay::MergeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
-        }
+        }*/
 
         
         WhichApp::AupeBM(pp) => {
