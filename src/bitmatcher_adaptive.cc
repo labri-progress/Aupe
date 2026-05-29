@@ -838,88 +838,20 @@ void BitMatcherAdaptive::decay() {
 	division_count++;
 }
 
-
-// Merge two BitMatchers by summing counters and reinserting
-/*void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
-	// Map to accumulate counts: key = (bucket_id_table0, fingerprint), value = summed count
-	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> merged_counts;
-	merged_counts.reserve(bucket_num * 20);
-
-
-	// Lambda to extract items from a BitMatcher and accumulate counts
-	auto extract_counts = [&](const BitMatcherAdaptive& bm) {
-		// Extract from table 0 (bucket_id is directly the index)
-		for (uint32_t i = 0; i < bm.bucket_num; i++) {
-			const ec_bucket* b0 = &bm.bucket[0][i];
-			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b0));
-			uint8_t num_items = get_item_num_in_bucket_type(type_id);
-
-			for (uint8_t j = 0; j < num_items; j++) {
-				uint8_t fp = get_bucket_fingerprint(const_cast<ec_bucket*>(b0), j);
-				if (fp == 0) continue;
-
-				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b0), j, type_id);
-				if (count > 0) {
-					if (merge_strategy == 0 || merge_strategy == 1) {
-						merged_counts[{i, fp}] += count;
-					} else if (merge_strategy == 2) {
-						merged_counts[{i, fp}] = std::max(merged_counts[{i, fp}], count);
-					}
-				}
-			}
-		}
-
-		// Extract from table 1 (need to compute bucket_id_table0 = index ^ fp)
-		for (uint32_t i = 0; i < bm.bucket_num; i++) {
-			const ec_bucket* b1 = &bm.bucket[1][i];
-			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b1));
-			uint8_t num_items = get_item_num_in_bucket_type(type_id);
-
-			for (uint8_t j = 0; j < num_items; j++) {
-				uint8_t fp = get_bucket_fingerprint(const_cast<ec_bucket*>(b1), j);
-				if (fp == 0) continue;
-
-				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b1), j, type_id);
-				if (count > 0) {
-					uint32_t bucket_id_table0 = (i ^ fp) % bm.bucket_num;
-					if (merge_strategy == 0 || merge_strategy == 1) {
-						merged_counts[{bucket_id_table0, fp}] += count;
-					} else if (merge_strategy == 2) {
-						merged_counts[{bucket_id_table0, fp}] = std::max(merged_counts[{bucket_id_table0, fp}], count);
-					}
-				}
-			}
-		}
-	};
-
-	// Extract and accumulate counts from both BitMatchers
-	extract_counts(*this);
-	extract_counts(other);
-
-	
-	// Convert map to sorted vector (sorted by decreasing count for better insertion)
-	std::vector<ItemInfo> items;
-	items.reserve(merged_counts.size());
-	for (const auto& kv : merged_counts) {
-		int count = kv.second; 
-		if (merge_strategy == 1) { // moy strategy
-			count = (count + 1) / 2; // Average count for moy strategy
-		}
-		items.push_back({kv.first.second, kv.first.first, count});
-	}
-	//printf("Merged unique items: %zu\n", items.size());
-	// Reinsert all items into a fresh sketch (overwrites current)
-	reinsert_items(items);
-}
-*/
-
-
+// Merge two sketches with per-sketch normalization before combining.
+//
+// Each sketch is independently normalized by its own max count, mapped to
+// the common target scale max(max_self, max_other).  This makes relative
+// frequencies comparable regardless of how many global_divisions each node
+// has accumulated.  After the (max) merge in normalized space the values are
+// already in [0, target] and reinsert_items_direct handles the rest.
 void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> self_counts, other_counts;
 	self_counts.reserve(bucket_num * 20);
 	other_counts.reserve(bucket_num * 20);
 
-	auto extract = [&](const BitMatcherAdaptive& bm, std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash>& out) {
+	auto extract = [&](const BitMatcherAdaptive& bm,
+	                   std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash>& out) {
 		for (uint32_t i = 0; i < bm.bucket_num; i++) {
 			const ec_bucket* b0 = &bm.bucket[0][i];
 			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b0));
@@ -950,26 +882,48 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	extract(*this, self_counts);
 	extract(other, other_counts);
 
+	// Per-sketch max (normalization denominator)
+	uint64_t max_self = 0, max_other = 0;
+	for (const auto& kv : self_counts)  max_self  = max(max_self,  kv.second);
+	for (const auto& kv : other_counts) max_other = max(max_other, kv.second);
+
+	if (max_self == 0 && max_other == 0) return;
+	if (max_self  == 0) max_self  = 1;
+	if (max_other == 0) max_other = 1;
+
+	// Common target scale: the larger of the two maxes.
+	// Both sketches are mapped to [0, target], so the lower-scale one is
+	// scaled up before the max comparison.
+	uint64_t target = max(max_self, max_other);
+
 	std::vector<ItemInfo> items;
 	items.reserve(self_counts.size() + other_counts.size());
-	
+
 	for (const auto& kv : self_counts) {
-		uint64_t other_count = 0;
+		uint64_t norm_self = (kv.second * target) / max_self;
 		auto it = other_counts.find(kv.first);
-		if (it != other_counts.end()) other_count = it->second;
-		uint64_t avg = (kv.second + other_count + 1) / 2;
-		if (avg > 0) items.push_back({kv.first.second, kv.first.first, avg});
+		uint64_t merged;
+		if (it != other_counts.end()) {
+			uint64_t norm_other = (it->second * target) / max_other;
+			merged = (norm_self + norm_other + 1) / 2;  // average, seen by both
+		} else {
+			merged = (norm_self + 1) / 2;               // halved, seen by self only
+		}
+		if (merged > 0)
+			items.push_back({kv.first.second, kv.first.first, merged});
 	}
 	for (const auto& kv : other_counts) {
 		if (self_counts.find(kv.first) == self_counts.end()) {
-			uint64_t avg = (kv.second +1)/ 2;
-			if (avg > 0) items.push_back({kv.first.second, kv.first.first, avg});
+			uint64_t norm_other = (kv.second * target) / max_other;
+			uint64_t merged = (norm_other + 1) / 2;     // halved, seen by other only
+			if (merged > 0)
+				items.push_back({kv.first.second, kv.first.first, merged});
 		}
 	}
-	//printf("Merged unique items: %zu\n", items.size());
+
+	std::sort(items.begin(), items.end());
 	reinsert_items(items);
 }
-
 
 // Compute overflow count
 uint32_t BitMatcherAdaptive::compute_overflow_count() const {

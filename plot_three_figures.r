@@ -108,7 +108,7 @@ read_file <- function(fname, strategy_label, f_pct, run) {
   d$run      <- run
 
   #filter time between 9500 and 10500
-  #d <- d %>% filter(time >= 9900 & time <= 11000)
+  d <- d %>% filter(time >= 9900 & time <= 11000)
 
   d
 }

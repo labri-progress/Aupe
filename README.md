@@ -2,6 +2,8 @@
 
 ./run_merge_experimentsK.sh 0.5 30
 
+./max_expe.sh evict 0.5 30 5 ; ./max_expe.sh evict 0.5 30 20 ;./max_expe.sh evict 0.5 30 0 
+
 ./max_expe.sh decay 0.5 30 5 ; ./max_expe.sh decay 0.5 30 20 ;./max_expe.sh decay 0.5 30 0 
 
 ./max_expe.sh decay 0.5 20 5 ; ./max_expe.sh decay 0.5 20 20 ;./max_expe.sh decay 0.5 20 0 

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk 'NR==1 || \\($1 >= 195 && $1 <= 210\\)' /home/amukam/thss/simulation/Aupe/results_merge/decay-N1000-v20-f100-y0.5-x200-run1)",
+      "Bash(awk '{print $1, $55, $86}')",
+      "Bash(awk '{for\\(i=1;i<=NF;i++\\) printf \"%d: %s\\\\n\", i, $i}')",
+      "Bash(awk 'NR>1 && $1+0 >= 5 && $1+0 <= 20 {printf \"t=%d  h_avgByzN=%.2f  t_avgByzN=%.2f\\\\n\", $1, $9, $16}' /home/amukam/thss/simulation/Aupe/results_merge/evict1/evict-1000-20-100-200-10-1-run1)"
+    ]
+  }
+}

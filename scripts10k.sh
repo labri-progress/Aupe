@@ -1,3 +1,7 @@
+
+Rscript plot_boxplot_bytrust.r 6.0 10 decay 200 1 10000 2>&1
+
+
 #
 Rscript plot_byz_trusted.r 0.5
 # evolution de la résilience
