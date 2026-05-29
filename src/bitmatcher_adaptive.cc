@@ -894,7 +894,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Common target scale: the larger of the two maxes.
 	// Both sketches are mapped to [0, target], so the lower-scale one is
 	// scaled up before the max comparison.
-	uint64_t target = max(max_self, max_other);
+	uint64_t target = (1+max(max_self, max_other)) / 2;
 
 	std::vector<ItemInfo> items;
 	items.reserve(self_counts.size() + other_counts.size());
