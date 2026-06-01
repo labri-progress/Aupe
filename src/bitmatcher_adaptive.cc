@@ -628,43 +628,6 @@ void BitMatcherAdaptive::reinsert_items(std::vector<ItemInfo>& items) {
 
 
 
-double BitMatcherAdaptive::QueryByFp(uint8_t fingerprint_value, uint first_hash_table_idx) const{ //const char *key, const int16_t key_len) {
-	
-	uint8_t fp = fingerprint_value;
-	uint32_t h1 = first_hash_table_idx;
-	uint32_t h2 = (h1 ^ fingerprint_value) % bucket_num;
-	uint hash[2] = {h1, h2};
-
-	bool flag=0;
-	uint64_t min_value = UINT64_MAX; uint64_t table_min[2];
-	__builtin_prefetch(bucket[0].data() + hash[0], 0, 2);
-	__builtin_prefetch(bucket[1].data() + hash[1], 0, 2);
-	for (uint8_t i = 0; i < 2; i++) {
-		ec_bucket* b = const_cast<ec_bucket*>(bucket[i].data() + hash[i]);
-//ec_bucket* b = bucket[i].data() + hash[i];
-		const uint32_t type_id = get_bucket_type_id(b);
-		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
-		table_min[i] = get_bucket_count(b, 0, type_id);
-		for (uint8_t fpt_idx = 0; fpt_idx < fingerprint_num; fpt_idx++) {
-			const uint8_t stored_fingerprint = get_bucket_fingerprint(b, fpt_idx);
-			const uint64_t stored_count = get_bucket_count(b, fpt_idx, type_id);
-			if ( stored_fingerprint == fp ) {
-				return stored_count;
-			}
-			if (!flag && stored_fingerprint == 0) {
-				flag = 1;
-			}
-			if (flag) {continue;}  
-			if (stored_fingerprint != 0 && min_value > stored_count) { min_value = stored_count;}
-		}
-	}
-	if (flag) { return 0; } 
-	else {
-		return min_value;
-	}
-}
-
-
 int BitMatcherAdaptive::Mem(const char *key, const int16_t key_len) {
 	GET_HASH_VALUE_SENTENCE(key);
 	for (uint8_t i = 0; i < 2; i++) {
@@ -894,7 +857,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Common target scale: the larger of the two maxes.
 	// Both sketches are mapped to [0, target], so the lower-scale one is
 	// scaled up before the max comparison.
-	uint64_t target = (1+max(max_self, max_other)) / 2;
+	uint64_t target = (1+max(max_self, max_other)) / 2; //TODO : (max_self + max_other + 1) / 2;
 
 	std::vector<ItemInfo> items;
 	items.reserve(self_counts.size() + other_counts.size());
@@ -907,7 +870,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 			uint64_t norm_other = (it->second * target) / max_other;
 			merged = (norm_self + norm_other + 1) / 2;  // average, seen by both
 		} else {
-			merged = (norm_self + 1) / 2;               // halved, seen by self only
+			merged = norm_self;                          // full value, seen by self only //merged = (norm_self + 1) / 2;               // halved, seen by self only
 		}
 		if (merged > 0)
 			items.push_back({kv.first.second, kv.first.first, merged});
@@ -915,9 +878,9 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	for (const auto& kv : other_counts) {
 		if (self_counts.find(kv.first) == self_counts.end()) {
 			uint64_t norm_other = (kv.second * target) / max_other;
-			uint64_t merged = (norm_other + 1) / 2;     // halved, seen by other only
-			if (merged > 0)
-				items.push_back({kv.first.second, kv.first.first, merged});
+			// uint64_t merged = (norm_other + 1) / 2;     // halved, seen by other only
+			if (norm_other > 0)
+				items.push_back({kv.first.second, kv.first.first, norm_other}); //merged});
 		}
 	}
 

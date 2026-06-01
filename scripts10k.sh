@@ -1,6 +1,16 @@
 
 Rscript plot_boxplot_bytrust.r 0.5 30 decay 200 1 0 2>&1
 
+Rscript plot_resilience_merge.r            # f=300, budget=1 (défaut)
+Rscript plot_resilience_merge.r 200        # f=200
+Rscript plot_resilience_merge.r 300 0.5   # f=300, budget=0.5
+
+
+
+Rscript plot_three_figures.r 0.5 0.5
+
+
+
 Rscript plot_boxplot_bytrust.r 6.0 10 decay 200 1 10000 2>&1
 
 #

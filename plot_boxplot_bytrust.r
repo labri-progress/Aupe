@@ -34,9 +34,18 @@ results_dir  <- "results_merge"
 #target_times <- c(5000, 9999, 10500, 15000, 20000)
 target_times <- c(100, 200, 300, 500, 800, 1000)
 # ── Lecture ───────────────────────────────────────────────────────────────────
-fname <- file.path(results_dir,
+if (strategy == "decay") {
+  fname <- file.path(results_dir,
   sprintf("nodes-%s-%d-%d-%d-%d-%d-%.1f.csv",
     strategy, nodes, view, faulty_count, t_count, p_merge, budget))
+} else if (strategy == "array") {
+  fname <- file.path(results_dir,
+  sprintf("nodes-%s-%d-%d-%d-%d-%d.csv",
+    strategy, nodes, view, faulty_count, t_count, p_merge))
+} else {
+  cat("Stratégie inconnue:", strategy, "\n")
+  quit(status = 1)
+}
 
 if (!file.exists(fname)) {
   cat("Fichier introuvable:", fname, "\n")
@@ -65,14 +74,16 @@ d$group <- ifelse(d$node_id < faulty_count + t_count, "Trusted", "Honest")
 
 if (t_count == 0 || sum(d$group == "Trusted") == 0) {
   cat("Aucun noeud Trusted (t_count=0 ou absent). Abandon.\n")
-  quit(status = 1)
+  #quit(status = 1)
 }
 
 # ── Extraction des metriques selon le groupe ──────────────────────────────────
-d$division <- ifelse(d$group == "Trusted", d$t_division, d$h_division)
-d$f1       <- ifelse(d$group == "Trusted", d$t_f1,       d$h_f1)
-d$tp       <- ifelse(d$group == "Trusted", d$t_tp,       d$h_tp)
-d$biasErr  <- ifelse(d$group == "Trusted", d$t_biasErr,  d$h_biasErr)
+col_or_na <- function(df, nm) if (nm %in% names(df)) df[[nm]] else rep(NA_real_, nrow(df))
+
+d$division <- ifelse(d$group == "Trusted", col_or_na(d, "t_division"), col_or_na(d, "h_division"))
+d$f1       <- ifelse(d$group == "Trusted", col_or_na(d, "t_f1"),       col_or_na(d, "h_f1"))
+d$tp       <- ifelse(d$group == "Trusted", col_or_na(d, "t_tp"),       col_or_na(d, "h_tp"))
+d$biasErr  <- ifelse(d$group == "Trusted", col_or_na(d, "t_biasErr"),  col_or_na(d, "h_biasErr"))
 
 d$group <- factor(d$group, levels = c("Honest", "Trusted"))
 
@@ -118,6 +129,7 @@ pre_post_bg <- annotate("rect",
 
 # ── Limites Y : portee des moustaches (Q1-1.5IQR … Q3+1.5IQR) + marge ────────
 whisker_lim <- function(x, margin = 0.08, lo_zero = FALSE) {
+  if (all(is.na(x))) return(c(0, 1))
   q    <- quantile(x, c(0.25, 0.75), na.rm = TRUE)
   iqr  <- q[2] - q[1]
   lo   <- q[1] - 1.5 * iqr
@@ -142,6 +154,9 @@ make_panel <- function(metric_col, title, ylims, hline = NULL) {
     geom_boxplot(outlier.size = 0.5, outlier.alpha = 0.4,
                  linewidth = 0.4, alpha = 0.75,
                  position = position_dodge(width = 0.8)) +
+    stat_summary(fun = mean, geom = "point", shape = 18, size = 2,
+                 position = position_dodge(width = 0.8),
+                 show.legend = FALSE) +
     scale_fill_manual(values  = group_colors) +
     scale_color_manual(values = group_borders) +
     coord_cartesian(ylim = ylims) +
