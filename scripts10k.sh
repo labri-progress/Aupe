@@ -1,6 +1,7 @@
 
-Rscript plot_boxplot_bytrust.r 6.0 10 decay 200 1 10000 2>&1
+Rscript plot_boxplot_bytrust.r 0.5 30 decay 200 1 0 2>&1
 
+Rscript plot_boxplot_bytrust.r 6.0 10 decay 200 1 10000 2>&1
 
 #
 Rscript plot_byz_trusted.r 0.5
