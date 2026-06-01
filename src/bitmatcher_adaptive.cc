@@ -857,7 +857,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	// Common target scale: the larger of the two maxes.
 	// Both sketches are mapped to [0, target], so the lower-scale one is
 	// scaled up before the max comparison.
-	uint64_t target = (1+max(max_self, max_other)) / 2; //TODO : (max_self + max_other + 1) / 2;
+	uint64_t target = (max_self + max_other + 1) / 2;
 
 	std::vector<ItemInfo> items;
 	items.reserve(self_counts.size() + other_counts.size());
@@ -870,7 +870,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 			uint64_t norm_other = (it->second * target) / max_other;
 			merged = (norm_self + norm_other + 1) / 2;  // average, seen by both
 		} else {
-			merged = norm_self;                          // full value, seen by self only //merged = (norm_self + 1) / 2;               // halved, seen by self only
+			merged = (norm_self + 1) / 2;               // halved, seen by self only
 		}
 		if (merged > 0)
 			items.push_back({kv.first.second, kv.first.first, merged});
@@ -878,9 +878,9 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	for (const auto& kv : other_counts) {
 		if (self_counts.find(kv.first) == self_counts.end()) {
 			uint64_t norm_other = (kv.second * target) / max_other;
-			// uint64_t merged = (norm_other + 1) / 2;     // halved, seen by other only
-			if (norm_other > 0)
-				items.push_back({kv.first.second, kv.first.first, norm_other}); //merged});
+			uint64_t merged = (norm_other + 1) / 2;     // halved, seen by other only
+			if (merged > 0)
+				items.push_back({kv.first.second, kv.first.first, merged});
 		}
 	}
 
