@@ -16,11 +16,11 @@ library(gridExtra)
 budget         <- as.numeric(args[1])
 merge_subdir   <- "attack"
 eviction_rate  <- if (length(args) >= 2) as.numeric(args[2]) else 0.0
-
+zoom <-  if (length(args) >= 3) as.numeric(args[3]) else 0.0
 nodes        <- 1000
 view         <- 20
 nruns        <- 1
-faulty_pcts  <- c(10, 20, 30, 40)
+faulty_pcts  <- c(10, 20, 25, 30, 35, 40) # c(10, 20, 30, 40)
 trusted_pcts <- c(5, 10, 20)
 
 results_dir  <- "output_byz"
@@ -108,7 +108,9 @@ read_file <- function(fname, strategy_label, f_pct, run) {
   d$run      <- run
 
   #filter time between 9500 and 10500
-  d <- d %>% filter(time >= 9900 & time <= 11000)
+  if (zoom != 0) {
+    d <- d %>% filter(time >= 9900 & time <= 11000)
+  }
 
   d
 }
@@ -224,8 +226,8 @@ make_grid <- function(avg_data, colors, ltys, outfile) {
                            show_y_title = (i == 3))
   }
   dir.create("results", showWarnings = FALSE)
-  pdf(outfile, width = width, height = height)
-  grid.arrange(grobs = plots, nrow = 1, ncol = 4)
+  pdf(outfile, width = width, height = height*2)
+  grid.arrange(grobs = plots, nrow = 2, ncol = 3) #grid.arrange(grobs = plots, nrow = 1, ncol = 4)
   dev.off()
   cat("Saved to:", outfile, "\n")
 }
@@ -256,6 +258,8 @@ fig2_ltys   <- custom_lty[fig2_order]
 
 make_grid(fig2_data, fig2_colors, fig2_ltys,
           sprintf("results/fig2_bm_bmdecay_merge_%gKB_%s.pdf", budget, merge_subdir))
+
+quit()
 
 # ============================================================
 # Figure 3: BMDecay t=% vs Evict t=%
@@ -346,8 +350,8 @@ make_gain_grid <- function(gain_data, colors, ltys, outfile) {
                             show_y_title = (i == 1))
   }
   dir.create("results", showWarnings = FALSE)
-  pdf(outfile, width = width, height = height)
-  grid.arrange(grobs = plots, nrow = 1, ncol = 4)
+  pdf(outfile, width = width, height = height*2)
+  grid.arrange(grobs = plots, nrow = 2, ncol = 3) #grid.arrange(grobs = plots, nrow = 1, ncol = 4)
   dev.off()
   cat("Saved to:", outfile, "\n")
 }

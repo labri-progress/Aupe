@@ -22,9 +22,10 @@ FAULTY_PCTS=("${3:-30}") #10 20 30
 TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
 
 # Eviction rates for trusted nodes (0.0 = no eviction)
-EVICTION_RATES=("${5:-0.5}") # 0.0 0.5 0.8
+EVICTION_RATES=("${6:-0.5}") # 0.0 0.5 0.8
 # Trusted node counts (0 = no trusted nodes)
 
+numberofmerge=("${5:-1}")
 # Output directory
 OUTDIR="results_merge"
 mkdir -p "$OUTDIR"
@@ -57,10 +58,10 @@ for run in $(seq 1 $NRUNS); do
         t_count=$(( NODES * t_pct / 100 ))
         # Build trusted flags
         if [ "$t_count" -gt 0 ]; then
-          trusted_flags="-x $t_count -p 1" # -p 1 means One merge per round for trusted nodes
+          trusted_flags="-x $t_count -p $numberofmerge" # -p 1 means One merge per round for trusted nodes
           trusted_tag="-x${t_count}"
         else
-          trusted_flags=""
+          trusted_flags="-p $numberofmerge"
           trusted_tag=""
         fi
 
