@@ -209,7 +209,7 @@ byz_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = T
                        minor_breaks = seq(0, 1, by = 0.1),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.5, 0.75) else "none") +
+    theme(legend.position = if (show_legend) c(0.45, 0.85) else "none") +
     guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 2))
 }
@@ -220,8 +220,8 @@ make_grid <- function(avg_data, colors, ltys, outfile) {
     f   <- faulty_pcts[i]
     sub <- avg_data %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f, colors, ltys,
-                           show_legend  = (i == 1),
-                           show_y_title = (i == 1))
+                           show_legend  = (i == 3),
+                           show_y_title = (i == 3))
   }
   dir.create("results", showWarnings = FALSE)
   pdf(outfile, width = width, height = height)

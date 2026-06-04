@@ -31,8 +31,8 @@ faulty_count <- as.integer(nodes * faulty_pct / 100)
 results_dir  <- "results_merge"
 
 # Rounds cibles : 9999 = juste avant l'attaque, 10500 = juste apres
-#target_times <- c(5000, 9999, 10500, 15000, 20000)
-target_times <- c(100, 200, 300, 500, 800, 1000)
+target_times <- c(5000, 9999, 10500, 15000, 20000)
+#target_times <- c(100, 200, 300, 500, 800, 1000)
 # ── Lecture ───────────────────────────────────────────────────────────────────
 if (strategy == "decay") {
   fname <- file.path(results_dir,
