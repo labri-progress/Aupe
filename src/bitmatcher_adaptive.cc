@@ -806,7 +806,7 @@ void BitMatcherAdaptive::decay() {
 // Each sketch is independently normalized by its own max count, mapped to
 // the common target scale max(max_self, max_other).  This makes relative
 // frequencies comparable regardless of how many global_divisions each node
-// has accumulated.  After the (max) merge in normalized space the values are
+// has accumulated.  After the merge in normalized space the values are
 // already in [0, target] and reinsert_items_direct handles the rest.
 void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	std::unordered_map<std::pair<uint32_t, uint8_t>, uint64_t, pair_hash> self_counts, other_counts;
@@ -870,7 +870,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 			uint64_t norm_other = (it->second * target) / max_other;
 			merged = (norm_self + norm_other + 1) / 2;  // average, seen by both
 		} else {
-			merged = norm_self; //(norm_self + 1) / 2;               // halved, seen by self only
+			merged = norm_self;               
 		}
 		if (merged > 0)
 			items.push_back({kv.first.second, kv.first.first, merged});
@@ -878,7 +878,7 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 	for (const auto& kv : other_counts) {
 		if (self_counts.find(kv.first) == self_counts.end()) {
 			uint64_t norm_other = (kv.second * target) / max_other;
-			uint64_t merged = norm_other; //(norm_other + 1) / 2;     // halved, seen by other only
+			uint64_t merged = norm_other; 
 			if (merged > 0)
 				items.push_back({kv.first.second, kv.first.first, merged});
 		}
@@ -886,6 +886,31 @@ void BitMatcherAdaptive::merge(const BitMatcherAdaptive& other) {
 
 	std::sort(items.begin(), items.end());
 	reinsert_items(items);
+}
+
+// Return the minimum non-zero count across all buckets in both tables.
+// Used by debiais_stream as a scale-invariant reference for the acceptance
+// probability: prob = min_count / item_count.  Scanning is O(bucket_num * slots)
+// which is negligible compared to the N-node network simulation.
+uint64_t BitMatcherAdaptive::get_min_count() const {
+	uint64_t min_count = UINT64_MAX;
+
+	for (int table = 0; table < 2; table++) {
+		for (uint32_t i = 0; i < bucket_num; i++) {
+			const ec_bucket* b = &bucket[table][i];
+			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b));
+			uint8_t num_items = get_item_num_in_bucket_type(type_id);
+			for (uint8_t j = 0; j < num_items; j++) {
+				uint8_t fp = get_bucket_fingerprint(const_cast<ec_bucket*>(b), j);
+				if (fp == 0) continue;
+				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b), j, type_id);
+				if (count > 0 && count < min_count)
+					min_count = count;
+			}
+		}
+	}
+	//printf("Minimum non-zero count in sketch: %llu\n", (unsigned long long)min_count);
+	return (min_count == UINT64_MAX) ? 1 : min_count;
 }
 
 // Compute overflow count

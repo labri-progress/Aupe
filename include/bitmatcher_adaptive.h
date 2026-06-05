@@ -297,6 +297,7 @@ public:
     void decay();
 	uint32_t get_division_count() const { return division_count; };
 	uint32_t get_blocked_count() const { return blocked_count; };
+	uint64_t get_min_count() const;
     uint32_t compute_overflow_count() const;
 
     ~BitMatcherAdaptive();

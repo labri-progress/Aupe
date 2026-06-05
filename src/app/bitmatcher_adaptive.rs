@@ -28,6 +28,7 @@ pub mod ffi {
         fn merge(self: Pin<&mut BitMatcherAdaptive>, other: &BitMatcherAdaptive);
         fn get_blocked_count(self: &BitMatcherAdaptive) -> u32;
         fn get_division_count(self: &BitMatcherAdaptive) -> u32;
+        fn get_min_count(self: &BitMatcherAdaptive) -> u64;
         // Adaptive strategy methods
         fn decay(self: Pin<&mut BitMatcherAdaptive>);
     }
@@ -40,7 +41,6 @@ impl Clone for BM {
             params: self.params.clone(),
             matrix: self.matrix.as_ref().unwrap().clone(), 
             key_len: self.key_len,
-            min_value: self.min_value,
             omniscient_memory_push: self.omniscient_memory_push.clone(),
             omniscient_memory_pull: self.omniscient_memory_pull.clone(),
         }
@@ -56,7 +56,6 @@ pub struct BM {
     pub params: Init,
     pub matrix: UniquePtr<BitMatcherAdaptive>,
     pub key_len: usize,
-    pub min_value: f64,
     pub omniscient_memory_push: Vec<usize>,
     pub omniscient_memory_pull: Vec<usize>,
 }
@@ -80,9 +79,6 @@ impl BM {
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         let_cxx_string!(key = item_str);
         let result = self.matrix.as_mut().unwrap().Query(&key, self.key_len as i16);
-        if result !=0.0 && result < self.min_value {
-            self.min_value = result;
-        }
         result
     }
 
@@ -91,7 +87,6 @@ impl BM {
             params: Init::default(),
             matrix: ffi::new_BitMatcherAdaptive(0),
             key_len: 4,
-            min_value: f64::MAX,
             omniscient_memory_push: Vec::new(),
             omniscient_memory_pull: Vec::new(),
         }
@@ -100,7 +95,6 @@ impl BM {
     pub fn print(&self) {
         //println!("BM of 2 arrays, each of {:?} buckets of size 64 bits", self.params.n_bucket); 
         self.matrix.print_buckets();
-        println!("\nmin_value {}", self.min_value);
          println!("Getting stats bm: {:?}", self.get_stats());
     }
 
@@ -145,64 +139,45 @@ impl BM {
     
 
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>, rng: &mut StdRng, from: &str) -> Vec<usize> {
+        // Use the minimum non-zero count currently stored in the sketch as the
+        // reference for the acceptance probability.  This is scale-invariant: after a
+        // global decay (all counts halved) both ref_min and item counts halve, so the
+        // ratio ref_min/occur is preserved.  Unlike the historical running min_value,
+        // it always reflects the current sketch state after merges and decays.
+        let ref_min = self.matrix.as_ref().unwrap().get_min_count() as f64;
+
+        let estimates: Vec<f64> = inputstream.iter().map(|e| self.estimate(e)).collect();
+
         let mut outputstream = Vec::new();
-        
-        if from == "push" {
-            for element in &inputstream {
-                
-                let occur = self.estimate(element);
-                
-                if self.omniscient_memory_push.len() < self.params.memory_size {
-                    if !self.omniscient_memory_push.contains(element) {
-                        self.omniscient_memory_push.push(*element);
-                    }
-                }else {
-                    let mut prob;
-                    if occur == 0.0 {
-                        prob = 1.0;
-                    } else {
-                        prob = self.min_value/ occur as f64;
-                    }
-                    let random_float: f64 = rng.random(); 
-                    if random_float < prob && !self.omniscient_memory_push.contains(element) {
-                        let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
-                        
-                        self.omniscient_memory_push[i] = *element;
-                    }
+
+        let memory = if from == "push" {
+            &mut self.omniscient_memory_push
+        } else {
+            &mut self.omniscient_memory_pull
+        };
+
+        for (element, &occur) in inputstream.iter().zip(estimates.iter()) {
+            /* if occur < ref_min {
+                panic!("Error: estimate {} is less than ref_min {}", occur, ref_min);
+            } */
+            if memory.len() < self.params.memory_size {
+                if !memory.contains(element) {
+                    memory.push(*element);
                 }
-                let i = rng.random_range(0..self.omniscient_memory_push.len());
-                outputstream.push(self.omniscient_memory_push[i].clone());
+            } else {
+                let prob = if occur == 0.0 { 1.0 } else { (ref_min / occur).min(1.0) };
+                let random_float: f64 = rng.random();
+                if random_float < prob && !memory.contains(element) {
+                    let i = rng.random_range(0..self.params.memory_size);
+                    memory[i] = *element;
+                }
             }
-        } else if from == "pull" {
-            for element in &inputstream {
-            
-                let occur = self.estimate(element);
-                
-                if self.omniscient_memory_pull.len() < self.params.memory_size {
-                    if !self.omniscient_memory_pull.contains(element) {
-                        self.omniscient_memory_pull.push(*element);
-                    }
-                }else {
-                    let mut prob;
-                    if occur == 0.0 {
-                        prob = 1.0;
-                    } else {
-                        prob = self.min_value/ occur as f64;
-                    }
-                    let random_float: f64 = rng.random(); 
-                    if random_float < prob && !self.omniscient_memory_pull.contains(element) {
-                        let i = rng.random_range(0..self.params.memory_size);//omniscient_memory.len());
-                        
-                        self.omniscient_memory_pull[i] = *element;
-                    }
-                }
-                let i = rng.random_range(0..self.omniscient_memory_pull.len());
-                outputstream.push(self.omniscient_memory_pull[i].clone());
+            if !memory.is_empty() {
+                let i = rng.random_range(0..memory.len());
+                outputstream.push(memory[i]);
             }
         }
 
-        
-     
         outputstream
     }
    
