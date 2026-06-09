@@ -492,6 +492,45 @@ double BitMatcherAdaptive::Query(const std::string& key, int16_t key_len){ //con
 }
 
 
+// Si la clé est physiquement présente : retourne la moyenne des compteurs non-nuls
+// du bucket où la clé est trouvée.
+// Si la clé est absente : comportement identique à Query (0 si slot vide, min sinon).
+double BitMatcherAdaptive::QueryAvgBucket(const std::string& key, int16_t key_len) {
+	GET_HASH_VALUE_SENTENCE(key.c_str());
+
+	for (uint8_t i = 0; i < 2; i++) {
+		ec_bucket* b = bucket[i].data() + hash[i];
+		const uint32_t type_id = get_bucket_type_id(b);
+		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (uint8_t j = 0; j < fingerprint_num; j++) {
+			if (get_bucket_fingerprint(b, j) == fp) {
+				uint64_t sum = 0; uint32_t cnt = 0;
+				for (uint8_t k = 0; k < fingerprint_num; k++) {
+					uint64_t c = get_bucket_count(b, k, type_id);
+					if (c > 0) { sum += c; cnt++; }
+				}
+				return (cnt > 0) ? (double)sum / cnt : 0.0;
+			}
+		}
+	}
+
+	// Absent : même comportement que Query
+	bool flag = false;
+	uint64_t min_value = UINT64_MAX;
+	for (uint8_t i = 0; i < 2; i++) {
+		ec_bucket* b = bucket[i].data() + hash[i];
+		const uint32_t type_id = get_bucket_type_id(b);
+		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (uint8_t fpt_idx = 0; fpt_idx < fingerprint_num; fpt_idx++) {
+			const uint8_t stored_fp    = get_bucket_fingerprint(b, fpt_idx);
+			const uint64_t stored_count = get_bucket_count(b, fpt_idx, type_id);
+			if (!flag && stored_fp == 0) { flag = true; }
+			if (!flag && stored_fp != 0 && min_value > stored_count) { min_value = stored_count; }
+		}
+	}
+	return flag ? 0.0 : (double)min_value;
+}
+
 void BitMatcherAdaptive::InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx, uint64_t count){
 	// Insert count incrementally to properly handle overflow using BitMatcherAdaptive's strategy
 	// This allows plus() and solve_overflow_locally() to work correctly for each increment
@@ -935,6 +974,41 @@ uint32_t BitMatcherAdaptive::compute_overflow_count() const {
 	}
 
 	return ovf_num;
+}
+
+uint64_t BitMatcherAdaptive::get_max_count() const {
+	uint64_t max_count = 0;
+	for (int table = 0; table < 2; table++) {
+		for (uint32_t i = 0; i < bucket_num; i++) {
+			const ec_bucket* b = &bucket[table][i];
+			uint8_t type_id = get_bucket_type_id(const_cast<ec_bucket*>(b));
+			uint8_t num_items = get_item_num_in_bucket_type(type_id);
+			for (uint8_t j = 0; j < num_items; j++) {
+				if (get_bucket_fingerprint(const_cast<ec_bucket*>(b), j) == 0) continue;
+				uint64_t count = get_bucket_count(const_cast<ec_bucket*>(b), j, type_id);
+				if (count > max_count) max_count = count;
+			}
+		}
+	}
+	return (max_count == 0) ? 1 : max_count;
+}
+
+// Retourne le compteur physiquement stocké pour cette clé, ou -1 si la clé
+// n'est pas présente (contrairement à Query qui peut renvoyer un min-count
+// quand le bucket est plein).
+int64_t BitMatcherAdaptive::GetCount(const std::string& key, int16_t key_len) {
+	GET_HASH_VALUE_SENTENCE(key.c_str());
+	for (uint8_t i = 0; i < 2; i++) {
+		ec_bucket* b = bucket[i].data() + hash[i];
+		const uint64_t type_id = get_bucket_type_id(b);
+		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (uint8_t j = 0; j < fingerprint_num; j++) {
+			if (get_bucket_fingerprint(b, j) == fp) {
+				return (int64_t)get_bucket_count(b, j, type_id);
+			}
+		}
+	}
+	return -1;
 }
 
 uint64_t BitMatcherAdaptive::get_item_slot_key(const std::string& key, int16_t key_len) {

@@ -1,5 +1,17 @@
 # Aupe
 
+
+./max_expe.sh decay2 0.5 30 20 ; ./max_expe.sh decay2 0.5 30 5 ;
+./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
+
+Rscript plot_slots_bytrust.r 6.0 10 decay 200 1 10000
+Output : results/slots_bytrust_decay_f100_b6.0_x200.pdf
+
+./max_expe.sh decay 0.5 30 20 ; ./max_expe.sh decay 0.5 30 5 ;
+./max_expe.sh decay 0.5 10 0 ; ./max_expe.sh decay 0.5 10 20 ;
+
+
+
 ./run_merge_experimentsK.sh 0.5 30
 
 ./max_expe.sh decay 0.5 40 5 ; ./max_expe.sh decay 0.5 40 20 ;

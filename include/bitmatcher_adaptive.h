@@ -280,6 +280,7 @@ public:
     double zero() const;
     //double Query(const char *key, const int16_t key_len = 0);
 	double Query(const std::string& key, int16_t key_len);
+	double QueryAvgBucket(const std::string& key, int16_t key_len);
     int Mem(const char *key, const int16_t key_len = 0);
     double Ratio() const;
     void dump_to_file(FILE* fp);
@@ -298,8 +299,10 @@ public:
 	uint32_t get_division_count() const { return division_count; };
 	uint32_t get_blocked_count() const { return blocked_count; };
 	uint64_t get_min_count() const;
+	uint64_t get_max_count() const;
     uint32_t compute_overflow_count() const;
     uint64_t get_item_slot_key(const std::string& key, int16_t key_len);
+    int64_t  GetCount(const std::string& key, int16_t key_len);
 
     ~BitMatcherAdaptive();
 

@@ -39,6 +39,14 @@ pub enum WhichApp {
     #[structopt(name = "decay")]
     AupeDecay(app::aupebmdecay::Init),
 
+    /// Aupe RPS – debiasing par présence physique (prob=1 si absent, min/max si présent)
+    #[structopt(name = "decay2")]
+    AupeDecay2(app::aupebmdecay2::Init),
+
+    /// Aupe RPS – query avg-bucket (moy des compteurs du bucket si présent, sinon original)
+    #[structopt(name = "decay3")]
+    AupeDecay3(app::aupebmdecay3::Init),
+
     /// Eviction Decay RPS
     #[structopt(name = "evict")]
     EvictionDecay(app::evictiondecay::Init),
@@ -81,6 +89,18 @@ fn main() {
             let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
+        WhichApp::AupeDecay2(pp) => {
+            let f = format!("{}/nodes-decay2-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::aupebmdecay2::AupeDecay2>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
+        WhichApp::AupeDecay3(pp) => {
+            let f = format!("{}/nodes-decay3-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::aupebmdecay3::AupeDecay3>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::EvictionDecay(pp) => {
