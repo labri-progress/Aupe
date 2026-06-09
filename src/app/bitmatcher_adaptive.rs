@@ -31,6 +31,7 @@ pub mod ffi {
         fn get_min_count(self: &BitMatcherAdaptive) -> u64;
         // Adaptive strategy methods
         fn decay(self: Pin<&mut BitMatcherAdaptive>);
+        fn get_item_slot_key(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> u64;
     }
 }
 unsafe impl Send for ffi::BitMatcherAdaptive {}
@@ -137,6 +138,12 @@ impl BM {
         self.matrix.as_mut().unwrap().merge(other);
     }
     
+
+    pub fn slot_key_of(&mut self, item: &usize) -> u64 {
+        let item_str = format!("{:0>width$}", item, width = self.key_len);
+        let_cxx_string!(key = item_str);
+        self.matrix.as_mut().unwrap().get_item_slot_key(&key, self.key_len as i16)
+    }
 
     pub fn debiais_stream(&mut self, inputstream: Vec<usize>, rng: &mut StdRng, from: &str) -> Vec<usize> {
         // Use the minimum non-zero count currently stored in the sketch as the

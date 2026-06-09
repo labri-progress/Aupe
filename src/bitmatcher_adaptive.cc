@@ -937,6 +937,11 @@ uint32_t BitMatcherAdaptive::compute_overflow_count() const {
 	return ovf_num;
 }
 
+uint64_t BitMatcherAdaptive::get_item_slot_key(const std::string& key, int16_t key_len) {
+	GET_HASH_VALUE_SENTENCE(key.c_str());
+	return ((uint64_t)h1 << 8) | (uint64_t)fp;
+}
+
 BitMatcherAdaptive::~BitMatcherAdaptive() {
 	/* for (int i = 0; i < 2; i++) {
 		delete[]bucket[i];

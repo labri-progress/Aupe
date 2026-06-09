@@ -299,6 +299,7 @@ public:
 	uint32_t get_blocked_count() const { return blocked_count; };
 	uint64_t get_min_count() const;
     uint32_t compute_overflow_count() const;
+    uint64_t get_item_slot_key(const std::string& key, int16_t key_len);
 
     ~BitMatcherAdaptive();
 

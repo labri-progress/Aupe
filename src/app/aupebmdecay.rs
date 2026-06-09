@@ -129,6 +129,12 @@ pub struct Metrics {
     bias_factor_err_honest: f64,
     stat_honest: u32,
     occ_honest: f64,
+    /// fraction de slots occupés uniquement par des byz
+    slots_byz_only_honest: f64,
+    /// fraction de slots occupés uniquement par des honnêtes
+    slots_hon_only_honest: f64,
+    /// fraction de slots avec collision byz+honnête
+    slots_mixed_honest: f64,
 
     // ---- métriques par groupe : nœuds de confiance ----
     n_procs_trusted: usize,
@@ -139,6 +145,9 @@ pub struct Metrics {
     bias_factor_err_trusted: f64,
     stat_trusted: u32,
     occ_trusted: f64,
+    slots_byz_only_trusted: f64,
+    slots_hon_only_trusted: f64,
+    slots_mixed_trusted: f64,
 }
 
 
@@ -158,6 +167,9 @@ impl NetMetrics for Metrics {
             bias_factor_err_honest: 0.0,
             stat_honest: 0,
             occ_honest: 0.0,
+            slots_byz_only_honest: 0.0,
+            slots_hon_only_honest: 0.0,
+            slots_mixed_honest: 0.0,
             n_procs_trusted: 0,
             n_byz_neighbors_trusted: 0,
             dkl_trusted: 0.0,
@@ -166,6 +178,9 @@ impl NetMetrics for Metrics {
             bias_factor_err_trusted: 0.0,
             stat_trusted: 0,
             occ_trusted: 0.0,
+            slots_byz_only_trusted: 0.0,
+            slots_hon_only_trusted: 0.0,
+            slots_mixed_trusted: 0.0,
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -186,6 +201,9 @@ impl NetMetrics for Metrics {
         self.bias_factor_err_honest += other.bias_factor_err_honest;
         self.stat_honest += other.stat_honest;
         self.occ_honest += other.occ_honest;
+        self.slots_byz_only_honest += other.slots_byz_only_honest;
+        self.slots_hon_only_honest += other.slots_hon_only_honest;
+        self.slots_mixed_honest += other.slots_mixed_honest;
 
         // groupe trusted
         self.n_procs_trusted += other.n_procs_trusted;
@@ -196,6 +214,9 @@ impl NetMetrics for Metrics {
         self.bias_factor_err_trusted += other.bias_factor_err_trusted;
         self.stat_trusted += other.stat_trusted;
         self.occ_trusted += other.occ_trusted;
+        self.slots_byz_only_trusted += other.slots_byz_only_trusted;
+        self.slots_hon_only_trusted += other.slots_hon_only_trusted;
+        self.slots_mixed_trusted += other.slots_mixed_trusted;
     }
     fn headers() -> Vec<&'static str> { //'
         vec![
@@ -212,6 +233,9 @@ impl NetMetrics for Metrics {
             "h_biasErr",
             "h_division",
             "h_occ",
+            "h_sl_byz",
+            "h_sl_hon",
+            "h_sl_mix",
             // groupe trusted
             "t_avgByzN",
             "t_dkl",
@@ -220,6 +244,9 @@ impl NetMetrics for Metrics {
             "t_biasErr",
             "t_division",
             "t_occ",
+            "t_sl_byz",
+            "t_sl_hon",
+            "t_sl_mix",
         ]
     }
     fn is_empty(&self) -> bool { self.n_procs == 0 }
@@ -240,6 +267,9 @@ impl NetMetrics for Metrics {
             format!("{:.2}", g(self.n_procs_honest, self.bias_factor_err_honest)),
             format!("{}", self.stat_honest),
             format!("{:.2}", g(self.n_procs_honest, self.occ_honest)),
+            format!("{:.3}", g(self.n_procs_honest, self.slots_byz_only_honest)),
+            format!("{:.3}", g(self.n_procs_honest, self.slots_hon_only_honest)),
+            format!("{:.3}", g(self.n_procs_honest, self.slots_mixed_honest)),
             // groupe trusted
             format!("{:.2}", gi(self.n_procs_trusted, self.n_byz_neighbors_trusted)),
             format!("{:.2}", g(self.n_procs_trusted, self.dkl_trusted)),
@@ -248,6 +278,9 @@ impl NetMetrics for Metrics {
             format!("{:.2}", g(self.n_procs_trusted, self.bias_factor_err_trusted)),
             format!("{}", self.stat_trusted),
             format!("{:.2}", g(self.n_procs_trusted, self.occ_trusted)),
+            format!("{:.3}", g(self.n_procs_trusted, self.slots_byz_only_trusted)),
+            format!("{:.3}", g(self.n_procs_trusted, self.slots_hon_only_trusted)),
+            format!("{:.3}", g(self.n_procs_trusted, self.slots_mixed_trusted)),
         ]
     }
 }
@@ -350,6 +383,31 @@ fn compute_sketch_metrics(
     };
 
     (dkl, f1, tp, bias_factor_err)
+}
+
+/// Pour chaque ID présent dans le sketch (estimate > 0), calcule sa clé de slot canonique
+/// (h1 << 8 | fp), puis classifie chaque slot occupé comme byz-seulement / honnête-seulement
+/// / mixte.  Retourne les fractions (byz_only, hon_only, mixed) sur le total de slots occupés.
+fn compute_slot_occupation(
+    sketch: &mut BM,
+    n_byzantine: usize,
+    n_nodes: usize,
+) -> (f64, f64, f64) {
+    use std::collections::HashMap;
+    let mut slot_map: HashMap<u64, (bool, bool)> = HashMap::new();
+    for id in 0..n_nodes {
+        if sketch.estimate(&id) > 0.0 {
+            let key = sketch.slot_key_of(&id);
+            let entry = slot_map.entry(key).or_insert((false, false));
+            if id < n_byzantine { entry.0 = true; } else { entry.1 = true; }
+        }
+    }
+    let total = slot_map.len() as f64;
+    if total == 0.0 { return (0.0, 0.0, 0.0); }
+    let byz_only = slot_map.values().filter(|(b, h)| *b && !h).count() as f64 / total;
+    let hon_only = slot_map.values().filter(|(b, h)| !b && *h).count() as f64 / total;
+    let mixed    = slot_map.values().filter(|(b, h)| *b && *h).count()  as f64 / total;
+    (byz_only, hon_only, mixed)
 }
 
 
@@ -681,6 +739,12 @@ impl App for AupeDecay {
                 .filter(|id| self.sketch.estimate(id) > 0.0)
                 .count() as f64 / self.params.nodes as f64;
 
+            let (slots_byz_only, slots_hon_only, slots_mixed) = compute_slot_occupation(
+                &mut self.sketch,
+                self.params.n_byzantine,
+                self.params.nodes,
+            );
+
             let mut ret = Self::Metrics {
                 n_procs: 1,
                 n_received: self.n_received,
@@ -696,6 +760,9 @@ impl App for AupeDecay {
                 bias_factor_err_honest: 0.0,
                 stat_honest: 0,
                 occ_honest: 0.0,
+                slots_byz_only_honest: 0.0,
+                slots_hon_only_honest: 0.0,
+                slots_mixed_honest: 0.0,
                 n_procs_trusted: 0,
                 n_byz_neighbors_trusted: 0,
                 dkl_trusted: 0.0,
@@ -704,6 +771,9 @@ impl App for AupeDecay {
                 bias_factor_err_trusted: 0.0,
                 stat_trusted: 0,
                 occ_trusted: 0.0,
+                slots_byz_only_trusted: 0.0,
+                slots_hon_only_trusted: 0.0,
+                slots_mixed_trusted: 0.0,
             };
 
             if self.is_trusted {
@@ -715,6 +785,9 @@ impl App for AupeDecay {
                 ret.bias_factor_err_trusted = bias_factor_err;
                 ret.stat_trusted = self.sketch.get_stats().1;
                 ret.occ_trusted = occ;
+                ret.slots_byz_only_trusted = slots_byz_only;
+                ret.slots_hon_only_trusted = slots_hon_only;
+                ret.slots_mixed_trusted    = slots_mixed;
             } else {
                 ret.n_procs_honest = 1;
                 ret.n_byz_neighbors_honest = nbn;
@@ -724,6 +797,9 @@ impl App for AupeDecay {
                 ret.bias_factor_err_honest = bias_factor_err;
                 ret.stat_honest = self.sketch.get_stats().1;
                 ret.occ_honest = occ;
+                ret.slots_byz_only_honest = slots_byz_only;
+                ret.slots_hon_only_honest = slots_hon_only;
+                ret.slots_mixed_honest    = slots_mixed;
             }
 
             self.n_received = 0;
