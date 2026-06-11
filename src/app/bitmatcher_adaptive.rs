@@ -198,7 +198,9 @@ impl BM {
         outputstream
     }
 
-    /// Requête v3 : moyenne des compteurs du bucket si présent, sinon comportement original.
+    /// Requête v3 : si présent et bucket plein -> moyenne des compteurs du bucket,
+    /// si présent et bucket non plein -> compteur individuel de l'élément,
+    /// sinon (absent) -> comportement original (0 ou min du bucket).
     pub fn estimate_v3(&mut self, item: &usize) -> f64 {
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         let_cxx_string!(key = item_str);

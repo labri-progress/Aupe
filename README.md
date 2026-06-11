@@ -1,6 +1,6 @@
 # Aupe
 
-
+./max_expe.sh decay2 0.5 40 20 ; ./max_expe.sh decay2 0.5 40 5 ;
 ./max_expe.sh decay2 0.5 30 20 ; ./max_expe.sh decay2 0.5 30 5 ;
 ./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
 

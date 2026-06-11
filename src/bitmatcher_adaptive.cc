@@ -492,8 +492,9 @@ double BitMatcherAdaptive::Query(const std::string& key, int16_t key_len){ //con
 }
 
 
-// Si la clé est physiquement présente : retourne la moyenne des compteurs non-nuls
-// du bucket où la clé est trouvée.
+// Si la clé est physiquement présente :
+//   - bucket plein (toutes les empreintes occupées) -> moyenne des compteurs non-nuls du bucket
+//   - bucket non plein                               -> compteur individuel de la clé
 // Si la clé est absente : comportement identique à Query (0 si slot vide, min sinon).
 double BitMatcherAdaptive::QueryAvgBucket(const std::string& key, int16_t key_len) {
 	GET_HASH_VALUE_SENTENCE(key.c_str());
@@ -504,6 +505,13 @@ double BitMatcherAdaptive::QueryAvgBucket(const std::string& key, int16_t key_le
 		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
 		for (uint8_t j = 0; j < fingerprint_num; j++) {
 			if (get_bucket_fingerprint(b, j) == fp) {
+				bool full = true;
+				for (uint8_t k = 0; k < fingerprint_num; k++) {
+					if (get_bucket_fingerprint(b, k) == 0) { full = false; break; }
+				}
+				if (!full) {
+					return (double)get_bucket_count(b, j, type_id);
+				}
 				uint64_t sum = 0; uint32_t cnt = 0;
 				for (uint8_t k = 0; k < fingerprint_num; k++) {
 					uint64_t c = get_bucket_count(b, k, type_id);

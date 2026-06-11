@@ -121,7 +121,7 @@ load_base <- function() {
   print("Loading base strategies...")
   strats <- list(
     bm    = list(key = "bm",    label = "BM",     has_budget = TRUE),
-    decay = list(key = "decay", label = "BMDecay", has_budget = TRUE),
+    decay2 = list(key = "decay2", label = "BMDecay", has_budget = TRUE),
     evict = list(key = "evict", label = "Evict",   has_budget = TRUE)
   )
   df <- data.frame()
@@ -148,7 +148,7 @@ load_base <- function() {
 }
 
 # --- Load trusted variants for a given base strategy ---
-# strat_key: "decay" or "evict"
+# strat_key: "decay2" or "evict"
 # label_prefix: "BMDecay" or "Evict"
 # has_budget: TRUE 
 load_trusted <- function(strat_key, label_prefix, has_budget, eviction_rate = 0.0) {
@@ -180,6 +180,10 @@ load_trusted <- function(strat_key, label_prefix, has_budget, eviction_rate = 0.
 
 # --- Prepare and average data ---
 prepare <- function(df, level_order) {
+  if (nrow(df) == 0) {
+    return(data.frame(strategy = factor(character(0), levels = level_order),
+                       f_pct = numeric(0), time = integer(0), propByz = numeric(0)))
+  }
   df$propByz <- df$avgByzN / view
   avg <- df %>%
     group_by(strategy, f_pct, time) %>%
@@ -222,8 +226,8 @@ make_grid <- function(avg_data, colors, ltys, outfile) {
     f   <- faulty_pcts[i]
     sub <- avg_data %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f, colors, ltys,
-                           show_legend  = (i == 3),
-                           show_y_title = (i == 3))
+                           show_legend  = (i == 4),
+                           show_y_title = (i == 4))
   }
   dir.create("results", showWarnings = FALSE)
   pdf(outfile, width = width, height = height*2)
@@ -248,7 +252,7 @@ make_grid(fig1_data, fig1_colors, fig1_ltys,
 # ============================================================
 # Figure 2: BM + BMDecay + BMDecay t=5%/10%/20%
 # ============================================================
-bmdecay_trusted_df <- load_trusted("decay", "BMDecay", has_budget = TRUE)
+bmdecay_trusted_df <- load_trusted("decay2", "BMDecay", has_budget = TRUE, eviction_rate = eviction_rate)
 fig2_order <- c("BM", "BMDecay", paste0("BMDecay t=", trusted_pcts, "%"))
 fig2_data  <- prepare(rbind(base_df[base_df$strategy %in% c("BM","BMDecay"), ], bmdecay_trusted_df),
                       fig2_order)
