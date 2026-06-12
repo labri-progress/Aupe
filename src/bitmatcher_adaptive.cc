@@ -4,7 +4,7 @@
 namespace org {
 namespace blobstore {
 
-
+int MAX_TYPE = 0; // Maximum type ID for buckets (0-10)
 int merge_strategy = 1; // 0 for sum, 1 for moy 2 for max
 
 // Copy constructor
@@ -239,8 +239,11 @@ bool BitMatcherAdaptive::solve_overflow_locally(ec_bucket* b, const int finger_i
 			return true;
 		}
 	}
-
-	assert(type_id <= 3); // transition should not happen for higher type_ids
+	
+	assert(type_id <= MAX_TYPE); // should not reach here since solve_overflow_locally is only called for type_id <= 3, which have local solutions
+	this->decay();
+	//assert(type_id <= 3); // transition should not happen for higher type_ids
+	return false;
 
 	ec_bucket new_bkt; new_bkt.value = 0;
 	uint8_t least_finger; uint64_t least_count;
@@ -368,9 +371,9 @@ bool BitMatcherAdaptive::plus(ec_bucket* b, const int finger_idx, const uint32_t
 	if ( 1 + original_val == max_cnt_val ) { 
 		//printf("Overflow at table %u, bucket %u, finger %d, type %u\n", table_idx, slot_idx, finger_idx, type_id);
 		//printf("Current count: %lu, Max count: %lu\n", original_val, max_cnt_val - 1);
-		if (type_id > 3) {
+		/*if (type_id > 3) {
 			blocked_count++;
-		}
+		}*/
 		return false;
 	}
 	original_val++;
@@ -587,7 +590,7 @@ void BitMatcherAdaptive::InsertByFp(uint8_t fingerprint_value, uint first_hash_t
 static int find_compatible_type_a(std::vector<uint64_t>& desc_counts) {
 	// Adaptive version: restrict to types 0-3 since solve_overflow_locally
 	// only handles those (higher types trigger global_division instead).
-	for (int t = 0; t <= 3; t++) {
+	for (int t = 0; t <= MAX_TYPE; t++) {
 		int num_slots = get_item_num_in_bucket_type(t);
 		if (num_slots < (int)desc_counts.size()) continue;
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 # Usage: Rscript plot_three_figures.r <budget> [<merge_subdir>]
 # Produces PDFs:
-#   fig1: BM, BMDecay (t=0%), Evict
-#   fig2: BM, BMDecay (t=0%), BMDecay t=5%/10%/20%
+#   fig1: BM, BMDecay (=decay2, t=0%), Evict
+#   fig2: BM, OldDecay (=decay), BMDecay (=decay2, t=0%), BMDecay t=5%/10%/20% (=decay2)
 #   fig3: BMDecay + BMDecay t=% vs Evict + Evict t=%
 #   fig4: BM, BMDecay, Evict t=5%/20%
 
@@ -70,6 +70,7 @@ mytheme <- mytheme +
 custom_colors <- c(
   "BM"              = "#882EE6",
   "BMDecay"         = "#000000",
+  "OldDecay"        = "#8B4513",
   "Evict"           = "#ff3333",
   "BMDecay t=5%"    = "#E69F00",
   "BMDecay t=10%"   = "#56B4E9",
@@ -82,6 +83,7 @@ custom_colors <- c(
 custom_lty <- c(
   "BM"              = "solid",
   "BMDecay"         = "solid",
+  "OldDecay"        = "solid",
   "Evict"           = "solid",
   "BMDecay t=5%"    = "solid",
   "BMDecay t=10%"   = "solid",
@@ -120,9 +122,10 @@ read_file <- function(fname, strategy_label, f_pct, run) {
 load_base <- function() {
   print("Loading base strategies...")
   strats <- list(
-    bm    = list(key = "bm",    label = "BM",     has_budget = TRUE),
-    decay2 = list(key = "decay2", label = "BMDecay", has_budget = TRUE),
-    evict = list(key = "evict", label = "Evict",   has_budget = TRUE)
+    bm       = list(key = "bm",     label = "BM",       has_budget = TRUE),
+    olddecay = list(key = "decay",  label = "OldDecay", has_budget = TRUE),
+    decay2   = list(key = "decay2", label = "BMDecay",  has_budget = TRUE),
+    evict    = list(key = "evict",  label = "Evict",    has_budget = TRUE)
   )
   df <- data.frame()
   for (s in strats) {
@@ -215,8 +218,8 @@ byz_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = T
                        minor_breaks = seq(0, 1, by = 0.1),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.45, 0.85) else "none") +
-    guides(color    = guide_legend(ncol = 1),
+    theme(legend.position = if (show_legend) c(0.5, 0.85) else "none") +
+    guides(color    = guide_legend(ncol = 2),
            linetype = guide_legend(ncol = 2))
 }
 
@@ -253,15 +256,19 @@ make_grid(fig1_data, fig1_colors, fig1_ltys,
 # Figure 2: BM + BMDecay + BMDecay t=5%/10%/20%
 # ============================================================
 bmdecay_trusted_df <- load_trusted("decay2", "BMDecay", has_budget = TRUE, eviction_rate = eviction_rate)
-fig2_order <- c("BM", "BMDecay", paste0("BMDecay t=", trusted_pcts, "%"))
-fig2_data  <- prepare(rbind(base_df[base_df$strategy %in% c("BM","BMDecay"), ], bmdecay_trusted_df),
+fig2_order <- c("BM", "OldDecay", "BMDecay", paste0("BMDecay t=", trusted_pcts, "%"))
+fig2_data  <- prepare(rbind(base_df[base_df$strategy %in% c("BM","BMDecay","OldDecay"), ], bmdecay_trusted_df),
                       fig2_order)
 
 fig2_colors <- custom_colors[fig2_order]
 fig2_ltys   <- custom_lty[fig2_order]
 
+add <- ""
+if (zoom != 0) {
+  add <- sprintf("-zoom%d-%d", 9900, 11000)
+}
 make_grid(fig2_data, fig2_colors, fig2_ltys,
-          sprintf("results/fig2_bm_bmdecay_merge_%gKB_%s.pdf", budget, merge_subdir))
+          sprintf("results/fig2_bm_bmdecay_merge_%gKB_%s%s.pdf", budget, merge_subdir, add))
 
 quit()
 
