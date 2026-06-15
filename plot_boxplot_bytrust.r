@@ -34,7 +34,7 @@ results_dir  <- "results_merge"
 target_times <- c(5000, 9999, 10500, 15000, 20000)
 #target_times <- c(100, 200, 300, 500, 800, 1000)
 # ── Lecture ───────────────────────────────────────────────────────────────────
-if (strategy == "decay") {
+if (strategy == "decay2") {
   fname <- file.path(results_dir,
   sprintf("nodes-%s-%d-%d-%d-%d-%d-%.1f.csv",
     strategy, nodes, view, faulty_count, t_count, p_merge, budget))

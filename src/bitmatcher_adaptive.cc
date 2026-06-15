@@ -4,7 +4,7 @@
 namespace org {
 namespace blobstore {
 
-int MAX_TYPE = 0; // Maximum type ID for buckets (0-10)
+int MAX_TYPE = 3; // Maximum type ID for buckets (0-10)
 int merge_strategy = 1; // 0 for sum, 1 for moy 2 for max
 
 // Copy constructor
@@ -240,10 +240,8 @@ bool BitMatcherAdaptive::solve_overflow_locally(ec_bucket* b, const int finger_i
 		}
 	}
 	
-	assert(type_id <= MAX_TYPE); // should not reach here since solve_overflow_locally is only called for type_id <= 3, which have local solutions
-	this->decay();
-	//assert(type_id <= 3); // transition should not happen for higher type_ids
-	return false;
+	assert(type_id <= MAX_TYPE);  // transition should not happen for higher type_ids
+	
 
 	ec_bucket new_bkt; new_bkt.value = 0;
 	uint8_t least_finger; uint64_t least_count;

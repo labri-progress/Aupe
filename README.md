@@ -14,23 +14,23 @@ Output : results/slots_bytrust_decay_f100_b6.0_x200.pdf
 
 ./run_merge_experimentsK.sh 0.5 30
 
-./max_expe.sh decay 0.5 40 5 ; ./max_expe.sh decay 0.5 40 20 ;
-./max_expe.sh decay 0.5 40 0 ; ./max_expe.sh decay 0.5 40 10 ;
+./max_expe.sh decay2 0.5 40 5 ; ./max_expe.sh decay2 0.5 40 20 ;
+./max_expe.sh decay2 0.5 40 0 ; ./max_expe.sh decay2 0.5 40 10 ;
 
-./max_expe.sh decay 0.5 35 5 ; ./max_expe.sh decay 0.5 35 20 ;
-./max_expe.sh decay 0.5 35 0 ; ./max_expe.sh decay 0.5 35 10 
+./max_expe.sh decay2 0.5 35 5 ; ./max_expe.sh decay2 0.5 35 20 ;
+./max_expe.sh decay2 0.5 35 0 ; ./max_expe.sh decay2 0.5 35 10 
 
-./max_expe.sh decay 0.5 30 5 ; ./max_expe.sh decay 0.5 30 20 ;
-./max_expe.sh decay 0.5 30 0 ; ./max_expe.sh decay 0.5 30 10 ;
+./max_expe.sh decay2 0.5 30 5 ; ./max_expe.sh decay2 0.5 30 20 ;
+./max_expe.sh decay2 0.5 30 0 ; ./max_expe.sh decay2 0.5 30 10 ;
 
-./max_expe.sh decay 0.5 25 5 ; ./max_expe.sh decay 0.5 25 20 ;
-./max_expe.sh decay 0.5 25 0 ; ./max_expe.sh decay 0.5 25 10 
+./max_expe.sh decay2 0.5 25 5 ; ./max_expe.sh decay2 0.5 25 20 ;
+./max_expe.sh decay2 0.5 25 0 ; ./max_expe.sh decay2 0.5 25 10 
 
-./max_expe.sh decay 0.5 20 5 ; ./max_expe.sh decay 0.5 20 20 ;
-./max_expe.sh decay 0.5 20 0 ; ./max_expe.sh decay 0.5 20 10 
+./max_expe.sh decay2 0.5 20 5 ; ./max_expe.sh decay2 0.5 20 20 ;
+./max_expe.sh decay2 0.5 20 0 ; ./max_expe.sh decay2 0.5 20 10 
 
-./max_expe.sh decay 0.5 10 5 ; ./max_expe.sh decay 0.5 10 20 ;
-./max_expe.sh decay 0.5 10 0 ; ./max_expe.sh decay 0.5 10 10 ;
+./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
+./max_expe.sh decay2 0.5 10 0 ; ./max_expe.sh decay2 0.5 10 10 ;
 
 
 

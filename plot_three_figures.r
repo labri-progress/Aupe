@@ -27,10 +27,11 @@ results_dir  <- "output_byz"
 merge_dir    <- "output_byz"
 
 # --- Theme ---
-line_size  <- 0.1
+line_size  <- 0.4
 point_size <- 0.1
-ratio      <- 3.5
-width      <- 12
+time_step  <- if (zoom != 0) 5 else 100
+ratio      <- 2
+width      <- 10
 height     <- width / ratio
 
 mytheme <- theme(
@@ -190,8 +191,8 @@ prepare <- function(df, level_order) {
   df$propByz <- df$avgByzN / view
   avg <- df %>%
     group_by(strategy, f_pct, time) %>%
-    summarise(propByz = mean(propByz), .groups = "drop") #%>%
-    #filter(time %% 10 == 0)
+    summarise(propByz = mean(propByz), .groups = "drop") %>%
+    filter(time %% time_step == 0)
   present <- intersect(level_order, unique(avg$strategy))
   avg$strategy <- factor(avg$strategy, levels = present)
   avg
@@ -210,7 +211,7 @@ byz_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = T
       x = expression(bold("Rounds")),
       y = if (show_y_title) expression(bold("Proportion of Byz. samp.")) else NULL
     ) +
-    coord_cartesian(ylim = c(0, 1)) +
+    coord_cartesian(ylim = c(0.1, 1)) +
     scale_x_continuous(breaks = c(0, 5000, 10000, 15000, 20000),
                        labels = c("0", "5K", "10K", "15K", "20K"),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
@@ -218,8 +219,8 @@ byz_plot <- function(data, f, colors, ltys, show_legend = TRUE, show_y_title = T
                        minor_breaks = seq(0, 1, by = 0.1),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.5, 0.85) else "none") +
-    guides(color    = guide_legend(ncol = 2),
+    theme(legend.position = if (show_legend) c(0.65, 0.85) else "none") +
+    guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 2))
 }
 
