@@ -47,6 +47,10 @@ pub enum WhichApp {
     #[structopt(name = "decay3")]
     AupeDecay3(app::aupebmdecay3::Init),
 
+    /// Aupe RPS – byzantins invisibles avant attack_start (pas de push, exclus des vues initiales)
+    #[structopt(name = "decay4")]
+    AupeDecay4(app::aupebmdecay4::Init),
+
     /// Eviction Decay RPS
     #[structopt(name = "evict")]
     EvictionDecay(app::evictiondecay::Init),
@@ -101,6 +105,12 @@ fn main() {
             let f = format!("{}/nodes-decay3-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
             sim::<app::aupebmdecay3::AupeDecay3>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
+        WhichApp::AupeDecay4(pp) => {
+            let f = format!("{}/nodes-decay4-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+            sim::<app::aupebmdecay4::AupeDecay4>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::EvictionDecay(pp) => {

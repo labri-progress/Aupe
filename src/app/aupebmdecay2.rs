@@ -545,13 +545,8 @@ impl App for AupeDecay2 {
                         self.update_samples(&v_push);
                         self.update_samples(&v_pull);
 
-                        if self.is_trusted {
-                            v_push = self.sketch.debiais_stream_v2(v_push, &mut self.rng, "push");
-                            v_pull = self.sketch.debiais_stream_v2(v_pull, &mut self.rng, "pull");
-                        }else {
-                            v_push = self.sketch.debiais_stream(v_push, &mut self.rng, "push");
-                            v_pull = self.sketch.debiais_stream(v_pull, &mut self.rng, "pull");
-                        }
+                        v_push = self.sketch.debiais_stream_v2(v_push, &mut self.rng, "push");
+                        v_pull = self.sketch.debiais_stream_v2(v_pull, &mut self.rng, "pull");
                         
                         
                         self.push_view = sample(&v_push[..], alphav, &mut self.rng);

@@ -1,5 +1,24 @@
 # Aupe
 
+./proba -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay2_proba
+
+./max_expe.sh decay4 0.5 10 0 ; ./max_expe.sh decay4 0.5 10 20 ;
+./max_expe.sh decay4 0.5 20 0 ; ./max_expe.sh decay4 0.5 20 20 ;
+./max_expe.sh decay4 0.5 30 0 ; ./max_expe.sh decay4 0.5 30 20 ;
+
+
+./eviction -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay2_2k0
+
+./eviction -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 32 -p 1 -s 10000 > debias_decay2
+
+./two_debiais -T 20000 -n 1000 decay4 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay4_2k0
+
+./two_debiais -T 20000 -n 1000 decay4 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 32 -p 1 -s 10000 > attack_decay4
+
+
+./eviction -T 20000 -n 1000 decay4 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 32 -p 1 -s 10000 > onedebias_decay2
+
+
 ./max_expe.sh decay2 0.5 40 20 ; ./max_expe.sh decay2 0.5 40 5 ;
 ./max_expe.sh decay2 0.5 30 20 ; ./max_expe.sh decay2 0.5 30 5 ;
 ./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
