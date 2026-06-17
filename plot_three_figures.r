@@ -125,7 +125,7 @@ load_base <- function() {
   strats <- list(
     bm       = list(key = "bm",     label = "BM",       has_budget = TRUE),
     olddecay = list(key = "decay",  label = "OldDecay", has_budget = TRUE),
-    decay2   = list(key = "decay2", label = "BMDecay",  has_budget = TRUE),
+    decay4   = list(key = "decay4", label = "BMDecay",  has_budget = TRUE),
     evict    = list(key = "evict",  label = "Evict",    has_budget = TRUE)
   )
   df <- data.frame()
@@ -256,7 +256,7 @@ make_grid(fig1_data, fig1_colors, fig1_ltys,
 # ============================================================
 # Figure 2: BM + BMDecay + BMDecay t=5%/10%/20%
 # ============================================================
-bmdecay_trusted_df <- load_trusted("decay2", "BMDecay", has_budget = TRUE, eviction_rate = eviction_rate)
+bmdecay_trusted_df <- load_trusted("decay4", "BMDecay", has_budget = TRUE, eviction_rate = eviction_rate)
 fig2_order <- c("BM", "OldDecay", "BMDecay", paste0("BMDecay t=", trusted_pcts, "%"))
 fig2_data  <- prepare(rbind(base_df[base_df$strategy %in% c("BM","BMDecay","OldDecay"), ], bmdecay_trusted_df),
                       fig2_order)

@@ -1,11 +1,30 @@
 # Aupe
 
+./max_expe.sh bm 0.5 10 0 ; ./max_expe.sh bm 0.5 25 0 ;
+./max_expe.sh bm 0.5 20 0 ; ./max_expe.sh bm 0.5 35 0 ;
+./max_expe.sh bm 0.5 30 0 ; ./max_expe.sh bm 0.5 40 0 ;
 
 ./max_expe.sh brahms 0.5 10 0 ; ./max_expe.sh brahms 0.5 25 0 ;
 ./max_expe.sh brahms 0.5 20 0 ; ./max_expe.sh brahms 0.5 35 0 ;
 ./max_expe.sh brahms 0.5 30 0 ; ./max_expe.sh brahms 0.5 40 0 ;
 
+./max_expe.sh array 0.5 40 5 ; ./max_expe.sh array 0.5 40 20 ;
+./max_expe.sh array 0.5 40 0 ; ./max_expe.sh array 0.5 40 10 ;
 
+./max_expe.sh array 0.5 35 5 ; ./max_expe.sh array 0.5 35 20 ;
+./max_expe.sh array 0.5 35 0 ; ./max_expe.sh array 0.5 35 10 
+
+./max_expe.sh array 0.5 30 5 ; ./max_expe.sh array 0.5 30 20 ;
+./max_expe.sh array 0.5 30 0 ; ./max_expe.sh array 0.5 30 10 ;
+
+./max_expe.sh array 0.5 25 5 ; ./max_expe.sh array 0.5 25 20 ;
+./max_expe.sh array 0.5 25 0 ; ./max_expe.sh array 0.5 25 10 
+
+./max_expe.sh array 0.5 20 5 ; ./max_expe.sh array 0.5 20 20 ;
+./max_expe.sh array 0.5 20 0 ; ./max_expe.sh array 0.5 20 10 
+
+./max_expe.sh array 0.5 10 5 ; ./max_expe.sh array 0.5 10 20 ;
+./max_expe.sh array 0.5 10 0 ; ./max_expe.sh array 0.5 10 10 ;
 
 ./proba -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay2_proba
 

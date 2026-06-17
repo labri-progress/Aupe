@@ -255,11 +255,11 @@ impl BM {
     /// la même probabilité d'acceptation, qui décroît à mesure que l'écart entre
     /// éléments rares et fréquents (byzantins) se creuse.
     pub fn debiais_stream_v2(&mut self, inputstream: Vec<usize>, rng: &mut StdRng, from: &str) -> Vec<usize> {
-        /* let ref_min = self.matrix.as_ref().unwrap().get_min_count() as f64;
+        let ref_min = self.matrix.as_ref().unwrap().get_min_count() as f64;
         let ref_max = self.matrix.as_ref().unwrap().get_max_count() as f64;
-        let prob_present = if ref_max > 0.0 { (ref_min / ref_max).min(1.0) } else { 1.0 };*/
+        let prob_present = if ref_max > 0.0 { (ref_min / ref_max).min(1.0) } else { 1.0 };
 
-        let prob_present = 1.0/1023.0;
+        //let prob_present = 1.0/1023.0;
 
         // Pré-calcul des présences (emprunte matrix, libère avant de toucher memory)
         let counts: Vec<i64> = inputstream.iter().map(|e| self.get_count_of(e)).collect();
