@@ -1,5 +1,12 @@
 # Aupe
 
+
+./max_expe.sh brahms 0.5 10 0 ; ./max_expe.sh brahms 0.5 25 0 ;
+./max_expe.sh brahms 0.5 20 0 ; ./max_expe.sh brahms 0.5 35 0 ;
+./max_expe.sh brahms 0.5 30 0 ; ./max_expe.sh brahms 0.5 40 0 ;
+
+
+
 ./proba -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay2_proba
 
 ./max_expe.sh decay4 0.5 10 0 ; ./max_expe.sh decay4 0.5 10 20 ;

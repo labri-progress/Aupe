@@ -76,7 +76,19 @@ for run in $(seq 1 $NRUNS); do
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW \
             -s $ATTACK_START  > "$OUTDIR/$outfile" &
           mark_done "$outfile"
-          
+        
+        elif [ "$strat" = "basalt" ]; then
+          outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-run${run}"
+          if is_done "$outfile"; then
+            echo "Skipping (already done): $outfile"
+            continue
+          fi
+          echo "Running: $strat f=${f_pct}% run=${run}"
+          ./$binary -T $ROUNDS -n $NODES $strat \
+            -f $GAMMA -t $f_count -v $VIEW -i $UVIEW \
+            -s $ATTACK_START -k 1 -r 1 > "$OUTDIR/$outfile" &
+          mark_done "$outfile"
+
         elif [ "$strat" = "array" ] || [ "$strat" = "xarray" ]; then
           # Array has no budget parameter — run once per (f, run)
           outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}${trusted_tag}-run${run}"
