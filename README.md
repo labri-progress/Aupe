@@ -1,5 +1,43 @@
 # Aupe
 
+./max_expe.sh decay2 2 10 0 ; ./max_expe.sh decay2 2 30 20 ;
+./max_expe.sh decay2 2 20 0 ; ./max_expe.sh decay2 2 40 20 ;
+
+./max_expe.sh decay2 2 10 0 ; ./max_expe.sh decay2 2 30 0 ;
+./max_expe.sh decay2 2 20 0 ; ./max_expe.sh decay2 2 40 0;
+
+./max_expe.sh decay2 1 10 0 ; ./max_expe.sh decay2 1 30 0 ;
+./max_expe.sh decay2 1 20 0 ; ./max_expe.sh decay2 1 40 0;
+
+
+
+./max_expe.sh decay2 0.5 40 5 ; ./max_expe.sh decay2 0.5 40 20 ;
+./max_expe.sh decay2 0.5 40 0 ; ./max_expe.sh decay2 0.5 40 10 ;
+
+./max_expe.sh decay2 0.5 30 5 ; ./max_expe.sh decay2 0.5 30 20 ;
+./max_expe.sh decay2 0.5 30 0 ; ./max_expe.sh decay2 0.5 30 10 ;
+
+./max_expe.sh decay2 0.5 20 5 ; ./max_expe.sh decay2 0.5 20 20 ;
+./max_expe.sh decay2 0.5 20 0 ; ./max_expe.sh decay2 0.5 20 10 
+
+./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
+./max_expe.sh decay2 0.5 10 0 ; ./max_expe.sh decay2 0.5 10 10 ;
+
+
+
+
+./max_expe.sh decay4 0.5 10 0 ; ./max_expe.sh decay4 0.5 10 20 ;
+./max_expe.sh decay4 0.5 20 0 ; ./max_expe.sh decay4 0.5 20 20 ;
+./max_expe.sh decay4 0.5 30 0 ; ./max_expe.sh decay4 0.5 30 20 ;
+./max_expe.sh decay4 0.5 40 0 ; ./max_expe.sh decay4 0.5 40 20 ;
+
+
+./max_expe.sh basalt 0.5 10 0; ./max_expe.sh basalt 0.5 30 0
+./max_expe.sh basalt 0.5 20 0 ; ./max_expe.sh basalt 0.5 40 0
+
+
+
+
 ./max_expe.sh bm 0.5 10 0 ; ./max_expe.sh bm 0.5 25 0 ;
 ./max_expe.sh bm 0.5 20 0 ; ./max_expe.sh bm 0.5 35 0 ;
 ./max_expe.sh bm 0.5 30 0 ; ./max_expe.sh bm 0.5 40 0 ;
@@ -26,319 +64,24 @@
 ./max_expe.sh array 0.5 10 5 ; ./max_expe.sh array 0.5 10 20 ;
 ./max_expe.sh array 0.5 10 0 ; ./max_expe.sh array 0.5 10 10 ;
 
-./proba -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay2_proba
 
-./max_expe.sh decay4 0.5 10 0 ; ./max_expe.sh decay4 0.5 10 20 ;
-./max_expe.sh decay4 0.5 20 0 ; ./max_expe.sh decay4 0.5 20 20 ;
-./max_expe.sh decay4 0.5 30 0 ; ./max_expe.sh decay4 0.5 30 20 ;
 
+# Plots
+J'ai une liste de scripts à faire pour la génération de diverses figures, destinée à un papier journal double column de 12 pages. Produis les script R associés en respectant le format des fichiers de résultat présents dans le dossier output_byz (le dossier ne contient qu'une ébauche des résultats pour le moment). 
+Fais également des choix de réprésentation clair et digeste pour ce papier (couleurs uniformisés, choix de type de ligne ou de forme de points lorsque nécessaire, échelle, etc...)
+L'ensemble de mes simulations respectent le format 20000 rounds, avec une attaque débutant au round 10000. 
+les proportions de byzantins qui nous insteressent sont 10, 20, 30 et 40%.
+Tu peux t'inspirer des 3 scripts r actuellement présents dans le dossier. 
 
-./eviction -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay2_2k0
+1. Figure qui montre l'évolution de la proportion de byzantin dans la vue des noeuds corrects (colonne avgByzN comme d'habitude) en fonction des rounds. Les stratégies évaluées sont Aupe Array (stratégie array dans les fichiers de résultat), Aupe BM (bm), Aupe BMDecay (decay2). 
 
-./eviction -T 20000 -n 1000 decay2 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 32 -p 1 -s 10000 > debias_decay2
+2. Figure recapitulative qui montre la proportion de byzantin dans la vue des noeuds corrects à la convergence (calculée comme la moyenne sur les 9000 derniers rounds) en fonction du pourcentage de byzantin dans le système. Les stratégies évaluées sont Basalt, Brahms et Aupe BMDecay
 
-./two_debiais -T 20000 -n 1000 decay4 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 128 -p 1 -s 10000 > decay4_2k0
+3. Figure recapitulative qui montre le gain sur la proportion de byzantin dans la vue des noeuds corrects des stratégies Aupe BMDecay avec Merge t=5, 10 et 20% par rapport à la version Aupe BmDecay sans merge. La proportion est aussi mesurée à la convergence.
 
-./two_debiais -T 20000 -n 1000 decay4 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 32 -p 1 -s 10000 > attack_decay4
+4. Figure qui montre l'évolution de la proportion de byzantin dans la vue des noeuds corrects en fonction des rounds, en comparant AupeBMDecay pour une attaque classique, i.e. débutant au round 10000 (stratégie decay2) et AupeBMDecay pour une attaque dans laquelle les byzantins ne se répresentent pas du tout avant le round 10000 (decay 4). On doit pouvoir évaluer cela lorsqu'il n'y a pas de merge (t=0%) et lorsqu'il y a du merge 5, 10, 20%. Trouve des noms adéquats pour ces 2 configurations de AupeBMDecay dans le cas de cette figure.
 
+5. script qui analyse les proportions de byzantin dans la vue de chacun des noeuds corrects (fichier de résultat débutant par nodes-) du round 11000 au round 11049 (valeurs tunables), afin de classifier qui sont les noeuds de confiance et qui sont les autres noeuds corrects. Les noeuds de confiance sont attendus d'avoir des vues moins biaisées et donc la moyenne de la proportion de byzantin sur ces 50 rounds doit être plus faible que pour un simple noeud correct. Fais une classification Kmeans à 2 classe. Les métriques étudiées sont precision, recal F1score. Les vraies classes sont définies dans le codes rust : 0 à F-1 pour les byzantins. F à F+T-1 pour les noeuds de confiance et le reste pour les autres noeuds corrects.
 
-./eviction -T 20000 -n 1000 decay4 -f 10 -t 300 -v 20 -u 20 -m 15 -n 1000 -c 32 -p 1 -s 10000 > onedebias_decay2
-
-
-./max_expe.sh decay2 0.5 40 20 ; ./max_expe.sh decay2 0.5 40 5 ;
-./max_expe.sh decay2 0.5 30 20 ; ./max_expe.sh decay2 0.5 30 5 ;
-./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
-
-Rscript plot_slots_bytrust.r 6.0 10 decay 200 1 10000
-Output : results/slots_bytrust_decay_f100_b6.0_x200.pdf
-
-./max_expe.sh decay 0.5 30 20 ; ./max_expe.sh decay 0.5 30 5 ;
-./max_expe.sh decay 0.5 10 0 ; ./max_expe.sh decay 0.5 10 20 ;
-
-
-
-./run_merge_experimentsK.sh 0.5 30
-
-./max_expe.sh decay2 0.5 40 5 ; ./max_expe.sh decay2 0.5 40 20 ;
-./max_expe.sh decay2 0.5 40 0 ; ./max_expe.sh decay2 0.5 40 10 ;
-
-./max_expe.sh decay2 0.5 35 5 ; ./max_expe.sh decay2 0.5 35 20 ;
-./max_expe.sh decay2 0.5 35 0 ; ./max_expe.sh decay2 0.5 35 10 
-
-./max_expe.sh decay2 0.5 30 5 ; ./max_expe.sh decay2 0.5 30 20 ;
-./max_expe.sh decay2 0.5 30 0 ; ./max_expe.sh decay2 0.5 30 10 ;
-
-./max_expe.sh decay2 0.5 25 5 ; ./max_expe.sh decay2 0.5 25 20 ;
-./max_expe.sh decay2 0.5 25 0 ; ./max_expe.sh decay2 0.5 25 10 
-
-./max_expe.sh decay2 0.5 20 5 ; ./max_expe.sh decay2 0.5 20 20 ;
-./max_expe.sh decay2 0.5 20 0 ; ./max_expe.sh decay2 0.5 20 10 
-
-./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
-./max_expe.sh decay2 0.5 10 0 ; ./max_expe.sh decay2 0.5 10 10 ;
-
-
-
-
-- remove conditionnal pull requests of trusted nodes
-- test without eviction rate and samplek of push and pull bags
-./max_expe.sh evict 0.5 30 0 ; ./max_expe.sh evict 0.5 30 5 ; ./max_expe.sh evict 0.5 30 20 ;
-
-./max_expe.sh evict 0.5 10 0 ; ./max_expe.sh evict 0.5 10 5 ; ./max_expe.sh evict 0.5 10 20 ;
-
-./max_expe.sh evict 0.5 20 0 ; ./max_expe.sh evict 0.5 20 5 ; ./max_expe.sh evict 0.5 20 20 ; 
-
-./max_expe.sh array 0.5 30 0 ; ./max_expe.sh array 0.5 20 0 ; ./max_expe.sh array 0.5 10 0 ;
-
-./max_expe.sh brahms 0.5 30 0 ; ./max_expe.sh brahms 0.5 20 0 ; ./max_expe.sh brahms 0.5 10 0 ;
-
-
-./max_expe.sh bm 0.5 10 0 ; ./max_expe.sh bm 0.5 20 0 ; ./max_expe.sh bm 0.5 30 0 ;
-
-./max_expe.sh decay 0.5 30 5 ; ./max_expe.sh decay 0.5 30 20 ; ./max_expe.sh decay 0.5 10 5 ; 
-
- ./max_expe.sh decay 0.5 20 5 ; ./max_expe.sh decay 0.5 20 20 ; ./max_expe.sh decay 0.5 10 20 ;
-
-
-chartreuse3-1.grenoble.grid5000.fr
-chartreuse3-3.grenoble.grid5000.fr
-chartreuse3-4.grenoble.grid5000.fr
-chartreuse4-1.grenoble.grid5000.fr
-chartreuse4-2.grenoble.grid5000.fr
-chartreuse4-3.grenoble.grid5000.fr
-chartreuse4-4.grenoble.grid5000.fr
-./max_expe.sh decay 0.5 30 0 ; ./max_expe.sh decay 0.5 20 0 ; ./max_expe.sh decay 0.5 10 0 ; 
-
-
-
-./run_experimentsK.sh evict 0.5 30 0 ; ./run_experimentsK.sh evict 0.5 30 5 ; ./run_experimentsK.sh evict 0.5 30 20 ;
-
-./run_experimentsK.sh evict 0.5 10 0 ; ./run_experimentsK.sh evict 0.5 10 5 ; ./run_experimentsK.sh evict 0.5 10 20 ;
-
-./run_experimentsK.sh evict 0.5 20 0 ; ./run_experimentsK.sh evict 0.5 20 5 ; ./run_experimentsK.sh evict 0.5 20 20 ; 
-
-
-./run_experimentsK.sh evict 0.5 40 0 ; ./run_experimentsK.sh evict 0.5 40 5 ; ./run_experimentsK.sh evict 0.5 40 20 ; 
-
-./run_experimentsK.sh decay 0.5 30 0 ; ./run_experimentsK.sh decay 0.5 20 0 ; ./run_experimentsK.sh decay 0.5 10 0 ; 
-
-./run_experimentsK.sh decay 0.5 40 0 ; ./run_experimentsK.sh bm 0.5 40 0 ; ./run_experimentsK.sh bm 0.5 30 0 ;
-
-
- ./run_experimentsK.sh bm 0.5 20 0 ; ./run_experimentsK.sh bm 0.5 10 0 ; ./run_experimentsK.sh array 0.5 40 0;
-
-
-./run_experimentsK.sh array 0.5 30 0 ; ./run_experimentsK.sh array 0.5 20 0 ; ./run_experimentsK.sh array 0.5 10 0 ;
-
-
-
-./max_expe.sh decay 0.5 30 5; ./max_expe.sh decay 0.5 30 10
-
-./run_experimentsK.sh decay 0.5 30 0 ; ./run_experimentsK.sh decay 0.5 30 5
-./run_experimentsK.sh decay 0.5 20 0 ; ./run_experimentsK.sh decay 0.5 20 5
-./run_experimentsK.sh decay 0.5 10 0 ; ./run_experimentsK.sh decay 0.5 10 5
-
-./run_experimentsK.sh decay 0.5 30 10 ; ./run_experimentsK.sh decay 0.5 30 20
-./run_experimentsK.sh decay 0.5 20 10 ; ./run_experimentsK.sh decay 0.5 20 20
-./run_experimentsK.sh decay 0.5 10 10 ; ./run_experimentsK.sh decay 0.5 10 20
-
-
-
-
-./run_experimentsK.sh xdec 0.5 30 0 ; ./run_experimentsK.sh xdec 0.5 30 20
-
-./run_experimentsK.sh xbm 0.5 30 0 ; ./run_experimentsK.sh xbm 0.5 30 20
-
-./run_experimentsK.sh xarray 0.5 30 0 ; ./run_experimentsK.sh xarray 0.5 30 20
-
-TODO
-./run_10000K.sh decay 10 30 0
-
-./run_merge_experimentsK.sh 1 [10,20,26,30]
-./run_merge_experimentsK.sh 1 [10,20,30]
-
-
-./run_experimentsK.sh evict 0.5 30 0 ; ./run_experimentsK.sh evict 0.5 30 5
-./run_experimentsK.sh evict 0.5 20 0 ; ./run_experimentsK.sh evict 0.5 20 5
-./run_experimentsK.sh evict 0.5 10 0 ; ./run_experimentsK.sh evict 0.5 10 5
-
-./run_experimentsK.sh evict 0.5 30 10 ; ./run_experimentsK.sh evict 0.5 30 20
-./run_experimentsK.sh evict 0.5 20 10 ; ./run_experimentsK.sh evict 0.5 20 20
-./run_experimentsK.sh evict 0.5 10 10 ; ./run_experimentsK.sh evict 0.5 10 20
-
-
-./run_experimentsK.sh xdec 0.5 30 0 ; ./run_experimentsK.sh xdec 0.5 30 5
-./run_experimentsK.sh xdec 0.5 20 0 ; ./run_experimentsK.sh xdec 0.5 20 5
-./run_experimentsK.sh xdec 0.5 10 0 ; ./run_experimentsK.sh xdec 0.5 10 5
-
-./run_experimentsK.sh xdec 0.5 30 10 ; ./run_experimentsK.sh xdec 0.5 30 20
-./run_experimentsK.sh xdec 0.5 20 10 ; ./run_experimentsK.sh xdec 0.5 20 20
-./run_experimentsK.sh xdec 0.5 10 10 ; ./run_experimentsK.sh xdec 0.5 10 20
-
-./run_experimentsK.sh xbm 0.5 30 0 ; ./run_experimentsK.sh xbm 0.5 20 0 ; ./run_experimentsK.sh xbm 0.5 10 0
-
-./run_experimentsK.sh xarray 0.5 30 0 ; ./run_experimentsK.sh xarray 0.5 20 0 ; ./run_experimentsK.sh xarray 0.5 10 0
-
-
-
-
-
-./run_merge_attack.sh decay 1 10
-
-./run_merge_float.sh 0.5 10
-
-./run_merge_experimentsK.sh 3 [10,20,26,30]
-./run_merge_experimentsK.sh 3 [10,20,30]
-
-
-./run_experimentsK.sh decay 0.5 30 10 ; ./run_experimentsK.sh decay 0.5 30 20
-./run_experimentsK.sh decay 0.5 20 10 ; ./run_experimentsK.sh decay 0.5 20 20
-./run_experimentsK.sh decay 0.5 10 10 ; ./run_experimentsK.sh decay 0.5 10 20
-
-./run_experimentsK.sh decay 0.5 30 5 ; ./run_experimentsK.sh decay 0.5 20 5
-./run_experimentsK.sh decay 0.5 10 5 ; ./run_experimentsK.sh array 0.5 30 0 
-
-
-./run_experimentsK.sh bm 0.5 30 0 ; ./run_experimentsK.sh bm 0.5 20 0
-./run_experimentsK.sh decay 0.5 30 0 ; ./run_experimentsK.sh decay 0.5 20 0
-./run_experimentsK.sh bm 0.5 10 0 ; ./run_experimentsK.sh decay 0.5 10 0
-
-
-./run_experimentsK.sh array 0.5 10 0; ./run_experimentsK.sh array 0.5 20 0
-
-./run_merge_experimentsK.sh decay 1 40
-./run_merge_experimentsK.sh decay 1 30
-./run_merge_experimentsK.sh decay 1 20
-./run_merge_experimentsK.sh decay 1 [22,24,26,28]
-./run_merge_experimentsK.sh decay 1 [12,14,16,18]
-./run_merge_experimentsK.sh decay 1 10
-
-Rscript plot_resilience_decay.r 1 10
-Rscript plot_metrics_evolution.r 1 30
-Rscript plot_mergeandNomerge.r 30 1 10
-
-
-./run_experimentsK.sh bm 1 30 0
-./run_experimentsK.sh decay 1 30 0
-./run_experimentsK.sh bm 1 20 0
-./run_experimentsK.sh decay 1 20 0
-./run_experimentsK.sh bm 1 10 0
-./run_experimentsK.sh decay 1 10 0
-./run_experimentsK.sh array 1 30 0
-./run_experimentsK.sh array 1 20 0
-./run_experimentsK.sh array 1 10 0
-
-
-./run_experimentsK.sh decay 1 30 10
-./run_experimentsK.sh decay 1 30 10
-./run_experimentsK.sh decay 1 30 10
-
-
-
-./run_experimentsK.sh bm 30 0 1
-./run_experimentsK.sh decay 30 0 1
-./run_experimentsK.sh bm 20 0 1
-./run_experimentsK.sh decay 20 0 1
-./run_experimentsK.sh bm 10 0 1
-./run_experimentsK.sh decay 10 0 1
-./run_experimentsK.sh decay 40 0 1
-
-
-./run_experimentsK.sh bm 30 10 1
-./run_experimentsK.sh decay 30 10 1
-./run_experimentsK.sh bm 20 10 1
-./run_experimentsK.sh decay 20 10 1
-./run_experimentsK.sh bm 10 10 1
-./run_experimentsK.sh decay 10 10 1
-
-
-oarsub -l host=4,walltime=12 -t deploy -p grappe -r '2026-02-03 02:00:02'
-
-
-
-
-
-PREVIOUS
-
-Run in release mode (much faster):
-cargo run --release -- -T 1000 -n 1000 decay -f 10 -t 300 -v 100 -u 100 -m 100 -n 1000 -y 1
-
-./run_experiments.sh
-Rscript plot_byz.r 1 (for budget=1KB) or Rscript plot_byz.r 2
-
-./run_merge_experiments.sh 
-Rscript plot_merge.r 30 10 1
-
-run_merge_experimentsK.sh $STRATEGY $BUDGET $NRUNS
-
-only Nrun 1 and 2 
-
-REDO for t=5% REMOVE 30
-./run_merge_experimentsK.sh bm 10 1 2
-./run_merge_experimentsK.sh bm 20 1 2
-./run_merge_experimentsK.sh array 10 1 2
-
-
-./run_experimentsK.sh bm 30 1 2
-./run_experimentsK.sh array 30 1 2
-./run_experimentsK.sh decay 30 1 2
-
-./run_experimentsK.sh bm 40 1 2
-./run_experimentsK.sh array 40 1 2
-./run_experimentsK.sh decay 40 1 2
-
-Rscript plot_byz.r 1
- Rscript plot_byz.r 2
- Rscript plot_byzfloat.r 0.5
-
-Rscript plot_merge.r 30 10 10
-Rscript plot_merge.r 30 20 10
-Rscript plot_mergeandNomergecopy.r 30 10 10
-Rscript plot_mergeandNomerge.r 30 5 10
-
-
-BUDGET 5
-./run_merge_experimentsK.sh bm 5 1
-
-NOMERGE
-
-./run_NOmerge_expeK.sh bm 5 1 2
-./run_NOmerge_expeK.sh bm 10 1 2
-./run_NOmerge_expeK.sh array 10 1 2
-./run_NOmerge_expeK.sh bm 20 1 2
-
-./run_experimentsK.sh bm 20 1 2
-
-WAITING
-./run_experimentsK.sh array 20 1 2
-./run_experimentsK.sh decay 20 1 2
-
-./run_experimentsK.sh bm 10 1 2
-./run_experimentsK.sh array 10 1 *
-
-
-./run_experimentsK.sh decay 10 1 2
-
-./run_NOmerge_expeK.sh decay 5 1
-./run_NOmerge_expeK.sh decay 10 1
-./run_NOmerge_expeK.sh decay 20 1
-
-./run_merge_experimentsK.sh decay 5 1
-./run_merge_experimentsK.sh decay 10 1
-./run_merge_experimentsK.sh decay 20 1
-
-cargo run -- -T 200 -n 10000 array -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -x 100 -p 10 > results_merge/array-10000-160-3000-100-10-run1
-
-cargo run -- -T 200 -n 10000 bm -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -y 20 -x 100 -p 10 > results_merge/bm-10000-160-3000-100-10-20-run1
-
-cargo run -- -T 200 -n 10000 bm -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -y 10 -x 100 -p 10 > results_merge/bm-10000-160-3000-100-10-10-run1
-
-cargo run -- -T 200 -n 10000 bm -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -y 5 -x 100 -p 10 > results_merge/bm-10000-160-3000-100-10-5-run1
-
-
-
-TODO
-
-cargo run -- -T 2000 -n 10000 decay -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -y 20 -x 3000 -p 10 > results_merge/decay-10000-160-3000-3000-10-20-run1
-
-cargo run -- -T 2000 -n 10000 decay -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -y 20 > results_merge/decay-10000-160-3000-0-10-20-run1
+Remarque:
+- Comme dans le fichier plot_three_figures.r, donne la possibilité de pouvoir zoomer la figure entre 2 rounds donnés tout en affichant plus de points

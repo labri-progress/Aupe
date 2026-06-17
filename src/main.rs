@@ -186,7 +186,8 @@ fn sim<A: App + Send>(nsteps: usize, nproc: usize, init: &A::Init, node_file: &s
     if nb_merge > 0 {
         net.write_node_metrics(node_file);
     }
-    let list_of_steps = [100, 200, 500, 1000, 5000, 9999, 10500, 11000, 15000, 20000];
+    let mut list_of_steps = vec![100, 500, 9999, 10500, 20000];
+    list_of_steps.extend(11000usize..=11049);
     for _step in 0..nsteps {
         net.step();
         net.print_metrics();

@@ -102,7 +102,7 @@ for run in $(seq 1 $NRUNS); do
             -n $NODES $trusted_flags -s $ATTACK_START  > "$OUTDIR/$outfile" &
           mark_done "$outfile"
           
-        elif [ "$strat" = "bm" ] || [ "$strat" = "decay" ]; then
+        elif [ "$strat" = "bm" ] || [ "$strat" = "decay" ] || [ "$strat" = "decay2" ] || [ "$strat" = "decay4" ]; then
           for budget in "${BUDGETS[@]}"; do
             buckets=$(echo "$budget * 1024/8/2" | bc)
             outfile="${strat}-N${NODES}-v${VIEW}-f${f_count}-y${budget}${trusted_tag}-run${run}"
