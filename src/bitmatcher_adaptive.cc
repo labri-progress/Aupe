@@ -540,6 +540,44 @@ double BitMatcherAdaptive::QueryAvgBucket(const std::string& key, int16_t key_le
 	return flag ? 0.0 : (double)min_value;
 }
 
+double BitMatcherAdaptive::QueryMaxBucket(const std::string& key, int16_t key_len) {
+	GET_HASH_VALUE_SENTENCE(key.c_str());
+
+	for (uint8_t i = 0; i < 2; i++) {
+		ec_bucket* b = bucket[i].data() + hash[i];
+		const uint32_t type_id = get_bucket_type_id(b);
+		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (uint8_t j = 0; j < fingerprint_num; j++) {
+			if (get_bucket_fingerprint(b, j) == fp) {
+				bool full = true;
+				for (uint8_t k = 0; k < fingerprint_num; k++) {
+					if (get_bucket_fingerprint(b, k) == 0) { full = false; break; }
+				}
+				if (!full) {
+					return (double)get_bucket_count(b, j, type_id);
+				}
+				return (double)get_max_count();
+			}
+		}
+	}
+
+	// Absent : même comportement que Query
+	bool flag = false;
+	uint64_t min_value = UINT64_MAX;
+	for (uint8_t i = 0; i < 2; i++) {
+		ec_bucket* b = bucket[i].data() + hash[i];
+		const uint32_t type_id = get_bucket_type_id(b);
+		const uint8_t fingerprint_num = get_item_num_in_bucket_type(type_id);
+		for (uint8_t fpt_idx = 0; fpt_idx < fingerprint_num; fpt_idx++) {
+			const uint8_t stored_fp    = get_bucket_fingerprint(b, fpt_idx);
+			const uint64_t stored_count = get_bucket_count(b, fpt_idx, type_id);
+			if (!flag && stored_fp == 0) { flag = true; }
+			if (!flag && stored_fp != 0 && min_value > stored_count) { min_value = stored_count; }
+		}
+	}
+	return flag ? 0.0 : (double)min_value;
+}
+
 void BitMatcherAdaptive::InsertByFp(uint8_t fingerprint_value, uint first_hash_table_idx, uint64_t count){
 	// Insert count incrementally to properly handle overflow using BitMatcherAdaptive's strategy
 	// This allows plus() and solve_overflow_locally() to work correctly for each increment

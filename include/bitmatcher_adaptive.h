@@ -281,6 +281,7 @@ public:
     //double Query(const char *key, const int16_t key_len = 0);
 	double Query(const std::string& key, int16_t key_len);
 	double QueryAvgBucket(const std::string& key, int16_t key_len);
+	double QueryMaxBucket(const std::string& key, int16_t key_len);
     int Mem(const char *key, const int16_t key_len = 0);
     double Ratio() const;
     void dump_to_file(FILE* fp);

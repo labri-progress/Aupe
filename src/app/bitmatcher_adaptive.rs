@@ -25,6 +25,7 @@ pub mod ffi {
         fn Insert(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16); //key: &str,key_len: u16);
         fn Query(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> f64;
         fn QueryAvgBucket(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> f64;
+        fn QueryMaxBucket(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> f64;
         fn print_buckets(self: &BitMatcherAdaptive);
         fn merge(self: Pin<&mut BitMatcherAdaptive>, other: &BitMatcherAdaptive);
         fn get_blocked_count(self: &BitMatcherAdaptive) -> u32;
@@ -198,13 +199,13 @@ impl BM {
         outputstream
     }
 
-    /// Requête v3 : si présent et bucket plein -> moyenne des compteurs du bucket,
+    /// Requête v3 : si présent et bucket plein -> max du sketch,
     /// si présent et bucket non plein -> compteur individuel de l'élément,
     /// sinon (absent) -> comportement original (0 ou min du bucket).
     pub fn estimate_v3(&mut self, item: &usize) -> f64 {
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         let_cxx_string!(key = item_str);
-        self.matrix.as_mut().unwrap().QueryAvgBucket(&key, self.key_len as i16)
+        self.matrix.as_mut().unwrap().QueryMaxBucket(&key, self.key_len as i16)
     }
 
     /// Debiasing v3 : même logique que debiais_stream original (ref_min / occur),

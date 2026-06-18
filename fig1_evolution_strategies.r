@@ -3,9 +3,9 @@
 #
 # Grille 2x2 — évolution de la proportion de byzantins dans la vue des
 # nœuds corrects en fonction des rounds pour trois stratégies :
-#   Aupe Array   (array,  sans budget)
-#   Aupe BM      (bm,     avec budget y)
-#   Aupe BMDecay (decay2, avec budget y, sans nœuds de confiance)
+#   Array   (array,  sans budget)
+#   BM      (bm,     avec budget y)
+#   BMDecay (decay2, avec budget y, sans nœuds de confiance)
 # Faulty proportions étudiées : 10, 20, 30, 40 %
 # Attaque : 20 000 rounds, début au round 10 000
 #
@@ -32,9 +32,9 @@ faulty_pcts <- c(10, 20, 30, 40)
 results_dir <- "output_byz"
 
 time_step <- if (zoomed) 5 else 100
-line_size <- 0.5
-width     <- 10
-height    <- 5   # par panneau → PDF final = 10 x 10 (2 rangées)
+line_size <- 0.4
+width     <- 7
+height    <- 2.5
 
 # ── Thème ─────────────────────────────────────────────────────────────────────
 mytheme <- theme(
@@ -44,16 +44,18 @@ mytheme <- theme(
   plot.background         = element_rect(fill = "white"),
   panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y        = unit(0.005, "cm"),
-  text                    = element_text(size = 12, color = "black"),
-  axis.title.x            = element_text(size = 13, face = "bold"),
-  axis.title.y            = element_text(size = 12, face = "bold"),
-  axis.text.x             = element_text(size = 12, face = "bold"),
-  axis.text.y             = element_text(size = 12, face = "bold"),
-  plot.title              = element_text(size = 13, face = "bold"),
-  legend.text             = element_text(size = 11, face = "bold"),
+  text                    = element_text(size = 9, color = "black"),
+  axis.title.x            = element_text(size = 9, face = "bold"),
+  axis.title.y            = element_text(size = 9, face = "bold"),
+  axis.text.x             = element_text(size = 8, face = "bold"),
+  axis.text.y             = element_text(size = 8, face = "bold"),
+  plot.title              = element_text(size = 9, face = "bold"),
+  legend.text             = element_text(size = 8, face = "bold"),
   legend.title            = element_blank(),
   legend.background       = element_rect(fill = "transparent", colour = NA),
   legend.box.background   = element_rect(fill = "transparent", colour = NA),
+  legend.key.height       = unit(8,  "pt"),
+  plot.margin             = margin(5.5, 2, 5.5, 2, "pt"),
   axis.ticks              = element_line(color = "black", linewidth = 1),
   axis.ticks.length       = unit(4, "pt"),
   axis.minor.ticks.length = unit(2, "pt")
@@ -68,16 +70,16 @@ mytheme <- theme(
 
 # ── Palette cohérente (Okabe-Ito + accord avec les autres scripts) ─────────────
 custom_colors <- c(
-  "Aupe Array"   = "#56B4E9",   # bleu ciel
-  "Aupe BM"      = "#882EE6",   # violet
-  "Aupe BMDecay" = "#000000"    # noir
+  "Array"   = "#56B4E9",   # bleu ciel
+  "BM"      = "#882EE6",   # violet
+  "BMDecay" = "#000000"    # noir
 )
 custom_lty <- c(
-  "Aupe Array"   = "solid",
-  "Aupe BM"      = "solid",
-  "Aupe BMDecay" = "solid"
+  "Array"   = "solid",
+  "BM"      = "solid",
+  "BMDecay" = "solid"
 )
-level_order <- c("Aupe Array", "Aupe BM", "Aupe BMDecay")
+level_order <- c("Array", "BM", "BMDecay")
 
 # ── Lecture d'un fichier résultat ─────────────────────────────────────────────
 read_file <- function(fname, label, f_pct, run) {
@@ -101,17 +103,17 @@ load_all <- function() {
   for (f_pct in faulty_pcts) {
     f <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
-      # Aupe Array (pas de budget)
+      # Array (pas de budget)
       fn <- file.path(results_dir, sprintf("array-N%d-v%d-f%d-run%d", nodes, view, f, run))
-      d  <- read_file(fn, "Aupe Array", f_pct, run)
+      d  <- read_file(fn, "Array", f_pct, run)
       if (!is.null(d)) df <- rbind(df, d)
-      # Aupe BM
+      # BM
       fn <- file.path(results_dir, sprintf("bm-N%d-v%d-f%d-y%g-run%d", nodes, view, f, budget, run))
-      d  <- read_file(fn, "Aupe BM", f_pct, run)
+      d  <- read_file(fn, "BM", f_pct, run)
       if (!is.null(d)) df <- rbind(df, d)
-      # Aupe BMDecay (decay2, sans noeuds de confiance)
+      # BMDecay (decay2, sans noeuds de confiance)
       fn <- file.path(results_dir, sprintf("decay2-N%d-v%d-f%d-y%g-run%d", nodes, view, f, budget, run))
-      d  <- read_file(fn, "Aupe BMDecay", f_pct, run)
+      d  <- read_file(fn, "BMDecay", f_pct, run)
       if (!is.null(d)) df <- rbind(df, d)
     }
   }
@@ -152,8 +154,8 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
     scale_linetype_manual(values = custom_lty,  drop = FALSE) +
     labs(
       x     = expression(bold("Rounds")),
-      y     = if (show_y_title) expression(bold("Proportion byz. dans la vue")) else NULL,
-      title = sprintf("f = %d%%", f)
+      y     = if (show_y_title) expression(bold("Prop. of Byz. samp.")) else NULL,
+      #title = sprintf("f = %.2f", f / 100)
     ) +
     coord_cartesian(ylim = c(0, 1)) +
     scale_x_continuous(
@@ -167,7 +169,7 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.68, 0.80) else "none") +
+    theme(legend.position = if (show_legend) c(0.6, 0.80) else "none") +
     guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 1))
 }
@@ -182,15 +184,19 @@ for (i in seq_along(faulty_pcts)) {
   f   <- faulty_pcts[i]
   sub <- avg %>% filter(f_pct == f)
   plots[[i]] <- byz_plot(sub, f,
-                          show_legend  = (i == 2),           # légende panneau haut-droite
-                          show_y_title = (i %% 2 == 1))      # titre Y panneau gauche seulement
+                          show_legend  = (i == 1),
+                          show_y_title = (i == 1))
 }
 
 dir.create("results", showWarnings = FALSE)
 zoom_tag <- if (zoomed) sprintf("-zoom%d-%d", zoom_from, zoom_to) else ""
 outfile  <- sprintf("results/fig1_evolution_strategies_%gKB%s.pdf", budget, zoom_tag)
 
-pdf(outfile, width = width, height = height * 2)
-grid.arrange(grobs = plots, nrow = 2, ncol = 2)
+grobs_out <- lapply(plots, ggplotGrob)
+max_w     <- do.call(grid::unit.pmax, lapply(grobs_out, `[[`, "widths"))
+grobs_out <- lapply(grobs_out, function(g) { g$widths <- max_w; g })
+
+pdf(outfile, width = width, height = height)
+grid.arrange(grobs = grobs_out, nrow = 1, ncol = 4)
 dev.off()
 cat("Sauvegarde dans:", outfile, "\n")

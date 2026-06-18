@@ -27,8 +27,8 @@ trusted_pcts  <- c(5, 10, 20)
 conv_start    <- 11000
 results_dir   <- "output_byz"
 
-width  <- 7
-height <- 5
+width  <- 3.5
+height <- 2.8
 
 # ── Thème ─────────────────────────────────────────────────────────────────────
 mytheme <- theme(
@@ -37,15 +37,16 @@ mytheme <- theme(
   panel.background        = element_rect(fill = "white"),
   plot.background         = element_rect(fill = "white"),
   panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
-  text                    = element_text(size = 12, color = "black"),
-  axis.title.x            = element_text(size = 13, face = "bold"),
-  axis.title.y            = element_text(size = 12, face = "bold"),
-  axis.text.x             = element_text(size = 12, face = "bold"),
-  axis.text.y             = element_text(size = 12, face = "bold"),
-  legend.text             = element_text(size = 11, face = "bold"),
+  text                    = element_text(size = 9, color = "black"),
+  axis.title.x            = element_text(size = 9, face = "bold"),
+  axis.title.y            = element_text(size = 9, face = "bold"),
+  axis.text.x             = element_text(size = 8, face = "bold"),
+  axis.text.y             = element_text(size = 8, face = "bold"),
+  legend.text             = element_text(size = 8, face = "bold"),
   legend.title            = element_blank(),
   legend.background       = element_rect(fill = "transparent", colour = NA),
   legend.box.background   = element_rect(fill = "transparent", colour = NA),
+  legend.key.height    = unit(9,  "pt"),
   axis.ticks              = element_line(color = "black", linewidth = 1),
   axis.ticks.length       = unit(4, "pt"),
   axis.minor.ticks.length = unit(2, "pt")
@@ -112,7 +113,7 @@ load_gain <- function() {
       rows[[length(rows) + 1]] <- data.frame(
         strategy = paste0("t = ", t_pct, "%"),
         f_pct    = f_pct,
-        gain     = base_conv - merge_conv
+        gain     = (base_conv - merge_conv) / base_conv
       )
     }
   }
@@ -121,6 +122,7 @@ load_gain <- function() {
 
 # ── Données ───────────────────────────────────────────────────────────────────
 gain_df <- load_gain()
+
 if (nrow(gain_df) == 0 || all(is.na(gain_df$gain))) {
   cat("Aucune donnée valide.\n"); quit(status = 1)
 }
@@ -128,32 +130,35 @@ present <- intersect(level_order, unique(gain_df$strategy))
 gain_df$strategy <- factor(gain_df$strategy, levels = present)
 
 # ── Figure ────────────────────────────────────────────────────────────────────
-p <- ggplot(gain_df, aes(x = f_pct, y = gain,
+gain_df$gain_pct <- gain_df$gain * 100
+gain_df
+
+p <- ggplot(gain_df, aes(x = f_pct / 100, y = gain_pct,
                           color = strategy, shape = strategy, linetype = strategy,
                           group = strategy)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50", linewidth = 0.5) +
-  geom_line(linewidth = 0.7) +
-  geom_point(size = 3.5) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 2.0) +
   scale_color_manual(values = merge_colors,  drop = FALSE) +
   scale_shape_manual(values = merge_shapes,  drop = FALSE) +
   scale_linetype_manual(values = merge_lty,  drop = FALSE) +
+  coord_cartesian(ylim = c(0, 8)) +
   scale_x_continuous(
-    breaks   = faulty_pcts,
-    labels   = paste0(faulty_pcts, "%"),
-    sec.axis = dup_axis(labels = NULL, name = NULL)
+    breaks       = faulty_pcts / 100,
+    minor_breaks = NULL,
+    sec.axis     = dup_axis(labels = NULL, name = NULL)
   ) +
   scale_y_continuous(
-    breaks       = seq(-0.5, 0.5, by = 0.05),
-    minor_breaks = seq(-0.5, 0.5, by = 0.025),
-    labels       = function(x) sprintf("%.2f", x),
+    breaks       = seq(-0, 8, by = 2),
+    minor_breaks = seq(-0, 8, by = 1),
     sec.axis     = dup_axis(labels = NULL, name = NULL)
   ) +
   labs(
-    x = expression(bold("% de byzantins dans le système")),
-    y = expression(bold("Gain en prop. byz. (sans merge − avec merge)"))
+    x = expression(bold("Proportion of Byzantine nodes")),
+    y = expression(bold("Byz. prop. gain (%)" )) # (no merge − with merge)"))
   ) +
   mytheme +
-  theme(legend.position = c(0.20, 0.80)) +
+  theme(legend.position = c(0.17, 0.80)) +
   guides(color    = guide_legend(ncol = 1),
          linetype = guide_legend(ncol = 1),
          shape    = guide_legend(ncol = 1))

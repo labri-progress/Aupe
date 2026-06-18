@@ -83,45 +83,71 @@ pub enum WhichApp {
 
 fn main() {
     let opt = Opt::from_args();
+    
     match opt.app {
 // cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1
 // cargo run -- -T 200 -n 1000 bm -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -y 6 
         /* WhichApp::AupeCF(pp) => {
             sim::<app::aupecf::AupeCF>(opt.n_steps, opt.nodes, &pp);  
         } */ 
+        
         WhichApp::AupeDecay(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-decay-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::AupeDecay2(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-decay2-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::aupebmdecay2::AupeDecay2>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::AupeDecay3(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-decay3-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::aupebmdecay3::AupeDecay3>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::AupeDecay4(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-decay4-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::aupebmdecay4::AupeDecay4>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::EvictionDecay(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-evict-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::evictiondecay::EvictionDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::XDecay(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-xdec-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::xdecay::XDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
@@ -133,14 +159,22 @@ fn main() {
 
         
         WhichApp::AupeBM(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-bm-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::aupebm::AupeBM>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::XBM(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
             let f = format!("{}/nodes-xbm-{}-{}-{}-{}-{}-{:.1}.csv",
-                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, pp.space);
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::xbm::XBM>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
