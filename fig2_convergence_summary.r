@@ -163,14 +163,14 @@ p_summary <- ggplot(avg_conv, aes(x = f_pct / 100, y = propByz,
     y = expression(bold("Prop. of Byz. samp."))
   ) +
   mytheme +
-  theme(legend.position = c(0.23, 0.88)) +
+  theme(legend.position = c(0.25, 0.88)) +
   guides(color    = guide_legend(ncol = 1),
          linetype = guide_legend(ncol = 1),
          shape    = guide_legend(ncol = 1))
 
 dir.create("results", showWarnings = FALSE)
 out_a <- sprintf("results/fig2a_convergence_summary_%gKB.pdf", budget)
-pdf(out_a, width = 3.5, height = 2.8)
+pdf(out_a, width = 3, height = 2.4)
 print(p_summary)
 dev.off()
 cat("Saved:", out_a, "\n")

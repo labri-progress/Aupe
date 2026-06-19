@@ -4,7 +4,7 @@ Rscript fig1_evolution_strategies.r 0.5 [zoom_from zoom_to]
 
 Rscript fig2_convergence_summary.r 0.5 [round_from] [round_to]
 
-Rscript fig3_merge_gain.r 0.5
+Rscript fig3_merge_gain.r 0.5 [round_from] [round_to]
 
 Rscript fig4_attack_comparison.r 0.5 9900 11000
 
