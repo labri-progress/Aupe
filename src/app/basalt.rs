@@ -274,7 +274,7 @@ impl App for Basalt {
                     }else{
                         net.sample_peers(1)
                             .iter()
-                            .for_each(|p| net.send(*p, Msg::Push(sample(&mut byzantines[..], self.params.view_size, &mut self.rng))));
+                            .for_each(|p| net.send(*p, Msg::Push(net.sample_peers(self.params.view_size))));
                     }
                     /* if net.time() >= self.params.attack_start_time {
                         net.sample_peers(self.params.byzantine_flood_factor)
