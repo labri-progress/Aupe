@@ -1,21 +1,20 @@
 #!/usr/bin/env Rscript
 # Usage: Rscript fig4_attack_comparison.r <budget> [zoom_from zoom_to]
 #
-# Grille 2x2 (10, 20, 30, 40 % de byzantins) — comparaison de deux régimes
+# Grille 2x2 (10, 20, 30, 40 % de byzantins) — comparaison de deux scénarios
 # d'attaque pour Aupe BMDecay, pour chaque configuration de merge :
 #
-#   Normal (decay2) : les byzantins participent (se camouflent) avant le
-#                         round 10 000, puis lancent l'attaque.
-#   Caché   (decay4) : les byzantins sont absents avant le round 10 000,
-#                         puis apparaissent et attaquent simultanément.
+#   attack1 (decay2) : les byzantins participent (se camouflent) avant le
+#                        round 10 000, puis lancent l'attaque.
+#   attack2 (decay4) : les byzantins sont absents avant le round 10 000,
+#                        puis apparaissent et attaquent simultanément.
 #
-# Pour chaque régime, quatre configurations de merge :
-#   t = 0 %  (sans nœuds de confiance)
-#   t = 5 %  t = 10 %  t = 20 %
+# Configurations de merge : t = 0 %, t = 20 %, t = 30 %
 #
-# Encodage visuel :
+# Encodage visuel (légende fusionnée) :
 #   Couleur       → proportion de noeuds de confiance (t %)
-#   Type de ligne → régime d'attaque (Normal = solide, Caché = tiretée)
+#   Type de ligne → scénario (attack1 = solide, attack2 = tiretée)
+#   Étiquette     → "attack i : t=j%"
 #
 # Zoom : fournir zoom_from et zoom_to pour une fenêtre resserrée avec
 #        un pas de temps plus fin (time_step = 5).
@@ -40,7 +39,7 @@ nodes        <- 1000
 view         <- 20
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30, 40)
-trusted_pcts <- c(0, 20) #c(0, 5, 10, 20)
+trusted_pcts <- c(0, 20) #, 30)
 results_dir  <- "output_byz"
 
 time_step <- if (zoomed) 5 else 100
@@ -63,10 +62,11 @@ mytheme <- theme(
   axis.text.y             = element_text(size = 8, face = "bold"),
   plot.title              = element_text(size = 9, face = "bold"),
   legend.text             = element_text(size = 8, face = "bold"),
-  legend.title            = element_text(size = 8, face = "bold"),
+  legend.title            = element_blank(),
   legend.background       = element_rect(fill = "transparent", colour = NA),
   legend.box.background   = element_rect(fill = "transparent", colour = NA),
   legend.key.height       = unit(8,  "pt"),
+  legend.key.width        = unit(20, "pt"),
   plot.margin             = margin(5.5, 2, 5.5, 2, "pt"),
   axis.ticks              = element_line(color = "black", linewidth = 1),
   axis.ticks.length       = unit(4, "pt"),
@@ -81,20 +81,27 @@ mytheme <- theme(
 )
 
 # ── Palette ───────────────────────────────────────────────────────────────────
-# Couleur → merge % (cohérent avec fig3)
-merge_colors <- c(
-  "t = 0%"  = "#000000",   # noir
-  #"t = 5%"  = "#E69F00",   # orange
-  #"t = 10%" = "#56B4E9",   # bleu ciel
-  "t = 20%" = "#009E73"    # vert
+# Correspondance clé de fichier → label de scénario
+attack_keys <- c("attack1" = "decay2", "attack2" = "decay4")
+
+# Combinaisons (scénario × t%) — ordre pour la légende fusionnée
+combo_levels <- c(
+  "attack1 : t=0%",  "attack1 : t=20%",  # "attack1 : t=30%"
+  "attack2 : t=0%",  "attack2 : t=20%"   # "attack2 : t=30%"
 )
-# Type de ligne → régime d'attaque
-attack_lty <- c(
-  "Normal" = "solid",
-  "Hidden"     = "dashed"
+# Couleur → t% (cohérent avec fig3)
+t_col <- c("t=0%" = "#000000", "t=20%" = "#009E73") #, "t=30%" = "#CC79A7")
+# Linetype → scénario
+scen_lty <- c("attack1" = "solid", "attack2" = "22")
+
+combo_colors <- setNames(
+  t_col[sub("^attack[12] : ", "", combo_levels)],
+  combo_levels
 )
-# Correspondance clé de fichier → label d'attaque
-attack_keys <- c("Normal" = "decay2", "Hidden" = "decay4")
+combo_lty <- setNames(
+  scen_lty[sub(" : t=.*$", "", combo_levels)],
+  combo_levels
+)
 
 # ── Lecture d'un fichier résultat ─────────────────────────────────────────────
 read_file <- function(fname, attack, t_pct, f_pct, run) {
@@ -146,8 +153,12 @@ prepare <- function(df) {
     group_by(attack, t_label, f_pct, time) %>%
     summarise(propByz = mean(propByz), .groups = "drop") %>%
     filter(time %% time_step == 0)
-  avg$attack  <- factor(avg$attack,  levels = names(attack_lty))
+  avg$attack  <- factor(avg$attack,  levels = names(attack_keys))
   avg$t_label <- factor(avg$t_label, levels = paste0("t = ", trusted_pcts, "%"))
+  avg$combo   <- factor(
+    paste0(as.character(avg$attack), " : ", sub("t = ", "t=", as.character(avg$t_label))),
+    levels = combo_levels
+  )
   avg
 }
 
@@ -163,35 +174,25 @@ if (zoomed) {
 # ── Construction d'un panneau ─────────────────────────────────────────────────
 byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
   optimal <- f / 100
-  p <- ggplot(data, aes(x      = time,
-                        y      = propByz,
-                        color  = t_label,
-                        linetype = attack,
-                        group  = interaction(attack, t_label))) +
+  p <- ggplot(data, aes(x        = time,
+                        y        = propByz,
+                        color    = combo,
+                        linetype = combo,
+                        group    = combo)) +
     geom_hline(yintercept = optimal, linetype = "dashed",
                color = "gray60", linewidth = 0.4) +
     geom_vline(xintercept = 10000, linetype = "dotted",
                color = "gray60", linewidth = 0.4) +
     geom_line(linewidth = line_size) +
-    scale_color_manual(
-      #name   = "Merge (t)",
-      values = merge_colors,
-      drop   = FALSE
-    ) +
-    scale_linetype_manual(
-      name   = "Attack",
-      values = attack_lty,
-      drop   = FALSE
-    ) +
+    scale_color_manual(values = combo_colors, drop = FALSE) +
+    scale_linetype_manual(values = combo_lty, drop = FALSE) +
     labs(
       x     = expression(bold("Rounds")),
       y     = if (show_y_title) expression(bold("Prop. of Byz. samp.")) else NULL,
-      #title = sprintf("f = %.2f", f / 100)
     ) +
     coord_cartesian(ylim = c(0, 1)) +
     scale_x_continuous(
       breaks   = x_breaks,
-      #labels   = x_labels,
       sec.axis = dup_axis(labels = NULL, name = NULL)
     ) +
     scale_y_continuous(
@@ -200,15 +201,10 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.67, 0.65) else "none") +
+    theme(legend.position = if (show_legend) c(0.51, 0.8) else "none") +
     guides(
-      color    = guide_legend(#title = "Merge (t)",  
-                              ncol = 1,
-                              override.aes = list(linetype = "solid",
-                                                  linewidth = 0.8)),
-      linetype = guide_legend(title = "Attack",     ncol = 1,
-                              override.aes = list(color    = "black",
-                                                  linewidth = 0.8))
+      color    = guide_legend(ncol = 1, override.aes = list(linewidth = 0.8)),
+      linetype = guide_legend(ncol = 1, override.aes = list(linewidth = 0.8))
     )
   p
 }

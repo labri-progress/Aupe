@@ -37,7 +37,7 @@ nodes        <- 1000
 view         <- 20
 nruns        <- 1
 faulty_pcts  <- c(10, 20, 30, 40)
-trusted_pcts <- c(5, 10, 20)
+trusted_pcts <- c(5, 10, 20, 30)
 results_dir  <- "output_byz"
 
 cat(sprintf("Budget=%.1f  rounds [%d, %d]\n", budget, round_from, round_to))
@@ -56,6 +56,7 @@ mytheme <- theme(
   axis.text.y             = element_text(size = 8, face = "bold"),
   legend.text             = element_text(size = 8, face = "bold"),
   legend.title            = element_blank(),
+  legend.key.height    = unit(9,  "pt"),   # réduit la hauteur de chaque item
   legend.background       = element_rect(fill = "transparent", colour = NA),
   legend.box.background   = element_rect(fill = "transparent", colour = NA),
   axis.ticks              = element_line(color = "black", linewidth = 1),
@@ -74,17 +75,20 @@ mytheme <- theme(
 t_colors <- c(
   "t = 5%"  = "#E69F00",   # orange
   "t = 10%" = "#56B4E9",   # sky blue
-  "t = 20%" = "#009E73"    # green
+  "t = 20%" = "#009E73",   # green
+  "t = 30%" = "#CC79A7"    # rose
 )
 t_shapes <- c(
   "t = 5%"  = 16,
   "t = 10%" = 17,
-  "t = 20%" = 15
+  "t = 20%" = 15,
+  "t = 30%" = 18
 )
 t_lty <- c(
   "t = 5%"  = "solid",
   "t = 10%" = "solid",
-  "t = 20%" = "solid"
+  "t = 20%" = "solid",
+  "t = 30%" = "solid"
 )
 level_order <- paste0("t = ", trusted_pcts, "%")
 

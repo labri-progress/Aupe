@@ -36,6 +36,9 @@ Rscript fig6_trust_gap.r 0.5 [round_from] [round_to]
 ./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
 ./max_expe.sh decay2 0.5 10 0 ; ./max_expe.sh decay2 0.5 10 10 ;
 
+./max_expe.sh decay2 0.5 10 30 ; ./max_expe.sh decay2 0.5 30 30 ;
+./max_expe.sh decay2 0.5 20 30 ; ./max_expe.sh decay2 0.5 40 30 ;
+
 
 
 
@@ -45,7 +48,7 @@ Rscript fig6_trust_gap.r 0.5 [round_from] [round_to]
 ./max_expe.sh decay4 0.5 40 0 ; ./max_expe.sh decay4 0.5 40 20 ;
 
 
-./max_expe.sh basalt 0.5 10 0; ./max_expe.sh basalt 0.5 30 0;
+./max_expe.sh basalt 0.5 10 0 ; ./max_expe.sh basalt 0.5 30 0;
 ./max_expe.sh basalt 0.5 20 0 ; ./max_expe.sh basalt 0.5 40 0;
 
 

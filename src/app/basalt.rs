@@ -1,19 +1,21 @@
 use rand::{rng, Rng};
-//use rand::rngs::ThreadRng;
 use structopt::StructOpt;
 
 use crate::net::{App, PeerRef, Network};
 use crate::net::Metrics as NetMetrics;
-use crate::util::{either_or_if_both, hash, sample_nocopy, sample};
+use crate::util::{either_or_if_both, hash, sample} ; //, sample_nocopy};
+//use crate::rps::RPS;
 use crate::graph::ByzConnGraph;
+
 use rand::{SeedableRng};
 use rand::rngs::StdRng;
 use crate::util::SEED2;
 
 pub enum Msg {
     SelfNotif,
-    Pull,
-    Push(Vec<PeerRef>),
+    PullRequest,
+    PullReply(Vec<PeerRef>),
+    PushRequest,
 }
 
 #[derive(Clone, Default, StructOpt, Debug)]
@@ -30,14 +32,6 @@ pub struct Init {
     #[structopt(short = "s", long = "attack-start-time", default_value = "0")]
     pub attack_start_time: u64,
 
-    /// Replacement frequency: replace k neighbor every r (this paramter) time units
-    #[structopt(short = "r", long = "replacement-frequency")]
-    pub replacement_frequency: Option<u64>,
-
-    /// Replacement count: replace k (this parameter) neighbours every r time units
-    #[structopt(short = "k", long = "replacement-count", default_value = "1")]
-    pub replacement_count: usize,
-
     /// Peer sampling view size
     #[structopt(short = "v", long = "view-size")]
     pub view_size: usize,
@@ -46,13 +40,14 @@ pub struct Init {
     #[structopt(short = "i", long = "num-initial-samples")]
     pub initial_uniform_samples: usize,
 
-    /// Use minimum hit peer selection strategy or pure randomness
-    #[structopt(short = "H", long = "use-hit-counter")]
-    pub use_hit_counter: bool,
+    /// Replacement frequency: replace k neighbor every r (this paramter) time units
+    #[structopt(short = "r", long = "replacement-frequency")]
+    pub replacement_frequency: Option<u64>,
 
-    /// Enable detailed graph statistics
-    #[structopt(short = "G", long = "graph-stats")]
-    pub graph_stats: bool,
+    /// Replacement count: replace k (this parameter) neighbours every r time units
+    #[structopt(short = "k", long = "replacement-count", default_value = "1")]
+    pub replacement_count: usize,
+    
 }
 
 pub struct Basalt {
@@ -61,19 +56,19 @@ pub struct Basalt {
     my_id: PeerRef,
     is_byzantine: bool,
 
-    view: Vec<ViewEntry>,
+    view: Vec<PeerRef>,
+    push_view: Vec<PeerRef>,
+    pull_view: Vec<PeerRef>,
+    sample_part: Vec<PeerRef>,
 
-    out_samples: Vec<PeerRef>,
+    sample_view: Vec<(u64, Option<PeerRef>)>,
+
+    v_pull: Vec<PeerRef>,
+    v_push: Vec<PeerRef>,
 
     n_received: usize,
     n_byzantine_received: usize,
-    rng: StdRng,
-}
-
-struct ViewEntry {
-    seed: u64,
-    peer: PeerRef,
-    hits: i64,
+    rng: rand::rngs::StdRng,
 }
 
 pub struct Metrics {
@@ -81,15 +76,24 @@ pub struct Metrics {
 
     n_byzantine_received: usize,
     n_received: usize,
-
+    
     n_byzantine_neighbors: usize,
-    min_byzantine_neighbors: Option<i64>,
-    max_byzantine_neighbors: Option<i64>,
+    n_pushed_byzantine_neighbors: f64,
+    n_pulled_byzantine_neighbors: f64,
+    n_sampled_byzantine_neighbors: f64,
     n_isolated: usize,
+
+    n_byzantine_samples: usize,
+    min_byzantine_samples: Option<i64>,
+    max_byzantine_samples: Option<i64>,
+    n_fullbyz: usize,
+
+    n_fbi: usize,
 
     graph: ByzConnGraph,
     graphrng: StdRng,
 }
+
 
 impl NetMetrics for Metrics {
     fn empty() -> Self {
@@ -98,9 +102,15 @@ impl NetMetrics for Metrics {
             n_byzantine_received: 0,
             n_received: 0,
             n_byzantine_neighbors: 0,
-            min_byzantine_neighbors: None,
-            max_byzantine_neighbors: None,
+            n_pushed_byzantine_neighbors: 0.0,
+            n_pulled_byzantine_neighbors: 0.0,
+            n_sampled_byzantine_neighbors: 0.0,
             n_isolated: 0,
+            n_byzantine_samples: 0,
+            min_byzantine_samples: None,
+            max_byzantine_samples: None,
+            n_fullbyz: 0,
+            n_fbi: 0,
             graph: ByzConnGraph::new(),
             graphrng: StdRng::seed_from_u64(SEED2),
         }
@@ -112,27 +122,42 @@ impl NetMetrics for Metrics {
         self.n_received += other.n_received;
 
         self.n_byzantine_neighbors += other.n_byzantine_neighbors;
-        self.max_byzantine_neighbors = either_or_if_both(
-            &self.max_byzantine_neighbors,
-            &other.max_byzantine_neighbors,
-            |a, b| std::cmp::max(*a, *b));
-        self.min_byzantine_neighbors = either_or_if_both(
-            &self.min_byzantine_neighbors,
-            &other.min_byzantine_neighbors,
-            |a, b| std::cmp::min(*a, *b));
+        self.n_pushed_byzantine_neighbors += other.n_pushed_byzantine_neighbors;
+        self.n_pulled_byzantine_neighbors += other.n_pulled_byzantine_neighbors;
+        self.n_sampled_byzantine_neighbors += other.n_sampled_byzantine_neighbors;
+
         self.n_isolated += other.n_isolated;
+
+        self.n_byzantine_samples += other.n_byzantine_samples;
+        self.max_byzantine_samples = either_or_if_both(
+            &self.max_byzantine_samples,
+            &other.max_byzantine_samples,
+            |a, b| std::cmp::max(*a, *b));
+        self.min_byzantine_samples = either_or_if_both(
+            &self.min_byzantine_samples,
+            &other.min_byzantine_samples,
+            |a, b| std::cmp::min(*a, *b));
+        self.n_fullbyz += other.n_fullbyz;
+
+        self.n_fbi += other.n_fbi;
 
         self.graph.combine(&other.graph);
     }
-    fn headers() -> Vec<&'static str> {
+    fn headers() -> Vec<&'static str> { //'
         vec![
             "avgRecv",
             "avgByzRecv",
             "pByzRecv",
             "avgByzN",
+            "pushByzN",
+            "pullByzN",
+            "sampByzN",
+            "n_isolated",
+            "avgByzSamp",
             "min",
             "max",
-            "n_isolated",
+            "n_fullbyz",
+            "n_fbi",
             "cluscoeff",
             "MPL",
             "id_min", "id_d1", "id_q1", "id_med", "id_q3", "id_d9", "id_max",
@@ -159,9 +184,20 @@ impl NetMetrics for Metrics {
                    (self.n_byzantine_received as f32) / (self.n_received as f32)),
             format!("{:.2}",
                    (self.n_byzantine_neighbors as f32) / (self.n_procs as f32)),
-            format!("{}", self.min_byzantine_neighbors.unwrap_or(-1)),
-            format!("{}", self.max_byzantine_neighbors.unwrap_or(-1)),
+            format!("{:.2}",
+                   (self.n_pushed_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_pulled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+            format!("{:.2}",
+                   (self.n_sampled_byzantine_neighbors as f32) / (self.n_procs as f32)),
+
             format!("{}", self.n_isolated),
+            format!("{:.2}",
+                (self.n_byzantine_samples as f32) / (self.n_procs as f32)),
+            format!("{}", self.min_byzantine_samples.unwrap_or(-1)),
+            format!("{}", self.max_byzantine_samples.unwrap_or(-1)),
+            format!("{}", self.n_fullbyz),
+            format!("{}", self.n_fbi),
 
             format!("{:.4}", cluscoeff),
             format!("{:.4}", mpl),
@@ -176,48 +212,28 @@ impl NetMetrics for Metrics {
     }
 }
 
-type Net<'a> = &'a mut dyn Network<Msg>;
 
+type Net<'a> = &'a mut dyn Network<Msg>;
 
 
 impl Basalt {
     fn update_samples(&mut self, candidates: &[PeerRef]) {
-        for i in 0..self.view.len() {
+        //println!("len {}", self.sample_view.len());
+        for i in 0..self.sample_view.len() {
             self.update_sample(i, candidates);
         }
     }
 
     fn update_sample(&mut self, i: usize, candidates: &[PeerRef]) {
-        let entry = &mut self.view[i];
-        let mut prev_hash = hash(entry.seed, entry.peer);
+        let (seed, selected) = &mut self.sample_view[i];
+        let mut prev_hash = selected.map(|p| hash(*seed, p));
 
         for candidate in candidates.iter() {
-            if *candidate == entry.peer {
-                entry.hits += 1;
-            } else {
-                let new_hash = hash(entry.seed, *candidate);
-                if new_hash < prev_hash {
-                    entry.peer = *candidate;
-                    entry.hits = 1;
-                    prev_hash = new_hash;
-                }
+            let new_hash = hash(*seed, *candidate);
+            if prev_hash.is_none() || new_hash < prev_hash.unwrap() {
+                *selected = Some(*candidate);
+                prev_hash = Some(new_hash);
             }
-        }
-    }
-
-    fn get_exchange_peer(&mut self, rng: &mut StdRng) -> PeerRef {
-        if self.params.use_hit_counter {
-            println!("Using hit counter");
-            let mut ret = 0;
-            for i in 1..self.view.len() {
-                if self.view[i].hits < self.view[ret].hits {
-                    ret = i;
-                }
-            }
-            self.view[ret].hits += 1;
-            self.view[ret].peer
-        } else {
-            self.view[rng.random_range(0..self.view.len())].peer
         }
     }
 }
@@ -226,7 +242,7 @@ impl App for Basalt {
     type Init = Init;
     type Msg = Msg;
     type Metrics = Metrics;
-
+    
     fn new() -> Self {
         Self {
             params: Init::default(),
@@ -234,7 +250,13 @@ impl App for Basalt {
             my_id: 0,
             is_byzantine: false,
             view: Vec::new(),
-            out_samples: Vec::new(),
+            push_view: Vec::new(),
+            pull_view: Vec::new(),
+            sample_part: Vec::new(),
+            sample_view: Vec::new(),
+
+            v_push: Vec::new(),
+            v_pull: Vec::new(),
 
             n_received: 0,
             n_byzantine_received: 0,
@@ -248,20 +270,19 @@ impl App for Basalt {
         self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
-            self.view = (0..self.params.view_size)
-                .map(|_| ViewEntry{
-                    seed: self.rng.random_range(0..std::u64::MAX),
-                    peer: id,
-                    hits: 1
-                }).collect();
+            let view = net.sample_peers(self.params.view_size);
 
-            let initial_samples = net.sample_peers(self.params.initial_uniform_samples);
-            self.update_samples(&initial_samples[..]);
+            self.sample_view = (0..self.params.view_size)
+                .map(|_| (self.rng.random_range(0..std::u64::MAX), None)).collect();
+            self.update_samples(&view[..]);
+            self.view = view;
         }
         net.send(id, Msg::SelfNotif);
     }
 
+    
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
+        //println!("**********************Node {}**********************", self.my_id);
         if self.is_byzantine {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
@@ -270,69 +291,97 @@ impl App for Basalt {
                     if net.time() >= self.params.attack_start_time {
                         net.sample_peers(self.params.byzantine_flood_factor)
                             .iter()
-                            .for_each(|p| net.send(*p, Msg::Push(sample(&mut byzantines[..], self.params.view_size, &mut self.rng))));
+                            .for_each(|p| net.send(*p, Msg::PushRequest));
                     }else{
                         net.sample_peers(1)
                             .iter()
-                            .for_each(|p| net.send(*p, Msg::Push(net.sample_peers(self.params.view_size))));
+                            .for_each(|p| net.send(*p, Msg::PushRequest));
                     }
-                    /* if net.time() >= self.params.attack_start_time {
-                        net.sample_peers(self.params.byzantine_flood_factor)
-                            .iter()
-                            .for_each(|p| net.send(*p, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng))));
-                    } */
                 },
-                Msg::Pull => {
-                    //net.send(from, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                Msg::PullRequest => {
                     if net.time() >= self.params.attack_start_time {
-                        net.send(from, Msg::Push(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                        net.send(from, Msg::PullReply(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
                     }else{
                         let view = net.sample_peers(self.params.view_size);
-                        net.send(from, Msg::Push(view));
+                        net.send(from, Msg::PullReply(view));
                     }
                 },
                 _ => (),
             }
         } else {
-            let mut rng = self.rng.clone(); //StdRng::seed_from_u64(SEED2)
-            let view = self.view.iter()
-                .map(|entry| entry.peer)
-                .collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
-                    
-                    if let Some(rf) = self.params.replacement_frequency {
+                    let alphav = 1 as usize;
+                    let gammav = (self.params.view_size / 3) as usize;
+                    let betav = self.params.view_size - alphav - gammav;
+
+                    //println!("vpush{:?} vpull{:?}",self.v_push, self.v_pull);
+                    if !self.v_push.is_empty() && !self.v_pull.is_empty() {
+                        
+                        let v_push = std::mem::replace(&mut self.v_push, Vec::new());
+                        let v_pull = std::mem::replace(&mut self.v_pull, Vec::new());
+
+                        if let Some(rf) = self.params.replacement_frequency {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             for k in 0..self.params.replacement_count {
                                 let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.view.len();
-                                if self.out_samples.len() < 200 {
-                                    self.out_samples.push(self.view[i_replace].peer);
-                                }
-                                self.view[i_replace].seed = rng.random_range(0..std::u64::MAX);
-                                self.view[i_replace].hits = 1;
-                                self.update_sample(i_replace, &view[..]);
+                                
+                                // change seed on sefl.sample_view[i_replace] to avoid bias
+                                self.sample_view[i_replace].0 = self.rng.random_range(0..std::u64::MAX);
                             }
                         }
                     }
 
-                    let pull_from = self.get_exchange_peer(&mut rng);
-                    net.send(pull_from, Msg::Pull);
+                        self.update_samples(&v_push[..]);
+                        self.update_samples(&v_pull[..]);
 
-                    let push_to = self.get_exchange_peer(&mut rng);
-                    net.send(push_to, Msg::Push(view.clone()));
+
+                        /*self.push_view = sample(&v_push[..], alphav, &mut self.rng);
+                        self.pull_view = sample(&v_pull[..], betav, &mut self.rng);
+                        
+                        let mut view = self.push_view.clone();
+                        view.extend(self.pull_view.clone());*/
+
+                        let samples_peer = self.sample_view.iter()
+                            .filter(|(_, x)| x.is_some())
+                            .map(|(_, x)| x.unwrap())
+                            .collect::<Vec<_>>();
+                        /*self.sample_part = sample(&samples_peer[..], gammav, &mut self.rng);
+                        
+                        view.extend(self.sample_part.clone());
+
+                        view.extend(sample(&self.view[..], self.params.view_size - view.len(), &mut self.rng));*/
+                        self.view = samples_peer;
+
+                    }
+                    
+                    sample(&self.view[..], alphav, &mut self.rng).iter()
+                        .for_each(|p| net.send(*p, Msg::PushRequest));
+
+                    sample(&self.view[..], betav, &mut self.rng).iter()
+                        .for_each(|p| net.send(*p, Msg::PullRequest));
 
                     net.send(self.my_id, Msg::SelfNotif);
                 },
-                Msg::Pull => {
-                    net.send(from, Msg::Push(view.clone()));
+                Msg::PullRequest => {
+                    //println!("message PlRq ");
+                    net.send(from, Msg::PullReply(self.view.clone()));
                 },
-                Msg::Push(lst) => {
+                Msg::PullReply(lst) => {
+                    //println!("message PlRy ");
                     self.n_received += lst.len();
                     self.n_byzantine_received += lst.iter()
                         .filter(|x| **x < self.params.n_byzantine)
                         .count();
-                    self.update_samples(&lst[..]);
-                    self.update_samples(&[from]);
+                    self.v_pull.extend(lst);
+                },
+                Msg::PushRequest => {
+                    //println!("message PushR ");
+                    self.n_received += 1;
+                    if from < self.params.n_byzantine {
+                        self.n_byzantine_received += 1;
+                    }
+                    self.v_push.push(from);
                 },
             }
         }
@@ -342,34 +391,45 @@ impl App for Basalt {
         if self.is_byzantine {
             let mut metrics = Self::Metrics::empty();
 
-            if self.params.graph_stats {
-                let neighs = (0..self.params.n_byzantine).collect::<Vec<_>>();
-                metrics.graph = ByzConnGraph::peer_new(self.params.n_byzantine,
-                                                       self.my_id,
-                                                       neighs);
-            }
-
             metrics
         } else {
-            let nbn = self.view.iter()
-                .filter(|entry| entry.peer < self.params.n_byzantine).count();
+            let nbn = self.view.iter().filter(|x| **x < self.params.n_byzantine).count();
+            let mut nbpush = 0.0;
+            let mut nbpull = 0.0;
+            let mut nbsamp = 0.0;
+            if self.push_view.len() !=0 {
+                nbpush = self.push_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbpush = nbpush / (self.push_view.len() as f64);
+            }
+            if self.pull_view.len() !=0 {
+                nbpull = self.pull_view.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbpull = nbpull / (self.pull_view.len() as f64);
+            }
+            if self.sample_part.len() !=0 {
+                nbsamp = self.sample_part.iter().filter(|x| **x < self.params.n_byzantine).count() as f64;
+                nbsamp = nbsamp / (self.sample_part.len() as f64);
+            }
+            let samp = self.sample_view.iter()
+                .filter(|(_, x)| x.is_some());
+            let nsamp = samp.clone().count();
+            let nbs = samp.filter(|(_, x)| x.unwrap() < self.params.n_byzantine).count();
 
-            let graph = if self.params.graph_stats {
-                let neighs = self.view.iter().map(|x| x.peer).collect::<Vec<_>>();
-                ByzConnGraph::peer_new(self.params.n_byzantine, self.my_id, neighs)
-            } else {
-                ByzConnGraph::new()
-            };
 
             let ret = Self::Metrics{
                 n_procs: 1,
                 n_received: self.n_received,
                 n_byzantine_received: self.n_byzantine_received,
                 n_byzantine_neighbors: nbn,
+                n_pushed_byzantine_neighbors: nbpush,
+                n_pulled_byzantine_neighbors: nbpull,
+                n_sampled_byzantine_neighbors: nbsamp,
                 n_isolated: if nbn == self.view.len() { 1 } else { 0 },
-                min_byzantine_neighbors: Some(nbn as i64),
-                max_byzantine_neighbors: Some(nbn as i64),
-                graph,
+                n_byzantine_samples: nbs,
+                min_byzantine_samples: Some(nbs as i64),
+                max_byzantine_samples: Some(nbs as i64),
+                n_fullbyz: if nbs == nsamp { 1 } else { 0 },
+                n_fbi: if nbn == self.view.len() && nbs == nsamp { 1 } else { 0 },
+                graph: ByzConnGraph::new(),
                 graphrng: StdRng::seed_from_u64(SEED2 + self.my_id as u64),
             };
             self.n_received = 0;
@@ -377,13 +437,6 @@ impl App for Basalt {
             ret
         }
     }
+    
 }
 
-/* impl RPS for Basalt {
-    fn get_samples(&mut self) -> Vec<PeerRef> {
-        std::mem::replace(&mut self.out_samples, Vec::new())
-    }
-    fn clear_samples(&mut self) {
-        self.out_samples.clear();
-    }
-} */

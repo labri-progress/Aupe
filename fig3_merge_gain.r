@@ -29,7 +29,7 @@ nodes         <- 1000
 view          <- 20
 nruns         <- 1
 faulty_pcts   <- c(10, 20, 30, 40)
-trusted_pcts  <- c(5, 10, 20)
+trusted_pcts  <- c(5, 10, 20, 30)
 conv_start    <- 11000
 results_dir   <- "output_byz"
 
@@ -74,34 +74,39 @@ mytheme <- theme(
 merge_colors <- c(
   "t = 5%"  = "#E69F00",
   "t = 10%" = "#56B4E9",
-  "t = 20%" = "#009E73"
+  "t = 20%" = "#009E73",
+  "t = 30%" = "#CC79A7"
 )
 merge_shapes <- c(
   "t = 5%"  = 16,
   "t = 10%" = 17,
-  "t = 20%" = 15
+  "t = 20%" = 15,
+  "t = 30%" = 18
 )
 merge_lty <- c(
   "t = 5%"  = "solid",
   "t = 10%" = "solid",
-  "t = 20%" = "solid"
+  "t = 20%" = "solid",
+  "t = 30%" = "solid"
 )
 level_order <- paste0("t = ", trusted_pcts, "%")
 
-# Evolution figure (t = 0/5/10/20%)
-trusted_pcts_evo  <- c(0, 5, 10, 20)
+# Evolution figure (t = 0/5/10/20/30%)
+trusted_pcts_evo  <- c(0, 5, 10, 20, 30)
 level_order_evo   <- paste0("t = ", trusted_pcts_evo, "%")
 evo_colors <- c(
   "t = 0%"  = "#000000",
   "t = 5%"  = "#E69F00",
   "t = 10%" = "#56B4E9",
-  "t = 20%" = "#009E73"
+  "t = 20%" = "#009E73",
+  "t = 30%" = "#CC79A7"
 )
 evo_lty <- c(
   "t = 0%"  = "solid",
   "t = 5%"  = "solid",
   "t = 10%" = "solid",
-  "t = 20%" = "solid"
+  "t = 20%" = "solid",
+  "t = 30%" = "solid"
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
