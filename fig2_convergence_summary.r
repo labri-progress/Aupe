@@ -163,7 +163,7 @@ p_summary <- ggplot(avg_conv, aes(x = f_pct / 100, y = propByz,
     y = expression(bold("Prop. of Byz. samp."))
   ) +
   mytheme +
-  theme(legend.position = c(0.25, 0.88)) +
+  theme(legend.position = c(0.7, 0.15)) +
   guides(color    = guide_legend(ncol = 1),
          linetype = guide_legend(ncol = 1),
          shape    = guide_legend(ncol = 1))
@@ -227,7 +227,7 @@ prepare_evo <- function(df) {
 }
 
 if (zoomed) {
-  x_breaks <- pretty(c(zoom_from, zoom_to), n = 6)
+  x_breaks <- pretty(c(zoom_from, zoom_to), n = 4)
   x_labels <- as.character(x_breaks)
 } else {
   x_breaks <- c(0, 5000, 10000, 15000, 20000)
