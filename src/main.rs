@@ -51,6 +51,10 @@ pub enum WhichApp {
     #[structopt(name = "decay4")]
     AupeDecay4(app::aupebmdecay4::Init),
 
+    /// Aupe RPS – comme decay2 mais buckets des nœuds de confiance fixés à 5 entrées (type 0, pas de transition)
+    #[structopt(name = "decay5")]
+    AupeDecay5(app::aupebmdecay5::Init),
+
     /// Eviction Decay RPS
     #[structopt(name = "evict")]
     EvictionDecay(app::evictiondecay::Init),
@@ -129,6 +133,16 @@ fn main() {
             let f = format!("{}/nodes-decay4-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
             sim::<app::aupebmdecay4::AupeDecay4>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+        }
+
+        WhichApp::AupeDecay5(pp) => {
+            let mut space = pp.space;
+            if space == 6.0 {
+                space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
+            }
+            let f = format!("{}/nodes-decay5-{}-{}-{}-{}-{}-{:.1}.csv",
+                folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
+            sim::<app::aupebmdecay5::AupeDecay5>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::EvictionDecay(pp) => {

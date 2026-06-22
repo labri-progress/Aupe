@@ -14,6 +14,8 @@ BitMatcherAdaptive::BitMatcherAdaptive(const BitMatcherAdaptive& other)
       h1(other.h1),
       h2(other.h2)
 {
+    no_transition_ = other.no_transition_;
+
     // Deep copy of bobhash
     for (int i = 0; i < 2; i++) {
         if (other.bobhash[i]) {
@@ -35,6 +37,7 @@ BitMatcherAdaptive& BitMatcherAdaptive::operator=(const BitMatcherAdaptive& othe
     maxloop = other.maxloop;
     h1 = other.h1;
     h2 = other.h2;
+    no_transition_ = other.no_transition_;
 
     // Deep copy of bobhash
     for (int i = 0; i < 2; i++) {
@@ -61,6 +64,7 @@ BitMatcherAdaptive::BitMatcherAdaptive(BitMatcherAdaptive&& other) noexcept
       h1(other.h1),
       h2(other.h2)
 {
+    no_transition_ = other.no_transition_;
     for (int i = 0; i < 2; i++) {
         bobhash[i] = std::move(other.bobhash[i]); // transfer ownership
         bucket[i] = std::move(other.bucket[i]);   // move vector
@@ -81,6 +85,7 @@ BitMatcherAdaptive& BitMatcherAdaptive::operator=(BitMatcherAdaptive&& other) no
     maxloop = other.maxloop;
     h1 = other.h1;
     h2 = other.h2;
+    no_transition_ = other.no_transition_;
 
     for (int i = 0; i < 2; i++) {
         bobhash[i] = std::move(other.bobhash[i]);
@@ -254,6 +259,11 @@ bool BitMatcherAdaptive::solve_overflow_locally(ec_bucket* b, const int finger_i
 			if ( finger_idx != 0 ) {
 				flag_need_up = true;
 				if ( type_id == 0 ) {
+					if (no_transition_) {
+						// No-transition mode: decay instead of upgrading to fewer entries
+						this->decay();
+						return false;
+					}
 					next_type_id = (finger_idx == 4)? 1 : 2;
 				} else {
 					this->decay(); //next_type_id = (finger_idx == 3)? 6 : 7;
@@ -623,10 +633,11 @@ void BitMatcherAdaptive::InsertByFp(uint8_t fingerprint_value, uint first_hash_t
 	}
 }
 
-static int find_compatible_type_a(std::vector<uint64_t>& desc_counts) {
-	// Adaptive version: restrict to types 0-3 since solve_overflow_locally
+static int find_compatible_type_a(std::vector<uint64_t>& desc_counts, int max_t = -1) {
+	if (max_t < 0) max_t = MAX_TYPE;
+	// Adaptive version: restrict to types 0-max_t since solve_overflow_locally
 	// only handles those (higher types trigger global_division instead).
-	for (int t = 0; t <= MAX_TYPE; t++) {
+	for (int t = 0; t <= max_t; t++) {
 		int num_slots = get_item_num_in_bucket_type(t);
 		if (num_slots < (int)desc_counts.size()) continue;
 
@@ -694,7 +705,7 @@ void BitMatcherAdaptive::reinsert_items(std::vector<ItemInfo>& items) {
 				all_items.push_back({item.fingerprint, item.count});
 				desc_counts.push_back(item.count);
 
-				int new_type = find_compatible_type_a(desc_counts);
+				int new_type = find_compatible_type_a(desc_counts, no_transition_ ? 0 : -1);
 				if (new_type >= 0) {
 					int new_num_slots = get_item_num_in_bucket_type(new_type);
 					b->value = 0;

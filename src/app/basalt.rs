@@ -326,8 +326,12 @@ impl App for Basalt {
                             for k in 0..self.params.replacement_count {
                                 let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.view.len();
                                 
-                                // change seed on sefl.sample_view[i_replace] to avoid bias
+                                // change seed on self.sample_view[i_replace] to avoid bias
                                 self.sample_view[i_replace].0 = self.rng.random_range(0..std::u64::MAX);
+                                
+                                
+                                let mut view = self.view.clone();
+                                self.update_sample(i_replace, view.as_slice());
                             }
                         }
                     }

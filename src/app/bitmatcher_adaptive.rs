@@ -36,6 +36,7 @@ pub mod ffi {
         fn decay(self: Pin<&mut BitMatcherAdaptive>);
         fn get_item_slot_key(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> u64;
         fn GetCount(self: Pin<&mut BitMatcherAdaptive>, key: &CxxString, key_len: i16) -> i64;
+        fn set_no_transition(self: Pin<&mut BitMatcherAdaptive>, v: bool);
     }
 }
 unsafe impl Send for ffi::BitMatcherAdaptive {}
@@ -148,6 +149,10 @@ impl BM {
         let item_str = format!("{:0>width$}", item, width = self.key_len);
         let_cxx_string!(key = item_str);
         self.matrix.as_mut().unwrap().GetCount(&key, self.key_len as i16)
+    }
+
+    pub fn set_no_transition(&mut self, v: bool) {
+        self.matrix.as_mut().unwrap().set_no_transition(v);
     }
 
     pub fn slot_key_of(&mut self, item: &usize) -> u64 {

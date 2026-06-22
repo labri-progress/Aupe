@@ -261,12 +261,18 @@ private:
 	std::unique_ptr<BOBHash> bobhash[2];
 	std::vector<ec_bucket> bucket[2];
 	int error_num = 0;
-	
+
     // Tracking
     uint32_t division_count = 0;
     uint32_t blocked_count = 0;
 
+    // When true, bucket type transitions are disabled: overflow triggers decay()
+    // instead of upgrading to a type with fewer entries.  Buckets stay at type 0
+    // (5 fingerprints per bucket) at all times.
+    bool no_transition_ = false;
+
 public:
+    void set_no_transition(bool v) { no_transition_ = v; }
     BitMatcherAdaptive(uint64_t _bucket);
 
     void print_buckets() const;
