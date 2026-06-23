@@ -456,6 +456,11 @@ impl App for AupeDecay2 {
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
 
+        // Trusted nodes: lock buckets at 5 entries (type 0), no type transitions.
+        if self.is_trusted {
+            self.sketch.set_no_transition(true);
+        }
+
         if !self.is_byzantine{
             let view = net.sample_peers(self.params.view_size);
 

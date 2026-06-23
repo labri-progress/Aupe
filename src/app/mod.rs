@@ -1,10 +1,10 @@
 pub mod aupe;
 pub mod aupebm;
 pub mod aupebmdecay;
+pub mod aupebmdecay1;
 pub mod aupebmdecay2;
 pub mod aupebmdecay3;
 pub mod aupebmdecay4;
-pub mod aupebmdecay5;
 pub mod kvs;
 pub mod brahms;
 pub mod basalt;

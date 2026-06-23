@@ -40,8 +40,8 @@ pub enum WhichApp {
     AupeDecay(app::aupebmdecay::Init),
 
     /// Aupe RPS – debiasing par présence physique (prob=1 si absent, min/max si présent)
-    #[structopt(name = "decay2")]
-    AupeDecay2(app::aupebmdecay2::Init),
+    #[structopt(name = "decay1")]
+    AupeDecay1(app::aupebmdecay1::Init),
 
     /// Aupe RPS – query avg-bucket (moy des compteurs du bucket si présent, sinon original)
     #[structopt(name = "decay3")]
@@ -51,9 +51,9 @@ pub enum WhichApp {
     #[structopt(name = "decay4")]
     AupeDecay4(app::aupebmdecay4::Init),
 
-    /// Aupe RPS – comme decay2 mais buckets des nœuds de confiance fixés à 5 entrées (type 0, pas de transition)
-    #[structopt(name = "decay5")]
-    AupeDecay5(app::aupebmdecay5::Init),
+    /// Aupe RPS – comme decay1 mais buckets des nœuds de confiance fixés à 5 entrées (type 0, pas de transition)
+    #[structopt(name = "decay2")]
+    AupeDecay2(app::aupebmdecay2::Init),
 
     /// Eviction Decay RPS
     #[structopt(name = "evict")]
@@ -105,14 +105,14 @@ fn main() {
             sim::<app::aupebmdecay::AupeDecay>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
-        WhichApp::AupeDecay2(pp) => {
+        WhichApp::AupeDecay1(pp) => {
             let mut space = pp.space;
             if space == 6.0 {
                 space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
             }
-            let f = format!("{}/nodes-decay2-{}-{}-{}-{}-{}-{:.1}.csv",
+            let f = format!("{}/nodes-decay1-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
-            sim::<app::aupebmdecay2::AupeDecay2>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+            sim::<app::aupebmdecay1::AupeDecay1>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::AupeDecay3(pp) => {
@@ -135,14 +135,14 @@ fn main() {
             sim::<app::aupebmdecay4::AupeDecay4>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
-        WhichApp::AupeDecay5(pp) => {
+        WhichApp::AupeDecay2(pp) => {
             let mut space = pp.space;
             if space == 6.0 {
                 space = pp.n_bucket as f64* 8.0 * 2.0 /1024.0;
             }
-            let f = format!("{}/nodes-decay5-{}-{}-{}-{}-{}-{:.1}.csv",
+            let f = format!("{}/nodes-decay2-{}-{}-{}-{}-{}-{:.1}.csv",
                 folder, pp.nodes, pp.view_size, pp.n_byzantine, pp.n_trusted, pp.nb_merge, space);
-            sim::<app::aupebmdecay5::AupeDecay5>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
+            sim::<app::aupebmdecay2::AupeDecay2>(opt.n_steps, opt.nodes, &pp, &f, pp.nb_merge);
         }
 
         WhichApp::EvictionDecay(pp) => {

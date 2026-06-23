@@ -31,7 +31,7 @@ pub enum Msg {
     MergeReply(UniquePtr<BitMatcherAdaptive>),
 }
 
-pub struct AupeDecay5 {
+pub struct AupeDecay1 {
     params: Init,
 
     my_id: PeerRef,
@@ -363,7 +363,7 @@ fn compute_slot_occupation(
 }
 
 
-impl AupeDecay5 {
+impl AupeDecay1 {
     fn update_samples(&mut self, candidates: &[PeerRef]) {
         //println!("len {}", self.sample_view.len());
         for i in 0..self.sample_view.len() {
@@ -410,7 +410,7 @@ impl AupeDecay5 {
     }
 }
 
-impl App for AupeDecay5 {
+impl App for AupeDecay1 {
     type Init = Init;
     type Msg = Msg;
     type Metrics = Metrics;
@@ -455,11 +455,6 @@ impl App for AupeDecay5 {
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;
         self.is_trusted = self.is_trusted(id); // F to F + T-1
-
-        // Trusted nodes: lock buckets at 5 entries (type 0), no type transitions.
-        if self.is_trusted {
-            self.sketch.set_no_transition(true);
-        }
 
         if !self.is_byzantine{
             let view = net.sample_peers(self.params.view_size);
