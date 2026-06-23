@@ -161,7 +161,7 @@ present <- intersect(level_order, unique(gain_df$strategy))
 gain_df$strategy  <- factor(gain_df$strategy, levels = present)
 gain_df$gain_pct  <- gain_df$gain * 100
 
-max_y <- max(gain_df$gain_pct, na.rm = TRUE)
+max_y <- 10 # max(gain_df$gain_pct, na.rm = TRUE)
 p_gain <- ggplot(gain_df, aes(x = f_pct / 100, y = gain_pct,
                                color = strategy, shape = strategy, linetype = strategy,
                                group = strategy)) +
