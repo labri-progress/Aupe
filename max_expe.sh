@@ -22,7 +22,7 @@ FAULTY_PCTS=("${3:-30}") #10 20 30
 TRUSTED_PCTS=("${4:-0}") # 0 10 20 30
 
 # Eviction rates for trusted nodes (0.0 = no eviction)
-EVICTION_RATES=("${6:-0.5}") # 0.0 0.5 0.8
+EVICTION_RATES=0.5 #("${6:-0.5}") # 0.0 0.5 0.8
 # Trusted node counts (0 = no trusted nodes)
 
 numberofmerge=("${5:-1}")
@@ -48,8 +48,14 @@ mark_done() {
     echo "$1" >> "$MANIFEST"
 }
 
+if $NRUNS -eq 1; then
+  start=1
+else
+  start=2
+fi
+
 binary="eviction" #"aupe1push13pullmax"
-for run in $(seq 1 $NRUNS); do
+for run in $(seq $start $NRUNS); do
   for strat in "${STRATEGIES[@]}"; do
     for f_pct in "${FAULTY_PCTS[@]}"; do
       f_count=$(faulty_count $f_pct)

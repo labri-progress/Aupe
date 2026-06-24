@@ -23,24 +23,25 @@ Rscript fig6_trust_gap.r 0.5 [round_from] [round_to]
 ./max_expe.sh decay2 1 20 0 ; ./max_expe.sh decay2 1 40 0;
 
 
+# basic expe
 
-./max_expe.sh decay2 0.5 40 5 ; ./max_expe.sh decay2 0.5 40 20 ;
-./max_expe.sh decay2 0.5 40 0 ; ./max_expe.sh decay2 0.5 40 10 ;
+./max_expe.sh decay2 0.5 40 5 1 4 ; ./max_expe.sh decay2 0.5 40 20 1 4 ;
+./max_expe.sh decay2 0.5 40 0 1 4 ; ./max_expe.sh decay2 0.5 40 10 1 4 ;
 
-./max_expe.sh decay2 0.5 30 5 ; ./max_expe.sh decay2 0.5 30 20 ;
-./max_expe.sh decay2 0.5 30 0 ; ./max_expe.sh decay2 0.5 30 10 ;
+./max_expe.sh decay2 0.5 30 5 1 4 ; ./max_expe.sh decay2 0.5 30 20 1 4 ;
+./max_expe.sh decay2 0.5 30 0 1 4 ; ./max_expe.sh decay2 0.5 30 10 1 4 ;
 
-./max_expe.sh decay2 0.5 20 5 ; ./max_expe.sh decay2 0.5 20 20 ;
-./max_expe.sh decay2 0.5 20 0 ; ./max_expe.sh decay2 0.5 20 10 
+./max_expe.sh decay2 0.5 20 5 1 4 ; ./max_expe.sh decay2 0.5 20 20 1 4 ;
+./max_expe.sh decay2 0.5 20 0 1 4 ; ./max_expe.sh decay2 0.5 20 10 1 4 ;
 
-./max_expe.sh decay2 0.5 10 5 ; ./max_expe.sh decay2 0.5 10 20 ;
-./max_expe.sh decay2 0.5 10 0 ; ./max_expe.sh decay2 0.5 10 10 ;
+./max_expe.sh decay2 0.5 10 5 1 4 ; ./max_expe.sh decay2 0.5 10 20 1 4 ;
+./max_expe.sh decay2 0.5 10 0 1 4 ; ./max_expe.sh decay2 0.5 10 10 1 4 ;
 
-./max_expe.sh decay2 0.5 10 30 ; ./max_expe.sh decay2 0.5 30 30 ;
-./max_expe.sh decay2 0.5 20 30 ; ./max_expe.sh decay2 0.5 40 30 ;
+./max_expe.sh decay2 0.5 10 30 1 4 ; ./max_expe.sh decay2 0.5 30 30 1 4 ;
+./max_expe.sh decay2 0.5 20 30 1 4 ; ./max_expe.sh decay2 0.5 40 30 1 4 ;
 
 
-
+# end
 
 ./max_expe.sh decay4 0.5 10 0 ; ./max_expe.sh decay4 0.5 10 20 ;
 ./max_expe.sh decay4 0.5 20 0 ; ./max_expe.sh decay4 0.5 20 20 ;
