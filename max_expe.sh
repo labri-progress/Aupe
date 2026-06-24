@@ -145,7 +145,7 @@ for run in $(seq $start $NRUNS); do
       done
     done
   done
-  wait
+ # wait
 done
 
 echo "All experiments done."
