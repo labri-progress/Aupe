@@ -63,8 +63,6 @@ pub struct Basalt {
 
     view: Vec<ViewEntry>,
 
-    out_samples: Vec<PeerRef>,
-
     n_received: usize,
     n_byzantine_received: usize,
     rng: StdRng,
@@ -204,7 +202,6 @@ impl Basalt {
             }
         }
     }
-
 }
 
 impl App for Basalt {
@@ -219,7 +216,6 @@ impl App for Basalt {
             my_id: 0,
             is_byzantine: false,
             view: Vec::new(),
-            out_samples: Vec::new(),
 
             n_received: 0,
             n_byzantine_received: 0,
@@ -232,7 +228,7 @@ impl App for Basalt {
         self.params = init.clone();
         self.rng = StdRng::seed_from_u64(get_seed() + id as u64);
         self.is_byzantine = id < init.n_byzantine;
-        if !self.is_byzantine || net.time() < self.params.attack_start_time{
+        if !self.is_byzantine {
             self.view = (0..self.params.view_size)
                 .map(|_| ViewEntry{
                     seed: self.rng.random_range(0..std::u64::MAX),
@@ -247,18 +243,34 @@ impl App for Basalt {
     }
 
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
-        if self.is_byzantine && net.time() >= self.params.attack_start_time {
+        if self.is_byzantine {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
                 Msg::SelfNotif => {
+                    net.send(self.my_id, Msg::SelfNotif);
                     if net.time() >= self.params.attack_start_time {
                         net.sample_peers(self.params.byzantine_flood_factor)
                             .iter()
+                            .for_each(|p| net.send(*p, Msg::Push(sample(&mut byzantines[..], self.params.view_size, &mut self.rng))));
+                    }else{
+                        net.sample_peers(1)
+                            .iter()
+                            .for_each(|p| net.send(*p, Msg::Push(net.sample_peers(self.params.view_size))));
+                    }
+                    /* if net.time() >= self.params.attack_start_time {
+                        net.sample_peers(self.params.byzantine_flood_factor)
+                            .iter()
                             .for_each(|p| net.send(*p, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng))));
-                    } 
+                    } */
                 },
                 Msg::Pull => {
-                    net.send(from, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));    
+                    //net.send(from, Msg::Push(sample_nocopy(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    if net.time() >= self.params.attack_start_time {
+                        net.send(from, Msg::Push(sample(&mut byzantines[..], self.params.view_size, &mut self.rng)));
+                    }else{
+                        let view = net.sample_peers(self.params.view_size);
+                        net.send(from, Msg::Push(view));
+                    }
                 },
                 _ => (),
             }
@@ -273,13 +285,8 @@ impl App for Basalt {
                         if (self.my_id as u64 + net.time()) % rf == 0 {
                             for k in 0..self.params.replacement_count {
                                 let i_replace = ((net.time() / rf) as usize * self.params.replacement_count + k) % self.view.len();
-                                if self.out_samples.len() < 200 {
-                                    self.out_samples.push(self.view[i_replace].peer);
-                                }
+                                
                                 self.view[i_replace].seed = self.rng.random_range(0..std::u64::MAX);
-                                /*if self.my_id == self.params.n_byzantine {
-                                    println!("{}: Replacing peer {} with new seed {}", self.my_id, i_replace, self.view[i_replace].seed);
-                                }*/
                                 //self.view[i_replace].hits = 1;
                                 self.update_sample(i_replace, &view[..]);
                             }
