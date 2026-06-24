@@ -49,7 +49,7 @@ mark_done() {
 }
 
 start=2
-if $NRUNS -eq 1; then
+if [ "$NRUNS" -eq 1 ]; then
   start=1
 fi
 
