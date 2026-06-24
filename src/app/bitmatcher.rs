@@ -11,7 +11,7 @@ use cxx::UniquePtr;
 use cxx::CxxString;
 use std::pin::Pin;
 
-use crate::util::SEED2;
+use crate::util::get_seed;
 
 #[cxx::bridge(namespace = "org::blobstore")]
 pub mod ffi {

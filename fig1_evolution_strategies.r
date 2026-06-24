@@ -34,7 +34,7 @@ results_dir <- "output_byz"
 time_step <- if (zoomed) 5 else 100
 line_size <- 0.4
 width     <- 7
-height    <- 2.5
+height    <- 2
 
 # ── Thème ─────────────────────────────────────────────────────────────────────
 mytheme <- theme(

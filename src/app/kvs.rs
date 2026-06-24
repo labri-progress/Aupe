@@ -8,7 +8,7 @@ use std::error::Error;
 
 use rand::rngs::StdRng;
 use rand::SeedableRng; 
-use crate::util::SEED2;
+use crate::util::get_seed;
 
 #[derive(Debug, Clone)]
 pub struct Kvs {

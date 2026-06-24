@@ -8,7 +8,7 @@ use rayon::prelude::*;
 use super::net::PeerRef;
 use super::util::either_or_if_both;
 
-use crate::util::SEED2;
+use crate::util::get_seed;
 
 pub struct ByzConnGraph {
     n_byzantine: Option<usize>,

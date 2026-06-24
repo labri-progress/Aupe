@@ -6,7 +6,12 @@ use super::net::PeerRef;
 use rand::seq::SliceRandom;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
-pub const SEED2: u64 = 42;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static GLOBAL_SEED: AtomicU64 = AtomicU64::new(42);
+
+pub fn get_seed() -> u64 { GLOBAL_SEED.load(Ordering::Relaxed) }
+pub fn set_seed(s: u64) { GLOBAL_SEED.store(s, Ordering::Relaxed) }
 
 pub fn either_or_if_both<T: Clone>(a: &Option<T>, b: &Option<T>, f: fn(&T, &T) -> T) -> Option<T> {
     match (a, b) {
@@ -18,7 +23,7 @@ pub fn either_or_if_both<T: Clone>(a: &Option<T>, b: &Option<T>, f: fn(&T, &T) -
 
 pub fn hash(seed: u64, peer: PeerRef) -> u64 {
     // Create a deterministic hasher with a fixed seed
-    let mut hasher = XxHash64::with_seed(SEED2); // 0 or any fixed u64 seed
+    let mut hasher = XxHash64::with_seed(get_seed());
     seed.hash(&mut hasher);
     peer.hash(&mut hasher);
     hasher.finish()

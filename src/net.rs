@@ -62,7 +62,7 @@ struct NetHandler<A> where A: App + Send {
 
 impl<A> Network<A::Msg> for NetHandler<A> where A: App + Send {
     fn sample_peers(&self, n: usize) -> Vec<PeerRef> {
-        let mut rng = StdRng::seed_from_u64(self.id as u64 + self.time); 
+        let mut rng = StdRng::seed_from_u64(self.id as u64 + self.time + crate::util::get_seed());
         if n <= self.nproc / 10 {
             let mut res = Vec::new();
             while res.len() < n {

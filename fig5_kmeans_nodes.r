@@ -257,7 +257,7 @@ p_f1     <- make_panel("F1-score",  show_legend = FALSE, show_y_title = FALSE)
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/fig5_kmeans_decay2_%d-%d_%gKB.pdf",
                    round_from, round_to, budget)
-pdf(outfile, width = 7, height = 2.8)
+pdf(outfile, width = 7, height = 2)
 grid.arrange(p_prec, p_recall, p_f1, nrow = 1, ncol = 3)
 dev.off()
 cat("Sauvegarde dans:", outfile, "\n")

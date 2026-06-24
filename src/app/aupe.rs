@@ -12,7 +12,7 @@ const DEBUG: bool = false;
 use rand::{SeedableRng};
 use rand::rngs::StdRng;
 
-use crate::util::SEED2;
+use crate::util::get_seed;
 use std::sync::{OnceLock, Mutex};
 
 static GLOBAL_OCCURENCE: OnceLock<Mutex<Vec<f64>>> = OnceLock::new();
@@ -221,7 +221,7 @@ fn kmeans_classify(values: &[f64], max_iters: usize) -> Vec<usize> {
     if n < 2 {
         return vec![0; n];
     }
-    let mut rng = StdRng::seed_from_u64(SEED2);
+    let mut rng = StdRng::seed_from_u64(get_seed());
     let i1 = rng.random_range(0..n);
     let mut i2;
     loop {
@@ -388,7 +388,7 @@ impl App for Aupe {
             sketch: Kvs::new(),
             to_conctact: Vec::new(),
             oldest: 0,
-            rng: StdRng::seed_from_u64(SEED2),
+            rng: StdRng::seed_from_u64(get_seed()),
         }
     }
 
@@ -398,7 +398,7 @@ impl App for Aupe {
 
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
-        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
+        self.rng = StdRng::seed_from_u64(get_seed() + id as u64);
         GLOBAL_OCCURENCE.get_or_init(|| Mutex::new(vec![0.0f64; init.nodes]));
         //println!("b_byzantine {}",init.n_byzantine);
         self.is_byzantine = id < init.n_byzantine;

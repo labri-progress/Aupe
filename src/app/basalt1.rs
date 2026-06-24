@@ -8,7 +8,7 @@ use crate::util::{either_or_if_both, hash, sample_nocopy, sample};
 use crate::graph::ByzConnGraph;
 use rand::{SeedableRng};
 use rand::rngs::StdRng;
-use crate::util::SEED2;
+use crate::util::get_seed;
 
 pub enum Msg {
     SelfNotif,
@@ -100,7 +100,7 @@ impl NetMetrics for Metrics {
             max_byzantine_neighbors: None,
             n_isolated: 0,
             graph: ByzConnGraph::new(),
-            graphrng: StdRng::seed_from_u64(SEED2),
+            graphrng: StdRng::seed_from_u64(get_seed()),
         }
     }
     fn net_combine(&mut self, other: &Self) {
@@ -219,14 +219,14 @@ impl App for Basalt {
 
             n_received: 0,
             n_byzantine_received: 0,
-            rng: StdRng::seed_from_u64(SEED2),
+            rng: StdRng::seed_from_u64(get_seed()),
         }
     }
     
     fn init(&mut self, id: PeerRef, net: Net, init: &Self::Init) {
         self.my_id = id;
         self.params = init.clone();
-        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
+        self.rng = StdRng::seed_from_u64(get_seed() + id as u64);
         self.is_byzantine = id < init.n_byzantine;
         if !self.is_byzantine {
             self.view = (0..self.params.view_size)
@@ -348,7 +348,7 @@ impl App for Basalt {
                 min_byzantine_neighbors: Some(nbn as i64),
                 max_byzantine_neighbors: Some(nbn as i64),
                 graph,
-                graphrng: StdRng::seed_from_u64(SEED2 + self.my_id as u64),
+                graphrng: StdRng::seed_from_u64(get_seed() + self.my_id as u64),
             };
             self.n_received = 0;
             self.n_byzantine_received = 0;

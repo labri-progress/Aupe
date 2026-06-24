@@ -13,7 +13,7 @@ use super::bitmatcher_adaptive::BM;
 use crate::app::bitmatcher_adaptive::ffi::BitMatcherAdaptive;
 pub use crate::app::aupebmdecay::Init;
 
-use crate::util::SEED2;
+use crate::util::get_seed;
 use std::sync::{OnceLock, Mutex};
 
 /// Oracle global : accumule les insertions de tous les nœuds corrects et de confiance.
@@ -212,7 +212,7 @@ fn kmeans_classify(values: &[f64], max_iters: usize) -> Vec<usize> {
     if n < 2 {
         return vec![0; n];
     }
-    let mut rng = StdRng::seed_from_u64(SEED2);
+    let mut rng = StdRng::seed_from_u64(get_seed());
     let i1 = rng.random_range(0..n);
     let mut i2;
     loop {
@@ -457,7 +457,7 @@ impl App for EvictionDecay {
             sketch: BM::new().into(),
             to_conctact: Vec::new(),
             oldest: 0,
-            rng: StdRng::seed_from_u64(SEED2),
+            rng: StdRng::seed_from_u64(get_seed()),
         }
     }
     
@@ -467,7 +467,7 @@ impl App for EvictionDecay {
 
         // Init preallocated vectors
         self.sketch.init(self.params.nodes, self.params.clone());
-        self.rng = StdRng::seed_from_u64(SEED2 + id as u64);
+        self.rng = StdRng::seed_from_u64(get_seed() + id as u64);
         // Initialiser le tableau global (idempotent : seul le premier appel alloue)
         GLOBAL_OCCURENCE.get_or_init(|| Mutex::new(vec![0.0f64; init.nodes]));
         //println!("b_byzantine {}",init.n_byzantine);

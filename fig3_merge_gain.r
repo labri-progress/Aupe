@@ -36,7 +36,7 @@ results_dir   <- "output_byz"
 time_step <- if (zoomed) 5 else 100
 line_size <- 0.4
 width  <- 3.5
-height <- 2.8
+height <- 2
 
 # ── Thème ─────────────────────────────────────────────────────────────────────
 mytheme <- theme(
@@ -142,6 +142,7 @@ load_gain <- function() {
         merge_vals[run] <- read_conv(fn)
       }
       merge_conv <- mean(merge_vals, na.rm = TRUE)
+      cat(sprintf("f = %d%%, t = %d%%: diff= %.4f %%\n", f_pct, t_pct, (base_conv - merge_conv) * 100))
       rows[[length(rows) + 1]] <- data.frame(
         strategy = paste0("t = ", t_pct, "%"),
         f_pct    = f_pct,
@@ -162,7 +163,7 @@ gain_df$strategy  <- factor(gain_df$strategy, levels = present)
 gain_df$gain_pct  <- gain_df$gain * 100
 
 max_y <- 10 # max(gain_df$gain_pct, na.rm = TRUE)
-min_y <- round(min(gain_df$gain_pct, na.rm = TRUE), digits = 0) # - 1
+min_y <- round(min(gain_df$gain_pct, na.rm = TRUE), digits = 0) - 1
 p_gain <- ggplot(gain_df, aes(x = f_pct / 100, y = gain_pct,
                                color = strategy, shape = strategy, linetype = strategy,
                                group = strategy)) +
@@ -286,7 +287,7 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.55, 0.80) else "none") +
+    theme(legend.position = if (show_legend) c(0.55, 0.70) else "none") +
     guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 1))
 }
@@ -312,8 +313,110 @@ if (nrow(raw_evo) == 0) {
 
   zoom_tag <- if (zoomed) sprintf("-zoom%d-%d", zoom_from, zoom_to) else ""
   out_b    <- sprintf("results/fig3b_evolution_merge_%gKB%s.pdf", budget, zoom_tag)
-  pdf(out_b, width = 7, height = 2.5)
+  pdf(out_b, width = 7, height = height)
   grid.arrange(grobs = grobs_out, nrow = 1, ncol = 4)
   dev.off()
   cat("Saved:", out_b, "\n")
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# fig3c — Gain at peak attack round
+# ══════════════════════════════════════════════════════════════════════════════
+# For each f_pct: find the round where avgByzN is maximal in the no-merge
+# curve, then compute gain = (propByz_no_merge - propByz_merge) /
+# propByz_no_merge at that round.
+
+load_peak_gain <- function() {
+  rows <- list()
+  for (f_pct in faulty_pcts) {
+    f <- as.integer(nodes * f_pct / 100)
+
+    # -- load no-merge runs and average them
+    base_list <- lapply(1:nruns, function(run) {
+      fn <- file.path(results_dir, sprintf("decay2-N%d-v%d-f%d-y%g-run%d", nodes, view, f, budget, run))
+      if (!file.exists(fn)) { cat("Warning: absent:", fn, "\n"); return(NULL) }
+      d <- read.table(fn, header = TRUE)
+      d[, c("time", "avgByzN")]
+    })
+    base_list <- Filter(Negate(is.null), base_list)
+    if (length(base_list) == 0) next
+
+    base_avg <- do.call(rbind, base_list) %>%
+      group_by(time) %>%
+      summarise(avgByzN = mean(avgByzN), .groups = "drop")
+
+    # find peak round (max avgByzN in no-merge curve)
+    peak_row   <- base_avg[which.max(base_avg$avgByzN), ]
+    peak_round <- peak_row$time
+    peak_byz   <- peak_row$avgByzN / view
+
+    for (t_pct in trusted_pcts) {
+      t <- as.integer(nodes * t_pct / 100)
+      merge_at_peak <- numeric(nruns)
+      for (run in 1:nruns) {
+        fn <- file.path(results_dir, sprintf("decay2-N%d-v%d-f%d-y%g-x%d-run%d", nodes, view, f, budget, t, run))
+        if (!file.exists(fn)) { cat("Warning: absent:", fn, "\n"); merge_at_peak[run] <- NA; next }
+        d <- read.table(fn, header = TRUE)
+        row <- d[d$time == peak_round, "avgByzN"]
+        merge_at_peak[run] <- if (length(row) == 1) row / view else NA_real_
+      }
+      merge_conv <- mean(merge_at_peak, na.rm = TRUE)
+      gain_val   <- if (!is.na(peak_byz) && peak_byz > 0) (peak_byz - merge_conv) / peak_byz * 100 else NA_real_
+      rows[[length(rows) + 1]] <- data.frame(
+        strategy    = paste0("t = ", t_pct, "%"),
+        f_pct       = f_pct,
+        peak_round  = peak_round,
+        gain_pct    = gain_val
+      )
+    }
+  }
+  do.call(rbind, rows)
+}
+
+peak_gain_df <- load_peak_gain()
+
+if (!is.null(peak_gain_df) && nrow(peak_gain_df) > 0 && !all(is.na(peak_gain_df$gain_pct))) {
+  present_pg <- intersect(level_order, unique(peak_gain_df$strategy))
+  peak_gain_df$strategy <- factor(peak_gain_df$strategy, levels = present_pg)
+
+  max_y_c <- ceiling(max(peak_gain_df$gain_pct, na.rm = TRUE) / 5) * 5
+  min_y_c <- floor(min(peak_gain_df$gain_pct,   na.rm = TRUE) / 5) * 5
+
+  p_peak <- ggplot(peak_gain_df, aes(x = f_pct / 100, y = gain_pct,
+                                      color = strategy, shape = strategy, linetype = strategy,
+                                      group = strategy)) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray50", linewidth = 0.5) +
+    geom_line(linewidth = 0.5) +
+    geom_point(size = 2.0) +
+    scale_color_manual(values = merge_colors, drop = FALSE) +
+    scale_shape_manual(values = merge_shapes, drop = FALSE) +
+    scale_linetype_manual(values = merge_lty,  drop = FALSE) +
+    coord_cartesian(ylim = c(min_y_c, max_y_c)) +
+    scale_x_continuous(
+      breaks       = faulty_pcts / 100,
+      minor_breaks = NULL,
+      sec.axis     = dup_axis(labels = NULL, name = NULL)
+    ) +
+    scale_y_continuous(
+      breaks       = seq(min_y_c, max_y_c, by = 5),
+      minor_breaks = seq(min_y_c, max_y_c, by = 1),
+      sec.axis     = dup_axis(labels = NULL, name = NULL)
+    ) +
+    labs(
+      x = expression(bold("Proportion of Byzantine nodes")),
+      y = expression(bold("Byz. prop. gain at peak (%)"))
+    ) +
+    mytheme +
+    theme(legend.position = c(0.8, 0.80)) +
+    guides(color    = guide_legend(ncol = 1),
+           linetype = guide_legend(ncol = 1),
+           shape    = guide_legend(ncol = 1))
+
+  out_c <- sprintf("results/fig3c_peak_gain_%gKB.pdf", budget)
+  pdf(out_c, width = width, height = height)
+  print(p_peak)
+  dev.off()
+  cat("Saved:", out_c, "\n")
+} else {
+  cat("Warning: no peak-gain data, skipping fig3c.\n")
 }

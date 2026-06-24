@@ -108,6 +108,10 @@ Diminue l'échelle des figures aussi. elles seront importées dans un document d
 6. Rajoute également une figure 6 qui montre la différence entre la proportion de byzantin dans la vue des noeuds de confiance (colonne t_avgByzN) et dans la vue des noeuds corrects (h_avgByzN), toujours en faisant cette moyenne des valeurs sur les rounds 11000 à round 11049.
 
 
+7. Rajoute le lot de figures 7 qui montrent l'évolution de la proportion de byzantin dans la vue des noeuds corrects (colonne avgByzN comme d'habitude) en fonction des rounds. Les stratégies évaluées sont Aupe Array (stratégie array), Brahms (brahms) et Basalt (basalt). 
+Deuxieme la figure recapitulative qui montre la proportion de byzantin dans la vue des noeuds corrects à la convergence (calculée comme la moyenne sur les 9000 derniers rounds) en fonction du pourcentage de byzantin dans le système. Les stratégies évaluées sont les mêmes
+Troisiemement la figure recapitulative qui montre la proportion de byzantin dans la vue des noeuds corrects à la convergence  en fonction du pourcentage de byzantin dans le système. Les stratégies évaluées sont les mêmes + AupeBMDecay
+
 
 
 ./max_expe.sh decay5 0.5 10 0 ; ./max_expe.sh decay5 0.5 10 20 ;

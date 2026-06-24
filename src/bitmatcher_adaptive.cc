@@ -5,7 +5,7 @@ namespace org {
 namespace blobstore {
 
 int MAX_TYPE = 3; // Maximum type ID for buckets (0-10)
-int merge_strategy = 1; // 0 for sum, 1 for moy 2 for max
+int merge_strategy = 3; // 0 for sum, 1 for moy, 2 for max, 3 for min-intersection
 
 // Copy constructor
 BitMatcherAdaptive::BitMatcherAdaptive(const BitMatcherAdaptive& other)
@@ -901,7 +901,7 @@ void BitMatcherAdaptive::decay() {
 // Merge two sketches with per-sketch normalization before combining.
 //
 // Each sketch is independently normalized by its own max count, mapped to
-// the common target scale max(max_self, max_other).  This makes relative
+// the common target scale moy(max_self, max_other).  This makes relative
 // frequencies comparable regardless of how many global_divisions each node
 // has accumulated.  After the merge in normalized space the values are
 // already in [0, target] and reinsert_items_direct handles the rest.

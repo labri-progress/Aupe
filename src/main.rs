@@ -15,10 +15,14 @@ pub struct Opt {
     /// Number of simulation steps
     #[structopt(short = "T", long = "time", default_value = "100")]
     n_steps: usize,
-    
+
     /// Number of nodes
     #[structopt(short = "n", long = "nodes", default_value = "1000")]
     nodes: usize,
+
+    /// RNG seed (vary per run for independent repetitions)
+    #[structopt(short = "S", long = "seed", default_value = "42")]
+    seed: u64,
 
     #[structopt(subcommand)]
     app: WhichApp,
@@ -87,7 +91,7 @@ pub enum WhichApp {
 
 fn main() {
     let opt = Opt::from_args();
-    
+    util::set_seed(opt.seed);
     match opt.app {
 // cargo run -- -T 10 -n 10 cms -G samples -f 10 -x 3 -t 3 -v 5 -u 5 -m 5 -n 10 -d 2 -w 5 -p 1
 // cargo run -- -T 200 -n 1000 bm -G samples -f 10 -t 100 -v 20 -u 20 -m 100 -n 1000 -y 6 
