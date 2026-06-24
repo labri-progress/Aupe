@@ -48,10 +48,9 @@ mark_done() {
     echo "$1" >> "$MANIFEST"
 }
 
+start=2
 if $NRUNS -eq 1; then
   start=1
-else
-  start=2
 fi
 
 binary="eviction" #"aupe1push13pullmax"
