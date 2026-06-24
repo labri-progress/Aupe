@@ -162,6 +162,7 @@ gain_df$strategy  <- factor(gain_df$strategy, levels = present)
 gain_df$gain_pct  <- gain_df$gain * 100
 
 max_y <- 10 # max(gain_df$gain_pct, na.rm = TRUE)
+min_y <- round(min(gain_df$gain_pct, na.rm = TRUE), digits = 0) # - 1
 p_gain <- ggplot(gain_df, aes(x = f_pct / 100, y = gain_pct,
                                color = strategy, shape = strategy, linetype = strategy,
                                group = strategy)) +
@@ -171,15 +172,15 @@ p_gain <- ggplot(gain_df, aes(x = f_pct / 100, y = gain_pct,
   scale_color_manual(values = merge_colors,  drop = FALSE) +
   scale_shape_manual(values = merge_shapes,  drop = FALSE) +
   scale_linetype_manual(values = merge_lty,  drop = FALSE) +
-  coord_cartesian(ylim = c(0, max_y)) +
+  coord_cartesian(ylim = c(min_y, max_y)) +
   scale_x_continuous(
     breaks       = faulty_pcts / 100,
     minor_breaks = NULL,
     sec.axis     = dup_axis(labels = NULL, name = NULL)
   ) +
   scale_y_continuous(
-    breaks       = seq(0, max_y, by = 2),
-    minor_breaks = seq(0, max_y, by = 1),
+    breaks       = seq(min_y, max_y, by = 2),
+    minor_breaks = seq(min_y, max_y, by = 1),
     sec.axis     = dup_axis(labels = NULL, name = NULL)
   ) +
   labs(
