@@ -90,11 +90,11 @@ custom_shapes <- c(
 )
 
 level_order_abc  <- c("Array", "Basalt", "Brahms")
-level_order_abcd <- c("Array", "Basalt", "Brahms", "Aupe BMDecay")
+level_order_abcd <- c("Aupe BMDecay", "Array", "Basalt", "Brahms")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # fig7a — Evolution grid (1×4)
-# ══════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
 
 read_evo <- function(fname, label, f_pct, run) {
   if (!file.exists(fname)) {
@@ -144,7 +144,7 @@ prepare_evo <- function(df, level_order) {
 }
 
 if (zoomed) {
-  x_breaks <- pretty(c(zoom_from, zoom_to), n = 4)
+  x_breaks <- pretty(c(zoom_from, zoom_to), n = 3)
   x_labels <- as.character(x_breaks)
 } else {
   x_breaks <- c(0, 5000, 10000, 15000, 20000)
@@ -178,7 +178,7 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.6, 0.80) else "none") +
+    theme(legend.position = if (show_legend) c(0.5, 0.20) else "none") +
     guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 1))
 }
@@ -194,8 +194,8 @@ if (nrow(raw_evo) == 0) {
     f   <- faulty_pcts[i]
     sub <- avg_evo %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f,
-                            show_legend  = (i == 1),
-                            show_y_title = (i == 1))
+                            show_legend  = (i == 4),
+                            show_y_title = (i == 4))
   }
 
   grobs_out <- lapply(plots, ggplotGrob)
@@ -256,7 +256,7 @@ load_convergence <- function(with_decay2 = FALSE) {
   df
 }
 
-conv_plot <- function(avg_conv, level_order, legend_pos = c(0.71, 0.15)) {
+conv_plot <- function(avg_conv, level_order, legend_pos = c(0.6, 0.1)) {
   present <- intersect(level_order, unique(avg_conv$strategy))
   avg_conv$strategy <- factor(avg_conv$strategy, levels = present)
 
@@ -290,9 +290,9 @@ conv_plot <- function(avg_conv, level_order, legend_pos = c(0.71, 0.15)) {
     ) +
     mytheme +
     theme(legend.position = legend_pos) +
-    guides(color    = guide_legend(ncol = 1),
-           linetype = guide_legend(ncol = 1),
-           shape    = guide_legend(ncol = 1))
+    guides(color    = guide_legend(ncol = 2),
+           linetype = guide_legend(ncol = 2),
+           shape    = guide_legend(ncol = 2))
 }
 
 dir.create("results", showWarnings = FALSE)

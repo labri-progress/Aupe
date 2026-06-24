@@ -21,7 +21,7 @@ pub struct Opt {
     nodes: usize,
 
     /// RNG seed (vary per run for independent repetitions)
-    #[structopt(short = "S", long = "seed", default_value = "42")]
+    #[structopt(short = "d", long = "seed", default_value = "42")]
     seed: u64,
 
     #[structopt(subcommand)]
