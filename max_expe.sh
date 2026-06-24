@@ -77,7 +77,7 @@ for run in $(seq $start $NRUNS); do
             continue
           fi
           echo "Running: $strat f=${f_pct}% run=${run}"
-          ./$binary -T $ROUNDS -n $NODES -d $run$strat \
+          ./$binary -T $ROUNDS -n $NODES -d $run $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW \
             -s $ATTACK_START  > "$OUTDIR/$outfile" &
           mark_done "$outfile"
@@ -89,7 +89,7 @@ for run in $(seq $start $NRUNS); do
             continue
           fi
           echo "Running: $strat f=${f_pct}% run=${run}"
-          ./$binary -T $ROUNDS -n $NODES -d $run$strat \
+          ./$binary -T $ROUNDS -n $NODES -d $run $strat \
             -f $GAMMA -t $f_count -v $VIEW -i $UVIEW \
             -s $ATTACK_START -k 1 -r 1 > "$OUTDIR/$outfile" &
           mark_done "$outfile"
@@ -102,7 +102,7 @@ for run in $(seq $start $NRUNS); do
             continue
           fi
           echo "Running: $strat f=${f_pct}% t=${t_count} run=${run}"
-          ./$binary -T $ROUNDS -n $NODES -d $run$strat \
+          ./$binary -T $ROUNDS -n $NODES -d $run $strat \
             -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
             -n $NODES $trusted_flags -s $ATTACK_START  > "$OUTDIR/$outfile" &
           mark_done "$outfile"
@@ -116,7 +116,7 @@ for run in $(seq $start $NRUNS); do
               continue
             fi
             echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} run=${run}"
-            ./$binary -T $ROUNDS -n $NODES -d $run$strat \
+            ./$binary -T $ROUNDS -n $NODES -d $run $strat \
               -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
               -n $NODES -c $buckets $trusted_flags -s $ATTACK_START > "$OUTDIR/$outfile" &
             mark_done "$outfile"
@@ -135,7 +135,7 @@ for run in $(seq $start $NRUNS); do
                 continue
               fi
               echo "Running: $strat f=${f_count} budget=${budget}KB t=${t_count} eviction=${eviction_rate} run=${run}"
-              ./$binary -T $ROUNDS -n $NODES -d $run$strat \
+              ./$binary -T $ROUNDS -n $NODES -d $run $strat \
                 -f $GAMMA -t $f_count -v $VIEW -u $UVIEW -m $SM \
                 -n $NODES -c $buckets $trusted_flags -s $ATTACK_START -e $eviction_rate > "$OUTDIR/$outfile" &
               mark_done "$outfile"
