@@ -277,9 +277,9 @@ impl App for Basalt {
                                     self.out_samples.push(self.view[i_replace].peer);
                                 }
                                 self.view[i_replace].seed = self.rng.random_range(0..std::u64::MAX);
-                                if self.my_id == self.params.n_byzantine {
+                                /*if self.my_id == self.params.n_byzantine {
                                     println!("{}: Replacing peer {} with new seed {}", self.my_id, i_replace, self.view[i_replace].seed);
-                                }
+                                }*/
                                 //self.view[i_replace].hits = 1;
                                 self.update_sample(i_replace, &view[..]);
                             }
