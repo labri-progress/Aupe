@@ -32,44 +32,12 @@ budget       <- as.numeric(args[1])
 round_from   <- if (length(args) >= 2) as.integer(args[2]) else 11000L
 round_to     <- if (length(args) >= 3) as.integer(args[3]) else 11049L
 
+source("params.r")
 strategy     <- "decay2"
-nodes        <- 1000
-view         <- 20
-nruns        <- 1
-faulty_pcts  <- c(10, 20, 30, 40)
 trusted_pcts <- c(5, 10, 20, 30)
-results_dir  <- "output_byz"
 
 cat(sprintf("Budget=%.1f  rounds [%d, %d]\n", budget, round_from, round_to))
 
-# ── Thème ─────────────────────────────────────────────────────────────────────
-mytheme <- theme(
-  panel.grid.major        = element_line(color = "gray90",  linewidth = 0.50),
-  panel.grid.minor        = element_line(color = "gray95",  linewidth = 0.25),
-  panel.background        = element_rect(fill = "white"),
-  plot.background         = element_rect(fill = "white"),
-  panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
-  text                    = element_text(size = 9, color = "black"),
-  axis.title.x            = element_text(size = 9, face = "bold"),
-  axis.title.y            = element_text(size = 9, face = "bold"),
-  axis.text.x             = element_text(size = 8, face = "bold"),
-  axis.text.y             = element_text(size = 8, face = "bold"),
-  legend.text             = element_text(size = 8, face = "bold"),
-  legend.title            = element_blank(),
-  legend.key.height    = unit(9,  "pt"),   # réduit la hauteur de chaque item
-  legend.background       = element_rect(fill = "transparent", colour = NA),
-  legend.box.background   = element_rect(fill = "transparent", colour = NA),
-  axis.ticks              = element_line(color = "black", linewidth = 1),
-  axis.ticks.length       = unit(4, "pt"),
-  axis.minor.ticks.length = unit(2, "pt")
-) + theme(
-  axis.ticks.x.top         = element_line(color = "black", linewidth = 1),
-  axis.ticks.y.right       = element_line(color = "black", linewidth = 1),
-  axis.minor.ticks.x.top   = element_line(color = "black", linewidth = 0.5),
-  axis.minor.ticks.y.right  = element_line(color = "black", linewidth = 0.5),
-  axis.text.x.top          = element_blank(),
-  axis.text.y.right        = element_blank()
-)
 
 # ── Palette cohérente avec les autres scripts ─────────────────────────────────
 t_colors <- c(
@@ -194,7 +162,7 @@ p <- ggplot(df, aes(x = f_pct / 100, y = gap,
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/fig6_trust_gap_%gKB_%d-%d.pdf",
                    budget, round_from, round_to)
-pdf(outfile, width = 3.5, height = 2.8)
+pdf(outfile, width = 3.5, height = height)
 print(p)
 dev.off()
 cat("Saved:", outfile, "\n")

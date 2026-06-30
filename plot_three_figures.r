@@ -231,7 +231,7 @@ make_grid <- function(avg_data, colors, ltys, outfile) {
     sub <- avg_data %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f, colors, ltys,
                            show_legend  = (i == 4),
-                           show_y_title = (i == 4))
+                           show_y_title = (i == 1))
   }
   dir.create("results", showWarnings = FALSE)
   pdf(outfile, width = width, height = height*2)

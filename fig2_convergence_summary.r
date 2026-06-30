@@ -19,6 +19,7 @@ if (length(args) < 1) { cat("Usage: Rscript fig2_convergence_summary.r <budget> 
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(gtable)
 
 # ── Paramètres ────────────────────────────────────────────────────────────────
 budget      <- as.numeric(args[1])
@@ -26,64 +27,31 @@ zoom_from   <- if (length(args) >= 2) as.integer(args[2]) else 0L
 zoom_to     <- if (length(args) >= 3) as.integer(args[3]) else 0L
 zoomed      <- zoom_from > 0
 
-nodes       <- 1000
-view        <- 20
-nruns       <- 1
-faulty_pcts <- c(10, 20, 30, 40)
+source("params.r")
+nruns       <- 4
 conv_start  <- 11000
-results_dir <- "output_byz"
 
-time_step <- if (zoomed) 5 else 100
+time_step <- 5 #if (zoomed) 5 else 100
 line_size <- 0.4
 
-# ── Thème ─────────────────────────────────────────────────────────────────────
-mytheme <- theme(
-  panel.grid.major        = element_line(color = "gray90",  linewidth = 0.50),
-  panel.grid.minor        = element_line(color = "gray95",  linewidth = 0.25),
-  panel.background        = element_rect(fill = "white"),
-  plot.background         = element_rect(fill = "white"),
-  panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
-  text                    = element_text(size = 9, color = "black"),
-  axis.title.x            = element_text(size = 9, face = "bold"),
-  axis.title.y            = element_text(size = 9, face = "bold"),
-  axis.text.x             = element_text(size = 8, face = "bold"),
-  axis.text.y             = element_text(size = 8, face = "bold"),
-  plot.title              = element_text(size = 9, face = "bold"),
-  legend.text             = element_text(size = 8, face = "bold"),
-  legend.title            = element_blank(),
-  legend.background       = element_rect(fill = "transparent", colour = NA),
-  legend.box.background   = element_rect(fill = "transparent", colour = NA),
-  legend.key.height       = unit(9,  "pt"),
-  plot.margin             = margin(5.5, 2, 5.5, 2, "pt"),
-  axis.ticks              = element_line(color = "black", linewidth = 1),
-  axis.ticks.length       = unit(4, "pt"),
-  axis.minor.ticks.length = unit(2, "pt")
-) + theme(
-  axis.ticks.x.top         = element_line(color = "black", linewidth = 1),
-  axis.ticks.y.right       = element_line(color = "black", linewidth = 1),
-  axis.minor.ticks.x.top   = element_line(color = "black", linewidth = 0.5),
-  axis.minor.ticks.y.right  = element_line(color = "black", linewidth = 0.5),
-  axis.text.x.top          = element_blank(),
-  axis.text.y.right        = element_blank()
-)
 
 # ── Palette (Okabe-Ito, cohérente avec les autres scripts) ────────────────────
 custom_colors <- c(
   "Basalt"       = "#E69F00",   # orange
   "Brahms"       = "#D55E00",   # vermillion
-  "Aupe BMDecay" = "#000000"    # noir
+  "BMDecay" = "#000000"    # noir
 )
 custom_lty <- c(
   "Basalt"       = "solid",
   "Brahms"       = "solid",
-  "Aupe BMDecay" = "solid"
+  "BMDecay" = "solid"
 )
 custom_shapes <- c(
   "Basalt"       = 16,
   "Brahms"       = 17,
-  "Aupe BMDecay" = 15
+  "BMDecay" = 15
 )
-level_order <- c("Aupe BMDecay", "Basalt", "Brahms")
+level_order <- c("BMDecay", "Basalt", "Brahms")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # fig2a — Convergence summary
@@ -117,7 +85,7 @@ load_convergence <- function() {
       if (!is.null(d)) df <- rbind(df, d)
 
       fn <- file.path(results_dir, sprintf("decay2-N%d-v%d-f%d-y%g-run%d", nodes, view, f, budget, run))
-      d  <- read_convergence(fn, "Aupe BMDecay", f_pct)
+      d  <- read_convergence(fn, "BMDecay", f_pct)
       if (!is.null(d)) df <- rbind(df, d)
     }
   }
@@ -159,7 +127,7 @@ p_summary <- ggplot(avg_conv, aes(x = f_pct / 100, y = propByz,
   ) +
   coord_cartesian(ylim = c(0, 1)) +
   labs(
-    x = expression(bold("Proportion of Byzantine nodes")),
+    x = expression(bold("Prop. of Byz. nodes")),
     y = expression(bold("Prop. of Byz. samp."))
   ) +
   mytheme +
@@ -170,7 +138,7 @@ p_summary <- ggplot(avg_conv, aes(x = f_pct / 100, y = propByz,
 
 dir.create("results", showWarnings = FALSE)
 out_a <- sprintf("results/fig2a_convergence_summary_%gKB.pdf", budget)
-pdf(out_a, width = 3, height = 2)
+pdf(out_a, width = 3, height = height)
 print(p_summary)
 dev.off()
 cat("Saved:", out_a, "\n")
@@ -208,7 +176,7 @@ load_evolution <- function() {
       if (!is.null(d)) df <- rbind(df, d)
 
       fn <- file.path(results_dir, sprintf("decay2-N%d-v%d-f%d-y%g-run%d", nodes, view, f, budget, run))
-      d  <- read_evo(fn, "Aupe BMDecay", f_pct, run)
+      d  <- read_evo(fn, "BMDecay", f_pct, run)
       if (!is.null(d)) df <- rbind(df, d)
     }
   }
@@ -234,7 +202,7 @@ if (zoomed) {
   x_labels <- c("0", "5K", "10K", "15K", "20K")
 }
 
-byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
+byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE, show_y_axis = TRUE) {
   optimal <- f / 100
   ggplot(data, aes(x = time, y = propByz,
                    color = strategy, linetype = strategy, group = strategy)) +
@@ -262,7 +230,11 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.5, 0.20) else "none") +
+    theme(
+      legend.position = if (show_legend) c(0.5, 0.20) else "none",
+      axis.text.y     = if (show_y_axis) NULL else element_blank(),
+      axis.ticks.y    = if (show_y_axis) NULL else element_blank()
+    ) +
     guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 1))
 }
@@ -279,17 +251,22 @@ if (nrow(raw_evo) == 0) {
     sub <- avg_evo %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f,
                             show_legend  = (i == 4),
-                            show_y_title = (i == 4))
+                            show_y_title = (i == 1),
+                            show_y_axis  = (i == 1))
   }
 
-  grobs_out <- lapply(plots, ggplotGrob)
-  max_w     <- do.call(grid::unit.pmax, lapply(grobs_out, `[[`, "widths"))
-  grobs_out <- lapply(grobs_out, function(g) { g$widths <- max_w; g })
+  grobs_out  <- lapply(plots, ggplotGrob)
+  panel_cols <- sapply(grobs_out, function(g) g$layout$l[g$layout$name == "panel"])
+  common_w   <- do.call(grid::unit.pmax,
+                        Map(function(g, col) g$widths[col], grobs_out, panel_cols))
+  grobs_out  <- Map(function(g, col) { g$widths[col] <- common_w; g },
+                    grobs_out, panel_cols)
+  combined   <- Reduce(gtable_cbind, grobs_out)
 
   zoom_tag <- if (zoomed) sprintf("-zoom%d-%d", zoom_from, zoom_to) else ""
   out_b    <- sprintf("results/fig2b_evolution_strategies_%gKB%s.pdf", budget, zoom_tag)
-  pdf(out_b, width = 7, height = 2.5)
-  grid.arrange(grobs = grobs_out, nrow = 1, ncol = 4)
+  pdf(out_b, width = 10, height = height)
+  grid::grid.draw(combined)
   dev.off()
   cat("Saved:", out_b, "\n")
 }

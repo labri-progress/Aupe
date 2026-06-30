@@ -49,8 +49,8 @@ Rscript fig6_trust_gap.r 0.5 [round_from] [round_to]
 ./max_expe.sh decay4 0.5 40 0 ; ./max_expe.sh decay4 0.5 40 20 ;
 
 
-./max_expe.sh basalt 0.5 10 0 ; ./max_expe.sh basalt 0.5 30 0;
-./max_expe.sh basalt 0.5 20 0 ; ./max_expe.sh basalt 0.5 40 0;
+./max_expe.sh basalt 0.5 10 0 1 4 ; ./max_expe.sh basalt 0.5 30 0 1 4 ;
+./max_expe.sh basalt 0.5 20 0 1 4 ; ./max_expe.sh basalt 0.5 40 0 1 4 ;
 
 
 

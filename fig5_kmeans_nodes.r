@@ -34,6 +34,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(gridExtra)
+library(gtable)
 
 # ── Paramètres ────────────────────────────────────────────────────────────────
 budget       <- as.numeric(args[1])
@@ -41,12 +42,9 @@ p_merge      <- if (length(args) >= 2) as.integer(args[2]) else 1L
 round_from   <- if (length(args) >= 3) as.integer(args[3]) else 11000L
 round_to     <- if (length(args) >= 4) as.integer(args[4]) else 11049L
 
+source("params.r")
 strategy     <- "decay2"
-nodes        <- 1000
-view         <- 20
-faulty_pcts  <- c(10, 20, 30, 40)
 trusted_pcts <- c(5, 10, 20, 30)
-results_dir  <- "output_byz"
 
 cat(sprintf("Budget=%.1f  p_merge=%d  rounds [%d, %d]\n",
             budget, p_merge, round_from, round_to))
@@ -165,24 +163,26 @@ df_long <- df_all %>%
   )
 
 # ── Thème ─────────────────────────────────────────────────────────────────────
+size <- 14
 mytheme <- theme(
   panel.grid.major        = element_line(color = "gray90",  linewidth = 0.50),
   panel.grid.minor        = element_line(color = "gray95",  linewidth = 0.25),
   panel.background        = element_rect(fill = "white"),
   plot.background         = element_rect(fill = "white"),
   panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
-  text                    = element_text(size = 9, color = "black"),
-  axis.title.x            = element_text(size = 9, face = "bold"),
-  axis.title.y            = element_text(size = 9, face = "bold"),
-  axis.text.x             = element_text(size = 8, face = "bold"),
-  axis.text.y             = element_text(size = 8, face = "bold"),
-  plot.title              = element_text(size = 9, face = "bold"),
-  legend.text             = element_text(size = 8, face = "bold"),
+  text                    = element_text(size = size, color = "black"),
+  axis.title.x            = element_text(size = size, face = "bold"),
+  axis.title.y            = element_text(size = size, face = "bold"),
+  axis.text.x             = element_text(size = size, face = "bold"),
+  axis.text.y             = element_text(size = size, face = "bold"),
+  plot.title              = element_text(size = size, face = "bold"),
+  legend.text             = element_text(size = size, face = "bold"),
   legend.title            = element_blank(),
   legend.background       = element_rect(fill = "transparent", colour = NA),
   legend.box.background   = element_rect(fill = "transparent", colour = NA),
   #legend.key.spacing.y = unit(-2, "pt"),   # rapproche les items
   legend.key.height    = unit(9,  "pt"),   # réduit la hauteur de chaque item
+  plot.margin          = margin(5.5, 0, 5.5, 0, "pt"),
   axis.ticks              = element_line(color = "black", linewidth = 1),
   axis.ticks.length       = unit(4, "pt"),
   axis.minor.ticks.length = unit(2, "pt")
@@ -216,7 +216,7 @@ t_lty <- c(
 )
 
 # ── Construction d'un panneau ─────────────────────────────────────────────────
-make_panel <- function(metric_name, show_legend = FALSE, show_y_title = TRUE) {
+make_panel <- function(metric_name, show_legend = FALSE, show_y_title = TRUE, show_y_axis = TRUE) {
   sub <- df_long %>% filter(metric == metric_name)
   ggplot(sub, aes(x = f_pct, y = value,
                   color = t_label, shape = t_label, linetype = t_label,
@@ -239,25 +239,47 @@ make_panel <- function(metric_name, show_legend = FALSE, show_y_title = TRUE) {
     ) +
     labs(
       x     = expression(bold("Prop. of Byz. nodes")),
-      y     = if (show_y_title) expression(bold("Metric value")) else NULL,
+      y     = NULL, # if (show_y_title) expression(bold("Metric value")) else NULL,
       title = metric_name
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.5, 0.85) else "none") +
+    theme(
+      legend.position = if (show_legend) c(0.5, 0.85) else "none",
+      axis.text.y     = if (show_y_axis) NULL else element_blank(),
+      axis.ticks.y    = if (show_y_axis) NULL else element_blank()
+    ) +
     guides(color    = guide_legend(ncol = 2),
            shape    = guide_legend(ncol = 2),
            linetype = guide_legend(ncol = 1))
 }
 
 # ── Grille 1×3 ────────────────────────────────────────────────────────────────
-p_prec   <- make_panel("Precision", show_legend = TRUE,  show_y_title = TRUE)
-p_recall <- make_panel("Recall",    show_legend = FALSE, show_y_title = FALSE)
-p_f1     <- make_panel("F1-score",  show_legend = FALSE, show_y_title = FALSE)
+p_prec   <- make_panel("Precision", show_legend = TRUE,  show_y_title = TRUE,  show_y_axis = TRUE)
+p_recall <- make_panel("Recall",    show_legend = FALSE, show_y_title = FALSE, show_y_axis = FALSE)
+p_f1     <- make_panel("F1-score",  show_legend = FALSE, show_y_title = FALSE, show_y_axis = FALSE)
 
 dir.create("results", showWarnings = FALSE)
 outfile <- sprintf("results/fig5_kmeans_decay2_%d-%d_%gKB.pdf",
                    round_from, round_to, budget)
-pdf(outfile, width = 7, height = 2)
-grid.arrange(p_prec, p_recall, p_f1, nrow = 1, ncol = 3)
+grobs_out  <- lapply(list(p_prec, p_recall, p_f1), ggplotGrob)
+panel_cols <- sapply(grobs_out, function(g) g$layout$l[g$layout$name == "panel"])
+common_w   <- do.call(grid::unit.pmax,
+                      Map(function(g, col) g$widths[col], grobs_out, panel_cols))
+grobs_out  <- Map(function(g, col) { g$widths[col] <- common_w; g },
+                  grobs_out, panel_cols)
+combined   <- Reduce(gtable_cbind, grobs_out)
+
+pdf(outfile, width = 8, height = height)
+grid::grid.draw(combined)
 dev.off()
 cat("Sauvegarde dans:", outfile, "\n")
+
+# ── Figure F1-score seule ──────────────────────────────────────────────────────
+p_f1_solo <- make_panel("F1-score", show_legend = TRUE, show_y_title = TRUE, show_y_axis = TRUE) +
+  labs(y = expression(bold("F1-score")), title = NULL)
+outfile_f1 <- sprintf("results/fig5_kmeans_decay2_%d-%d_%gKB_f1only.pdf",
+                      round_from, round_to, budget)
+pdf(outfile_f1, width = 3, height = height)
+print(p_f1_solo)
+dev.off()
+cat("Sauvegarde dans:", outfile_f1, "\n")

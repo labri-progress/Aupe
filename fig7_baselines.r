@@ -5,12 +5,12 @@
 #
 # fig7a — Evolution grid (1×4, one panel per faulty %):
 #         Byzantine proportion in correct nodes' views (avgByzN/view) vs. rounds.
-#         Strategies: Array, Brahms, Basalt.
+#         Strategies: Aupe, Brahms, Basalt.
 #         Optional zoom window: zoom_from / zoom_to (finer time_step = 5).
 #
 # fig7b — Summary at convergence (mean over rounds > 11000) vs. Byzantine
 #         proportion in the system.
-#         Strategies: Array, Brahms, Basalt.
+#         Strategies: Aupe, Brahms, Basalt.
 #
 # fig7c — Same summary with Aupe BMDecay (decay2, no merge) added.
 
@@ -20,6 +20,7 @@ if (length(args) < 1) { cat("Usage: Rscript fig7_baselines.r <budget> [zoom_from
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(gtable)
 
 # ── Paramètres ────────────────────────────────────────────────────────────────
 budget    <- as.numeric(args[1])
@@ -27,70 +28,36 @@ zoom_from <- if (length(args) >= 2) as.integer(args[2]) else 0L
 zoom_to   <- if (length(args) >= 3) as.integer(args[3]) else 0L
 zoomed    <- zoom_from > 0
 
-nodes       <- 1000
-view        <- 20
-nruns       <- 1
-faulty_pcts <- c(10, 20, 30, 40)
+source("params.r")
 conv_start  <- 11000
-results_dir <- "output_byz"
 
-time_step <- if (zoomed) 5 else 100
+time_step <- 5 #if (zoomed) 5 else 100
 line_size <- 0.4
 
-# ── Thème ─────────────────────────────────────────────────────────────────────
-mytheme <- theme(
-  panel.grid.major        = element_line(color = "gray90",  linewidth = 0.50),
-  panel.grid.minor        = element_line(color = "gray95",  linewidth = 0.25),
-  panel.background        = element_rect(fill = "white"),
-  plot.background         = element_rect(fill = "white"),
-  panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
-  legend.spacing.y        = unit(0.005, "cm"),
-  text                    = element_text(size = 9, color = "black"),
-  axis.title.x            = element_text(size = 9, face = "bold"),
-  axis.title.y            = element_text(size = 9, face = "bold"),
-  axis.text.x             = element_text(size = 8, face = "bold"),
-  axis.text.y             = element_text(size = 8, face = "bold"),
-  plot.title              = element_text(size = 9, face = "bold"),
-  legend.text             = element_text(size = 8, face = "bold"),
-  legend.title            = element_blank(),
-  legend.background       = element_rect(fill = "transparent", colour = NA),
-  legend.box.background   = element_rect(fill = "transparent", colour = NA),
-  legend.key.height       = unit(8,  "pt"),
-  plot.margin             = margin(5.5, 2, 5.5, 2, "pt"),
-  axis.ticks              = element_line(color = "black", linewidth = 1),
-  axis.ticks.length       = unit(4, "pt"),
-  axis.minor.ticks.length = unit(2, "pt")
-) + theme(
-  axis.ticks.x.top         = element_line(color = "black", linewidth = 1),
-  axis.ticks.y.right       = element_line(color = "black", linewidth = 1),
-  axis.minor.ticks.x.top   = element_line(color = "black", linewidth = 0.5),
-  axis.minor.ticks.y.right  = element_line(color = "black", linewidth = 0.5),
-  axis.text.x.top          = element_blank(),
-  axis.text.y.right        = element_blank()
-)
+
 
 # ── Palette (Okabe-Ito, cohérente avec les autres scripts) ────────────────────
 custom_colors <- c(
-  "Array"        = "#56B4E9",   # bleu ciel   (cohérent avec fig1)
+  "Aupe"        = "#56B4E9",   # bleu ciel   (cohérent avec fig1)
   "Basalt"       = "#E69F00",   # orange      (cohérent avec fig2)
   "Brahms"       = "#D55E00",   # vermillion  (cohérent avec fig2)
-  "Aupe BMDecay" = "#000000"    # noir        (cohérent avec fig1, fig2)
+  "BMDecay" = "#000000"    # noir        (cohérent avec fig1, fig2)
 )
 custom_lty <- c(
-  "Array"        = "solid",
+  "Aupe"        = "solid",
   "Basalt"       = "solid",
   "Brahms"       = "solid",
-  "Aupe BMDecay" = "solid"
+  "BMDecay" = "solid"
 )
 custom_shapes <- c(
-  "Array"        = 18,
+  "Aupe"        = 18,
   "Basalt"       = 16,
   "Brahms"       = 17,
-  "Aupe BMDecay" = 15
+  "BMDecay" = 15
 )
 
-level_order_abc  <- c("Array", "Basalt", "Brahms")
-level_order_abcd <- c("Aupe BMDecay", "Array", "Basalt", "Brahms")
+level_order_abc  <- c("Aupe", "Basalt", "Brahms")
+level_order_abcd <- c("Aupe", "Basalt", "Brahms", "BMDecay")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # fig7a — Evolution grid (1×4)
@@ -117,7 +84,7 @@ load_evolution <- function() {
     f <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
       fn <- file.path(results_dir, sprintf("array-N%d-v%d-f%d-run%d",  nodes, view, f, run))
-      d  <- read_evo(fn, "Array",  f_pct, run)
+      d  <- read_evo(fn, "Aupe",  f_pct, run)
       if (!is.null(d)) df <- rbind(df, d)
 
       fn <- file.path(results_dir, sprintf("brahms-N%d-v%d-f%d-run%d", nodes, view, f, run))
@@ -151,7 +118,7 @@ if (zoomed) {
   x_labels <- c("0", "5K", "10K", "15K", "20K")
 }
 
-byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
+byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE, show_y_axis = TRUE, legend_pos = c(0.5, 0.20)) {
   optimal <- f / 100
   ggplot(data, aes(x = time, y = propByz,
                    color = strategy, linetype = strategy, group = strategy)) +
@@ -178,7 +145,11 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.5, 0.20) else "none") +
+    theme(
+      legend.position = if (show_legend) legend_pos else "none",
+      axis.text.y     = if (show_y_axis) NULL else element_blank(),
+      axis.ticks.y    = if (show_y_axis) NULL else element_blank()
+    ) +
     guides(color    = guide_legend(ncol = 1),
            linetype = guide_legend(ncol = 1))
 }
@@ -195,20 +166,41 @@ if (nrow(raw_evo) == 0) {
     sub <- avg_evo %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f,
                             show_legend  = (i == 4),
-                            show_y_title = (i == 4))
+                            show_y_title = (i == 1),
+                            show_y_axis  = (i == 1))
   }
 
-  grobs_out <- lapply(plots, ggplotGrob)
-  max_w     <- do.call(grid::unit.pmax, lapply(grobs_out, `[[`, "widths"))
-  grobs_out <- lapply(grobs_out, function(g) { g$widths <- max_w; g })
+  grobs_out  <- lapply(plots, ggplotGrob)
+  panel_cols <- sapply(grobs_out, function(g) g$layout$l[g$layout$name == "panel"])
+  common_w   <- do.call(grid::unit.pmax,
+                        Map(function(g, col) g$widths[col], grobs_out, panel_cols))
+  grobs_out  <- Map(function(g, col) { g$widths[col] <- common_w; g },
+                    grobs_out, panel_cols)
+  combined   <- Reduce(gtable_cbind, grobs_out)
 
   dir.create("results", showWarnings = FALSE)
   zoom_tag <- if (zoomed) sprintf("-zoom%d-%d", zoom_from, zoom_to) else ""
   out_a    <- sprintf("results/fig7a_evolution_baselines%s.pdf", zoom_tag)
-  pdf(out_a, width = 7, height = 2.5)
-  grid.arrange(grobs = grobs_out, nrow = 1, ncol = 4)
+  pdf(out_a, width = 7, height = height)
+  grid::grid.draw(combined)
   dev.off()
   cat("Saved:", out_a, "\n")
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# fig7a_f20 — Evolution single panel, f = 20 % only
+# ══════════════════════════════════════════════════════════════════════════════
+
+if (nrow(raw_evo) == 0) {
+  cat("Warning: no evolution data found, skipping fig7a_f20.\n")
+} else {
+  sub_f20 <- avg_evo %>% filter(f_pct == 20)
+  zoom_tag <- if (zoomed) sprintf("-zoom%d-%d", zoom_from, zoom_to) else ""
+  out_a20  <- sprintf("results/fig7a_f20_evolution_baselines%s.pdf", zoom_tag)
+  pdf(out_a20, width = 3, height = height)
+  print(byz_plot(sub_f20, f = 20, show_legend = TRUE, show_y_title = TRUE, legend_pos = c(0.5, 0.35)))
+  dev.off()
+  cat("Saved:", out_a20, "\n")
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -235,7 +227,7 @@ load_convergence <- function(with_decay2 = FALSE) {
     f <- as.integer(nodes * f_pct / 100)
     for (run in 1:nruns) {
       fn <- file.path(results_dir, sprintf("array-N%d-v%d-f%d-run%d",  nodes, view, f, run))
-      d  <- read_convergence(fn, "Array",  f_pct)
+      d  <- read_convergence(fn, "Aupe",  f_pct)
       if (!is.null(d)) df <- rbind(df, d)
 
       fn <- file.path(results_dir, sprintf("brahms-N%d-v%d-f%d-run%d", nodes, view, f, run))
@@ -248,7 +240,7 @@ load_convergence <- function(with_decay2 = FALSE) {
 
       if (with_decay2) {
         fn <- file.path(results_dir, sprintf("decay2-N%d-v%d-f%d-y%g-run%d", nodes, view, f, budget, run))
-        d  <- read_convergence(fn, "Aupe BMDecay", f_pct)
+        d  <- read_convergence(fn, "BMDecay", f_pct)
         if (!is.null(d)) df <- rbind(df, d)
       }
     }
@@ -289,7 +281,7 @@ conv_plot <- function(avg_conv, level_order, legend_pos = c(0.6, 0.1)) {
       y = expression(bold("Prop. of Byz. samp."))
     ) +
     mytheme +
-    theme(legend.position = legend_pos) +
+    theme(legend.position = "none") + #legend_pos) +
     guides(color    = guide_legend(ncol = 2),
            linetype = guide_legend(ncol = 2),
            shape    = guide_legend(ncol = 2))
@@ -297,7 +289,7 @@ conv_plot <- function(avg_conv, level_order, legend_pos = c(0.6, 0.1)) {
 
 dir.create("results", showWarnings = FALSE)
 
-# fig7b — Array, Basalt, Brahms
+# fig7b — Aupe, Basalt, Brahms
 raw_conv_b <- load_convergence(with_decay2 = FALSE)
 if (nrow(raw_conv_b) == 0) {
   cat("Warning: no convergence data, skipping fig7b.\n")
@@ -307,13 +299,13 @@ if (nrow(raw_conv_b) == 0) {
     summarise(propByz = mean(propByz), .groups = "drop")
 
   out_b <- "results/fig7b_convergence_baselines.pdf"
-  pdf(out_b, width = 3, height = 2)
+  pdf(out_b, width = 3, height = 2.5)
   print(conv_plot(avg_conv_b, level_order_abc))
   dev.off()
   cat("Saved:", out_b, "\n")
 }
 
-# fig7c — Array, Basalt, Brahms + Aupe BMDecay
+# fig7c — Aupe, Basalt, Brahms + Aupe BMDecay
 raw_conv_c <- load_convergence(with_decay2 = TRUE)
 if (nrow(raw_conv_c) == 0) {
   cat("Warning: no convergence data for fig7c.\n")
@@ -323,7 +315,7 @@ if (nrow(raw_conv_c) == 0) {
     summarise(propByz = mean(propByz), .groups = "drop")
 
   out_c <- sprintf("results/fig7c_convergence_with_decay2_%gKB.pdf", budget)
-  pdf(out_c, width = 3, height = 2)
+  pdf(out_c, width = 3, height = height)
   print(conv_plot(avg_conv_c, level_order_abcd))
   dev.off()
   cat("Saved:", out_c, "\n")

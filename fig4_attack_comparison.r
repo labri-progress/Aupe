@@ -14,7 +14,7 @@
 # Encodage visuel (légende fusionnée) :
 #   Couleur       → proportion de noeuds de confiance (t %)
 #   Type de ligne → scénario (attack1 = solide, attack2 = tiretée)
-#   Étiquette     → "attack i : t=j%"
+#   Étiquette     → "attack i-t=j%"
 #
 # Zoom : fournir zoom_from et zoom_to pour une fenêtre resserrée avec
 #        un pas de temps plus fin (time_step = 5).
@@ -28,6 +28,7 @@ if (length(args) < 1) {
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(gtable)
 
 # ── Paramètres ────────────────────────────────────────────────────────────────
 budget       <- as.numeric(args[1])
@@ -35,19 +36,15 @@ zoom_from    <- if (length(args) >= 2) as.integer(args[2]) else 0L
 zoom_to      <- if (length(args) >= 3) as.integer(args[3]) else 0L
 zoomed       <- zoom_from > 0
 
-nodes        <- 1000
-view         <- 20
-nruns        <- 1
-faulty_pcts  <- c(10, 20, 30, 40)
+source("params.r")
 trusted_pcts <- c(0, 20) #, 30)
-results_dir  <- "output_byz"
 
-time_step <- if (zoomed) 5 else 100
+time_step <- 5 #if (zoomed) 5 else 100
 line_size <- 0.4
-width     <- 7
-height    <- 2
+width     <- 10
 
 # ── Thème ─────────────────────────────────────────────────────────────────────
+size <- 16
 mytheme <- theme(
   panel.grid.major        = element_line(color = "gray90",  linewidth = 0.50),
   panel.grid.minor        = element_line(color = "gray95",  linewidth = 0.25),
@@ -55,19 +52,19 @@ mytheme <- theme(
   plot.background         = element_rect(fill = "white"),
   panel.border            = element_rect(colour = "black", linewidth = 1, fill = NA),
   legend.spacing.y        = unit(0.005, "cm"),
-  text                    = element_text(size = 9, color = "black"),
-  axis.title.x            = element_text(size = 9, face = "bold"),
-  axis.title.y            = element_text(size = 9, face = "bold"),
-  axis.text.x             = element_text(size = 8, face = "bold"),
-  axis.text.y             = element_text(size = 8, face = "bold"),
-  plot.title              = element_text(size = 9, face = "bold"),
-  legend.text             = element_text(size = 8, face = "bold"),
+  text                    = element_text(size = size, color = "black"),
+  axis.title.x            = element_text(size = size, face = "bold"),
+  axis.title.y            = element_text(size = size, face = "bold"),
+  axis.text.x             = element_text(size = size, face = "bold"),
+  axis.text.y             = element_text(size = size, face = "bold"),
+  plot.title              = element_text(size = size, face = "bold"),
+  legend.text             = element_text(size = size, face = "bold"),
   legend.title            = element_blank(),
   legend.background       = element_rect(fill = "transparent", colour = NA),
   legend.box.background   = element_rect(fill = "transparent", colour = NA),
-  legend.key.height       = unit(8,  "pt"),
-  legend.key.width        = unit(20, "pt"),
-  plot.margin             = margin(5.5, 2, 5.5, 2, "pt"),
+  legend.key.height       = unit(9,  "pt"),
+  legend.key.width        = unit(15, "pt"),
+  plot.margin             = margin(5.5, 0, 5.5, 0, "pt"),
   axis.ticks              = element_line(color = "black", linewidth = 1),
   axis.ticks.length       = unit(4, "pt"),
   axis.minor.ticks.length = unit(2, "pt")
@@ -86,8 +83,8 @@ attack_keys <- c("attack1" = "decay2", "attack2" = "decay4")
 
 # Combinaisons (scénario × t%) — ordre pour la légende fusionnée
 combo_levels <- c(
-  "attack1 : t=0%",  "attack1 : t=20%",  # "attack1 : t=30%"
-  "attack2 : t=0%",  "attack2 : t=20%"   # "attack2 : t=30%"
+  "attack1-t=0%",  "attack1-t=20%",  # "attack1-t=30%"
+  "attack2-t=0%",  "attack2-t=20%"   # "attack2-t=30%"
 )
 # Couleur → t% (cohérent avec fig3)
 t_col <- c("t=0%" = "#000000", "t=20%" = "#009E73") #, "t=30%" = "#CC79A7")
@@ -95,11 +92,11 @@ t_col <- c("t=0%" = "#000000", "t=20%" = "#009E73") #, "t=30%" = "#CC79A7")
 scen_lty <- c("attack1" = "solid", "attack2" = "22")
 
 combo_colors <- setNames(
-  t_col[sub("^attack[12] : ", "", combo_levels)],
+  t_col[sub("^attack[12]-", "", combo_levels)],
   combo_levels
 )
 combo_lty <- setNames(
-  scen_lty[sub(" : t=.*$", "", combo_levels)],
+  scen_lty[sub("-t=.*$", "", combo_levels)],
   combo_levels
 )
 
@@ -156,7 +153,7 @@ prepare <- function(df) {
   avg$attack  <- factor(avg$attack,  levels = names(attack_keys))
   avg$t_label <- factor(avg$t_label, levels = paste0("t = ", trusted_pcts, "%"))
   avg$combo   <- factor(
-    paste0(as.character(avg$attack), " : ", sub("t = ", "t=", as.character(avg$t_label))),
+    paste0(as.character(avg$attack), "-", sub("t = ", "t=", as.character(avg$t_label))),
     levels = combo_levels
   )
   avg
@@ -172,7 +169,7 @@ if (zoomed) {
 }
 
 # ── Construction d'un panneau ─────────────────────────────────────────────────
-byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
+byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE, show_y_axis = TRUE) {
   optimal <- f / 100
   p <- ggplot(data, aes(x        = time,
                         y        = propByz,
@@ -201,7 +198,11 @@ byz_plot <- function(data, f, show_legend = FALSE, show_y_title = TRUE) {
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
     mytheme +
-    theme(legend.position = if (show_legend) c(0.51, 0.8) else "none") +
+    theme(
+      legend.position = if (show_legend) c(0.51, 0.8) else "none",
+      axis.text.y     = if (show_y_axis) NULL else element_blank(),
+      axis.ticks.y    = if (show_y_axis) NULL else element_blank()
+    ) +
     guides(
       color    = guide_legend(ncol = 1, override.aes = list(linewidth = 0.8)),
       linetype = guide_legend(ncol = 1, override.aes = list(linewidth = 0.8))
@@ -220,7 +221,8 @@ for (i in seq_along(faulty_pcts)) {
   sub <- avg %>% filter(f_pct == f)
   plots[[i]] <- byz_plot(sub, f,
                           show_legend  = (i == 1),
-                          show_y_title = (i == 1))
+                          show_y_title = (i == 1),
+                          show_y_axis  = (i == 1))
 }
 
 dir.create("results", showWarnings = FALSE)
@@ -228,10 +230,18 @@ zoom_tag <- if (zoomed) sprintf("-zoom%d-%d", zoom_from, zoom_to) else ""
 outfile  <- sprintf("results/fig4_attack_comparison_%gKB%s.pdf", budget, zoom_tag)
 
 grobs_out <- lapply(plots, ggplotGrob)
-max_w     <- do.call(grid::unit.pmax, lapply(grobs_out, `[[`, "widths"))
-grobs_out <- lapply(grobs_out, function(g) { g$widths <- max_w; g })
+
+# Égaliser uniquement la colonne "panel" (zone de tracé), pas les totaux
+panel_cols <- sapply(grobs_out, function(g) g$layout$l[g$layout$name == "panel"])
+common_w   <- do.call(grid::unit.pmax,
+                      Map(function(g, col) g$widths[col], grobs_out, panel_cols))
+grobs_out  <- Map(function(g, col) { g$widths[col] <- common_w; g },
+                  grobs_out, panel_cols)
+
+# Coller sans aucun espace entre les panneaux
+combined <- Reduce(gtable_cbind, grobs_out)
 
 pdf(outfile, width = width, height = height)
-grid.arrange(grobs = grobs_out, nrow = 1, ncol = 4)
+grid::grid.draw(combined)
 dev.off()
 cat("Sauvegarde dans:", outfile, "\n")
