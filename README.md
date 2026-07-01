@@ -23,6 +23,18 @@ Rscript fig6_trust_gap.r 0.5 [round_from] [round_to]
 ./max_expe.sh decay2 1 20 0 ; ./max_expe.sh decay2 1 40 0;
 
 
+cargo run -- -T 200 -n 10000 basalt -f 10 -t 1000 -v 160 -i 160 -k 1 -r 1 > basalt10
+cargo run -- -T 200 -n 10000 brahms -f 10 -t 1000 -v 160 -u 160 > brahms10
+
+cargo run -- -T 200 -n 10000 basalt -f 10 -t 2000 -v 160 -i 160 -k 1 -r 1 > basalt20
+cargo run -- -T 200 -n 10000 brahms -f 10 -t 2000 -v 160 -u 160 > brahms20
+
+cargo run -- -T 200 -n 10000 brahms -f 10 -t 2000 -v 160 -u 160 
+
+cargo run -- -T 200 -n 10000 -d 1 decay2 -f 10 -t 3000 -v 160 -u 160 -m 100 -n 10000 -y 5 -x 3000 -p 1
+
+cargo run -- -T 200 -n 1000 -d 1 decay2 -f 10 -t 300 -v 100 -u 100 -m 100 -n 1000 -c 32 -x 300 -p 1 > decay
+
 # basic expe
 
 ./max_expe.sh decay2 0.5 40 5 1 4 ; ./max_expe.sh decay2 0.5 40 20 1 4 ;

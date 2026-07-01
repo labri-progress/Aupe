@@ -91,7 +91,7 @@ for run in $(seq $start $NRUNS); do
           echo "Running: $strat f=${f_pct}% run=${run}"
           ./$binary -T $ROUNDS -n $NODES -d $run $strat \
             -f $GAMMA -t $f_count -v $VIEW -i $UVIEW \
-            -s $ATTACK_START -k 1 -r 1 > "$OUTDIR/$outfile" &
+            -s $ATTACK_START -k 1 -r 2 > "$OUTDIR/$outfile" &
           mark_done "$outfile"
 
         elif [ "$strat" = "array" ] || [ "$strat" = "xarray" ]; then
