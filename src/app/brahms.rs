@@ -316,7 +316,7 @@ impl App for Brahms {
                 Msg::SelfNotif => {
                     net.send(self.my_id, Msg::SelfNotif);
                     if net.time() >= self.params.attack_start_time {
-                        net.sample_peers(self.params.byzantine_flood_factor)
+                        net.sample_peers(self.params.byzantine_flood_factor*alphav)
                             .iter()
                             .for_each(|p| net.send(*p, Msg::PushRequest));
                     }else{
