@@ -309,6 +309,7 @@ impl App for Brahms {
     
     fn handle(&mut self, net: Net, from: PeerRef, msg: &Self::Msg) {
         //println!("**********************Node {}**********************", self.my_id);
+        let alphav = 4 as usize;
         if self.is_byzantine {
             let mut byzantines = (0..self.params.n_byzantine).collect::<Vec<_>>();
             match msg {
@@ -319,7 +320,7 @@ impl App for Brahms {
                             .iter()
                             .for_each(|p| net.send(*p, Msg::PushRequest));
                     }else{
-                        net.sample_peers(1)
+                        net.sample_peers(alphav)
                             .iter()
                             .for_each(|p| net.send(*p, Msg::PushRequest));
                     }
@@ -337,7 +338,7 @@ impl App for Brahms {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    let alphav = 4 as usize;
+                    
                     let gammav = (self.params.view_size / 3) as usize;
                     let betav = self.params.view_size - alphav - gammav;
 
