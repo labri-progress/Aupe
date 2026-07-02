@@ -54,7 +54,8 @@ if [ "$NRUNS" -eq 1 ]; then
 fi
 
 binary="eviction" #"aupe1push13pullmax"
-for run in $(seq $start $NRUNS); do
+#for run in $(seq $start $NRUNS); do
+for run in $(seq $NRUNS -1 $start); do
   for strat in "${STRATEGIES[@]}"; do
     for f_pct in "${FAULTY_PCTS[@]}"; do
       f_count=$(faulty_count $f_pct)

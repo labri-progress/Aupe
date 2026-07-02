@@ -21,6 +21,7 @@ library(dplyr)
 library(gridExtra)
 library(gtable)
 
+
 # ── Paramètres ────────────────────────────────────────────────────────────────
 budget      <- as.numeric(args[1])
 zoom_from   <- if (length(args) >= 2) as.integer(args[2]) else 0L
@@ -34,7 +35,8 @@ conv_start  <- 11000
 time_step <- 5 #if (zoomed) 5 else 100
 line_size <- 0.4
 
-
+faulty_pcts <- c(10, 14, 18, 20, 24, 28, 30, 34, 38, 40)
+f_breaks    <- c(10, 20, 30, 40)
 # ── Palette (Okabe-Ito, cohérente avec les autres scripts) ────────────────────
 custom_colors <- c(
   "Basalt"       = "#E69F00",   # orange
@@ -104,6 +106,7 @@ avg_conv$strategy <- factor(avg_conv$strategy, levels = present)
 
 ref_df <- data.frame(f_pct = faulty_pcts, ref = faulty_pcts / 100)
 
+
 p_summary <- ggplot(avg_conv, aes(x = f_pct / 100, y = propByz,
                                   color = strategy, shape = strategy,
                                   linetype = strategy, group = strategy)) +
@@ -116,7 +119,7 @@ p_summary <- ggplot(avg_conv, aes(x = f_pct / 100, y = propByz,
   scale_linetype_manual(values = custom_lty,  drop = FALSE) +
   scale_shape_manual(values = custom_shapes,  drop = FALSE) +
   scale_x_continuous(
-    breaks       = faulty_pcts / 100,
+    breaks       = f_breaks / 100,
     minor_breaks = NULL,
     sec.axis     = dup_axis(labels = NULL, name = NULL)
   ) +
@@ -245,9 +248,9 @@ if (nrow(raw_evo) == 0) {
 } else {
   avg_evo <- prepare_evo(raw_evo)
 
-  plots <- vector("list", length(faulty_pcts))
-  for (i in seq_along(faulty_pcts)) {
-    f   <- faulty_pcts[i]
+  plots <- vector("list", length(f_breaks))
+  for (i in seq_along(f_breaks)) {
+    f   <- f_breaks[i]
     sub <- avg_evo %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f,
                             show_legend  = (i == 4),

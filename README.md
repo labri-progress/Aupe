@@ -13,14 +13,40 @@ Rscript fig5_kmeans_nodes.r 0.5 [p_merge] [round_from] [round_to]
 Rscript fig6_trust_gap.r 0.5 [round_from] [round_to]
 
 
-./max_expe.sh decay2 2 10 0 ; ./max_expe.sh decay2 2 30 20 ;
-./max_expe.sh decay2 2 20 0 ; ./max_expe.sh decay2 2 40 20 ;
+./max_expe.sh basalt 0.5 14 0 1 ; ./max_expe.sh basalt 0.5 34 0 1 ;
+./max_expe.sh basalt 0.5 24 0 1 ; ./max_expe.sh basalt 0.5 18 0 1 ;
+./max_expe.sh basalt 0.5 28 0 1 ; ./max_expe.sh basalt 0.5 38 0 1 ;
 
-./max_expe.sh decay2 2 10 0 ; ./max_expe.sh decay2 2 30 0 ;
-./max_expe.sh decay2 2 20 0 ; ./max_expe.sh decay2 2 40 0 ;
 
-./max_expe.sh decay2 1 10 0 ; ./max_expe.sh decay2 1 30 0 ;
-./max_expe.sh decay2 1 20 0 ; ./max_expe.sh decay2 1 40 0;
+
+./max_expe.sh decay2 0.5 14 5 1 ; ./max_expe.sh decay2 0.5 14 20 1 ;
+./max_expe.sh decay2 0.5 14 0 1 ; ./max_expe.sh decay2 0.5 14 10 1 ;
+
+./max_expe.sh decay2 0.5 18 5 1 ; ./max_expe.sh decay2 0.5 18 20 1 ;
+./max_expe.sh decay2 0.5 18 0 1 ; ./max_expe.sh decay2 0.5 18 10 1 ;
+
+./max_expe.sh decay2 0.5 24 5 1 ; ./max_expe.sh decay2 0.5 24 20 1 ;
+./max_expe.sh decay2 0.5 24 0 1 ; ./max_expe.sh decay2 0.5 24 10 1 ;
+
+./max_expe.sh decay2 0.5 28 5 1 ; ./max_expe.sh decay2 0.5 28 20 1 ;
+./max_expe.sh decay2 0.5 28 0 1 ; ./max_expe.sh decay2 0.5 28 10 1 ;
+
+./max_expe.sh decay2 0.5 34 5 1 ; ./max_expe.sh decay2 0.5 34 20 1 ;
+./max_expe.sh decay2 0.5 34 0 1 ; ./max_expe.sh decay2 0.5 34 10 1 ;
+
+./max_expe.sh decay2 0.5 38 5 1 ; ./max_expe.sh decay2 0.5 38 20 1 ;
+./max_expe.sh decay2 0.5 38 0 1 ; ./max_expe.sh decay2 0.5 38 10 1 ;
+
+./max_expe.sh decay2 0.5 14 30 1 ; ./max_expe.sh decay2 0.5 24 30 1 ;
+./max_expe.sh decay2 0.5 18 30 1 ; ./max_expe.sh decay2 0.5 28 30 1 ;
+
+./max_expe.sh decay2 0.5 34 30 1 ; ./max_expe.sh decay2 0.5 38 30 1 ;
+
+./max_expe.sh brahms 0.5 14 0 ; ./max_expe.sh brahms 0.5 18 0 ;
+
+
+./max_expe.sh brahms 0.5 24 0 ; ./max_expe.sh brahms 0.5 28 0 ;
+./max_expe.sh brahms 0.5 34 0 ; ./max_expe.sh brahms 0.5 38 0 ;
 
 
 cargo run -- -T 200 -n 10000 basalt -f 10 -t 1000 -v 160 -i 160 -k 1 -r 1 > basalt10
@@ -37,20 +63,20 @@ cargo run -- -T 200 -n 1000 -d 1 decay2 -f 10 -t 300 -v 100 -u 100 -m 100 -n 100
 
 # basic expe
 
-./max_expe.sh decay2 0.5 40 5 1 4 ; ./max_expe.sh decay2 0.5 40 20 1 4 ;
-./max_expe.sh decay2 0.5 40 0 1 4 ; ./max_expe.sh decay2 0.5 40 10 1 4 ;
+./max_expe.sh decay2 0.5 40 5 1 3 ; ./max_expe.sh decay2 0.5 40 20 1 3 ;
+./max_expe.sh decay2 0.5 40 0 1 3 ; ./max_expe.sh decay2 0.5 40 10 1 3 ;
 
-./max_expe.sh decay2 0.5 30 5 1 4 ; ./max_expe.sh decay2 0.5 30 20 1 4 ;
-./max_expe.sh decay2 0.5 30 0 1 4 ; ./max_expe.sh decay2 0.5 30 10 1 4 ;
+./max_expe.sh decay2 0.5 30 5 1 3 ; ./max_expe.sh decay2 0.5 30 20 1 3 ;
+./max_expe.sh decay2 0.5 30 0 1 3 ; ./max_expe.sh decay2 0.5 30 10 1 3 ;
 
-./max_expe.sh decay2 0.5 20 5 1 4 ; ./max_expe.sh decay2 0.5 20 20 1 4 ;
-./max_expe.sh decay2 0.5 20 0 1 4 ; ./max_expe.sh decay2 0.5 20 10 1 4 ;
+./max_expe.sh decay2 0.5 20 5 1 3 ; ./max_expe.sh decay2 0.5 20 20 1 3 ;
+./max_expe.sh decay2 0.5 20 0 1 3 ; ./max_expe.sh decay2 0.5 20 10 1 3 ;
 
-./max_expe.sh decay2 0.5 10 5 1 4 ; ./max_expe.sh decay2 0.5 10 20 1 4 ;
-./max_expe.sh decay2 0.5 10 0 1 4 ; ./max_expe.sh decay2 0.5 10 10 1 4 ;
+./max_expe.sh decay2 0.5 10 5 1 3 ; ./max_expe.sh decay2 0.5 10 20 1 3 ;
+./max_expe.sh decay2 0.5 10 5 1 3 ; ./max_expe.sh decay2 0.5 10 20 1 3 ;
 
-./max_expe.sh decay2 0.5 10 30 1 4 ; ./max_expe.sh decay2 0.5 30 30 1 4 ;
-./max_expe.sh decay2 0.5 20 30 1 4 ; ./max_expe.sh decay2 0.5 40 30 1 4 ;
+./max_expe.sh decay2 0.5 10 30 1 3 ; ./max_expe.sh decay2 0.5 30 30 1 3 ;
+./max_expe.sh decay2 0.5 20 30 1 3 ; ./max_expe.sh decay2 0.5 40 30 1 3 ;
 
 
 # end

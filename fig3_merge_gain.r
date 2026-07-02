@@ -35,6 +35,9 @@ line_size <- 0.4
 width  <- 3.5
 
 
+f_breaks    <- c(10, 20, 30, 40)
+faulty_pcts <- c(10, 14, 18, 20, 24, 28, 30, 34, 38, 40)
+
 # ── Palette (cohérente avec les autres scripts) ───────────────────────────────
 # Gain figure (t = 5/10/20% only)
 merge_colors <- c(
@@ -141,7 +144,7 @@ p_gain <- ggplot(gain_df, aes(x = f_pct / 100, y = gain_pct,
   scale_linetype_manual(values = merge_lty,  drop = FALSE) +
   coord_cartesian(ylim = c(min_y, max_y)) +
   scale_x_continuous(
-    breaks       = faulty_pcts / 100,
+    breaks       = f_breaks / 100,
     minor_breaks = NULL,
     sec.axis     = dup_axis(labels = NULL, name = NULL)
   ) +
@@ -301,9 +304,9 @@ if (nrow(raw_evo) == 0) {
 } else {
   avg_evo <- prepare_evo(raw_evo)
 
-  plots <- vector("list", length(faulty_pcts))
-  for (i in seq_along(faulty_pcts)) {
-    f   <- faulty_pcts[i]
+  plots <- vector("list", length(f_breaks))
+  for (i in seq_along(f_breaks)) {
+    f   <- f_breaks[i]
     sub <- avg_evo %>% filter(f_pct == f)
     plots[[i]] <- byz_plot(sub, f,
                             show_legend  = (i == 1),
@@ -401,7 +404,7 @@ if (!is.null(peak_gain_df) && nrow(peak_gain_df) > 0 && !all(is.na(peak_gain_df$
     scale_linetype_manual(values = merge_lty,  drop = FALSE) +
     coord_cartesian(ylim = c(min_y_c, max_y_c)) +
     scale_x_continuous(
-      breaks       = faulty_pcts / 100,
+      breaks       = f_breaks / 100,
       minor_breaks = NULL,
       sec.axis     = dup_axis(labels = NULL, name = NULL)
     ) +
