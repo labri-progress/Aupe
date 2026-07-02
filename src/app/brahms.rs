@@ -337,7 +337,7 @@ impl App for Brahms {
         } else {
             match msg {
                 Msg::SelfNotif => {
-                    let alphav = 1 as usize;
+                    let alphav = 4 as usize;
                     let gammav = (self.params.view_size / 3) as usize;
                     let betav = self.params.view_size - alphav - gammav;
 
